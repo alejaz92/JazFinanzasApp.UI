@@ -1,0 +1,49 @@
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">JazFinanzasApp</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavDropdown">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="#">Saldos</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Reportes</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+             Movimientos
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#">General</a></li>
+              <li><a class="dropdown-item" href="#">Tarjetas</a></li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+             Inversiones
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#">Crypto</a></li>
+              <li><a class="dropdown-item" href="#">Bolsa</a></li>
+              <li><a class="dropdown-item" href="#">Intercambio Monedas</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+             Gestion
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#">Activos</a></li>
+              <li><a class="dropdown-item" href="#">Clases de Movimiento</a></li>
+              <li><a class="dropdown-item" href="#">Cuentas</a></li>
+              <li><a class="dropdown-item" [routerLink]="['management/card']">Tarjetas</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
