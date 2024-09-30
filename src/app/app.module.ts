@@ -9,6 +9,7 @@ import { CardAddComponent } from './features/card/card-add/card-add.component';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { CardEditComponent } from './features/card/card-edit/card-edit.component';
+import { MovementClassListComponent } from './features/movementClass/movementClass-list/movement-class-list/movement-class-list.component';
 
 @NgModule({
   declarations: [
@@ -16,7 +17,8 @@ import { CardEditComponent } from './features/card/card-edit/card-edit.component
     NavbarComponent,
     CardListComponent,
     CardAddComponent,
-    CardEditComponent
+    CardEditComponent,
+    MovementClassListComponent
   ],
   imports: [
     BrowserModule,
