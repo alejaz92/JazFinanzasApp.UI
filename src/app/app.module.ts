@@ -7,18 +7,22 @@ import { NavbarComponent } from './core/components/navbar/navbar.component';
 import { CardListComponent } from './features/card/card-list/card-list.component';
 import { CardAddComponent } from './features/card/card-add/card-add.component';
 import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
+import { CardEditComponent } from './features/card/card-edit/card-edit.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     NavbarComponent,
     CardListComponent,
-    CardAddComponent
+    CardAddComponent,
+    CardEditComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    FormsModule
+    FormsModule,
+    HttpClientModule
   ],
   providers: [],
   bootstrap: [AppComponent]

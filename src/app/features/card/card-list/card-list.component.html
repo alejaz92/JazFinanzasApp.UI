@@ -5,4 +5,29 @@
             Crear Tarjeta
         </a>
     </div>
+
+    <ng-container *ngIf="cards$ | async as cards">
+        <table class="table table-bordered mt-3">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let card of cards">
+                    <td>{{ card.name }}</td>
+                    <td>
+                        <a class="btn btn-light" [routerLink]="['/management/card',card.id]">
+                            <i class="bi-pencil-fill"></i>
+                        </a>
+                        <button class="btn btn-danger ms-3" (click)="onDelete(card.id)">
+                            <i class="bi-trash-fill"></i>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+
+        </table>
+    </ng-container>
 </div>

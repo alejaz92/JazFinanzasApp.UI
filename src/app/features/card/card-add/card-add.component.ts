@@ -1,21 +1,38 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { CardAddRequest } from '../models/card-add-request.model';
+import { CardService } from '../services/card.service';
+import { Subscription } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-card-add',
   templateUrl: './card-add.component.html',
   styleUrls: ['./card-add.component.css']
 })
-export class CardAddComponent {
-model: CardAddRequest;
+export class CardAddComponent implements OnDestroy {
 
-  constructor() {
+model: CardAddRequest;
+private addCategorysubscription?: Subscription;
+
+  constructor(private cardService: CardService, 
+    private router: Router
+  ) {
     this.model = {
       name: ''
     };
   }
 
+
   onFormSubmit() {
-    console.log(this.model);
+    this.addCategorysubscription = this.cardService.addCard(this.model)
+      .subscribe({
+        next: (response) => {
+          this.router.navigate(['/management/card']);
+        }
+      })
+  }
+
+  ngOnDestroy(): void {
+    this.addCategorysubscription?.unsubscribe();
   }
 }
