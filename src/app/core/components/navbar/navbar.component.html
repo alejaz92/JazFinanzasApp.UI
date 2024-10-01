@@ -1,4 +1,5 @@
-<nav class="navbar navbar-expand-lg bg-body-tertiary">
+
+<nav class="navbar navbar-expand-lg bg-body-tertiary" *ngIf="!isLoginPage()">
     <div class="container-fluid">
       <a class="navbar-brand" href="#">JazFinanzasApp</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,9 +40,14 @@
             <ul class="dropdown-menu">
               <li><a class="dropdown-item" href="#">Activos</a></li>
               <li><a class="dropdown-item" href="#">Clases de Movimiento</a></li>
-              <li><a class="dropdown-item" href="#">Cuentas</a></li>
+              <li><a class="dropdown-item" [routerLink]="['management/account']">Cuentas</a></li>
               <li><a class="dropdown-item" [routerLink]="['management/card']">Tarjetas</a></li>
             </ul>
+          </li>
+        </ul>
+        <ul class="navbar-nav ms-auto"> <!-- Alineado a la derecha con ms-auto -->
+          <li class="nav-item">
+            <button class="btn btn-outline-danger" (click)="logout()">Cerrar Sesión</button>
           </li>
         </ul>
       </div>

@@ -14,22 +14,22 @@ export class CardService {
   constructor(private http: HttpClient) { }
 
   addCard(model: CardAddRequest): Observable<void> {
-    return this.http.post<void>(`${environment.apiBaseURL}/api/card/test`, model);
+    return this.http.post<void>(`${environment.apiBaseURL}/api/card`, model);
   }
 
   getAllCards(): Observable<Card[]> {
-    return this.http.get<Card[]>(`${environment.apiBaseURL}/api/card/test`);
+    return this.http.get<Card[]>(`${environment.apiBaseURL}/api/card`);
   }
 
   getCardById(id: number): Observable<Card> {
-    return this.http.get<Card>(`${environment.apiBaseURL}/api/card/test/${id}`);
+    return this.http.get<Card>(`${environment.apiBaseURL}/api/card/${id}`);
   }
   updateCard(id: number,cardUpdateRequest: CardUpdateRequest):
    Observable<Card> {
-    return this.http.put<Card>(`${environment.apiBaseURL}/api/card/test/${id}`, cardUpdateRequest);
+    return this.http.put<Card>(`${environment.apiBaseURL}/api/card/${id}`, cardUpdateRequest);
   }
 
   deleteCard(id: number): Observable<Card> {
-    return this.http.delete<Card>(`${environment.apiBaseURL}/api/card/test/${id}`);
+    return this.http.delete<Card>(`${environment.apiBaseURL}/api/card/${id}`);
   }
 }

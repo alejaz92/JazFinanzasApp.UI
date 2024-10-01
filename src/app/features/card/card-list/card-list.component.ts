@@ -14,7 +14,7 @@ export class CardListComponent implements OnInit {
 
   }
   ngOnInit(): void {
-    this.cards$ = this.cardService.getAllCards();      
+    this.cards$ = this.cardService.getAllCards();  
   }
 
   onDelete(cardId: number): void {
@@ -22,7 +22,7 @@ export class CardListComponent implements OnInit {
       this.cardService.deleteCard(cardId)
       .subscribe({
         next: (response) => {
-          alert('Card deleted successfully');
+          alert('Tarjeta eliminada correctamente');
           this.ngOnInit();
         }
       });

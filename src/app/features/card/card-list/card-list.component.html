@@ -18,7 +18,7 @@
                 <tr *ngFor="let card of cards">
                     <td>{{ card.name }}</td>
                     <td>
-                        <a class="btn btn-light" [routerLink]="['/management/card',card.id]">
+                        <a class="btn btn-primary" [routerLink]="['/management/card',card.id]">
                             <i class="bi-pencil-fill"></i>
                         </a>
                         <button class="btn btn-danger ms-3" (click)="onDelete(card.id)">

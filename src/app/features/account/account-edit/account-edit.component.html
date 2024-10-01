@@ -1,0 +1,27 @@
+<div class="container">
+    <h1 class="mt-3">
+        Editar Cuenta
+    </h1>
+    <ng-container *ngIf="account;else notFound">
+
+        <form #form="ngForm" (ngSubmit)="onFormSubmit()">
+            <div class="mt-2">
+                <div class="mt-3">
+                    <label class="form-label" for="accountName">Nombre</label>
+                    <input type="text" class="form-control" id="accountName" [(ngModel)]="account.name" 
+                    name="accountName">
+                </div>
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary m-1">Guardar</button>
+                    <a class="btn btn-secondary" [routerLink]="['/management/account']">Cancelar</a>   
+                </div>
+            </div>
+        </form>
+    </ng-container>
+
+    <ng-template #notFound>
+        <div class="alert alert-warning" role="alert">
+            La cuenta no ha sido encontrada.
+          </div>
+    </ng-template>
+</div>

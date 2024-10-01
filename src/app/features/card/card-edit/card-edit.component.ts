@@ -17,10 +17,7 @@ export class CardEditComponent implements OnInit, OnDestroy {
   editCardSubscription?: Subscription;
   card?: Card;
 
-  constructor(private route: ActivatedRoute, private cardService: CardService, private router: Router) {
-
-
-   }
+  constructor(private route: ActivatedRoute, private cardService: CardService, private router: Router) {  }
 
   ngOnInit(): void {
     this.paramsSubcription = this.route.paramMap.subscribe({
