@@ -35,4 +35,8 @@ export class AuthService {
   isloggedIn(): boolean {
     return !!this.getToken();
   }
+
+  register(userData: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/register`, userData);
+  }
 }

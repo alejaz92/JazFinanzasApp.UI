@@ -15,6 +15,10 @@ import { HomeComponent } from './features/home/home/home.component';
 import { AccountListComponent } from './features/account/account-list/account-list.component';
 import { AccountAddComponent } from './features/account/account-add/account-add.component';
 import { AccountEditComponent } from './features/account/account-edit/account-edit.component';
+import { RegisterComponent } from './features/auth/register/register.component';
+import { ReactiveFormsModule } from '@angular/forms';
+import { ProfileComponent } from './features/user/profile/profile.component';
+import { ChangePasswordComponent } from './features/user/change-password/change-password.component';
 
 
 @NgModule({
@@ -28,13 +32,17 @@ import { AccountEditComponent } from './features/account/account-edit/account-ed
     HomeComponent,
     AccountListComponent,
     AccountAddComponent,
-    AccountEditComponent
+    AccountEditComponent,
+    RegisterComponent,
+    ProfileComponent,
+    ChangePasswordComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     FormsModule,
-    HttpClientModule
+    HttpClientModule,
+    ReactiveFormsModule
   ],
   providers: [ {
     provide: HTTP_INTERCEPTORS,

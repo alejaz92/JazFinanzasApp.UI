@@ -9,6 +9,8 @@ import { HomeComponent } from './features/home/home/home.component';
 import { AccountListComponent } from './features/account/account-list/account-list.component';
 import { AccountAddComponent } from './features/account/account-add/account-add.component';
 import { AccountEditComponent } from './features/account/account-edit/account-edit.component';
+import { RegisterComponent } from './features/auth/register/register.component';
+import { ProfileComponent } from './features/user/profile/profile.component';
 
 const routes: Routes = [
   {
@@ -48,6 +50,14 @@ const routes: Routes = [
     path: 'management/account/:id',
     component: AccountEditComponent,
     canActivate: [AuthGuard]
+  },
+  {
+    path: 'register',
+    component: RegisterComponent
+  },
+  {
+    path: 'profile',
+    component: ProfileComponent,
   },
   {
     path: '**',

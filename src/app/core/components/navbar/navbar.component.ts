@@ -10,7 +10,10 @@ import { AuthService } from 'src/app/features/auth/services/auth.service';
 export class NavbarComponent {
   constructor(public router: Router, private authService: AuthService) { }
   isLoginPage(): boolean {
-    return this.router.url === '/login';
+      if (this.router.url === '/login' || this.router.url === '/register') {
+          return true;
+      }
+      return false;
   }
 
   logout(): void {

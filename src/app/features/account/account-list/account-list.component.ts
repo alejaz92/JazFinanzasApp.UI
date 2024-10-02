@@ -18,6 +18,7 @@ export class AccountListComponent implements OnInit {
   ngOnInit(): void {
     this.accounts$ = this.AccountService.getAllAccounts();
   }
+  
   onDelete(accountId: number): void {
     if(accountId){
       this.AccountService.deleteAccount(accountId)
@@ -27,8 +28,7 @@ export class AccountListComponent implements OnInit {
           this.ngOnInit();
         }
       });
-    }
-    
+    }    
   }
 
   updateAssetTypes(accountId: number): void {
