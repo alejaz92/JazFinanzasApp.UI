@@ -13,6 +13,7 @@ export class ProfileComponent implements OnInit {
   loading = false;
   submitted = false;
   errorMessage = '';
+  succesMessage = '';
 
   constructor(
     private formBuilder: FormBuilder,
@@ -55,7 +56,7 @@ export class ProfileComponent implements OnInit {
     this.userService.updateUserData(this.profileForm.value).pipe(first()).subscribe(
       (data: any) => {
         this.loading = false;
-        this.errorMessage = 'Datos actualizados correctamente';
+        this.succesMessage = 'Datos actualizados correctamente';
       },
       (error: any) => {
         this.errorMessage = 'Error al actualizar los datos';

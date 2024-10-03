@@ -46,6 +46,15 @@
           </li>
         </ul>
         <ul class="navbar-nav ms-auto"> <!-- Alineado a la derecha con ms-auto -->
+
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+             {{ username }}
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" [routerLink]="['profile']">Perfil</a></li>
+              <li><a class="dropdown-item" [routerLink]="['change-password']">Cambiar Contraseña</a></li>
+            </ul>
           <li class="nav-item">
             <button class="btn btn-outline-danger" (click)="logout()">Cerrar Sesión</button>
           </li>

@@ -11,6 +11,7 @@ import { AccountAddComponent } from './features/account/account-add/account-add.
 import { AccountEditComponent } from './features/account/account-edit/account-edit.component';
 import { RegisterComponent } from './features/auth/register/register.component';
 import { ProfileComponent } from './features/user/profile/profile.component';
+import { ChangePasswordComponent } from './features/user/change-password/change-password.component';
 
 const routes: Routes = [
   {
@@ -56,11 +57,21 @@ const routes: Routes = [
     component: RegisterComponent
   },
   {
+    path: 'change-password',
+    component: ChangePasswordComponent,
+    canActivate: [AuthGuard]
+  },
+  {
     path: 'profile',
     component: ProfileComponent,
+    canActivate: [AuthGuard]
   },
   {
     path: '**',
+    redirectTo: ''
+  },
+  {
+    path: 'home',
     redirectTo: ''
   }
 ];

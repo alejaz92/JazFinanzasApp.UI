@@ -39,8 +39,8 @@
                 <div  *ngIf="submitted && f['email'].errors" class="invalid-feedback">
                     El email es requerido
                 </div>
-                <div *ngIf="f['email'].errors?.['email']">
-                    Correo no válido
+                <div *ngIf="f['email'].errors?.['email']" class="invalid-feedback">
+                    Email no válido
                 </div>
             </div>
 
@@ -48,6 +48,9 @@
                 <button type="submit" class="btn btn-primary m-1">Guardar</button>
                     <a class="btn btn-secondary" [routerLink]="['']">Cancelar</a> 
             </div>
+
+            <div *ngIf="succesMessage" class="alert alert-success mt-3">{{ succesMessage }}</div>
+            <div *ngIf="errorMessage" class="alert alert-danger mt-3">{{ errorMessage }}</div>
         </div>
     </form>
 </div>
