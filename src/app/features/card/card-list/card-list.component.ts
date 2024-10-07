@@ -19,13 +19,17 @@ export class CardListComponent implements OnInit {
 
   onDelete(cardId: number): void {
     if(cardId){
-      this.cardService.deleteCard(cardId)
-      .subscribe({
-        next: (response) => {
-          alert('Tarjeta eliminada correctamente');
-          this.ngOnInit();
-        }
-      });
+
+      const confirmed = window.confirm('¿Estás seguro de eliminar esta tarjeta?');
+      if(confirmed) {
+        this.cardService.deleteCard(cardId)
+        .subscribe({
+          next: (response) => {
+            alert('Tarjeta eliminada correctamente');
+            this.ngOnInit();
+          }
+        });
+      }
     }
     
   }

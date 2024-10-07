@@ -21,13 +21,17 @@ export class AccountListComponent implements OnInit {
   
   onDelete(accountId: number): void {
     if(accountId){
-      this.AccountService.deleteAccount(accountId)
-      .subscribe({
-        next: (response) => {
-          alert('Cuenta eliminada correctamente');
-          this.ngOnInit();
-        }
-      });
+      const confirmed = window.confirm('¿Estás seguro de eliminar esta cuenta?');
+      if(confirmed) {
+
+        this.AccountService.deleteAccount(accountId)
+        .subscribe({
+          next: (response) => {
+            alert('Cuenta eliminada correctamente');
+            this.ngOnInit();
+          }
+        });
+      }
     }    
   }
 
