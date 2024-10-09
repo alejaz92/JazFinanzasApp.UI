@@ -1,0 +1,5 @@
+export interface AssetType {
+    id: number;
+    name: string;
+    isSelected: boolean;
+}

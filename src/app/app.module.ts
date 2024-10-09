@@ -19,7 +19,9 @@ import { RegisterComponent } from './features/auth/register/register.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ProfileComponent } from './features/user/profile/profile.component';
 import { ChangePasswordComponent } from './features/user/change-password/change-password.component';
-import { AccountAssetTypeListComponent } from './features/account_assetType/account-asset-type-list/account-asset-type-list.component';
+import { AccountAssetTypeComponent } from './features/account/account-assettype/account-assettype.component';
+
+
 
 
 @NgModule({
@@ -37,7 +39,7 @@ import { AccountAssetTypeListComponent } from './features/account_assetType/acco
     RegisterComponent,
     ProfileComponent,
     ChangePasswordComponent,
-    AccountAssetTypeListComponent
+    AccountAssetTypeComponent
   ],
   imports: [
     BrowserModule,

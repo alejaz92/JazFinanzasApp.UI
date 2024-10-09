@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment.development';
 import { Account } from '../models/account.model';
 import { AccountAddRequest } from '../models/account-add-request.model';
+import { AssetType } from '../models/assetType.model';
 
 @Injectable({
   providedIn: 'root'
@@ -27,4 +28,12 @@ export class AccountService {
   updateAccount(id: number, account: AccountAddRequest): Observable<Account> {
     return this.http.put<Account>(`${environment.apiBaseURL}/api/account/${id}`, account);
   }
+  getAccountAssetTypes(accountId: number): Observable<AssetType[]> {
+    return this.http.get<AssetType[]>(`${environment.apiBaseURL}/api/account_AssetType/${accountId}`);
+  }
+
+  updateAccountAssetTypes(accountId: number, assetTypes: AssetType[]): Observable<any> {
+    return this.http.post(`${environment.apiBaseURL}/api/account_AssetType/${accountId}`, assetTypes);
+  }
+
 }

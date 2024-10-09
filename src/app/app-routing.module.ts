@@ -12,6 +12,8 @@ import { AccountEditComponent } from './features/account/account-edit/account-ed
 import { RegisterComponent } from './features/auth/register/register.component';
 import { ProfileComponent } from './features/user/profile/profile.component';
 import { ChangePasswordComponent } from './features/user/change-password/change-password.component';
+import { AccountAssetTypeComponent } from './features/account/account-assettype/account-assettype.component';
+
 
 const routes: Routes = [
   {
@@ -67,13 +69,18 @@ const routes: Routes = [
     canActivate: [AuthGuard]
   },
   {
-    path: '**',
+    path: 'home',
     redirectTo: ''
   },
   {
-    path: 'home',
+    path: 'management/account/asset-type/:id',
+    component: AccountAssetTypeComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: '**',
     redirectTo: ''
-  }
+  },
 ];
 
 @NgModule({
