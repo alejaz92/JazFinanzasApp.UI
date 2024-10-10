@@ -15,7 +15,7 @@ import { ChangePasswordComponent } from './features/user/change-password/change-
 import { MovementClassListComponent } from './features/movementClass/movement-class-list/movement-class-list.component';
 import { MovementClassAddComponent } from './features/movementClass/movement-class-add/movement-class-add.component';
 import { MovementClassEditComponent } from './features/movementClass/movement-class-edit/movement-class-edit.component';
-import { AccountAssetTypeComponent } from './features/account/account-assettype/account-assettype.component';
+import { AccountAssetTypeComponent } from './features/account/account-assettype/account-assetType.component';
 
 
 const routes: Routes = [
