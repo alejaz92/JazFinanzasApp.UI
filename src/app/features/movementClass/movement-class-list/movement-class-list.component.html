@@ -1,0 +1,65 @@
+<div class="container">
+    <h1 class="mt-3">Clases de Movimiento</h1>
+    <div class="d-flex justify-content-end mt-3">
+        <a class="btn btn-primary" [routerLink]="['/management/movementClass/add']">
+            Crear Clase de Movimiento
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6" *ngIf="incomeClasses !== null && incomeClasses.length > 0">
+            <h3>Ingresos</h3>
+            <table class="table" >
+                <thead>
+                    <tr>
+                        <th>Descripcion</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let movementClass of incomeClasses">
+                        <td>{{movementClass.description}}</td>
+                        <td>
+                            <button *ngIf="canEditOrDelete(movementClass.description)" class="btn btn-primary m-1"
+                            [routerLink]="['/management/movementClass',movementClass.id]">
+                                <i class="bi-pencil-fill"></i>
+                            </button>
+                            <button *ngIf="canEditOrDelete(movementClass.description)"  class="btn btn-danger"
+                                (click)="onDelete(movementClass.id)">
+                                <i class="bi-trash-fill"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    
+        <div class="col-md-6" *ngIf="expenseClasses !== null && expenseClasses.length > 0">
+            <h3>Egresos</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Descripcion</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let movementClass of expenseClasses">
+                        <td>{{movementClass.description}}</td>
+                        <td>
+                            <button *ngIf="canEditOrDelete(movementClass.description)" class="btn btn-primary m-1"
+                            [routerLink]="['/management/movementClass',movementClass.id]">
+                                <i class="bi-pencil-fill"></i>
+                            </button>
+                            <button *ngIf="canEditOrDelete(movementClass.description)"  class="btn btn-danger"
+                                (click)="onDelete(movementClass.id)">
+                                <i class="bi-trash-fill"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>    
+
+</div>

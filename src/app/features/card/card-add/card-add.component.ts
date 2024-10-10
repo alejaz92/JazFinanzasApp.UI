@@ -11,12 +11,12 @@ import { Router } from '@angular/router';
 })
 export class CardAddComponent implements OnDestroy {
 
-model: CardAddRequest;
-private addCategorysubscription?: Subscription;
+  model: CardAddRequest;
+  private addCardSubscription?: Subscription;
 
   constructor(private cardService: CardService, 
-    private router: Router
-  ) {
+    private router: Router) 
+  {
     this.model = {
       name: ''
     };
@@ -24,7 +24,7 @@ private addCategorysubscription?: Subscription;
 
 
   onFormSubmit() {
-    this.addCategorysubscription = this.cardService.addCard(this.model)
+    this.addCardSubscription = this.cardService.addCard(this.model)
       .subscribe({
         next: (response) => {
           this.router.navigate(['/management/card']);
@@ -33,6 +33,6 @@ private addCategorysubscription?: Subscription;
   }
 
   ngOnDestroy(): void {
-    this.addCategorysubscription?.unsubscribe();
+    this.addCardSubscription?.unsubscribe();
   }
 }

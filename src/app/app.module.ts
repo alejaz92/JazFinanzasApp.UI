@@ -20,6 +20,9 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { ProfileComponent } from './features/user/profile/profile.component';
 import { ChangePasswordComponent } from './features/user/change-password/change-password.component';
 import { AccountAssetTypeComponent } from './features/account/account-assettype/account-assettype.component';
+import { MovementClassListComponent } from './features/movementClass/movement-class-list/movement-class-list.component';
+import { MovementClassAddComponent } from './features/movementClass/movement-class-add/movement-class-add.component';
+import { MovementClassEditComponent } from './features/movementClass/movement-class-edit/movement-class-edit.component';
 
 
 
@@ -39,7 +42,10 @@ import { AccountAssetTypeComponent } from './features/account/account-assettype/
     RegisterComponent,
     ProfileComponent,
     ChangePasswordComponent,
-    AccountAssetTypeComponent
+    AccountAssetTypeComponent,
+    MovementClassListComponent,
+    MovementClassAddComponent,
+    MovementClassEditComponent
   ],
   imports: [
     BrowserModule,

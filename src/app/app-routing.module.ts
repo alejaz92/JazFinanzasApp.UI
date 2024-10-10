@@ -12,6 +12,9 @@ import { AccountEditComponent } from './features/account/account-edit/account-ed
 import { RegisterComponent } from './features/auth/register/register.component';
 import { ProfileComponent } from './features/user/profile/profile.component';
 import { ChangePasswordComponent } from './features/user/change-password/change-password.component';
+import { MovementClassListComponent } from './features/movementClass/movement-class-list/movement-class-list.component';
+import { MovementClassAddComponent } from './features/movementClass/movement-class-add/movement-class-add.component';
+import { MovementClassEditComponent } from './features/movementClass/movement-class-edit/movement-class-edit.component';
 import { AccountAssetTypeComponent } from './features/account/account-assettype/account-assettype.component';
 
 
@@ -75,6 +78,21 @@ const routes: Routes = [
   {
     path: 'management/account/asset-type/:id',
     component: AccountAssetTypeComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'management/movementClass',
+    component: MovementClassListComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'management/movementClass/add',
+    component: MovementClassAddComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'management/movementClass/:id',
+    component: MovementClassEditComponent,
     canActivate: [AuthGuard]
   },
   {

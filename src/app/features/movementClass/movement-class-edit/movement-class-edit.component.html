@@ -1,0 +1,29 @@
+<div class="container">
+    <h1 class="mt-3">Editar Clase de Movimiento</h1>
+    <ng-container *ngIf="movementClass;else notFound">
+        <form #form="ngForm" (ngSubmit)="onFormSubmit()">
+            <div class="mt-2">
+                <div class="mt-3">
+                    <label class="form-label" for="movementClassDescription">Descripción</label>
+                    <input type="text" class="form-control" id="movementClassDescription" [(ngModel)]="movementClass.description" name="movementClassDescription">
+                </div>
+                <div class="mt-3">
+                    <label class="form-label" for="movementClassIncExp">Tipo</label>
+                    <select class="form-select" id="movementClassIncExp" name="movementClassIncExp" [(ngModel)]="movementClass.incExp" disabled>
+                        <option value="I">Ingreso</option>
+                        <option value="E">Egreso</option>
+                    </select>
+                </div>
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary m-1">Guardar</button>
+                    <a class="btn btn-secondary" [routerLink]="['/management/movementClass']">Cancelar</a>
+                </div> 
+            </div>
+        </form>
+    </ng-container>
+    <ng-template #notFound>
+        <div class="alert alert-warning" role="alert">
+            La clase de movimiento no ha sido encontrada.
+        </div>
+    </ng-template>
+</div>
