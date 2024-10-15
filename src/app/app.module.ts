@@ -23,6 +23,7 @@ import { AccountAssetTypeComponent } from './features/account/account-assettype/
 import { MovementClassListComponent } from './features/movementClass/movement-class-list/movement-class-list.component';
 import { MovementClassAddComponent } from './features/movementClass/movement-class-add/movement-class-add.component';
 import { MovementClassEditComponent } from './features/movementClass/movement-class-edit/movement-class-edit.component';
+import { AssetManagementComponent } from './features/asset/asset-management/asset-management.component';
 
 
 
@@ -45,7 +46,8 @@ import { MovementClassEditComponent } from './features/movementClass/movement-cl
     AccountAssetTypeComponent,
     MovementClassListComponent,
     MovementClassAddComponent,
-    MovementClassEditComponent
+    MovementClassEditComponent,
+    AssetManagementComponent
   ],
   imports: [
     BrowserModule,

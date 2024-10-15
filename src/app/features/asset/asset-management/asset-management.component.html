@@ -1,0 +1,48 @@
+<div class="container">
+    <h1 class="mt-3">
+        Activos
+    </h1>
+
+    <div class="mb-3">
+        <label for="assetType">Tipo de Activo</label>
+        <select  id="assetType"
+            class="form-select"
+            [(ngModel)]="selectedAssetType"
+            (change)="onAssetTypeChange()">
+
+            <option *ngFor="let type of assetTypes" [value]="type.id">{{ type.name }}</option>
+        </select>
+    </div>
+
+  
+    <!-- Listado de activos-->
+    <div class="row" *ngIf="selectedAssetType != 0">
+        <div class="col-md-6">
+            <h4>Activos Disponibles</h4>
+            <ul class="list-group">
+                <li *ngFor="let asset of availableAssets"
+                    class="list-group-item d-flex justify-content-between align-items-center">
+
+                    {{ asset.name }}
+                    <button class="btn btn-primary" (click)="assignAsset(asset)">
+                        Asignar
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <div class="col-md-6">
+            <h4>Activos Asignados</h4>
+            <ul class="list-group">
+                <li *ngFor="let asset of assignedAssets"
+                    class="list-group-item d-flex justify-content-between align-items-center">
+
+                    {{ asset.name }}
+                    <button class="btn btn-danger" (click)="unassignAsset(asset)">
+                        Desasignar
+                    </button>
+                </li>
+            </ul>
+    </div>
+
+</div>

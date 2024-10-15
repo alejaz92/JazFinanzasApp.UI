@@ -18,13 +18,13 @@
                 <tr *ngFor="let account of accounts">
                     <td>{{ account.name }}</td>
                     <td>
-                        <a class="btn btn-success"[routerLink]="['/management/account/asset-type',account.id]">
+                        <a title="Asignar Tipo de Activo" class="btn btn-success"[routerLink]="['/management/account/asset-type',account.id]">
                             <i class="bi-card-checklist"></i>
                         </a>
-                        <a class="btn btn-primary ms-2" [routerLink]="['/management/account',account.id]">
+                        <a title="Editar" class="btn btn-primary ms-2" [routerLink]="['/management/account',account.id]">
                             <i class="bi-pencil-fill"></i>
                         </a>
-                        <button class="btn btn-danger ms-2" (click)="onDelete(account.id)">
+                        <button title="Eliminar" class="btn btn-danger ms-2" (click)="onDelete(account.id)">
                             <i class="bi-trash-fill"></i>
                         </button>
                     </td>

@@ -16,6 +16,7 @@ import { MovementClassListComponent } from './features/movementClass/movement-cl
 import { MovementClassAddComponent } from './features/movementClass/movement-class-add/movement-class-add.component';
 import { MovementClassEditComponent } from './features/movementClass/movement-class-edit/movement-class-edit.component';
 import { AccountAssetTypeComponent } from './features/account/account-assettype/account-assetType.component';
+import { AssetManagementComponent } from './features/asset/asset-management/asset-management.component';
 
 
 const routes: Routes = [
@@ -93,6 +94,11 @@ const routes: Routes = [
   {
     path: 'management/movementClass/:id',
     component: MovementClassEditComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'management/assets',
+    component: AssetManagementComponent,
     canActivate: [AuthGuard]
   },
   {
