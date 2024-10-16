@@ -1,0 +1,54 @@
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>Movimientos</h1>
+        <a class="btn btn-primary">Nuevo <i class="bi-plus-lg"></i></a>
+    </div>
+
+    <!-- tabla de movimientos-->
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead >
+                <tr>
+                    <th >Fecha</th>
+                    <th >Tipo Movimiento</th>
+                    <th >Clase Movimiento</th>
+                    <th >Detalle</th>
+                    <th >Cuenta</th>
+                    <th >Moneda</th>
+                    <th class="text-end">Monto</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let movement of movements | paginate: { itemsPerPage: 20, currentPage: page, totalItems: totalMovements}">
+                    <td>{{ movement.date | date: 'dd/MM/yyyy' }}</td>
+                    <td>{{ movement.movementType | movementType }}</td>
+                    <td>{{ movement.movementClassName }}</td>
+                    <td>{{ movement.detail }}</td>
+                    <td>{{ movement.accountName }}</td>
+                    <td>{{ movement.assetName }}</td>
+                    <td class="text-end" [ngClass]="{'table-danger': movement.amount < 0, 'table-success': movement.amount >= 0}">
+                        {{ movement.amount | currencyFiatFormat }}
+                    </td>
+                    <td>
+                        <div class="justify-content-around">
+                            <button class="btn btn-sm btn-primary m-1" title="Editar"><i class="bi-pencil-fill"></i></button>
+                            <button class="btn btn-sm btn-danger m-1" title="Eliminar"><i class="bi-trash-fill"></i></button>
+                            <button *ngIf="movement.movementType === 'E'" class="btn btn-sm btn-warning m-1" title="Reintegro"><i class="bi-box-arrow-in-up-right"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Paginacion-->
+    <div class="d-flex justify-content-center">
+        <pagination-controls 
+        (pageChange)="onPageChange($event)"
+        [responsive]="true"
+        [previousLabel]="'Anterior'"
+        [nextLabel]="'Siguiente'">
+    </pagination-controls>
+    </div>
+</div>

@@ -24,6 +24,10 @@ import { MovementClassListComponent } from './features/movementClass/movement-cl
 import { MovementClassAddComponent } from './features/movementClass/movement-class-add/movement-class-add.component';
 import { MovementClassEditComponent } from './features/movementClass/movement-class-edit/movement-class-edit.component';
 import { AssetManagementComponent } from './features/asset/asset-management/asset-management.component';
+import { MovementListComponent } from './features/movement/movement-list/movement-list.component';
+import { NgxPaginationModule } from 'ngx-pagination';
+import { CurrencyFiatFormatPipe } from './pipes/currencyFiatFormat/currency-fiat-format.pipe';
+import { MovementTypePipe } from './pipes/movementType/movement-type.pipe';
 
 
 
@@ -47,14 +51,18 @@ import { AssetManagementComponent } from './features/asset/asset-management/asse
     MovementClassListComponent,
     MovementClassAddComponent,
     MovementClassEditComponent,
-    AssetManagementComponent
+    AssetManagementComponent,
+    MovementListComponent,
+    CurrencyFiatFormatPipe,
+    MovementTypePipe    
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     FormsModule,
     HttpClientModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    NgxPaginationModule
   ],
   providers: [ {
     provide: HTTP_INTERCEPTORS,

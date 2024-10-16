@@ -28,6 +28,8 @@ export class NavbarComponent implements OnInit {
       },
       error => {
         console.error('Error al obtener el nombre de usuario', error);
+        //redireccionar a login
+        this.router.navigate(['/login']);
       }
     );
   }
