@@ -39,4 +39,9 @@ export class AssetService {
       observer.complete();
     });
   }
+
+  
+  getAssetsByTypeName(typeName: string): Observable<Asset[]> {
+    return this.http.get<Asset[]>(`${environment.apiBaseURL}/api/asset/user-assetsByName/${typeName}`);
+  }
 }

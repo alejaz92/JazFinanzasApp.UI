@@ -28,6 +28,8 @@ import { MovementListComponent } from './features/movement/movement-list/movemen
 import { NgxPaginationModule } from 'ngx-pagination';
 import { CurrencyFiatFormatPipe } from './pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { MovementTypePipe } from './pipes/movementType/movement-type.pipe';
+import { MovementAddComponent } from './features/movement/movement-add/movement-add.component';
+import { CurrencyFiatInputFormatPipe } from './pipes/currencyFiatInputFormat/currency-fiat-input-format.pipe';
 
 
 
@@ -54,7 +56,9 @@ import { MovementTypePipe } from './pipes/movementType/movement-type.pipe';
     AssetManagementComponent,
     MovementListComponent,
     CurrencyFiatFormatPipe,
-    MovementTypePipe    
+    MovementTypePipe,
+    MovementAddComponent,
+    CurrencyFiatInputFormatPipe    
   ],
   imports: [
     BrowserModule,

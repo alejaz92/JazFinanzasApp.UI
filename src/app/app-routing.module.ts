@@ -18,6 +18,7 @@ import { MovementClassEditComponent } from './features/movementClass/movement-cl
 import { AccountAssetTypeComponent } from './features/account/account-assettype/account-assetType.component';
 import { AssetManagementComponent } from './features/asset/asset-management/asset-management.component';
 import { MovementListComponent } from './features/movement/movement-list/movement-list.component';
+import { MovementAddComponent } from './features/movement/movement-add/movement-add.component';
 
 
 const routes: Routes = [
@@ -105,6 +106,11 @@ const routes: Routes = [
   {
     path: 'movements',
     component: MovementListComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'movements/add',
+    component: MovementAddComponent,
     canActivate: [AuthGuard]
   },
   {

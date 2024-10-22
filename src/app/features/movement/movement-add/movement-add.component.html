@@ -1,0 +1,149 @@
+<div class="container">
+    <h1 class="mt-3">Crear Movimiento</h1>
+
+    <div *ngIf="successMessage" class="alert alert-success" role="alert">
+        {{ successMessage }}
+      </div>
+    <form [formGroup]="movementForm" (ngSubmit)="onSubmit()">
+        <div class="row mb-3">
+            <div class="col">
+                <label for="movementType">Tipo de Movimiento</label>
+                <select id="movementType" class="form-control" formControlName="movementType"
+                (change)="onTipoMovimientoChange($event)">
+                    <option value="" disabled selected>Seleccione</option>
+                    <option value="I">Ingreso</option>
+                    <option value="E">Egreso</option>
+                    <option value="EX">Intercambio</option>
+                </select> 
+                <div *ngIf="movementForm.controls['movementType'].errors?.['incorrect'] " class="text-danger mt-2">
+                    Debe seleccionarse un tipo de movimiento.
+                </div>
+            </div>            
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="date">Fecha</label>
+                <input type="date" class="form-control" id="date" formControlName="date">
+                <div *ngIf="movementForm.controls['date'].errors?.['incorrect'] " class="text-danger mt-2">
+                    Debe seleccionarse una fecha.
+                </div>
+            </div>
+            <div class="col-md-6">
+                <label for="asset">Moneda</label>
+                <select id="asset" formControlName="asset" class="form-control">
+                    <option value="" disabled selected>Seleccione</option>
+                    <option *ngFor="let asset of assets" [value]="asset.id">{{ asset.name }}</option>
+                </select>
+
+                <div *ngIf="movementForm.controls['asset'].errors?.['incorrect'] " class="text-danger mt-2">
+                    Debe seleccionarse una Moneda.
+                </div>
+            </div>
+        </div>
+
+        <ng-container *ngIf="selectedMovementType === 'I'">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="incomeAccount">Cuenta Ingreso</label>
+                    <select  class="form-control" id="incomeAccount" formControlName="incomeAccount">
+                        <option value="" disabled selected>Seleccione</option>
+                        <option *ngFor="let account of accounts" [value]="account.id">{{ account.name }}</option>
+                    </select>
+                    <div *ngIf="movementForm.controls['incomeAccount'].errors?.['incorrect'] " class="text-danger mt-2">
+                        Debe seleccionarse una Cuenta de Ingresos.
+                    </div>
+                </div>
+            
+                <div class="col-md-6">
+                    <label for="incomeClass">Clase de Movimiento de Ingreso</label>
+                    <select  class="form-control" id="incomeClass" formControlName="incomeClass">
+                        <option value="" disabled selected>Seleccione</option>
+                        <option *ngFor="let class of incomeClasses" [value]="class.id">{{ class.description }}</option>
+                    </select>
+                    <div *ngIf="movementForm.controls['incomeClass'].errors?.['incorrect'] " class="text-danger mt-2">
+                        Debe seleccionarse una Clase de Ingreso.
+                    </div>
+                </div>
+            </div>
+        </ng-container>
+        <ng-container *ngIf="selectedMovementType === 'E'">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="expenseAccount">Cuenta Egreso</label>
+                    <select  class="form-control" id="expenseAccount" formControlName="expenseAccount">
+                        <option value="" disabled selected>Seleccione</option>
+                        <option *ngFor="let account of accounts" [value]="account.id">{{ account.name }}</option>
+                    </select>
+                    <div *ngIf="movementForm.controls['expenseAccount'].errors?.['incorrect'] " class="text-danger mt-2">
+                        Debe seleccionarse una Cuenta de Egreso.
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label for="expenseClass">Clase de Movimiento de Egreso</label>
+                    <select  class="form-control" id="expenseClass" formControlName="expenseClass">
+                        <option value="" disabled selected>Seleccione</option>
+                        <option *ngFor="let class of expenseClasses" [value]="class.id">{{ class.description }}</option>
+                    </select>
+                    <div *ngIf="movementForm.controls['expenseClass'].errors?.['incorrect'] " class="text-danger mt-2">
+                        Debe seleccionarse una Clase de Egreso.
+                    </div>
+                </div>
+            </div>
+        </ng-container>
+        <ng-container *ngIf="selectedMovementType === 'EX'">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="incomeExchangeAccount">Cuenta Ingreso</label>
+                    <select  class="form-control" id="incomeExchangeAccount" formControlName="incomeExchangeAccount">
+                        <option value="" disabled selected>Seleccione</option>
+                        <option *ngFor="let account of accounts" [value]="account.id">{{ account.name }}</option>
+                    </select>
+                    <div *ngIf="movementForm.controls['incomeExchangeAccount'].errors?.['incorrect'] " class="text-danger mt-2">
+                        Debe seleccionarse una Cuenta de Ingreso.
+                    </div>
+                </div> 
+                
+                <div class="col-md-6">
+                    <label for="expenseExchangeAccount">Cuenta Egreso</label>
+                    <select  class="form-control" id="expenseExchangeAccount" formControlName="expenseExchangeAccount">
+                        <option value="" disabled selected>Seleccione</option>
+                        <option *ngFor="let account of accounts" [value]="account.id">{{ account.name }}</option>
+                    </select>
+                    <div *ngIf="movementForm.controls['expenseExchangeAccount'].errors?.['incorrect'] " class="text-danger mt-2">
+                        Debe seleccionarse una Cuenta de Egreso.
+                    </div>
+                </div>
+            </div>            
+        </ng-container>
+        <div class="row mb-3">
+            <div class="col">
+                <label for="Detail">Detalle</label>
+                <textarea class="form-control" id="detail" formControlName="detail"></textarea>
+            </div>            
+        </div>
+        <div class="row mb-3">
+            <div class="col">
+                <label for="amount">Monto</label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">$</span>
+                    </div>
+                    <input type="text" class="form-control" id="amount" 
+                    formControlName="amount">
+                    
+                </div>
+                <div *ngIf="movementForm.controls['amount'].errors?.['incorrect'] && movementForm.controls['amount'].touched" class="text-danger mt-2">
+                    El monto debe ser un número válido mayor que 0.
+                </div>
+                
+            </div>            
+        </div>    
+        <div class="row mb-3">
+            
+            <div class="mt-1">
+                <button type="submit" class="btn btn-primary m-1">Guardar</button>
+                <a class="btn btn-secondary" [routerLink]="['/movements']">Volver</a>
+            </div>                             
+        </div>
+    </form>
+</div>

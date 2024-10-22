@@ -36,4 +36,9 @@ export class AccountService {
     return this.http.post(`${environment.apiBaseURL}/api/account_AssetType/${accountId}`, assetTypes);
   }
 
+  //get account by typeName
+  getAccountByTypeName(typeName: string): Observable<Account> {
+    return this.http.get<Account>(`${environment.apiBaseURL}/api/account/ByAssetType/${typeName}`);
+  }
+
 }
