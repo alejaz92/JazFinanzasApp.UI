@@ -4,6 +4,7 @@ import { Movement } from '../models/movement.model';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment.development';
 import { MovementAdd } from '../models/movement-add.model';
+import { MovementRefund } from '../models/movement-refund.model';
 
 @Injectable({
   providedIn: 'root'
@@ -19,6 +20,19 @@ export class MovementService {
 
     console.log(movement);
     return this.http.post<MovementAdd>(`${environment.apiBaseURL}/api/movement`, movement);
+  }
+  deleteMovement(id: number): Observable<void> {
+    return this.http.delete<void>(`${environment.apiBaseURL}/api/movement/${id}`);
+  }
+  getMovementById(id: number): Observable<Movement> {
+    return this.http.get<Movement>(`${environment.apiBaseURL}/api/movement/${id}`);
+  }
+  updateMovement(id: number, movement: Movement): Observable<Movement> {
+    return this.http.put<Movement>(`${environment.apiBaseURL}/api/movement/${id}`, movement);
+  }
+
+  refundMovement(id: number, refund: MovementRefund): Observable<MovementRefund> {
+    return this.http.post<MovementRefund>(`${environment.apiBaseURL}/api/movement/refund/${id}`, refund);
   }
 
 }

@@ -30,6 +30,9 @@ import { CurrencyFiatFormatPipe } from './pipes/currencyFiatFormat/currency-fiat
 import { MovementTypePipe } from './pipes/movementType/movement-type.pipe';
 import { MovementAddComponent } from './features/movement/movement-add/movement-add.component';
 import { CurrencyFiatInputFormatPipe } from './pipes/currencyFiatInputFormat/currency-fiat-input-format.pipe';
+import { MovementEditComponent } from './features/movement/movement-edit/movement-edit.component';
+import { CommonModule } from '@angular/common';
+import { MovementRefundComponent } from './features/movement/movement-refund/movement-refund.component';
 
 
 
@@ -58,7 +61,9 @@ import { CurrencyFiatInputFormatPipe } from './pipes/currencyFiatInputFormat/cur
     CurrencyFiatFormatPipe,
     MovementTypePipe,
     MovementAddComponent,
-    CurrencyFiatInputFormatPipe    
+    CurrencyFiatInputFormatPipe,
+    MovementEditComponent,
+    MovementRefundComponent    
   ],
   imports: [
     BrowserModule,
@@ -66,7 +71,8 @@ import { CurrencyFiatInputFormatPipe } from './pipes/currencyFiatInputFormat/cur
     FormsModule,
     HttpClientModule,
     ReactiveFormsModule,
-    NgxPaginationModule
+    NgxPaginationModule,
+    CommonModule
   ],
   providers: [ {
     provide: HTTP_INTERCEPTORS,

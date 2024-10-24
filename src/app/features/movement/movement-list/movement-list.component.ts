@@ -21,7 +21,6 @@ export class MovementListComponent implements OnInit {
   loadMovements() {
     this.movementService.getMovements(this.page,20)
       .subscribe(response => {
-        console.log(response); 
         this.movements = response.movements; 
         this.totalMovements = response.totalCount;
       });
@@ -34,4 +33,19 @@ export class MovementListComponent implements OnInit {
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
+
+  onDeleteMovement(movement: Movement) {
+
+    //preguntar si esta seguro de eliminar
+    if (!confirm(`¿Estás seguro de eliminar el movimiento?`)) {
+      return
+    }
+
+    this.movementService.deleteMovement(movement.id)
+      .subscribe(() => {
+        
+        this.loadMovements();
+      });
+  }
 }
+

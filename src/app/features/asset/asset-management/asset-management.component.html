@@ -9,7 +9,7 @@
             class="form-select"
             [(ngModel)]="selectedAssetType"
             (change)="onAssetTypeChange()">
-
+            <option value="0" disabled selected>Seleccione</option>
             <option *ngFor="let type of assetTypes" [value]="type.id">{{ type.name }}</option>
         </select>
     </div>
