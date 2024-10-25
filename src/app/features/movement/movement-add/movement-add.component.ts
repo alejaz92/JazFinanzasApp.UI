@@ -5,7 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { AccountService } from '../../account/services/account.service';
 import { AssetService } from '../../asset/services/asset.service';
 import { MovementClassService } from '../../movementClass/services/movement-class.service';
-import { CurrencyFiatInputFormatPipe } from '../../../pipes/currencyFiatInputFormat/currency-fiat-input-format.pipe';
+
 
 @Component({
   selector: 'app-movement-add',

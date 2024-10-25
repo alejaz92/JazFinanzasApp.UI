@@ -26,13 +26,12 @@ import { MovementClassEditComponent } from './features/movementClass/movement-cl
 import { AssetManagementComponent } from './features/asset/asset-management/asset-management.component';
 import { MovementListComponent } from './features/movement/movement-list/movement-list.component';
 import { NgxPaginationModule } from 'ngx-pagination';
-import { CurrencyFiatFormatPipe } from './pipes/currencyFiatFormat/currency-fiat-format.pipe';
-import { MovementTypePipe } from './pipes/movementType/movement-type.pipe';
+import { MovementTypePipe } from './shared/pipes/movementType/movement-type.pipe'
 import { MovementAddComponent } from './features/movement/movement-add/movement-add.component';
-import { CurrencyFiatInputFormatPipe } from './pipes/currencyFiatInputFormat/currency-fiat-input-format.pipe';
 import { MovementEditComponent } from './features/movement/movement-edit/movement-edit.component';
 import { CommonModule } from '@angular/common';
 import { MovementRefundComponent } from './features/movement/movement-refund/movement-refund.component';
+import { SharedModule } from './shared/shared.module';
 
 
 
@@ -58,10 +57,8 @@ import { MovementRefundComponent } from './features/movement/movement-refund/mov
     MovementClassEditComponent,
     AssetManagementComponent,
     MovementListComponent,
-    CurrencyFiatFormatPipe,
     MovementTypePipe,
     MovementAddComponent,
-    CurrencyFiatInputFormatPipe,
     MovementEditComponent,
     MovementRefundComponent    
   ],
@@ -72,7 +69,9 @@ import { MovementRefundComponent } from './features/movement/movement-refund/mov
     HttpClientModule,
     ReactiveFormsModule,
     NgxPaginationModule,
-    CommonModule
+    CommonModule,
+    SharedModule
+    
   ],
   providers: [ {
     provide: HTTP_INTERCEPTORS,

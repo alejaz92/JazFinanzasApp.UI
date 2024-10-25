@@ -67,7 +67,8 @@
                                    class="form-control" 
                                    id="amount" 
                                    formControlName="amount" 
-                                   (focus)="selectAll($event)">
+                                   (focus)="selectAll($event)"
+                                   appCurrencyInput>
                         </div>
                         <div *ngIf="refundForm.controls['amount']?.errors?.['incorrect'] && refundForm.controls['amount'].touched" class="text-danger mt-2">
                             El monto debe ser un número válido mayor que 0.

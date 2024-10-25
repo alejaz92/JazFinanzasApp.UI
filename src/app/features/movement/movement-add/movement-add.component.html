@@ -129,7 +129,8 @@
                         <span class="input-group-text">$</span>
                     </div>
                     <input type="text" class="form-control" id="amount" 
-                    formControlName="amount">
+                    formControlName="amount"
+                    appCurrencyInput>
                     
                 </div>
                 <div *ngIf="movementForm.controls['amount'].errors?.['incorrect'] && movementForm.controls['amount'].touched" class="text-danger mt-2">
