@@ -17,8 +17,6 @@ export class MovementService {
     return this.http.get<{ movements: Movement[], totalCount: number}>(`${environment.apiBaseURL}/api/movement?page=${page}&itemsPerPage=${itemsPerPage}`);
   }
   createMovement(movement: MovementAdd): Observable<MovementAdd> {
-
-    console.log(movement);
     return this.http.post<MovementAdd>(`${environment.apiBaseURL}/api/movement`, movement);
   }
   deleteMovement(id: number): Observable<void> {

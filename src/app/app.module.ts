@@ -32,6 +32,8 @@ import { MovementEditComponent } from './features/movement/movement-edit/movemen
 import { CommonModule } from '@angular/common';
 import { MovementRefundComponent } from './features/movement/movement-refund/movement-refund.component';
 import { SharedModule } from './shared/shared.module';
+import { CardMovementsListComponent } from './features/cardMovements/cardMovements-list/card-movements-list/card-movements-list.component';
+import { CardMovementsAddComponent } from './features/cardMovements/cardMovements-add/card-movements-add/card-movements-add.component';
 
 
 
@@ -60,7 +62,9 @@ import { SharedModule } from './shared/shared.module';
     MovementTypePipe,
     MovementAddComponent,
     MovementEditComponent,
-    MovementRefundComponent    
+    MovementRefundComponent,
+    CardMovementsListComponent,
+    CardMovementsAddComponent    
   ],
   imports: [
     BrowserModule,

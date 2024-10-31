@@ -75,7 +75,6 @@ export class MovementAddComponent implements OnInit{
 
     onSubmit() {
       const formValues = this.movementForm.value;
-
       
       if(formValues.movementType === '') {
         this.movementForm.controls['movementType'].setErrors({ 'incorrect': true });
@@ -144,14 +143,15 @@ export class MovementAddComponent implements OnInit{
         ? (formValues.incomeClass ? parseInt(formValues.incomeClass, 10) : null)
         : (formValues.expenseClass ? parseInt(formValues.expenseClass, 10) : null),
         detail: formValues.detail,
-        amount: formValues.amount,
+        amount: Number(formValues.amount),
         quotePrice: 0
       }
 
       if (this.movementForm.invalid) {
         return;
       }
-     this.movementService.createMovement(movementAdd).subscribe(() => {
+
+      this.movementService.createMovement(movementAdd).subscribe(() => {
       
        this.movementForm.reset();
        this.successMessage = 'Movimiento creado con éxito';
@@ -162,7 +162,7 @@ export class MovementAddComponent implements OnInit{
       });
     }
 
-    onTipoMovimientoChange(event: any) {
+    onMovementTypeChange(event: any) {
       this.selectedMovementType = event.target.value;
     }  
 }

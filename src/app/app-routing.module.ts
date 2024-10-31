@@ -21,6 +21,8 @@ import { MovementListComponent } from './features/movement/movement-list/movemen
 import { MovementAddComponent } from './features/movement/movement-add/movement-add.component';
 import { MovementEditComponent } from './features/movement/movement-edit/movement-edit.component';
 import { MovementRefundComponent } from './features/movement/movement-refund/movement-refund.component';
+import { CardMovementsListComponent } from './features/cardMovements/cardMovements-list/card-movements-list/card-movements-list.component';
+import { CardMovementsAddComponent } from './features/cardMovements/cardMovements-add/card-movements-add/card-movements-add.component';
 
 
 const routes: Routes = [
@@ -123,6 +125,16 @@ const routes: Routes = [
   {
     path: 'movements/refund/:id',
     component: MovementRefundComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'cardMovements',
+    component: CardMovementsListComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'cardMovements/add',
+    component: CardMovementsAddComponent,
     canActivate: [AuthGuard]
   },
   {

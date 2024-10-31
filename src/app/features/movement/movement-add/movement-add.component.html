@@ -7,9 +7,9 @@
     <form [formGroup]="movementForm" (ngSubmit)="onSubmit()">
         <div class="row mb-3">
             <div class="col">
-                <label for="movementType">Tipo de Movimiento</label>
+                <label class="form-label" for="movementType">Tipo de Movimiento</label>
                 <select id="movementType" class="form-control" formControlName="movementType"
-                (change)="onTipoMovimientoChange($event)">
+                (change)="onMovementTypeChange($event)">
                     <option value="" disabled selected>Seleccione</option>
                     <option value="I">Ingreso</option>
                     <option value="E">Egreso</option>
@@ -22,14 +22,14 @@
         </div>
         <div class="row mb-3">
             <div class="col-md-6">
-                <label for="date">Fecha</label>
+                <label class="form-label"  for="date">Fecha</label>
                 <input type="date" class="form-control" id="date" formControlName="date">
                 <div *ngIf="movementForm.controls['date'].errors?.['incorrect'] " class="text-danger mt-2">
                     Debe seleccionarse una fecha.
                 </div>
             </div>
             <div class="col-md-6">
-                <label for="asset">Moneda</label>
+                <label class="form-label"  for="asset">Moneda</label>
                 <select id="asset" formControlName="asset" class="form-control">
                     <option value="" disabled selected>Seleccione</option>
                     <option *ngFor="let asset of assets" [value]="asset.id">{{ asset.name }}</option>
@@ -44,7 +44,7 @@
         <ng-container *ngIf="selectedMovementType === 'I'">
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <label for="incomeAccount">Cuenta Ingreso</label>
+                    <label class="form-label"  for="incomeAccount">Cuenta Ingreso</label>
                     <select  class="form-control" id="incomeAccount" formControlName="incomeAccount">
                         <option value="" disabled selected>Seleccione</option>
                         <option *ngFor="let account of accounts" [value]="account.id">{{ account.name }}</option>
@@ -55,7 +55,7 @@
                 </div>
             
                 <div class="col-md-6">
-                    <label for="incomeClass">Clase de Movimiento de Ingreso</label>
+                    <label class="form-label"  for="incomeClass">Clase de Movimiento de Ingreso</label>
                     <select  class="form-control" id="incomeClass" formControlName="incomeClass">
                         <option value="" disabled selected>Seleccione</option>
                         <option *ngFor="let class of incomeClasses" [value]="class.id">{{ class.description }}</option>
@@ -69,7 +69,7 @@
         <ng-container *ngIf="selectedMovementType === 'E'">
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <label for="expenseAccount">Cuenta Egreso</label>
+                    <label class="form-label"  for="expenseAccount">Cuenta Egreso</label>
                     <select  class="form-control" id="expenseAccount" formControlName="expenseAccount">
                         <option value="" disabled selected>Seleccione</option>
                         <option *ngFor="let account of accounts" [value]="account.id">{{ account.name }}</option>
@@ -79,7 +79,7 @@
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <label for="expenseClass">Clase de Movimiento de Egreso</label>
+                    <label class="form-label"  for="expenseClass">Clase de Movimiento de Egreso</label>
                     <select  class="form-control" id="expenseClass" formControlName="expenseClass">
                         <option value="" disabled selected>Seleccione</option>
                         <option *ngFor="let class of expenseClasses" [value]="class.id">{{ class.description }}</option>
@@ -93,7 +93,7 @@
         <ng-container *ngIf="selectedMovementType === 'EX'">
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <label for="incomeExchangeAccount">Cuenta Ingreso</label>
+                    <label  class="form-label" for="incomeExchangeAccount">Cuenta Ingreso</label>
                     <select  class="form-control" id="incomeExchangeAccount" formControlName="incomeExchangeAccount">
                         <option value="" disabled selected>Seleccione</option>
                         <option *ngFor="let account of accounts" [value]="account.id">{{ account.name }}</option>
@@ -104,7 +104,7 @@
                 </div> 
                 
                 <div class="col-md-6">
-                    <label for="expenseExchangeAccount">Cuenta Egreso</label>
+                    <label  class="form-label" for="expenseExchangeAccount">Cuenta Egreso</label>
                     <select  class="form-control" id="expenseExchangeAccount" formControlName="expenseExchangeAccount">
                         <option value="" disabled selected>Seleccione</option>
                         <option *ngFor="let account of accounts" [value]="account.id">{{ account.name }}</option>
@@ -117,13 +117,13 @@
         </ng-container>
         <div class="row mb-3">
             <div class="col">
-                <label for="Detail">Detalle</label>
+                <label  class="form-label" for="Detail">Detalle</label>
                 <textarea class="form-control" id="detail" formControlName="detail"></textarea>
             </div>            
         </div>
         <div class="row mb-3">
             <div class="col">
-                <label for="amount">Monto</label>
+                <label  class="form-label" for="amount">Monto</label>
                 <div class="input-group">
                     <div class="input-group-prepend">
                         <span class="input-group-text">$</span>
