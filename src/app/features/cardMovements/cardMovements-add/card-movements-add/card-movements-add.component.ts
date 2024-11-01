@@ -53,7 +53,7 @@ export class CardMovementsAddComponent implements OnInit {
   }
 
   loadAssets() {
-    this.assetService.getAssetsByTypeName("Moneda").subscribe((data: any) => {
+    this.assetService.getCardAssets().subscribe((data: any) => {
       this.assets = data;
     });
   }

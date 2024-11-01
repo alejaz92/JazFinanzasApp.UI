@@ -44,5 +44,9 @@ export class AssetService {
   getAssetsByTypeName(typeName: string): Observable<Asset[]> {
     return this.http.get<Asset[]>(`${environment.apiBaseURL}/api/asset/user-assetsByName/${typeName}`);
   }
+
+  getCardAssets(): Observable<Asset[]> {
+    return this.http.get<Asset[]>(`${environment.apiBaseURL}/api/asset/card`);
+  }
   
 }

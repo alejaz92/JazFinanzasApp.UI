@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { CardMovementPending } from '../models/cardMovements-pending.model';
 import { environment } from 'src/environments/environment.development';
 import { CardMovementsAdd } from '../models/cardMovements-add.model';
+import { CardMovementPaymentList } from '../models/CardMovementePayment-List.model';
 
 @Injectable({
   providedIn: 'root'
@@ -18,5 +19,10 @@ export class CardMovementsService {
 
   addCardMovement(cardMovement: CardMovementsAdd): Observable<CardMovementsAdd> {
     return this.http.post<CardMovementsAdd>(`${environment.apiBaseURL}/api/CardMovement`, cardMovement);
+  }
+
+  getPaymentCardMovements(cardId: Number, paymentMonth: string): Observable<CardMovementPaymentList[]> {
+    return this.http.get<CardMovementPaymentList[]>(`${environment.apiBaseURL}/api/CardMovement/CardPayments?CardId=${cardId}&paymentMonth=${paymentMonth}`);
+    
   }
 }

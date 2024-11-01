@@ -23,6 +23,7 @@ import { MovementEditComponent } from './features/movement/movement-edit/movemen
 import { MovementRefundComponent } from './features/movement/movement-refund/movement-refund.component';
 import { CardMovementsListComponent } from './features/cardMovements/cardMovements-list/card-movements-list/card-movements-list.component';
 import { CardMovementsAddComponent } from './features/cardMovements/cardMovements-add/card-movements-add/card-movements-add.component';
+import { CardMovementsPayComponent } from './features/cardMovements/cardMovements-pay/card-movements-pay/card-movements-pay.component';
 
 
 const routes: Routes = [
@@ -135,6 +136,11 @@ const routes: Routes = [
   {
     path: 'cardMovements/add',
     component: CardMovementsAddComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'cardMovements/pay',
+    component: CardMovementsPayComponent,
     canActivate: [AuthGuard]
   },
   {

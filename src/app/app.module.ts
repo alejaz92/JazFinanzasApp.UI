@@ -34,6 +34,7 @@ import { MovementRefundComponent } from './features/movement/movement-refund/mov
 import { SharedModule } from './shared/shared.module';
 import { CardMovementsListComponent } from './features/cardMovements/cardMovements-list/card-movements-list/card-movements-list.component';
 import { CardMovementsAddComponent } from './features/cardMovements/cardMovements-add/card-movements-add/card-movements-add.component';
+import { CardMovementsPayComponent } from './features/cardMovements/cardMovements-pay/card-movements-pay/card-movements-pay.component';
 
 
 
@@ -64,7 +65,8 @@ import { CardMovementsAddComponent } from './features/cardMovements/cardMovement
     MovementEditComponent,
     MovementRefundComponent,
     CardMovementsListComponent,
-    CardMovementsAddComponent    
+    CardMovementsAddComponent,
+    CardMovementsPayComponent    
   ],
   imports: [
     BrowserModule,
