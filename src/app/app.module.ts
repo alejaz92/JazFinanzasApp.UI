@@ -39,6 +39,7 @@ import { CardMovementsPayComponent } from './features/cardMovements/cardMovement
 
 
 
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -66,7 +67,7 @@ import { CardMovementsPayComponent } from './features/cardMovements/cardMovement
     MovementRefundComponent,
     CardMovementsListComponent,
     CardMovementsAddComponent,
-    CardMovementsPayComponent    
+    CardMovementsPayComponent
   ],
   imports: [
     BrowserModule,

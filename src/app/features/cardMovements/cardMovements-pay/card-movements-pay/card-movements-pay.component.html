@@ -14,7 +14,7 @@
                         <fieldset>
                             <div class="form-group mb-3">
                                 <label for="card" class="form-label"></label>
-                                <select id="card" class="form-control" formControlName="card" (change)="loadMovements()">
+                                <select id="card" class="form-control" formControlName="card">
                                     <option value="" disabled selected>Seleccione</option>
                                     <option *ngFor="let card of cards" [value]="card.id">{{ card.name }}</option>
                                 </select>
@@ -30,8 +30,7 @@
                                     type="month" 
                                     class="form-control" 
                                     id="paymentMonth" 
-                                    formControlName="paymentMonth"
-                                    (change)="loadMovements()">
+                                    formControlName="paymentMonth">
 
                                     <div *ngIf="cardPaymentForm.controls['paymentMonth'].errors?.['incorrect'] " 
                                         class="text-danger mt-2">
@@ -66,7 +65,7 @@
                         <fieldset>
                             <div class="form-group mb-3">
                                 <label for="paymentAssets" class="form-label">Moneda de Pago</label>
-                                <select name="paymentAssets" id="paymentAssets" class="form-control">
+                                <select name="paymentAssets" id="paymentAssets" class="form-control" formControlName="paymentAssets">
                                     <option value="" disabled selected>Seleccione</option>
                                     <option value="Pesos">Pesos</option>
                                     <option value="Pesos+Dolar">Pesos y Dolares</option>
@@ -78,10 +77,10 @@
                                 </div>
                             </div>
                             <div class="form-group mb-3">
-                                <label for="valueInPesos">Pago en Pesos</label>
-                                <input type="text" class="form-control" id="valueInPesos" formControlName="valueInPesos" 
+                                <label for="pesosPayment">Pago en Pesos</label>
+                                <input type="text" class="form-control" id="pesosPayment" formControlName="pesosPayment" 
                                 appCurrencyInput>
-                                <div *ngIf="cardPaymentForm.controls['valueInPesos'].errors?.['incorrect'] " 
+                                <div *ngIf="cardPaymentForm.controls['pesosPayment'].errors?.['incorrect'] " 
                                     class="text-danger mt-2">
                                     Debe ingresar un monto en pesos.
                                 </div>
@@ -96,41 +95,65 @@
                 </div>
             </div>
 
-            <div class="col-md-9 col-sm-12">
+            <div class="col-md-9 col-sm-12-">
                 <div class="card">
                     <div class="card-header">
                         <h5>Gastos Tarjeta</h5>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-striped table-hover">
+                            <table class="table table-bordered table-hover">
                                 <thead>
                                     <tr>
                                         <th>Fecha</th>
                                         <th>Clase Movimiento</th>
                                         <th>Detalle</th>
-                                        <th>Moneda</th>
                                         <th>Cuota</th>
+                                        <th>Moneda</th>
                                         <th>Monto Cuota</th>
                                         <th>Valor en Pesos</th>
                                         <th>Pagar</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr *ngFor="let cardMovement of cardMovements">
-                                        <td>{{ cardMovement.date | date: 'dd/MM/yyyy' }}</td>
-                                        <td>{{ cardMovement.movementClass }}</td>
-                                        <td>{{ cardMovement.detail }}</td>
-                                        <td>{{ cardMovement.asset }}</td>
-                                        <td>{{ cardMovement.installment }}</td>
-                                        <td>{{ cardMovement.installmentAmount | currencyFiatFormat }}</td>
-                                        <td>{{ cardMovement.valueInPesos | currencyFiatFormat}}</td>
+                                    <tr *ngFor="let cardMovement of cardMovementsArray.controls; let i = index" [formGroupName]="i">
+                                       
+                                        <td>{{ cardMovement.value.date | date: 'dd/MM/yyyy' }}</td>
+                                        <td>{{ cardMovement.value.movementClass }}</td>
+                                        <td>{{ cardMovement.value.detail }}</td>
+                                        <td>{{ cardMovement.value.installment }}</td>
+                                        <td>{{ cardMovement.value.asset}}</td>                                     
+                                        <!-- <td>
+                                            <input 
+                                              type="text" 
+                                              class="form-control" 
+                                              formControlName="installmentAmount"
+                                              appCurrencyInput>
+                                        </td>
+                                  
                                         <td>
-                                            <input type="checkbox" value="{{ cardMovement.Pay }}">
-                                        </td>                                        
-                                    </tr>
+
+                                            <input 
+                                                type="text" 
+                                                class="form-control"  
+                                                formControlName="valueInPesos"                                             
+                                                appCurrencyInput>
+                                        </td> -->
+                                        <td>{{cardMovement.value.installmentAmount}}</td>
+                                        <td>{{cardMovement.value.valueInPesos}}</td>
+                                  
+                                        <td>
+                                          <input type="checkbox" 
+                                          formControlName="Pay">
+                                        </td>
+                                      </tr>
                                 </tbody>
                             </table>
+                        </div>
+
+                        <div class="d-flex">
+                            <button type="submit" class="btn btn-primary ms-auto m-1">Pagar</button>
+                            <a class="btn btn-secondary m-1" [routerLink]="['/cardMovements']">Volver</a>
                         </div>
                     </div>
                 </div>
