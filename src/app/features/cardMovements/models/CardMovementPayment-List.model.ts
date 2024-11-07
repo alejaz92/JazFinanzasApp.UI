@@ -8,5 +8,5 @@ export interface CardMovementPaymentList {
     installment: string;
     installmentAmount: number;
     valueInPesos: number;
-    Pay: boolean | true;
+    pay: boolean | true;
   }

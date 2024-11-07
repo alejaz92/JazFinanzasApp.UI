@@ -115,7 +115,7 @@
                                         <th>Pagar</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody formArrayName="cardMovementsArray">
                                     <tr *ngFor="let cardMovement of cardMovementsArray.controls; let i = index" [formGroupName]="i">
                                        
                                         <td>{{ cardMovement.value.date | date: 'dd/MM/yyyy' }}</td>
@@ -123,12 +123,13 @@
                                         <td>{{ cardMovement.value.detail }}</td>
                                         <td>{{ cardMovement.value.installment }}</td>
                                         <td>{{ cardMovement.value.asset}}</td>                                     
-                                        <!-- <td>
+                                        <td>
                                             <input 
                                               type="text" 
                                               class="form-control" 
                                               formControlName="installmentAmount"
-                                              appCurrencyInput>
+                                              appCurrencyInput
+                                            >
                                         </td>
                                   
                                         <td>
@@ -136,15 +137,18 @@
                                             <input 
                                                 type="text" 
                                                 class="form-control"  
-                                                formControlName="valueInPesos"                                             
-                                                appCurrencyInput>
-                                        </td> -->
-                                        <td>{{cardMovement.value.installmentAmount}}</td>
-                                        <td>{{cardMovement.value.valueInPesos}}</td>
+                                                formControlName="valueInPesos"                                          
+                                                appCurrencyInput
+                                            >
+                                        </td>
+                                        <!-- <td>{{cardMovement.value.installmentAmount}}</td>
+                                        <td>{{cardMovement.value.valueInPesos}}</td> -->
                                   
                                         <td>
-                                          <input type="checkbox" 
-                                          formControlName="Pay">
+                                            <input 
+                                                type="checkbox" 
+                                                formControlName="pay"  
+                                            >
                                         </td>
                                       </tr>
                                 </tbody>
