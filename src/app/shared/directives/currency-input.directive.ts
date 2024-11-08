@@ -1,18 +1,34 @@
-import { Directive, ElementRef, HostListener, AfterViewInit } from '@angular/core';
+import { Directive, ElementRef, HostListener, AfterViewInit, OnDestroy } from '@angular/core';
 
 @Directive({
   selector: '[appCurrencyInput]'
 })
-export class CurrencyInputDirective implements AfterViewInit {
+export class CurrencyInputDirective implements AfterViewInit, OnDestroy {
+  private observer: MutationObserver | undefined;
+
   constructor(private el: ElementRef) {}
 
   ngAfterViewInit() {
-    setTimeout(() => this.applyInitialFormat(), 0); // Asegura el formato después de la carga completa
+    this.applyInitialFormat();
+
+    // Observa cambios en el atributo "disabled" para aplicar el formato al habilitar/deshabilitar
+    this.observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'disabled') {
+          this.applyInitialFormat();
+        }
+      });
+    });
+
+    this.observer.observe(this.el.nativeElement, { attributes: true });
+  }
+
+  ngOnDestroy() {
+    this.observer?.disconnect();
   }
 
   @HostListener('focus') onFocus() {
-    const value = this.el.nativeElement.value.replace(/\./g, '').replace(',', '.');
-    this.el.nativeElement.value = value;
+    this.el.nativeElement.value = this.parseValue(this.el.nativeElement.value);
   }
 
   @HostListener('blur') onBlur() {
@@ -34,9 +50,10 @@ export class CurrencyInputDirective implements AfterViewInit {
   }
 
   private applyInitialFormat() {
-    const initialValue = parseFloat(this.el.nativeElement.value.replace(',', '.'));
-    if (!isNaN(initialValue)) {
-      this.el.nativeElement.value = this.formatCurrency(initialValue);
+    const initialValue = this.el.nativeElement.value;
+    const numericValue = parseFloat(this.parseValue(initialValue));
+    if (initialValue && !isNaN(numericValue)) {
+      this.el.nativeElement.value = this.formatCurrency(numericValue);
     }
   }
 
@@ -45,5 +62,15 @@ export class CurrencyInputDirective implements AfterViewInit {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     });
+  }
+
+  private parseValue(value: string): string {
+    // Si el valor ya está en un formato numérico adecuado, no lo convierte nuevamente
+    if (value.includes('.') && value.includes(',')) {
+      return value.replace(/\./g, '').replace(',', '.');
+    } else if (value.includes('.')) {
+      return value.replace(/,/g, '');
+    }
+    return value.replace(',', '.'); // Convierte ',' en '.' para interpretación numérica
   }
 }

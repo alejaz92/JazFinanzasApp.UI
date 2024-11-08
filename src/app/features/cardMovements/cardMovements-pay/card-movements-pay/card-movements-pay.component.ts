@@ -4,6 +4,8 @@ import { AccountService } from 'src/app/features/account/services/account.servic
 import { CardService } from 'src/app/features/card/services/card.service';
 import { CardMovementsService } from '../../services/card-movements.service';
 import { CardMovementPaymentList } from '../../models/CardMovementPayment-List.model';
+import { MovementClassService } from 'src/app/features/movementClass/services/movement-class.service';
+import { AssetService } from 'src/app/features/asset/services/asset.service';
 
 @Component({
   selector: 'app-card-movements-pay',
@@ -14,14 +16,19 @@ export class CardMovementsPayComponent implements OnInit {
   cardPaymentForm!: FormGroup;
   cards: any[] = [];
   accounts: any[] = [];
+  movementClasses: any[] = [];
+  assets: any[] = [];
   cardMovements: CardMovementPaymentList[] = [];
   selectedPaymentAssets: string | null = null;
+  successMessage: string = '';
 
   constructor(
     private fb: FormBuilder,
     private cardService: CardService,
     private accountService: AccountService,
-    private cardMovementService: CardMovementsService,
+    private assetService: AssetService,
+    private movementClassService: MovementClassService,
+    private cardMovementService: CardMovementsService
   ) { }
 
   get cardMovementsArray(): FormArray {
@@ -48,6 +55,8 @@ export class CardMovementsPayComponent implements OnInit {
 
     this.loadCards();
     this.loadAccounts();
+    this.loadAssets();
+    this.loadMovementClasses();
     
 
     this.cardPaymentForm.get('card')?.valueChanges.subscribe(() =>  this.loadTable());
@@ -66,6 +75,19 @@ export class CardMovementsPayComponent implements OnInit {
     });
   }
 
+  loadAssets() {
+    this.assetService.getCardAssets().subscribe((data: any) => {
+      this.assets = data;
+    });
+  }
+
+  loadMovementClasses() {
+    this.movementClassService.getAllMovementClasses().subscribe((data: any) => {
+
+      this.movementClasses = data.filter((movementClass: any) => movementClass.incExp === 'E');
+    });
+  }
+
   loadAccounts() {
     this.accountService.getAccountByTypeName("Moneda").subscribe((data: any) => {
       this.accounts = data;
@@ -76,6 +98,7 @@ export class CardMovementsPayComponent implements OnInit {
     const card = this.cardPaymentForm.get('card')?.value;
     const paymentMonth = this.cardPaymentForm.get('paymentMonth')?.value;
 
+    this.cardMovementsArray.clear();
     
 
     if (card && paymentMonth) {
@@ -111,6 +134,7 @@ export class CardMovementsPayComponent implements OnInit {
         installmentAmount: [{ value: movement.installmentAmount, disabled: true }],
         valueInPesos: [{ value: movement.valueInPesos, disabled: true }],
         pay: true,
+        isManual: false,
         originalInstallmentAmount: [movement.installmentAmount],
         originalValueInPesos: [movement.valueInPesos]
       });    
@@ -150,7 +174,19 @@ export class CardMovementsPayComponent implements OnInit {
         control.get('valueInPesos')?.setValue(originalValueInPesos);
       }
     });
+
+    this.refreshCurrencyFormat();
   }
+
+  // Método para actualizar el formato
+refreshCurrencyFormat() {
+  setTimeout(() => {
+    this.cardMovementsArray.controls.forEach((control) => {
+      control.get('installmentAmount')?.updateValueAndValidity();
+      control.get('valueInPesos')?.updateValueAndValidity();
+    });
+  }, 0);
+}
 
   updateCardExpenses() {
     const pesosPayment = this.cardPaymentForm.get('pesosPayment')?.value;
@@ -165,10 +201,10 @@ export class CardMovementsPayComponent implements OnInit {
       cardMovementsArray.controls.forEach((control) => {
         if (control.get('pay')?.value) {
           if (paymentAssets === 'Pesos') {
-            total += control.get('valueInPesos')?.value;
+            total += parseFloat(control.get('valueInPesos')?.value);
           } else if (paymentAssets === 'Pesos+Dolar') {
             if(control.get('asset')?.value === 'Peso Argentino'){
-              total += control.get('installmentAmount')?.value;
+              total += parseFloat(control.get('installmentAmount')?.value);
             }
           }
         }
@@ -179,13 +215,195 @@ export class CardMovementsPayComponent implements OnInit {
         return;
       }
 
-      this.cardPaymentForm.get('cardExpenses')?.setValue(pesosPayment - total);
+      var cardExpenses = pesosPayment - total;
+      
+      cardExpenses = Math.round(cardExpenses * 100) / 100;
+
+      this.cardPaymentForm.get('cardExpenses')?.setValue(cardExpenses);
       
     }   
   }
 
+  addManualEntry() {
+    // Chequear si la tabla tiene valores previamente
+    if (this.cardMovementsArray.length === 0) {
+      alert("La tabla está vacía. Debes tener al menos una fila existente antes de agregar una manual.");
+      return;
+    }
+
+// Chequear si la última fila tiene todos los valores completos (excepto los inputs deshabilitados)
+// const lastRow = this.cardMovementsArray.at(this.cardMovementsArray.length - 1);
+// if (this.isRowIncomplete(lastRow)) {
+//   alert("La última fila no está completa. Por favor, completa todos los campos antes de agregar una nueva fila.");
+//   return;
+// }
+
+
+    const manualEntry = this.fb.group({
+      date: [''],
+      movementClassId: [''],
+      movementClass: [''],
+      detail: [''],
+      assetId: [''],
+      asset: [''],
+      installment: ['1/1'],        
+      installmentAmount: [''],
+      valueInPesos: [''],
+      pay: true,
+      isManual: true
+
+    })
+
+    this.cardMovementsArray.push(manualEntry);
+
+    this.updateEditOptions();
+  }
+
+  isRowIncomplete(row: FormGroup): boolean {
+    // Verificar si la fila tiene todos los campos requeridos, sin tener en cuenta las filas con input deshabilitados
+
+    
+
+    var result = !row.get('date')?.value || !row.get('movementClassId')?.value || !row.get('detail')?.value || !row.get('assetId')?.value;
+    
+    if(result) {
+      return result;
+    }
+
+    if (this.selectedPaymentAssets === 'Pesos') {
+      result = !row.get('valueInPesos')?.value;
+    } else if (this.selectedPaymentAssets === 'Pesos+Dolar') {
+      result = !row.get('installmentAmount')?.value;
+    }
+    
+    return result;
+  
+  }
+
+
+  getTotalValues() {
+    let totalPesos = 0;
+    let totalDollars = 0;
+
+    this.cardMovementsArray.controls.forEach((control) => {
+      if (control.get('pay')?.value) {
+        if (this.selectedPaymentAssets === 'Pesos') {
+          totalPesos += parseFloat(control.get('valueInPesos')?.value);
+        } else if (this.selectedPaymentAssets === 'Pesos+Dolar') {
+          if (control.get('asset')?.value === 'Peso Argentino') {
+            totalPesos += parseFloat(control.get('installmentAmount')?.value);
+          }
+          else {
+            totalDollars += parseFloat(control.get('installmentAmount')?.value);
+          }          
+        }
+
+      }
+    });
+
+    return {
+      totalPesos,
+      totalDollars
+    };
+  }
+
   onSubmit() {
-    // Implementar lógica de envío
-    console.log(this.cardPaymentForm.value);
+
+    // if (this.cardPaymentForm.invalid) {
+    //   alert('Datos incorrectos');
+    //   return;
+    // }
+
+    const formValues = this.cardPaymentForm.value;
+
+    if (formValues.card === '') {
+      this.cardPaymentForm.controls['card'].setErrors({ 'incorrect': true });
+      return;
+    }
+
+    if (formValues.paymentMonth === '') {
+      this.cardPaymentForm.controls['paymentMonth'].setErrors({ 'incorrect': true });
+      return;
+    }
+
+    if (formValues.date === '') {
+      this.cardPaymentForm.controls['date'].setErrors({ 'incorrect': true });
+      return;
+    }
+
+    if (formValues.account === '') {
+      this.cardPaymentForm.controls['account'].setErrors({ 'incorrect': true });
+      return;
+    }
+
+    if (formValues.paymentAssets === '') {
+      this.cardPaymentForm.controls['paymentAssets'].setErrors({ 'incorrect': true });
+      return;
+    }
+
+    if (formValues.pesosPayment === '' || isNaN(formValues.pesosPayment) || formValues.pesosPayment <= 0) {
+      this.cardPaymentForm.controls['pesosPayment'].setErrors({ 'incorrect': true });
+      return;
+    }
+
+    if (formValues.cardExpenses === '' || isNaN(formValues.cardExpenses) || formValues.cardExpenses < 0) {
+      this.cardPaymentForm.controls['cardExpenses'].setErrors({ 'incorrect': true });
+      return;
+    }
+
+
+    // check if there are any rows with missing values, except for the disabled inputs
+    const incompleteRow = this.cardMovementsArray.controls.find((control) => this.isRowIncomplete(control as FormGroup));
+    if (incompleteRow) {
+      alert("Hay filas incompletas. Por favor, completa todos los campos antes de continuar.");
+      return;
+    }
+    
+
+
+
+    const cardMovements = this.cardMovementsArray.controls
+      .filter(control => control.get('pay')?.value)
+      .map(control => ({
+        date: control.get('date')?.value,
+        movementClassId: parseInt(control.get('movementClassId')?.value),
+        detail: control.get('detail')?.value,
+        assetId: parseInt(control.get('assetId')?.value),
+        installment: control.get('installment')?.value,
+        installmentAmount: parseFloat(control.get('installmentAmount')?.value) | 0,
+        valueInPesos: parseFloat(control.get('valueInPesos')?.value) | 0
+      }));
+
+      const cardPaymentRequest = {
+        cardId: parseInt(this.cardPaymentForm.get('card')?.value),
+        paymentMonth: this.cardPaymentForm.get('paymentMonth')?.value + '-01',
+        paymentDate: this.cardPaymentForm.get('date')?.value,
+        accountId: parseInt(this.cardPaymentForm.get('account')?.value),
+        paymentAsset: this.cardPaymentForm.get('paymentAssets')?.value,
+        pesosAmount: parseFloat(this.cardPaymentForm.get('pesosPayment')?.value),
+        dolarAmount: 0,
+        cardExpenses: parseFloat(this.cardPaymentForm.get('cardExpenses')?.value),
+        cardMovements: cardMovements        
+      }
+
+      if (cardPaymentRequest.paymentAsset === 'Pesos+Dolar') {
+        cardPaymentRequest.paymentAsset = 'P+D';
+      } else if (cardPaymentRequest.paymentAsset === 'Pesos') {
+        cardPaymentRequest.paymentAsset = 'P';
+      }
+
+
+      //console.log(cardPaymentRequest);
+      this.cardMovementService.createCardPayment(cardPaymentRequest).subscribe(() => {
+        
+        this.cardPaymentForm.reset();
+        this.cardMovementsArray.clear();
+
+        this.successMessage = 'Movimiento creado con éxito';
+        setTimeout(() => {
+          this.successMessage = '';
+        }, 3000);
+      });
+
   }
 }

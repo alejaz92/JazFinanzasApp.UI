@@ -1,6 +1,10 @@
 <div class="container-fluid">
     <h1 class="mt-3">Pago Tarjeta</h1>
 
+
+    <div *ngIf="successMessage" class="alert alert-success" role="alert">
+        {{ successMessage }}
+    </div>
     <form [formGroup]="cardPaymentForm" (ngSubmit)="onSubmit()">
 
         <div class="row">
@@ -13,7 +17,7 @@
                     <div class="card-body">
                         <fieldset>
                             <div class="form-group mb-3">
-                                <label for="card" class="form-label"></label>
+                                <label for="card" class="form-label">Tarjeta</label>
                                 <select id="card" class="form-control" formControlName="card">
                                     <option value="" disabled selected>Seleccione</option>
                                     <option *ngFor="let card of cards" [value]="card.id">{{ card.name }}</option>
@@ -77,7 +81,7 @@
                                 </div>
                             </div>
                             <div class="form-group mb-3">
-                                <label for="pesosPayment">Pago en Pesos</label>
+                                <label for="pesosPayment">Su pago en Pesos</label>
                                 <input type="text" class="form-control" id="pesosPayment" formControlName="pesosPayment" 
                                 appCurrencyInput>
                                 <div *ngIf="cardPaymentForm.controls['pesosPayment'].errors?.['incorrect'] " 
@@ -88,6 +92,10 @@
                             <div class="form-group mb-3">
                                 <label for="cardExpenses">Gastos Tarjeta</label>
                                 <input type="text" class="form-control" id="cardExpenses" formControlName="cardExpenses" readonly appCurrencyInput>
+                                <div *ngIf="cardPaymentForm.controls['cardExpenses'].errors?.['incorrect'] " 
+                                    class="text-danger mt-2">
+                                    Revise los valores ingresados.
+                                </div>
                             </div>
 
                         </fieldset>
@@ -95,14 +103,14 @@
                 </div>
             </div>
 
-            <div class="col-md-9 col-sm-12-">
+            <div class="col-md-9 col-sm-12-" *ngIf="cardMovementsArray.length > 0">
                 <div class="card">
                     <div class="card-header">
                         <h5>Gastos Tarjeta</h5>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-bordered table-hover">
+                            <table class="table table-bordered table-hover text-center">
                                 <thead>
                                     <tr>
                                         <th>Fecha</th>
@@ -116,18 +124,47 @@
                                     </tr>
                                 </thead>
                                 <tbody formArrayName="cardMovementsArray">
-                                    <tr *ngFor="let cardMovement of cardMovementsArray.controls; let i = index" [formGroupName]="i">
+                                    <tr 
+                                        class="align-middle" 
+                                        *ngFor="let cardMovement of cardMovementsArray.controls; let i = index" 
+                                        [formGroupName]="i"
+                                        
+                                    >
                                        
-                                        <td>{{ cardMovement.value.date | date: 'dd/MM/yyyy' }}</td>
-                                        <td>{{ cardMovement.value.movementClass }}</td>
-                                        <td>{{ cardMovement.value.detail }}</td>
-                                        <td>{{ cardMovement.value.installment }}</td>
-                                        <td>{{ cardMovement.value.asset}}</td>                                     
+                                        <td *ngIf="!cardMovement.get('isManual')?.value">{{ cardMovement.value.date | date: 'dd/MM/yyyy' }}</td>
+                                        <td *ngIf="cardMovement.get('isManual')?.value">
+                                            <input type="date" class="form-control small-font-input" formControlName="date">
+                                        </td>
+                                        
+
+                                        <td *ngIf="!cardMovement.get('isManual')?.value">{{ cardMovement.value.movementClass }}</td>
+                                        <td *ngIf="cardMovement.get('isManual')?.value">
+                                            <select class="form-control small-font-input" formControlName="movementClassId">
+                                                <option *ngFor="let option of movementClasses" [value]="option.id">{{ option.description }}</option>
+                                            </select>
+                                        </td>
+
+
+
+                                        <td *ngIf="!cardMovement.get('isManual')?.value">{{ cardMovement.value.detail }}</td>
+                                        <td *ngIf="cardMovement.get('isManual')?.value">
+                                            <input type="text" class="form-control small-font-input" formControlName="detail">
+                                        </td>
+
+                                        <td >{{ cardMovement.value.installment }}</td>
+
+                                        <td *ngIf="!cardMovement.get('isManual')?.value">{{ cardMovement.value.asset}}</td> 
+                                        <td *ngIf="cardMovement.get('isManual')?.value">
+                                            <select class="form-control small-font-input" formControlName="assetId">
+                                              <option *ngFor="let asset of assets" [value]="asset.id">{{ asset.name }}</option>
+                                            </select>
+                                        </td>
+                                        
                                         <td>
                                             <input 
                                               type="text" 
-                                              class="form-control" 
-                                              formControlName="installmentAmount"
+                                              class="form-control small-font-input" 
+                                              formControlName="installmentAmount"                                              
                                               appCurrencyInput
                                             >
                                         </td>
@@ -136,7 +173,7 @@
 
                                             <input 
                                                 type="text" 
-                                                class="form-control"  
+                                                class="form-control small-font-input"  
                                                 formControlName="valueInPesos"                                          
                                                 appCurrencyInput
                                             >
@@ -152,10 +189,25 @@
                                         </td>
                                       </tr>
                                 </tbody>
+                                <tfoot *ngIf="selectedPaymentAssets != null">
+                                    <tr>
+                                        <td colspan="6" class="text-right">
+                                            <strong>Total en Pesos</strong>
+                                        </td>
+                                        <td>{{ getTotalValues().totalPesos | currencyFiatFormat}}</td>
+                                    </tr>
+                                    <tr *ngIf="selectedPaymentAssets === 'Pesos+Dolar'">
+                                        <td colspan="6" class="text-right">
+                                            <strong>Total en Dolares</strong>
+                                        </td>
+                                        <td>{{ getTotalValues().totalDollars | currencyFiatFormat}}</td>
+                                    </tr>
+                                </tfoot>
                             </table>
                         </div>
 
-                        <div class="d-flex">
+                        <div class="d-flex mt-3">
+                            <button type="button" class="btn btn-success me-auto m-1" (click)="addManualEntry()">Agregar +</button>
                             <button type="submit" class="btn btn-primary ms-auto m-1">Pagar</button>
                             <a class="btn btn-secondary m-1" [routerLink]="['/cardMovements']">Volver</a>
                         </div>

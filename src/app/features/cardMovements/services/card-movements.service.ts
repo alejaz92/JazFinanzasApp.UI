@@ -27,6 +27,10 @@ export class CardMovementsService {
     
   }
 
+  createCardPayment(cardMovement: any): Observable<any> {
+    return this.http.post<any>(`${environment.apiBaseURL}/api/CardMovement/CardPayments`, cardMovement);
+  }
+
   // getPaymentCardMovements(cardId: Number, paymentMonth: string): Observable<CardMovementPaymentList[]> {
   //   return this.http.get<CardMovementPaymentList[]>(`${environment.apiBaseURL}/api/CardMovement/CardPayments?CardId=${cardId}&paymentMonth=${paymentMonth}`)
   //     .pipe(
