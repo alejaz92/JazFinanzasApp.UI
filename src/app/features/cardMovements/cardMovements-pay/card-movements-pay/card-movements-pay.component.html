@@ -207,9 +207,16 @@
                         </div>
 
                         <div class="d-flex mt-3">
-                            <button type="button" class="btn btn-success me-auto m-1" (click)="addManualEntry()">Agregar +</button>
-                            <button type="submit" class="btn btn-primary ms-auto m-1">Pagar</button>
-                            <a class="btn btn-secondary m-1" [routerLink]="['/cardMovements']">Volver</a>
+                            <div class="me-auto">
+                                <button type="button" class="btn btn-success  m-1" (click)="addManualEntry()">Agregar +</button>
+                                <button type="button" class="btn btn-danger m-1" (click)="removeManualEntry()" *ngIf="tableLength > originalTableLength">Eliminar -</button>
+                            </div>                            
+
+                            <div class="ms-auto">
+                                <button type="submit" class="btn btn-primary m-1">Pagar</button>
+                                <a class="btn btn-secondary m-1" [routerLink]="['/cardMovements']">Volver</a>
+                            </div>
+                            
                         </div>
                     </div>
                 </div>

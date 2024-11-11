@@ -39,7 +39,12 @@
                     <td class="align-middle text-end">{{cardMovement.installmentAmount | currencyFiatFormat}}</td>
                     <td class="align-middle">
                         <div class="justify-content-around">
-                            <button *ngIf="cardMovement.installments == 'Recurrente'" class="btn btn-sm btn-primary m-1" title="Editar Recurrente" ><i class="bi-pencil-fill"></i></button>
+                            <button 
+                                *ngIf="cardMovement.installments == 'Recurrente'" 
+                                class="btn btn-sm btn-primary m-1" 
+                                title="Editar Recurrente" 
+                                [routerLink]="['/cardMovements/editRecurrent', cardMovement.id]"
+                            ><i class="bi-pencil-fill"></i></button>
                         </div>
                     </td>
                 </tr>

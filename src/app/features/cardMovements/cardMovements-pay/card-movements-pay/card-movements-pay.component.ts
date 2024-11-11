@@ -6,6 +6,7 @@ import { CardMovementsService } from '../../services/card-movements.service';
 import { CardMovementPaymentList } from '../../models/CardMovementPayment-List.model';
 import { MovementClassService } from 'src/app/features/movementClass/services/movement-class.service';
 import { AssetService } from 'src/app/features/asset/services/asset.service';
+import { TmplAstVariable } from '@angular/compiler';
 
 @Component({
   selector: 'app-card-movements-pay',
@@ -21,6 +22,8 @@ export class CardMovementsPayComponent implements OnInit {
   cardMovements: CardMovementPaymentList[] = [];
   selectedPaymentAssets: string | null = null;
   successMessage: string = '';
+  tableLength: number = 0;
+  originalTableLength: number = 0;
 
   constructor(
     private fb: FormBuilder,
@@ -104,7 +107,12 @@ export class CardMovementsPayComponent implements OnInit {
     if (card && paymentMonth) {
       this.cardMovementService.getPaymentCardMovements(card, paymentMonth).subscribe((data: CardMovementPaymentList[]) => {
         
+
+
         this.cardMovements = data;
+
+        this.originalTableLength = this.tableLength = this.cardMovements.length;
+
         this.populateCardMovementsArray(this.cardMovements);
 
         if (this.selectedPaymentAssets) {
@@ -141,6 +149,7 @@ export class CardMovementsPayComponent implements OnInit {
 
 
       cardMovementsArray.push(movementGroup);
+
 
 
     });
@@ -231,13 +240,6 @@ refreshCurrencyFormat() {
       return;
     }
 
-// Chequear si la última fila tiene todos los valores completos (excepto los inputs deshabilitados)
-// const lastRow = this.cardMovementsArray.at(this.cardMovementsArray.length - 1);
-// if (this.isRowIncomplete(lastRow)) {
-//   alert("La última fila no está completa. Por favor, completa todos los campos antes de agregar una nueva fila.");
-//   return;
-// }
-
 
     const manualEntry = this.fb.group({
       date: [''],
@@ -255,9 +257,29 @@ refreshCurrencyFormat() {
     })
 
     this.cardMovementsArray.push(manualEntry);
+    this.tableLength = this.cardMovementsArray.length;
 
     this.updateEditOptions();
   }
+
+  //remove last manual entry
+  removeManualEntry() {
+
+
+    if (this.tableLength === this.originalTableLength) {
+      alert("No hay filas manuales para eliminar.");
+      return;
+    }
+
+    const lastManualEntry = this.cardMovementsArray.controls[this.cardMovementsArray.length - 1];
+    if (lastManualEntry.get('isManual')?.value) {
+      this.cardMovementsArray.removeAt(this.cardMovementsArray.length - 1);
+      this.tableLength = this.cardMovementsArray.length;
+    } else {
+      alert("La última fila no es una fila manual.");
+    }
+  }
+ 
 
   isRowIncomplete(row: FormGroup): boolean {
     // Verificar si la fila tiene todos los campos requeridos, sin tener en cuenta las filas con input deshabilitados

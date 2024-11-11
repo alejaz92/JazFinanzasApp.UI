@@ -33,7 +33,7 @@
                     <td>
                         <div class="justify-content-around">
                             <button class="btn btn-sm btn-primary m-1" title="Editar" [routerLink]="['/movements', movement.id]" ><i class="bi-pencil-fill"></i></button>
-                            <button class="btn btn-sm btn-danger m-1" title="Eliminar" (click)="onDeleteMovement(this.movement)"><i class="bi-trash-fill"></i></button>
+                            <button class="btn btn-sm btn-danger m-1" title="Eliminar" (click)="onDeleteMovement(movement)"><i class="bi-trash-fill"></i></button>
                             <button *ngIf="movement.movementType === 'E'" 
                                 class="btn btn-sm btn-warning m-1" 
                                 title="Reintegro" 

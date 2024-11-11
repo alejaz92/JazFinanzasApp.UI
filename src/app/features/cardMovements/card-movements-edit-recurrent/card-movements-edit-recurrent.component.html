@@ -1,0 +1,64 @@
+<div class="container-fluid">
+    <h1 class="mt-3">
+        Editar Movimiento Recurrente
+    </h1>
+
+    <div class="alert alert-success" role="alert" *ngIf="successMessage != ''">
+        {{ successMessage }}
+    </div>
+
+    <form [formGroup]="editRecurrentForm" (ngSubmit)="onSubmit()">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="date" class="form-label">Fecha</label>
+                    <input type="string" class="form-control" id="date" 
+                        formControlName="date"
+                        readonly
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="card" class="form-label">Tarjeta</label>
+                    <input type="string" class="form-control" id="card" formControlName="card" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="detail" class="form-label">Detalle</label>
+                    <input type="string" class="form-control" id="detail" formControlName="description" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="currentAmount" class="form-label">Monto Actual</label>
+                    <input type="string" class="form-control" id="currentAmount" formControlName="currentAmount" readonly appCurrencyInput>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="action" class="form-label">Acción</label>
+                    <select class="form-control" id="action" formControlName="action" placeholder="action">
+                        <option value="Edit">Editar</option>
+                        <option value="Close">Cerrar</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="newDate" class="form-label">Fecha</label>
+                    <input type="date" class="form-control" id="newDate" formControlName="newDate" placeholder="newDate">
+                    <!-- <div *ngIf="editRecurrentForm.get('newDate').invalid && editRecurrentForm.get('newDate').touched" class="alert alert-danger">
+                        La fecha es requerida
+                    </div> -->
+                </div>
+
+                <div 
+                    class="form-group"
+                    *ngIf="action === 'Edit'"
+                >
+                    <label for="newAmount" class="form-label">Nuevo Monto</label>
+                    <input type="string" class="form-control" id="newAmount" formControlName="newAmount" appCurrencyInput>
+                    <!-- <div *ngIf="editRecurrentForm.get('newAmount').invalid && editRecurrentForm.get('newAmount').touched" class="alert alert-danger">
+                        El monto es requerido
+                    </div> -->
+                </div>
+
+            </div>
+        </div>
+    </form>
+</div>

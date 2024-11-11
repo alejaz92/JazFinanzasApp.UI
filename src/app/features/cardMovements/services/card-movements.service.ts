@@ -5,6 +5,7 @@ import { CardMovementPending } from '../models/cardMovements-pending.model';
 import { environment } from 'src/environments/environment.development';
 import { CardMovementsAdd } from '../models/cardMovements-add.model';
 import { CardMovementPaymentList } from '../models/CardMovementPayment-List.model';
+import { RecurrentCardMovementGet, RecurrentCardMovementPut } from '../models/CardMovement-recurrent.model';
 
 
 @Injectable({
@@ -31,10 +32,12 @@ export class CardMovementsService {
     return this.http.post<any>(`${environment.apiBaseURL}/api/CardMovement/CardPayments`, cardMovement);
   }
 
-  // getPaymentCardMovements(cardId: Number, paymentMonth: string): Observable<CardMovementPaymentList[]> {
-  //   return this.http.get<CardMovementPaymentList[]>(`${environment.apiBaseURL}/api/CardMovement/CardPayments?CardId=${cardId}&paymentMonth=${paymentMonth}`)
-  //     .pipe(
-  //       map(data => data.map(item => ({ ...item, Pay: true })))
-  //     );
-  // }
+  getRecurrentCardMovements(id: number): Observable<RecurrentCardMovementGet> {
+    return this.http.get<RecurrentCardMovementGet>(`${environment.apiBaseURL}/api/CardMovement/editRecurrent/${id}`);
+  }
+
+  editRecurrentCardMovement(id: number, cardMovement: RecurrentCardMovementPut): Observable<RecurrentCardMovementPut> {
+    return this.http.put<RecurrentCardMovementPut>(`${environment.apiBaseURL}/api/CardMovement/editRecurrent/${id}`, cardMovement);
+  }
+
 }
