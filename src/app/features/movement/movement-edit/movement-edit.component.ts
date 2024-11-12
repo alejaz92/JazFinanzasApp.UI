@@ -40,13 +40,10 @@ export class MovementEditComponent  implements OnInit, OnDestroy{
               } else if (this.movement) {
                 this.movement.movementType = 'Egreso';
               }
-
-
-              this.movement.amount = Math.abs(this.movement.amount);
               
+              this.movement.amount = Math.abs(this.movement.amount);              
             }
           });
-
         } 
       }
     });

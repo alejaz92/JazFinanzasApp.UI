@@ -11,51 +11,80 @@
         <div class="row">
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="date" class="form-label">Fecha</label>
+                    <label for="date" class="form-label mt-3">Fecha</label>
                     <input type="string" class="form-control" id="date" 
                         formControlName="date"
                         readonly
                     >
                 </div>
+
                 <div class="form-group">
-                    <label for="card" class="form-label">Tarjeta</label>
+                    <label for="firstInstallment" class="form-label mt-3">Mes Primer Cuota</label>
+                    <input type="string" class="form-control" id="firstInstallment" 
+                        formControlName="firstInstallment"
+                        readonly
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="card" class="form-label mt-3">Tarjeta</label>
                     <input type="string" class="form-control" id="card" formControlName="card" readonly>
                 </div>
                 <div class="form-group">
-                    <label for="detail" class="form-label">Detalle</label>
+                    <label for="detail" class="form-label mt-3">Detalle</label>
                     <input type="string" class="form-control" id="detail" formControlName="description" readonly>
                 </div>
                 <div class="form-group">
-                    <label for="currentAmount" class="form-label">Monto Actual</label>
-                    <input type="string" class="form-control" id="currentAmount" formControlName="currentAmount" readonly appCurrencyInput>
+                    <label for="currentAmount" class="form-label mt-3">Monto Actual</label>
+                    <input type="string" class="form-control" id="currentAmount" formControlName="currentAmount" 
+                        readonly appCurrencyInput
+                    >
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="action" class="form-label">Acción</label>
+                    <label for="action" class="form-label mt-3">Acción</label>
                     <select class="form-control" id="action" formControlName="action" placeholder="action">
                         <option value="Edit">Editar</option>
                         <option value="Close">Cerrar</option>
                     </select>
+
                 </div>
 
                 <div class="form-group">
-                    <label for="newDate" class="form-label">Fecha</label>
+                    <label for="newDate" class="form-label mt-3">Fecha</label>
                     <input type="date" class="form-control" id="newDate" formControlName="newDate" placeholder="newDate">
-                    <!-- <div *ngIf="editRecurrentForm.get('newDate').invalid && editRecurrentForm.get('newDate').touched" class="alert alert-danger">
-                        La fecha es requerida
-                    </div> -->
+                    <div *ngIf="editRecurrentForm.controls['newDate']?.errors?.['incorrect']" class="text-danger mt-2">
+                        La fecha es requerida y tiene que ser un mes posterior a la primer cuota.
+                    </div>
                 </div>
 
                 <div 
                     class="form-group"
                     *ngIf="action === 'Edit'"
                 >
-                    <label for="newAmount" class="form-label">Nuevo Monto</label>
-                    <input type="string" class="form-control" id="newAmount" formControlName="newAmount" appCurrencyInput>
-                    <!-- <div *ngIf="editRecurrentForm.get('newAmount').invalid && editRecurrentForm.get('newAmount').touched" class="alert alert-danger">
-                        El monto es requerido
-                    </div> -->
+                    <label for="newAmount" class="form-label mt-3">Nuevo Monto</label>
+
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">$</span>
+                        </div>
+                        <input 
+                            type="string" 
+                            class="form-control" 
+                            id="newAmount" 
+                            formControlName="newAmount" 
+                            appCurrencyInput
+                        >
+                    </div>
+                    
+                    <div *ngIf="editRecurrentForm.controls['newAmount']?.errors?.['incorrect']" class="text-danger mt-2">
+                        El monto debe ser un número válido mayor que 0.
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary mt-3 m-1">Guardar</button>
+                    <a class="btn btn-secondary mt-3 m-1" [routerLink]="['/cardMovements']">Volver</a>
                 </div>
 
             </div>

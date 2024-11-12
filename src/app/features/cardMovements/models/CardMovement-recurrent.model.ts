@@ -1,6 +1,7 @@
 export interface RecurrentCardMovementGet {
     id: number;
     date: Date;
+    firstInstallment: Date;
     card: string;
     description: string;
     amount: number;
@@ -8,6 +9,6 @@ export interface RecurrentCardMovementGet {
 
 export interface RecurrentCardMovementPut {
     isUpdate: boolean;
-    date: Date;
+    newDate: Date;
     newAmount?: number;
 }
