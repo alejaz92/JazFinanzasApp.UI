@@ -11,6 +11,8 @@ export class MovementTypePipe implements PipeTransform {
                 return 'Ingreso';
             case 'E':
                 return 'Egreso';
+            case 'EX':
+                return 'Intercambio';
             default:
                 return 'Unknown'; // O manejarlo de otra manera
         }

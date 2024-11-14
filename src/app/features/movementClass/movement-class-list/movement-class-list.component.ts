@@ -9,7 +9,8 @@ import { MovementClassService} from '../services/movement-class.service';
 export class MovementClassListComponent implements OnInit {
   incomeClasses: any[] | null = null;
   expenseClasses: any[] | null = null;
-  restrictedClasses = ['Ajuste Saldos Ingreso', 'Ajuste Saldos Egreso', 'Gastos Tarjeta'];
+  restrictedClasses = ['Ajuste Saldos Ingreso', 'Ajuste Saldos Egreso', 'Gastos Tarjeta',
+    'Ingreso Inversiones','Inversiones'];
 
 
   constructor(private movementClassService: MovementClassService) { }

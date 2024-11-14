@@ -25,6 +25,8 @@ import { CardMovementsListComponent } from './features/cardMovements/cardMovemen
 import { CardMovementsAddComponent } from './features/cardMovements/cardMovements-add/card-movements-add/card-movements-add.component';
 import { CardMovementsPayComponent } from './features/cardMovements/cardMovements-pay/card-movements-pay/card-movements-pay.component';
 import { CardMovementsEditRecurrentComponent } from './features/cardMovements/card-movements-edit-recurrent/card-movements-edit-recurrent.component';
+import { CryptoMovementListComponent } from './features/cryptoMovement/crypto-movement-list/crypto-movement-list.component';
+import { CryptoMovementAddComponent } from './features/cryptoMovement/crypto-movement-add/crypto-movement-add.component';
 
 
 const routes: Routes = [
@@ -147,6 +149,16 @@ const routes: Routes = [
   {
     path: 'cardMovements/editRecurrent/:id',
     component: CardMovementsEditRecurrentComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'cryptoMovements',
+    component: CryptoMovementListComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'cryptoMovements/add',
+    component: CryptoMovementAddComponent,
     canActivate: [AuthGuard]
   },
   {
