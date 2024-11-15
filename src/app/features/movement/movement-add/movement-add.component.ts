@@ -28,8 +28,7 @@ export class MovementAddComponent implements OnInit{
     private movementService: MovementService, 
     private accountService: AccountService,
     private assetService: AssetService,
-    private movementClasses: MovementClassService,
-    private http: HttpClient) { }
+    private movementClasses: MovementClassService) { }
 
     ngOnInit(): void {
       this.movementForm = this.fb.group({

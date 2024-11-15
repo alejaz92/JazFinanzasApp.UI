@@ -1,13 +1,14 @@
 export interface CryptoMovementAdd {
+    environment: string;
     date:  Date;
     movementType: string;
     commerceType: string;
-    expenseAsset?: string;
-    expenseAccount?: string;
-    expenseAmount?: number;
-    expenseQuote?: number;
-    incomeAsset?: string;
-    incomeAccount?: string;
-    incomeAmount?: number;
-    incomeQuote?: number;
+    expenseAssetId?: string;
+    expenseAccountId?: string;
+    expenseQuantity?: number;
+    expenseQuotePrice?: number;
+    incomeAssetId?: string;
+    incomeAccountId?: string;
+    incomeQuantity?: number;
+    incomeQuotePrice?: number;
 }
