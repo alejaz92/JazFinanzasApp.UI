@@ -222,7 +222,7 @@ export class CryptoMovementAddComponent implements OnInit {
     if (this.cryptoMovementForm.invalid) {
       return;
     }
-
+    
     const movementAdd = {
       movementType: formValues.movementType,
       commerceType: formValues.commerceType,

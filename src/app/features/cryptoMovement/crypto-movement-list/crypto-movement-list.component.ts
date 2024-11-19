@@ -34,5 +34,12 @@ export class CryptoMovementListComponent implements OnInit{
   }
 
   onDeleteMovement(cryptoMovement: CryptoMovement) {
+    if (!confirm(`¿Estás seguro de eliminar el movimiento?`)) {
+      return
+    }
+    this.cryptoMovementService.deleteCryptoMovement(cryptoMovement.id)
+      .subscribe(() => {
+        this.loadCryptoMovements();
+      });
   }
 }

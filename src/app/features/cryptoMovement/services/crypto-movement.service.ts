@@ -20,4 +20,8 @@ export class CryptoMovementService {
     return this.http.post<CryptoMovementAdd>(`${environment.apiBaseURL}/api/CryptoMovement`, movement);
   }
 
+  deleteCryptoMovement(id: number): Observable<void> {
+    return this.http.delete<void>(`${environment.apiBaseURL}/api/CryptoMovement/${id}`);
+  }
+
 }
