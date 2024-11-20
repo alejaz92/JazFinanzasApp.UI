@@ -12,6 +12,8 @@ export class AssetService {
 
   constructor(private http: HttpClient) { }
 
+
+  // ver de  mover a un servicio de assetType
   getAssetTypes() : Observable<any[]> {
     return this.http.get<any[]>(`${environment.apiBaseURL}/api/asset/type`);
   }

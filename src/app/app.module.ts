@@ -38,6 +38,8 @@ import { CardMovementsPayComponent } from './features/cardMovements/cardMovement
 import { CardMovementsEditRecurrentComponent } from './features/cardMovements/card-movements-edit-recurrent/card-movements-edit-recurrent.component';
 import { CryptoMovementListComponent } from './features/cryptoMovement/crypto-movement-list/crypto-movement-list.component';
 import { CryptoMovementAddComponent } from './features/cryptoMovement/crypto-movement-add/crypto-movement-add.component';
+import { StockTransactionListComponent } from './features/stockTransactions/stock-transaction-list/stock-transaction-list.component';
+import { StockTransactionAddComponent } from './features/stockTransactions/stock-transaction-add/stock-transaction-add.component';
 
 
 
@@ -73,7 +75,9 @@ import { CryptoMovementAddComponent } from './features/cryptoMovement/crypto-mov
     CardMovementsPayComponent,
     CardMovementsEditRecurrentComponent,
     CryptoMovementListComponent,
-    CryptoMovementAddComponent
+    CryptoMovementAddComponent,
+    StockTransactionListComponent,
+    StockTransactionAddComponent
   ],
   imports: [
     BrowserModule,

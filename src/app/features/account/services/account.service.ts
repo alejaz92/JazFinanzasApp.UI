@@ -41,4 +41,9 @@ export class AccountService {
     return this.http.get<Account>(`${environment.apiBaseURL}/api/account/ByAssetType/${typeName}`);
   }
 
+  //get account by typeId
+  getAccountByTypeId(typeId: number): Observable<Account> {
+    return this.http.get<Account>(`${environment.apiBaseURL}/api/account/ByAssetTypeId/${typeId}`);
+  }
+
 }

@@ -27,6 +27,8 @@ import { CardMovementsPayComponent } from './features/cardMovements/cardMovement
 import { CardMovementsEditRecurrentComponent } from './features/cardMovements/card-movements-edit-recurrent/card-movements-edit-recurrent.component';
 import { CryptoMovementListComponent } from './features/cryptoMovement/crypto-movement-list/crypto-movement-list.component';
 import { CryptoMovementAddComponent } from './features/cryptoMovement/crypto-movement-add/crypto-movement-add.component';
+import { StockTransactionListComponent } from './features/stockTransactions/stock-transaction-list/stock-transaction-list.component';
+import { StockTransactionAddComponent } from './features/stockTransactions/stock-transaction-add/stock-transaction-add.component';
 
 
 const routes: Routes = [
@@ -159,6 +161,16 @@ const routes: Routes = [
   {
     path: 'cryptoMovements/add',
     component: CryptoMovementAddComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'stockTransactions',
+    component: StockTransactionListComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'stockTransactions/add',
+    component: StockTransactionAddComponent,
     canActivate: [AuthGuard]
   },
   {
