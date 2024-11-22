@@ -12,11 +12,11 @@ export class StockTranctionsService {
 
   constructor(private http: HttpClient) { }
 
-  getStockTransactions(page: number, itemsPerPage: number): Observable<{ movements: StockTransaction[], totalCount: number}> {
-    return this.http.get<{ movements: StockTransaction[], totalCount: number}>(`${environment.apiBaseURL}/api/stockTransaction?page=${page}&itemsPerPage=${itemsPerPage}`);
+  getStockTransactions(page: number, itemsPerPage: number): Observable<{ transactions: StockTransaction[], totalCount: number}> {
+    return this.http.get<{ transactions: StockTransaction[], totalCount: number}>(`${environment.apiBaseURL}/api/stockTransaction?page=${page}&itemsPerPage=${itemsPerPage}`);
   }
 
-  createStockTransaction(movement: StockTransaction): Observable<StockTransactionAdd> {
+  createStockTransaction(movement: StockTransactionAdd): Observable<StockTransactionAdd> {
     return this.http.post<StockTransactionAdd>(`${environment.apiBaseURL}/api/stockTransaction`, movement);
   }
 

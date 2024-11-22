@@ -29,6 +29,8 @@ import { CryptoMovementListComponent } from './features/cryptoMovement/crypto-mo
 import { CryptoMovementAddComponent } from './features/cryptoMovement/crypto-movement-add/crypto-movement-add.component';
 import { StockTransactionListComponent } from './features/stockTransactions/stock-transaction-list/stock-transaction-list.component';
 import { StockTransactionAddComponent } from './features/stockTransactions/stock-transaction-add/stock-transaction-add.component';
+import { CurrencyExchangeListComponent } from './features/CurrencyExchange/currency-exchange-list/currency-exchange-list.component';
+import { CurrencyExchangeAddComponent } from './features/CurrencyExchange/currency-exchange-add/currency-exchange-add.component';
 
 
 const routes: Routes = [
@@ -171,6 +173,16 @@ const routes: Routes = [
   {
     path: 'stockTransactions/add',
     component: StockTransactionAddComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'currencyExchange',
+    component: CurrencyExchangeListComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'currencyExchange/add',
+    component: CurrencyExchangeAddComponent,
     canActivate: [AuthGuard]
   },
   {

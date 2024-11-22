@@ -13,8 +13,10 @@ export class CommerceTypePipe implements PipeTransform {
             return 'Trading';
         case 'BalanceAdj':
             return 'Ajuste de Saldos';
+        case 'General':
+            return 'General';
         default:
-            return 'Unknown'; // O manejarlo de otra manera
+            return value; // O manejarlo de otra manera
     }
 }
 

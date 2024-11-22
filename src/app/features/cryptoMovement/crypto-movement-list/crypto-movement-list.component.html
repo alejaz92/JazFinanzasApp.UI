@@ -7,20 +7,22 @@
     <!-- tabla de movimientos-->
     <div class="table-responsive">
         <table class="table table-striped">
-            <thead >
+            <thead>
                 <tr>
-                    <th >Fecha</th>
-                    <th >Tipo Mov.</th>
-                    <th >Tipo Comercio</th>
-                    <th >Activo Egreso</th>
-                    <!-- <th >Cuenta Egreso</th> -->
-                    <th class="text-end">Cantidad Egreso</th>
-                    <th class="text-end">Cotización Egreso</th>
-                    <th >Activo Ingreso</th>
-                    <!-- <th >Cuenta Ingreso</th> -->
-                    <th class="text-end">Cantidad Ingreso</th>
-                    <th class="text-end ">Cotización Ingreso</th>
-                    <th>Acciones</th>
+                    <th rowspan="2">Fecha</th>
+                    <th rowspan="2">Tipo Mov.</th>
+                    <th rowspan="2">Tipo Comercio</th>
+                    <th colspan="3" class="text-center table-danger">Egreso</th>
+                    <th colspan="3" class="text-center table-success">Ingreso</th>
+                    <th rowspan="2">Acciones</th>
+                </tr>
+                <tr>
+                    <th class="table-danger">Activo</th>
+                    <th class="text-end table-danger">Cantidad</th>
+                    <th class="text-end table-danger">Cotización</th>
+                    <th class="table-success">Activo</th>
+                    <th class="text-end table-success">Cantidad</th>
+                    <th class="text-end table-success">Cotización</th>
                 </tr>
             </thead>
             <tbody>
@@ -30,18 +32,18 @@
                     <td>{{ movement.commerceType | commerceType }}</td>
                     <td class="table-danger">{{ movement.expenseAsset ?? ''}}</td>
                     <!-- <td>{{ movement.expenseAccount ?? '' }}</td> -->
-                    <td class="text-end" class="table-danger">
+                    <td class="text-end table-danger">
                         {{  movement.expenseAmount != null ? (-movement.expenseAmount | currencyInvestmentFormat) : ''  }}
                     </td>
-                    <td class="text-end" class="table-danger">
+                    <td class="text-end table-danger">
                         {{  movement.expenseQuote != null ? (movement.expenseQuote | currencyInvestmentFormat) : '' }}
                     </td>
                     <td class="table-success">{{ movement.incomeAsset ?? ''}}</td>
                     <!-- <td>{{ movement.incomeAccount ?? ''}}</td> -->
-                    <td class="text-end" class="table-success">
+                    <td class="text-end table-success">
                         {{ movement.incomeAmount != null ? (movement.incomeAmount | currencyInvestmentFormat) : ''   }}
                     </td>
-                    <td class="text-end" class="table-success">
+                    <td class="text-end table-success">
                         {{ movement.incomeQuote != null ? (movement.incomeQuote | currencyInvestmentFormat) : ''  }}
                     </td>
                     <td>

@@ -1,14 +1,15 @@
 export interface StockTransactionAdd {
     date:  Date;
-    movementType: string;
+    stockTransactionType: string;
     commerceType: string;
     assetType: string;
-    expenseAsset?: string;
-    expenseAccount?: string;
-    expenseAmount?: number;
-    expenseQuote?: number;
-    incomeAsset?: string;
-    incomeAccount?: string;
-    incomeAmount?: number;
-    incomeQuote?: number;
+    expenseAssetId?: string;
+    expenseAccountId?: string;
+    expenseQuantity?: number;
+    expenseQuotePrice?: number;
+    incomeAssetId?: string;
+    incomeAccountId?: string;
+    incomeQuantity?: number;
+    incomeQuotePrice?: number;
+    environment: string;
 }

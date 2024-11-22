@@ -1,0 +1,58 @@
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>Intercambio de Monedas</h1>
+        <a class="btn btn-primary" [routerLink]="['/currencyExchange/add']">Nuevo <i class="bi-plus-lg"></i></a>
+    </div>
+
+    <!-- tabla de movimientos-->
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th rowspan="2">Fecha</th>
+                    <th colspan="3" class="text-center table-danger">Egreso</th>
+                    <th colspan="3" class="text-center table-success">Ingreso</th>
+                    <th rowspan="2">Acciones</th>
+                </tr>
+                <tr>
+                    <th class="table-danger">Activo</th>
+                    <th class="table-danger">Cuenta</th>
+                    <th class="text-end table-danger">Monto</th>
+                    <th class="table-success">Activo</th>
+                    <th class="table-success">Cuenta</th>
+                    <th class="text-end table-success">Monto</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let movement of currencyExchanges | paginate: { itemsPerPage: 20, currentPage: page, totalItems: totalCurrencyExchanges}">
+                    <td>{{ movement.date | date: 'dd/MM/yyyy' }}</td>
+                    <td class="table-danger">{{ movement.expenseAsset ?? ''}}</td>
+                    <td class="table-danger">{{ movement.expenseAccount ?? '' }}</td>
+                    <td class="text-end table-danger">
+                        {{  movement.expenseAmount != null ? (-movement.expenseAmount | currencyFiatFormat) : ''  }}
+                    </td>
+                    <td class="table-success">{{ movement.incomeAsset ?? ''}}</td>
+                    <td class="table-success">{{ movement.incomeAccount ?? ''}}</td>
+                    <td class="text-end table-success">
+                        {{ movement.incomeAmount != null ? (movement.incomeAmount | currencyFiatFormat) : ''   }}
+                    </td>
+                    <td>
+                        <div class="justify-content-around">
+                            <button class="btn btn-sm btn-danger m-1" title="Eliminar" (click)="onDeleteExchange(movement)"><i class="bi-trash-fill"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Paginacion-->
+    <div class="d-flex justify-content-center">
+        <pagination-controls 
+        (pageChange)="onPageChange($event)"
+        [responsive]="true"
+        [previousLabel]="'Anterior'"
+        [nextLabel]="'Siguiente'">
+    </pagination-controls>
+    </div>
+</div>

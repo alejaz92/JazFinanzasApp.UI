@@ -152,7 +152,132 @@ export class StockTransactionAddComponent implements OnInit{
   }
 
   onSubmit() {
+    const formValues = this.stockTransactionForm.value;
+    formValues.incomeAmount = parseFloat(formValues.incomeAmount);
+    formValues.expenseAmount = parseFloat(formValues.expenseAmount);
+    formValues.incomeQuote = parseFloat(formValues.incomeQuote);
+    formValues.expenseQuote = parseFloat(formValues.expenseQuote);
+    formValues.incomeAccount = parseInt(formValues.incomeAccount);
+    formValues.expenseAccount = parseInt(formValues.expenseAccount);
+    formValues.incomeAsset = parseInt(formValues.incomeAsset);
+    formValues.expenseAsset = parseInt(formValues.expenseAsset);
 
+    if (formValues.transactionType === '') {
+      this.stockTransactionForm.controls['transactionType'].setErrors({ 'incorrect': true });
+      return;
+    }
+
+    if (formValues.commerceType === '') {
+      this.stockTransactionForm.controls['commerceType'].setErrors({ 'incorrect': true });
+      return;
+    }
+
+    if(formValues.assetType === '') {
+      this.stockTransactionForm.controls['assetType'].setErrors({ 'incorrect': true });
+      return;
+    }
+
+    if (formValues.date === '') {
+      this.stockTransactionForm.controls['date'].setErrors({ 'incorrect': true });
+      return;
+    }
+
+    if (formValues.transactionType === 'I') {
+      if (formValues.incomeAccount === '') {
+        this.stockTransactionForm.controls['incomeAccount'].setErrors({ 'incorrect': true });
+        return;
+      }
+      if (formValues.incomeAsset === '') {
+        this.stockTransactionForm.controls['incomeAsset'].setErrors({ 'incorrect': true });
+        return;
+      }
+      if (isNaN(formValues.incomeAmount) || formValues.incomeAmount <= 0) {
+        this.stockTransactionForm.controls['incomeAmount'].setErrors({ 'incorrect': true });
+        return;
+      }
+      if (isNaN(formValues.incomeQuote) || formValues.incomeQuote <= 0) {
+        this.stockTransactionForm.controls['incomeQuote'].setErrors({ 'incorrect': true });
+        return;
+      }
+    }
+
+    if (formValues.transactionType === 'E') {
+      if (formValues.expenseAccount === '') {
+        this.stockTransactionForm.controls['expenseAccount'].setErrors({ 'incorrect': true });
+        return;
+      }
+      if (formValues.expenseAsset === '') {
+        this.stockTransactionForm.controls['expenseAsset'].setErrors({ 'incorrect': true });
+        return;
+      }
+      if (isNaN(formValues.expenseAmount) || formValues.expenseAmount <= 0) {
+        this.stockTransactionForm.controls['expenseAmount'].setErrors({ 'incorrect': true });
+        return;
+      }
+      if (isNaN(formValues.expenseQuote) || formValues.expenseQuote <= 0) {
+        this.stockTransactionForm.controls['expenseQuote'].setErrors({ 'incorrect': true });
+        return;
+      }
+    }
+
+    if(formValues.transactionType === 'I' && formValues.commerceType === 'General') {
+      if (formValues.expenseAccount === '') {
+        this.stockTransactionForm.controls['expenseAccount'].setErrors({ 'incorrect': true });
+        return;
+      }
+      if (formValues.expenseAsset === '') {
+        this.stockTransactionForm.controls['expenseAsset'].setErrors({ 'incorrect': true });
+        return;
+      }
+      if (isNaN(formValues.expenseAmount) || formValues.expenseAmount <= 0) {
+        this.stockTransactionForm.controls['expenseAmount'].setErrors({ 'incorrect': true });
+        return;
+      }
+    }
+
+    if(formValues.transactionType === 'E' && formValues.commerceType === 'General') {
+      if (formValues.incomeAccount === '') {
+        this.stockTransactionForm.controls['incomeAccount'].setErrors({ 'incorrect': true });
+        return;
+      }
+      if (formValues.incomeAsset === '') {
+        this.stockTransactionForm.controls['incomeAsset'].setErrors({ 'incorrect': true });
+        return;
+      }
+      if (isNaN(formValues.incomeAmount) || formValues.incomeAmount <= 0) {
+        this.stockTransactionForm.controls['incomeAmount'].setErrors({ 'incorrect': true });
+        return;
+      }
+    }
+
+    if (this.stockTransactionForm.invalid) {
+      return;
+    }
+
+    const stockTransactionAdd = {
+      stockTransactionType: formValues.transactionType,
+      commerceType: formValues.commerceType,
+      assetType: formValues.assetType,
+      date: formValues.date,
+      incomeAccountId: formValues.incomeAccount || null,
+      expenseAccountId: formValues.expenseAccount || null,
+      expenseAssetId: formValues.expenseAsset || null,
+      incomeAssetId: formValues.incomeAsset || null,
+      expenseQuantity: formValues.expenseAmount || null,
+      incomeQuantity: formValues.incomeAmount || null,
+      expenseQuotePrice: formValues.expenseQuote || null,
+      incomeQuotePrice: formValues.incomeQuote || null,
+      environment: 'Stock'
+    };
+
+    this.stockTransactionService.createStockTransaction(stockTransactionAdd).subscribe(() => {
+      this.successMessage = 'Movimiento agregado correctamente';
+      this.stockTransactionForm.reset();
+
+      setTimeout(() => {
+        this.successMessage = '';
+      }, 3000);
+    });
   }
 
 }

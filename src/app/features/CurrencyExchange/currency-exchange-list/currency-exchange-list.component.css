@@ -1,0 +1,10 @@
+.text-end {
+    text-align: right; /* Alineación a la derecha para el monto */
+}
+
+.table th, .table td {
+    white-space: nowrap;
+}
+.table {
+    font-size: 1rem;
+}

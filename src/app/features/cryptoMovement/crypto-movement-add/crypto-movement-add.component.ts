@@ -80,7 +80,7 @@ export class CryptoMovementAddComponent implements OnInit {
     this.commerceTypes = [];
     if (this.selectedMovementType === 'I' || this.selectedMovementType === 'E') {
       this.commerceTypes = [
-        { id: 'BalancesAdj', name: 'Ajuste de Saldos' },
+        { id: 'BalanceAdj', name: 'Ajuste de Saldos' },
         { id: 'Fiat/Crypto Commerce', name: 'Comercio Fiat/Cripto' }
       ];
     } else if (this.selectedMovementType === 'EX') {
@@ -160,7 +160,6 @@ export class CryptoMovementAddComponent implements OnInit {
         return;
       }
       if (isNaN(formValues.incomeAmount) || formValues.incomeAmount <= 0) {
-        console.log(formValues.incomeAmount);
         this.cryptoMovementForm.controls['incomeAmount'].setErrors({ 'incorrect': true });
         return;
       }
@@ -238,7 +237,6 @@ export class CryptoMovementAddComponent implements OnInit {
       environment: 'Crypto'  
     };
 
-    console.log(movementAdd);
 
     this.cryptoMovementService.createCryptoMovement(movementAdd)
       .subscribe(() => {

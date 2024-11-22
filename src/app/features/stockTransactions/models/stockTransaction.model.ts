@@ -1,15 +1,15 @@
 export interface StockTransaction {
     id: number;
     date:  Date;
-    movementType: string;
+    stockTransactionType: string;
     commerceType: string;
     assetType: string;
     expenseAsset?: string;
     expenseAccount?: string;
-    expenseAmount?: number;
-    expenseQuote?: number;
+    expenseQuantity?: number;
+    expenseQuotePrice?: number;
     incomeAsset?: string;
     incomeAccount?: string;
-    incomeAmount?: number;
-    incomeQuote?: number;
+    incomeQuantity?: number;
+    incomeQuotePrice?: number;
 }

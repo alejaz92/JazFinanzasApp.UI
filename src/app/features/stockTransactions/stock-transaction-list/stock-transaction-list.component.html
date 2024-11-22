@@ -7,48 +7,50 @@
     <!-- tabla de movimientos-->
     <div class="table-responsive">
         <table class="table table-striped">
-            <thead >
+            <thead>
                 <tr>
-                    <th >Fecha</th>
-                    <th >Tipo Mov.</th>
-                    <th >Tipo Comercio</th>
-                    <th >Tipo de Activo</th>
-                    <th >Activo Egreso</th>
-                    <!-- <th >Cuenta Egreso</th> -->
-                    <th class="text-end">Cantidad Egreso</th>
-                    <th class="text-end">Cotización Egreso</th>
-                    <th >Activo Ingreso</th>
-                    <!-- <th >Cuenta Ingreso</th> -->
-                    <th class="text-end">Cantidad Ingreso</th>
-                    <th class="text-end ">Cotización Ingreso</th>
-                    <th>Acciones</th>
+                    <th rowspan="2">Fecha</th>
+                    <th rowspan="2">Tipo Mov.</th>
+                    <th rowspan="2">Tipo Comercio</th>
+                    <th rowspan="2">Tipo de Activo</th>
+                    <th colspan="3" class="text-center table-danger">Egreso</th>
+                    <th colspan="3" class="text-center table-success">Ingreso</th>
+                    <th rowspan="2">Acciones</th>
+                </tr>
+                <tr>
+                    <th class="table-danger">Activo</th>
+                    <th class="text-end table-danger">Cantidad</th>
+                    <th class="text-end table-danger">Cotización</th>
+                    <th class="table-success">Activo</th>
+                    <th class="text-end table-success">Cantidad</th>
+                    <th class="text-end table-success">Cotización</th>
                 </tr>
             </thead>
             <tbody>
                 <tr *ngFor="let transaction of stockTransactions | paginate: { itemsPerPage: 20, currentPage: page, totalItems: totalStockTransactions}">
                     <td>{{ transaction.date | date: 'dd/MM/yyyy' }}</td>
-                    <td>{{ transaction.movementType | movementType }}</td>
+                    <td>{{ transaction.stockTransactionType | movementType }}</td>
                     <td>{{ transaction.commerceType | commerceType }}</td>
                     <td>{{ transaction.assetType }}</td>
                     <td class="table-danger">{{ transaction.expenseAsset ?? ''}}</td>
-                    <!-- <td>{{ movement.expenseAccount ?? '' }}</td> -->
-                    <td class="text-end" class="table-danger">
-                        {{  transaction.expenseAmount != null ? (-transaction.expenseAmount | currencyInvestmentFormat) : ''  }}
+                    <td class="text-end table-danger">
+                        {{ transaction.expenseQuantity != null ? (-transaction.expenseQuantity | currencyInvestmentFormat) : '' }}
                     </td>
-                    <td class="text-end" class="table-danger">
-                        {{  transaction.expenseQuote != null ? (transaction.expenseQuote | currencyInvestmentFormat) : '' }}
+                    <td class="text-end table-danger">
+                        {{ transaction.expenseQuotePrice != null ? (transaction.expenseQuotePrice | currencyInvestmentFormat) : '' }}
                     </td>
                     <td class="table-success">{{ transaction.incomeAsset ?? ''}}</td>
-                    <!-- <td>{{ movement.incomeAccount ?? ''}}</td> -->
-                    <td class="text-end" class="table-success">
-                        {{ transaction.incomeAmount != null ? (transaction.incomeAmount | currencyInvestmentFormat) : ''   }}
+                    <td class="text-end table-success">
+                        {{ transaction.incomeQuantity != null ? (transaction.incomeQuantity | currencyInvestmentFormat) : '' }}
                     </td>
-                    <td class="text-end" class="table-success">
-                        {{ transaction.incomeQuote != null ? (transaction.incomeQuote | currencyInvestmentFormat) : ''  }}
+                    <td class="text-end table-success">
+                        {{ transaction.incomeQuotePrice != null ? (transaction.incomeQuotePrice | currencyInvestmentFormat) : '' }}
                     </td>
                     <td>
                         <div class="justify-content-around">
-                            <button class="btn btn-sm btn-danger m-1" title="Eliminar" (click)="onDeleteTransaction(transaction)"><i class="bi-trash-fill"></i></button>
+                            <button class="btn btn-sm btn-danger m-1" title="Eliminar" (click)="onDeleteTransaction(transaction)">
+                                <i class="bi-trash-fill"></i>
+                            </button>
                         </div>
                     </td>
                 </tr>
@@ -59,10 +61,10 @@
     <!-- Paginacion-->
     <div class="d-flex justify-content-center">
         <pagination-controls 
-        (pageChange)="onPageChange($event)"
-        [responsive]="true"
-        [previousLabel]="'Anterior'"
-        [nextLabel]="'Siguiente'">
-    </pagination-controls>
+            (pageChange)="onPageChange($event)"
+            [responsive]="true"
+            [previousLabel]="'Anterior'"
+            [nextLabel]="'Siguiente'">
+        </pagination-controls>
     </div>
 </div>
