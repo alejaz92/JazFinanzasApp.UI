@@ -222,7 +222,7 @@ export class CryptoTransactionAddComponent implements OnInit {
       return;
     }
     
-    const movementAdd = {
+    const transactionAdd = {
       movementType: formValues.movementType,
       commerceType: formValues.commerceType,
       date: formValues.date,
@@ -238,7 +238,7 @@ export class CryptoTransactionAddComponent implements OnInit {
     };
 
 
-    this.cryptoTransactionService.createCryptoTransaction(movementAdd)
+    this.cryptoTransactionService.createCryptoTransaction(transactionAdd)
       .subscribe(() => {
 
         this.successMessage = 'Movimiento agregado correctamente';

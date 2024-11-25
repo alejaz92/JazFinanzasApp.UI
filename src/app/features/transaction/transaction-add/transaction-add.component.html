@@ -4,7 +4,7 @@
     <div *ngIf="successMessage" class="alert alert-success" role="alert">
         {{ successMessage }}
     </div>
-    <form [formGroup]="movementForm" (ngSubmit)="onSubmit()">
+    <form [formGroup]="transactionForm" (ngSubmit)="onSubmit()">
         <div class="row mb-3">
             <div class="col">
                 <label class="form-label" for="movementType">Tipo de Movimiento</label>
@@ -15,7 +15,7 @@
                     <option value="E">Egreso</option>
                     <option value="EX">Intercambio</option>
                 </select> 
-                <div *ngIf="movementForm.controls['movementType'].errors?.['incorrect'] " class="text-danger mt-2">
+                <div *ngIf="transactionForm.controls['movementType'].errors?.['incorrect'] " class="text-danger mt-2">
                     Debe seleccionarse un tipo de movimiento.
                 </div>
             </div>            
@@ -24,7 +24,7 @@
             <div class="col-md-6">
                 <label class="form-label"  for="date">Fecha</label>
                 <input type="date" class="form-control" id="date" formControlName="date">
-                <div *ngIf="movementForm.controls['date'].errors?.['incorrect'] " class="text-danger mt-2">
+                <div *ngIf="transactionForm.controls['date'].errors?.['incorrect'] " class="text-danger mt-2">
                     Debe seleccionarse una fecha.
                 </div>
             </div>
@@ -35,7 +35,7 @@
                     <option *ngFor="let asset of assets" [value]="asset.id">{{ asset.name }}</option>
                 </select>
 
-                <div *ngIf="movementForm.controls['asset'].errors?.['incorrect'] " class="text-danger mt-2">
+                <div *ngIf="transactionForm.controls['asset'].errors?.['incorrect'] " class="text-danger mt-2">
                     Debe seleccionarse una Moneda.
                 </div>
             </div>
@@ -49,7 +49,7 @@
                         <option value="" disabled selected>Seleccione</option>
                         <option *ngFor="let account of accounts" [value]="account.id">{{ account.name }}</option>
                     </select>
-                    <div *ngIf="movementForm.controls['incomeAccount'].errors?.['incorrect'] " class="text-danger mt-2">
+                    <div *ngIf="transactionForm.controls['incomeAccount'].errors?.['incorrect'] " class="text-danger mt-2">
                         Debe seleccionarse una Cuenta de Ingresos.
                     </div>
                 </div>
@@ -60,7 +60,7 @@
                         <option value="" disabled selected>Seleccione</option>
                         <option *ngFor="let class of incomeClasses" [value]="class.id">{{ class.description }}</option>
                     </select>
-                    <div *ngIf="movementForm.controls['incomeClass'].errors?.['incorrect'] " class="text-danger mt-2">
+                    <div *ngIf="transactionForm.controls['incomeClass'].errors?.['incorrect'] " class="text-danger mt-2">
                         Debe seleccionarse una Clase de Ingreso.
                     </div>
                 </div>
@@ -74,7 +74,7 @@
                         <option value="" disabled selected>Seleccione</option>
                         <option *ngFor="let account of accounts" [value]="account.id">{{ account.name }}</option>
                     </select>
-                    <div *ngIf="movementForm.controls['expenseAccount'].errors?.['incorrect'] " class="text-danger mt-2">
+                    <div *ngIf="transactionForm.controls['expenseAccount'].errors?.['incorrect'] " class="text-danger mt-2">
                         Debe seleccionarse una Cuenta de Egreso.
                     </div>
                 </div>
@@ -84,7 +84,7 @@
                         <option value="" disabled selected>Seleccione</option>
                         <option *ngFor="let class of expenseClasses" [value]="class.id">{{ class.description }}</option>
                     </select>
-                    <div *ngIf="movementForm.controls['expenseClass'].errors?.['incorrect'] " class="text-danger mt-2">
+                    <div *ngIf="transactionForm.controls['expenseClass'].errors?.['incorrect'] " class="text-danger mt-2">
                         Debe seleccionarse una Clase de Egreso.
                     </div>
                 </div>
@@ -98,7 +98,7 @@
                         <option value="" disabled selected>Seleccione</option>
                         <option *ngFor="let account of accounts" [value]="account.id">{{ account.name }}</option>
                     </select>
-                    <div *ngIf="movementForm.controls['incomeExchangeAccount'].errors?.['incorrect'] " class="text-danger mt-2">
+                    <div *ngIf="transactionForm.controls['incomeExchangeAccount'].errors?.['incorrect'] " class="text-danger mt-2">
                         Debe seleccionarse una Cuenta de Ingreso.
                     </div>
                 </div> 
@@ -109,7 +109,7 @@
                         <option value="" disabled selected>Seleccione</option>
                         <option *ngFor="let account of accounts" [value]="account.id">{{ account.name }}</option>
                     </select>
-                    <div *ngIf="movementForm.controls['expenseExchangeAccount'].errors?.['incorrect'] " class="text-danger mt-2">
+                    <div *ngIf="transactionForm.controls['expenseExchangeAccount'].errors?.['incorrect'] " class="text-danger mt-2">
                         Debe seleccionarse una Cuenta de Egreso.
                     </div>
                 </div>
@@ -133,7 +133,7 @@
                     appCurrencyInput>
                     
                 </div>
-                <div *ngIf="movementForm.controls['amount'].errors?.['incorrect'] && movementForm.controls['amount'].touched" class="text-danger mt-2">
+                <div *ngIf="transactionForm.controls['amount'].errors?.['incorrect'] && transactionForm.controls['amount'].touched" class="text-danger mt-2">
                     El monto debe ser un número válido mayor que 0.
                 </div>
                 
@@ -143,7 +143,7 @@
             
             <div class="mt-1">
                 <button type="submit" class="btn btn-primary m-1">Guardar</button>
-                <a class="btn btn-secondary" [routerLink]="['/movements']">Volver</a>
+                <a class="btn btn-secondary" [routerLink]="['/transactions']">Volver</a>
             </div>                             
         </div>
     </form>

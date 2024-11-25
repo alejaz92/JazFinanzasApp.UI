@@ -16,8 +16,8 @@ export class StockTranctionsService {
     return this.http.get<{ transactions: StockTransaction[], totalCount: number}>(`${environment.apiBaseURL}/api/stockTransaction?page=${page}&itemsPerPage=${itemsPerPage}`);
   }
 
-  createStockTransaction(movement: StockTransactionAdd): Observable<StockTransactionAdd> {
-    return this.http.post<StockTransactionAdd>(`${environment.apiBaseURL}/api/stockTransaction`, movement);
+  createStockTransaction(transaction: StockTransactionAdd): Observable<StockTransactionAdd> {
+    return this.http.post<StockTransactionAdd>(`${environment.apiBaseURL}/api/stockTransaction`, transaction);
   }
 
   deleteTransaction(id: number): Observable<void> {

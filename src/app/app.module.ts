@@ -24,13 +24,13 @@ import { TransactionClassListComponent } from './features/transactionClass/trans
 import { TransactionClassAddComponent } from './features/transactionClass/transaction-class-add/transaction-class-add.component';
 import { TransactionClassEditComponent } from './features/transactionClass/transaction-class-edit/transaction-class-edit.component';
 import { AssetManagementComponent } from './features/asset/asset-management/asset-management.component';
-import { MovementListComponent } from './features/movement/movement-list/movement-list.component';
+import { TransactionListComponent } from './features/transaction/transaction-list/transaction-list.component';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { MovementTypePipe } from './shared/pipes/movementType/movement-type.pipe'
-import { MovementAddComponent } from './features/movement/movement-add/movement-add.component';
-import { MovementEditComponent } from './features/movement/movement-edit/movement-edit.component';
+import { TransactionAddComponent } from './features/transaction/transaction-add/transaction-add.component';
+import { TransactionEditComponent } from './features/transaction/transaction-edit/transaction-edit.component';
 import { CommonModule } from '@angular/common';
-import { MovementRefundComponent } from './features/movement/movement-refund/movement-refund.component';
+import { TransactionRefundComponent } from './features/transaction/transaction-refund/transaction-refund.component';
 import { SharedModule } from './shared/shared.module';
 import { CardTransactionsListComponent } from './features/cardTransactions/card-transactions-list/card-transactions-list.component';
 import { CardTransactionsAddComponent } from './features/cardTransactions/card-transactions-add/card-transactions-add.component';
@@ -67,11 +67,11 @@ import { CurrencyExchangeAddComponent } from './features/CurrencyExchange/curren
     TransactionClassAddComponent,
     TransactionClassEditComponent,
     AssetManagementComponent,
-    MovementListComponent,
+    TransactionListComponent,
     MovementTypePipe,
-    MovementAddComponent,
-    MovementEditComponent,
-    MovementRefundComponent,
+    TransactionAddComponent,
+    TransactionEditComponent,
+    TransactionRefundComponent,
     CardTransactionsListComponent,
     CardTransactionsAddComponent,
     CardTransactionsPayComponent,

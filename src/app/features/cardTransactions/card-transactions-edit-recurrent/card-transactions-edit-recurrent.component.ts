@@ -45,11 +45,11 @@ export class CardTransactionsEditRecurrentComponent implements OnInit{
 
     
     this.id = Number(this.route.snapshot.paramMap.get('id'));
-    this.loadMovementDetails(this.id);    
+    this.loadTransactionDetails(this.id);    
     this.onActionChange();
   }
 
-  loadMovementDetails(id: number) {
+  loadTransactionDetails(id: number) {
     this.cardTransactionsService.getRecurrentCardTransactions(id).subscribe(
       (data) => {
 
@@ -69,7 +69,7 @@ export class CardTransactionsEditRecurrentComponent implements OnInit{
         });
       },
       (error) => {
-        console.error('Error loading recurrent card movement details', error);
+        console.error('Error loading recurrent card transaction details', error);
       }
     );
   }
@@ -141,7 +141,7 @@ export class CardTransactionsEditRecurrentComponent implements OnInit{
         }, 3000);
       }, 
       (error) => {
-        console.error('Error updating recurrent card movement', error);
+        console.error('Error updating recurrent card transaction', error);
       }
     )
   }

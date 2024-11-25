@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MovementService } from '../services/movement.service';
+import { TransactionService } from '../services/transaction.service';
 import { HttpClient } from '@angular/common/http';
 import { AccountService } from '../../account/services/account.service';
 import { AssetService } from '../../asset/services/asset.service';
@@ -8,12 +8,12 @@ import { TransactionClassService } from '../../transactionClass/services/transac
 
 
 @Component({
-  selector: 'app-movement-add',
-  templateUrl: './movement-add.component.html',
-  styleUrls: ['./movement-add.component.css']
+  selector: 'app-transaction-add',
+  templateUrl: './transaction-add.component.html',
+  styleUrls: ['./transaction-add.component.css']
 })
-export class MovementAddComponent implements OnInit{
-  movementForm!: FormGroup;
+export class TransactionAddComponent implements OnInit{
+  transactionForm!: FormGroup;
   selectedMovementType: string = '';
   accounts: any[] = [];
   incomeClasses: any[] = [];
@@ -25,13 +25,13 @@ export class MovementAddComponent implements OnInit{
 
   constructor(
     private fb: FormBuilder,
-    private movementService: MovementService, 
+    private transactionService: TransactionService, 
     private accountService: AccountService,
     private assetService: AssetService,
     private transactionClasses: TransactionClassService) { }
 
     ngOnInit(): void {
-      this.movementForm = this.fb.group({
+      this.transactionForm = this.fb.group({
         movementType: ['', Validators.required],
         date: ['', Validators.required],
         asset: ['', Validators.required],
@@ -73,64 +73,64 @@ export class MovementAddComponent implements OnInit{
     }
 
     onSubmit() {
-      const formValues = this.movementForm.value;
+      const formValues = this.transactionForm.value;
       
       if(formValues.movementType === '') {
-        this.movementForm.controls['movementType'].setErrors({ 'incorrect': true });
+        this.transactionForm.controls['movementType'].setErrors({ 'incorrect': true });
         return;
       }
 
       
       if(formValues.date === '') {
-        this.movementForm.controls['date'].setErrors({ 'incorrect': true });
+        this.transactionForm.controls['date'].setErrors({ 'incorrect': true });
         return;
       }
 
       if(formValues.asset === '') {
-        this.movementForm.controls['asset'].setErrors({ 'incorrect': true });
+        this.transactionForm.controls['asset'].setErrors({ 'incorrect': true });
         return;
       }
 
       if (formValues.movementType === 'I') {
         if(formValues.incomeAccount === '') {
-          this.movementForm.controls['incomeAccount'].setErrors({ 'incorrect': true });
+          this.transactionForm.controls['incomeAccount'].setErrors({ 'incorrect': true });
           return;
         }
         if(formValues.incomeClass === '') {
-          this.movementForm.controls['incomeClass'].setErrors({ 'incorrect': true });
+          this.transactionForm.controls['incomeClass'].setErrors({ 'incorrect': true });
           return;
         }
 
       }
       if (formValues.movementType === 'E') {
         if(formValues.expenseAccount === '') {
-          this.movementForm.controls['expenseAccount'].setErrors({ 'incorrect': true });
+          this.transactionForm.controls['expenseAccount'].setErrors({ 'incorrect': true });
           return;
         }
         if(formValues.expenseClass === '') {
-          this.movementForm.controls['expenseClass'].setErrors({ 'incorrect': true });
+          this.transactionForm.controls['expenseClass'].setErrors({ 'incorrect': true });
           return;
         }
       }
       if (formValues.movementType === 'EX') {
         if(formValues.incomeExchangeAccount === '') {
-          this.movementForm.controls['incomeExchangeAccount'].setErrors({ 'incorrect': true });
+          this.transactionForm.controls['incomeExchangeAccount'].setErrors({ 'incorrect': true });
           return;
         }
         if(formValues.expenseExchangeAccount === '') {
-          this.movementForm.controls['expenseExchangeAccount'].setErrors({ 'incorrect': true });
+          this.transactionForm.controls['expenseExchangeAccount'].setErrors({ 'incorrect': true });
           return;
         }
       }
 
 
       if(isNaN(formValues.amount) || formValues.amount <= 0) {
-        this.movementForm.controls['amount'].setErrors({ 'incorrect': true });
+        this.transactionForm.controls['amount'].setErrors({ 'incorrect': true });
         return;
       }
 
       //mapeo de los valores del formulario para el dto
-      const movementAdd = {
+      const transactionAdd = {
         incomeAccountId: formValues.movementType === "I" ? parseInt(formValues.incomeAccount) : 
           formValues.movementType === "EX" ? parseInt(formValues.incomeExchangeAccount) : null,
         expenseAccountId: formValues.movementType === "E" ? parseInt(formValues.expenseAccount) : 
@@ -146,13 +146,13 @@ export class MovementAddComponent implements OnInit{
         quotePrice: 0
       }
 
-      if (this.movementForm.invalid) {
+      if (this.transactionForm.invalid) {
         return;
       }
 
-      this.movementService.createMovement(movementAdd).subscribe(() => {
+      this.transactionService.createTransaction(transactionAdd).subscribe(() => {
       
-       this.movementForm.reset();
+       this.transactionForm.reset();
        this.successMessage = 'Movimiento creado con éxito';
 
        setTimeout(() => {

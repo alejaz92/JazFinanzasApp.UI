@@ -12,12 +12,12 @@ export class CryptoTransactionService {
 
   constructor(private http: HttpClient) { }
 
-  getCryptoTransactions(page: number, itemsPerPage: number): Observable<{ movements: CryptoTransaction[], totalCount: number}> {
-    return this.http.get<{ movements: CryptoTransaction[], totalCount: number}>(`${environment.apiBaseURL}/api/CryptoTransaction?page=${page}&itemsPerPage=${itemsPerPage}`);
+  getCryptoTransactions(page: number, itemsPerPage: number): Observable<{ transactions: CryptoTransaction[], totalCount: number}> {
+    return this.http.get<{ transactions: CryptoTransaction[], totalCount: number}>(`${environment.apiBaseURL}/api/CryptoTransaction?page=${page}&itemsPerPage=${itemsPerPage}`);
   }
 
-  createCryptoTransaction(movement: CryptoTransactionAdd): Observable<CryptoTransactionAdd> {
-    return this.http.post<CryptoTransactionAdd>(`${environment.apiBaseURL}/api/CryptoTransaction`, movement);
+  createCryptoTransaction(transaction: CryptoTransactionAdd): Observable<CryptoTransactionAdd> {
+    return this.http.post<CryptoTransactionAdd>(`${environment.apiBaseURL}/api/CryptoTransaction`, transaction);
   }
 
   deleteCryptoTransaction(id: number): Observable<void> {

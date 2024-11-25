@@ -1,4 +1,4 @@
-export interface MovementAdd {
+export interface TransactionAdd {
     incomeAccounId?: number | null;
     expenseAccountId?: number | null;
     assetId: number;

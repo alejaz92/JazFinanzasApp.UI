@@ -12,7 +12,7 @@ import { AssetTypeService } from '../../assetType/services/asset-type.service';
 })
 export class StockTransactionAddComponent implements OnInit{
   stockTransactionForm!: FormGroup;
-  selectedTransactionType: string = '';
+  selectedMovementType: string = '';
   selectedCommerceType: string = '';
   selectedAssetType: string = '';
   stockAccounts: any[] = [];
@@ -38,7 +38,7 @@ export class StockTransactionAddComponent implements OnInit{
 
   ngOnInit(): void {
     this.stockTransactionForm = this.fb.group({
-      transactionType: ['', Validators.required],
+      movementType: ['', Validators.required],
       commerceType: ['', Validators.required],
       assetType: ['', Validators.required],
       date: ['', Validators.required],
@@ -72,12 +72,12 @@ export class StockTransactionAddComponent implements OnInit{
       this.assetService.getAssignedAssets(Number(this.selectedAssetType)).subscribe((data: any) => {
         this.stockAssets = data;
 
-        if (this.selectedTransactionType === "I") {
+        if (this.selectedMovementType === "I") {
           this.incomeAssets = this.stockAssets;
           if(this.selectedCommerceType === "General"){
             this.expenseAssets = this.fiatAssets;
           }
-        } else if (this.selectedTransactionType === "E") {
+        } else if (this.selectedMovementType === "E") {
           this.expenseAssets = this.stockAssets;
           if(this.selectedCommerceType === "General"){
             this.incomeAssets = this.fiatAssets;
@@ -95,12 +95,12 @@ export class StockTransactionAddComponent implements OnInit{
         this.stockAccounts = data;
       
 
-        if (this.selectedTransactionType === "I") {
+        if (this.selectedMovementType === "I") {
           this.incomeAccounts = this.stockAccounts;
           if(this.selectedCommerceType === "General"){
             this.expenseAccounts = this.fiatAccounts;
           }
-        } else if (this.selectedTransactionType === "E") {
+        } else if (this.selectedMovementType === "E") {
           this.expenseAccounts = this.stockAccounts;
           if(this.selectedCommerceType === "General"){
             this.incomeAccounts = this.fiatAccounts;
@@ -116,8 +116,8 @@ export class StockTransactionAddComponent implements OnInit{
     });
   }
 
-  onTransactionTypeChange(event: any) {
-    this.selectedTransactionType = event.target.value;   
+  onMovementTypeChange(event: any) {
+    this.selectedMovementType = event.target.value;   
     this.updateCombos();
   }
 
@@ -144,7 +144,7 @@ export class StockTransactionAddComponent implements OnInit{
 
 
 
-    if(this.selectedAssetType != '' && this.selectedTransactionType != '' && this.selectedCommerceType != ''){
+    if(this.selectedAssetType != '' && this.selectedMovementType != '' && this.selectedCommerceType != ''){
       this.loadAccounts();
       this.loadAssets();   
     }
@@ -162,8 +162,8 @@ export class StockTransactionAddComponent implements OnInit{
     formValues.incomeAsset = parseInt(formValues.incomeAsset);
     formValues.expenseAsset = parseInt(formValues.expenseAsset);
 
-    if (formValues.transactionType === '') {
-      this.stockTransactionForm.controls['transactionType'].setErrors({ 'incorrect': true });
+    if (formValues.movementType === '') {
+      this.stockTransactionForm.controls['movementType'].setErrors({ 'incorrect': true });
       return;
     }
 
@@ -182,7 +182,7 @@ export class StockTransactionAddComponent implements OnInit{
       return;
     }
 
-    if (formValues.transactionType === 'I') {
+    if (formValues.movementType === 'I') {
       if (formValues.incomeAccount === '') {
         this.stockTransactionForm.controls['incomeAccount'].setErrors({ 'incorrect': true });
         return;
@@ -201,7 +201,7 @@ export class StockTransactionAddComponent implements OnInit{
       }
     }
 
-    if (formValues.transactionType === 'E') {
+    if (formValues.movementType === 'E') {
       if (formValues.expenseAccount === '') {
         this.stockTransactionForm.controls['expenseAccount'].setErrors({ 'incorrect': true });
         return;
@@ -220,7 +220,7 @@ export class StockTransactionAddComponent implements OnInit{
       }
     }
 
-    if(formValues.transactionType === 'I' && formValues.commerceType === 'General') {
+    if(formValues.movementType === 'I' && formValues.commerceType === 'General') {
       if (formValues.expenseAccount === '') {
         this.stockTransactionForm.controls['expenseAccount'].setErrors({ 'incorrect': true });
         return;
@@ -235,7 +235,7 @@ export class StockTransactionAddComponent implements OnInit{
       }
     }
 
-    if(formValues.transactionType === 'E' && formValues.commerceType === 'General') {
+    if(formValues.movementType === 'E' && formValues.commerceType === 'General') {
       if (formValues.incomeAccount === '') {
         this.stockTransactionForm.controls['incomeAccount'].setErrors({ 'incorrect': true });
         return;
@@ -255,7 +255,7 @@ export class StockTransactionAddComponent implements OnInit{
     }
 
     const stockTransactionAdd = {
-      stockTransactionType: formValues.transactionType,
+      stockMovementType: formValues.movementType,
       commerceType: formValues.commerceType,
       assetType: formValues.assetType,
       date: formValues.date,

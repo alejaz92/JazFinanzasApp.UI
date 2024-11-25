@@ -21,7 +21,7 @@ export class CryptoTransactionListComponent implements OnInit{
   loadCryptoTransactions() {
     this.cryptoTransactionService.getCryptoTransactions(this.page, 20)
       .subscribe(response => {
-        this.cryptoTransactions = response.movements; 
+        this.cryptoTransactions = response.transactions; 
 
         this.totalCryptoTransactions = response.totalCount;
       });
@@ -33,7 +33,7 @@ export class CryptoTransactionListComponent implements OnInit{
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  onDeleteMovement(cryptoTransaction: CryptoTransaction) {
+  onDeleteTransaction(cryptoTransaction: CryptoTransaction) {
     if (!confirm(`¿Estás seguro de eliminar el movimiento?`)) {
       return
     }

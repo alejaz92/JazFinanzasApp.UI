@@ -1,4 +1,4 @@
-export interface Movement {
+export interface Transaction {
     id: number;
     accountId: number;
     accountName: string;

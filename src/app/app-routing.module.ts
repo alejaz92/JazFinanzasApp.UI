@@ -17,10 +17,10 @@ import { TransactionClassAddComponent } from './features/transactionClass/transa
 import { TransactionClassEditComponent } from './features/transactionClass/transaction-class-edit/transaction-class-edit.component';
 import { AccountAssetTypeComponent } from './features/account/account-assettype/account-assetType.component';
 import { AssetManagementComponent } from './features/asset/asset-management/asset-management.component';
-import { MovementListComponent } from './features/movement/movement-list/movement-list.component';
-import { MovementAddComponent } from './features/movement/movement-add/movement-add.component';
-import { MovementEditComponent } from './features/movement/movement-edit/movement-edit.component';
-import { MovementRefundComponent } from './features/movement/movement-refund/movement-refund.component';
+import { TransactionListComponent } from './features/transaction/transaction-list/transaction-list.component';
+import { TransactionAddComponent } from './features/transaction/transaction-add/transaction-add.component';
+import { TransactionEditComponent } from './features/transaction/transaction-edit/transaction-edit.component';
+import { TransactionRefundComponent } from './features/transaction/transaction-refund/transaction-refund.component';
 import { CardTransactionsListComponent } from './features/cardTransactions/card-transactions-list/card-transactions-list.component';
 import { CardTransactionsAddComponent } from './features/cardTransactions/card-transactions-add/card-transactions-add.component';
 import { CardTransactionsPayComponent } from './features/cardTransactions/card-transactions-pay/card-transactions-pay.component';
@@ -116,23 +116,23 @@ const routes: Routes = [
     canActivate: [AuthGuard]
   },
   {
-    path: 'movements',
-    component: MovementListComponent,
+    path: 'transactions',
+    component: TransactionListComponent,
     canActivate: [AuthGuard]
   },
   {
-    path: 'movements/add',
-    component: MovementAddComponent,
+    path: 'transactions/add',
+    component: TransactionAddComponent,
     canActivate: [AuthGuard]
   },
   {
-    path: 'movements/:id',
-    component: MovementEditComponent,
+    path: 'transactions/:id',
+    component: TransactionEditComponent,
     canActivate: [AuthGuard]
   },
   {
-    path: 'movements/refund/:id',
-    component: MovementRefundComponent,
+    path: 'transactions/refund/:id',
+    component: TransactionRefundComponent,
     canActivate: [AuthGuard]
   },
   {

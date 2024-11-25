@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CardTransactionsService } from '../services/card-transactions.service';
 import { HttpClient } from '@angular/common/http';
-import { Movement } from 'src/app/features/movement/models/movement.model';
+import { Transaction } from 'src/app/features/transaction/models/transaction.model';
 import { TransactionClassService } from 'src/app/features/transactionClass/services/transaction-class.service';
 import { AssetService } from 'src/app/features/asset/services/asset.service';
 import { CardService } from 'src/app/features/card/services/card.service';

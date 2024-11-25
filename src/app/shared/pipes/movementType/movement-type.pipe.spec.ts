@@ -1,4 +1,4 @@
-import { MovementTypePipe } from './movement-type.pipe';
+import { MovementTypePipe } from './transaction-type.pipe';
 
 describe('MovementTypePipe', () => {
   it('create an instance', () => {

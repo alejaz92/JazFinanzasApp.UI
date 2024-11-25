@@ -10,15 +10,15 @@
     >
         <div class="row mb-3">
             <div class="col-md-6">
-                <label class="form-label" for="transactionType">Tipo de Movimiento</label>
-                <select id="transactionType" class="form-control" formControlName="transactionType" 
-                    (change)="onTransactionTypeChange($event)"
+                <label class="form-label" for="movementType">Tipo de Movimiento</label>
+                <select id="movementType" class="form-control" formControlName="movementType" 
+                    (change)="onMovementTypeChange($event)"
                 >
                     <option value="" disabled selected>Seleccione</option>
                     <option value="I">Ingreso</option>
                     <option value="E">Egreso</option>
                 </select>
-                <div class="text-danger mt-2" *ngIf="stockTransactionForm.controls['transactionType'].errors?.['incorrect']">
+                <div class="text-danger mt-2" *ngIf="stockTransactionForm.controls['movementType'].errors?.['incorrect']">
                     Debe seleccionarse un tipo de movimiento.
                 </div>
             </div>
@@ -60,8 +60,8 @@
         <div 
             class="row mb-3"
             id="ExpensesGroup"
-            *ngIf="selectedAssetType && selectedCommerceType && ( (selectedTransactionType === 'E') || 
-            (selectedTransactionType === 'I' && selectedCommerceType === 'General'))"
+            *ngIf="selectedAssetType && selectedCommerceType && ( (selectedMovementType === 'E') || 
+            (selectedMovementType === 'I' && selectedCommerceType === 'General'))"
         >
             <div class="col-12">
                 <h4>Egreso</h4>
@@ -93,7 +93,7 @@
                     Debe ingresarse una cantidad.
                 </div>
             </div>
-            <div class="col-md-6" *ngIf="selectedTransactionType === 'E'">
+            <div class="col-md-6" *ngIf="selectedMovementType === 'E'">
                 <label class="form-label" for="expenseQuote">Cotizacion en USD</label>
                 <input type="string" class="form-control" id="expenseQuote" formControlName="expenseQuote" appInvestmentInput>
                 <div class="text-danger mt-2" *ngIf="stockTransactionForm.controls['expenseQuote'].errors?.['incorrect']">
@@ -105,8 +105,8 @@
         <div 
             class="row mb-3"
             id="IncomesGroup"
-            *ngIf=" selectedAssetType && selectedCommerceType && ((selectedTransactionType === 'I') || 
-            (selectedTransactionType === 'E' && selectedCommerceType === 'General'))"
+            *ngIf=" selectedAssetType && selectedCommerceType && ((selectedMovementType === 'I') || 
+            (selectedMovementType === 'E' && selectedCommerceType === 'General'))"
         >
             <div class="col-12">
                 <h4>Ingreso</h4>
@@ -138,7 +138,7 @@
                     Debe ingresarse una cantidad.
                 </div>
             </div>
-            <div class="col-md-6" *ngIf="selectedTransactionType === 'I'">
+            <div class="col-md-6" *ngIf="selectedMovementType === 'I'">
                 <label class="form-label" for="incomeQuote">Cotizacion en USD</label>
                 <input type="string" class="form-control" id="incomeQuote" formControlName="incomeQuote" appInvestmentInput>
                 <div class="text-danger mt-2" *ngIf="stockTransactionForm.controls['incomeQuote'].errors?.['incorrect']">

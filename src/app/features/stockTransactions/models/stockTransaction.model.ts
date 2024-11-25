@@ -1,7 +1,7 @@
 export interface StockTransaction {
     id: number;
     date:  Date;
-    stockTransactionType: string;
+    stockMovementType: string;
     commerceType: string;
     assetType: string;
     expenseAsset?: string;

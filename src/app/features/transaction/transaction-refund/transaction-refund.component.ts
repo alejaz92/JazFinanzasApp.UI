@@ -1,31 +1,31 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { MovementRefund } from '../models/movement-refund.model';
-import { Movement } from '../models/movement.model';
+import { TransactionRefund } from '../models/transaction-refund.model';
+import { Transaction } from '../models/transaction.model';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MovementService } from '../services/movement.service';
+import { TransactionService } from '../services/transaction.service';
 import { AccountService } from '../../account/services/account.service';
 
 @Component({
-  selector: 'app-movement-refund',
-  templateUrl: './movement-refund.component.html',
-  styleUrls: ['./movement-refund.component.css']
+  selector: 'app-transaction-refund',
+  templateUrl: './transaction-refund.component.html',
+  styleUrls: ['./transaction-refund.component.css']
 })
-export class MovementRefundComponent implements OnInit, OnDestroy {
+export class TransactionRefundComponent implements OnInit, OnDestroy {
   refundForm!: FormGroup;
   id: string | null = null;
   paramsSubscription?: Subscription;
   refundSubscription?: Subscription;
-  refund?: MovementRefund;
-  movement?: Movement;
+  refund?: TransactionRefund;
+  transaction?: Transaction;
   successMessage: string = '';
   accounts: any[] = []; 
   
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute, 
-    private movementService: MovementService, 
+    private transactionService: TransactionService, 
     private accountService: AccountService,
     private router: Router) { }
 
@@ -42,13 +42,13 @@ export class MovementRefundComponent implements OnInit, OnDestroy {
       next: (params) => {        
         this.id = params.get('id');        
         if (this.id) {
-          this.movementService.getMovementById(Number(this.id)).subscribe({
+          this.transactionService.getTransactionById(Number(this.id)).subscribe({
             next: (response) => {
-              this.movement = response;
+              this.transaction = response;
 
               this.refundForm.patchValue({ // Actualiza el formulario
-                accountId: this.movement.accountId,
-                date: this.movement.date ? new Date(this.movement.date).toISOString().split('T')[0] : '', // Asegúrate de que se formatee correctamente
+                accountId: this.transaction.accountId,
+                date: this.transaction.date ? new Date(this.transaction.date).toISOString().split('T')[0] : '', // Asegúrate de que se formatee correctamente
               });
             }
           });
@@ -70,7 +70,7 @@ export class MovementRefundComponent implements OnInit, OnDestroy {
     } 
 
     const formValues = this.refundForm.value;
-    let oldValue = this.movement?.amount;
+    let oldValue = this.transaction?.amount;
     if (oldValue === undefined) {
       oldValue = 0;
     }
@@ -95,11 +95,11 @@ export class MovementRefundComponent implements OnInit, OnDestroy {
 
     if (this.id && this.refund) {  
       
-      this.refundSubscription = this.movementService.refundMovement(Number(this.id), this.refund).subscribe({
+      this.refundSubscription = this.transactionService.refundTransaction(Number(this.id), this.refund).subscribe({
         next: (response) => {
           this.successMessage = 'Reembolso realizado con éxito';
           setTimeout(() => {
-            this.router.navigate(['/movements']);
+            this.router.navigate(['/transactions']);
           }, 2000);
         }
       });

@@ -1,6 +1,6 @@
 export interface StockTransactionAdd {
     date:  Date;
-    stockTransactionType: string;
+    stockMovementType: string;
     commerceType: string;
     assetType: string;
     expenseAssetId?: string;

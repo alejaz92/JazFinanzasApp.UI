@@ -1,7 +1,7 @@
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1>Movimientos</h1>
-        <a class="btn btn-primary" [routerLink]="['/movements/add']">Nuevo <i class="bi-plus-lg"></i></a>
+        <a class="btn btn-primary" [routerLink]="['/transactions/add']">Nuevo <i class="bi-plus-lg"></i></a>
     </div>
 
     <!-- tabla de movimientos-->
@@ -20,24 +20,24 @@
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let movement of movements | paginate: { itemsPerPage: 20, currentPage: page, totalItems: totalMovements}">
-                    <td>{{ movement.date | date: 'dd/MM/yyyy' }}</td>
-                    <td>{{ movement.movementType | movementType }}</td>
-                    <td>{{ movement.transactionClassName }}</td>
-                    <td>{{ movement.detail }}</td>
-                    <td>{{ movement.accountName }}</td>
-                    <td>{{ movement.assetName }}</td>
-                    <td class="text-end" [ngClass]="{'table-danger': movement.amount < 0, 'table-success': movement.amount >= 0}">
-                        {{ movement.amount | currencyFiatFormat }}
+                <tr *ngFor="let transaction of transactions | paginate: { itemsPerPage: 20, currentPage: page, totalItems: totalTransactions}">
+                    <td>{{ transaction.date | date: 'dd/MM/yyyy' }}</td>
+                    <td>{{ transaction.movementType | movementType }}</td>
+                    <td>{{ transaction.transactionClassName }}</td>
+                    <td>{{ transaction.detail }}</td>
+                    <td>{{ transaction.accountName }}</td>
+                    <td>{{ transaction.assetName }}</td>
+                    <td class="text-end" [ngClass]="{'table-danger': transaction.amount < 0, 'table-success': transaction.amount >= 0}">
+                        {{ transaction.amount | currencyFiatFormat }}
                     </td>
                     <td>
                         <div class="justify-content-around">
-                            <button class="btn btn-sm btn-primary m-1" title="Editar" [routerLink]="['/movements', movement.id]" ><i class="bi-pencil-fill"></i></button>
-                            <button class="btn btn-sm btn-danger m-1" title="Eliminar" (click)="onDeleteMovement(movement)"><i class="bi-trash-fill"></i></button>
-                            <button *ngIf="movement.movementType === 'E'" 
+                            <button class="btn btn-sm btn-primary m-1" title="Editar" [routerLink]="['/transactions', transaction.id]" ><i class="bi-pencil-fill"></i></button>
+                            <button class="btn btn-sm btn-danger m-1" title="Eliminar" (click)="onDeleteTransaction(transaction)"><i class="bi-trash-fill"></i></button>
+                            <button *ngIf="transaction.movementType === 'E'" 
                                 class="btn btn-sm btn-warning m-1" 
                                 title="Reintegro" 
-                                [routerLink]="['/movements/refund', movement.id]">
+                                [routerLink]="['/transactions/refund', transaction.id]">
                                 <i class="bi-box-arrow-in-up-right"></i>
                             </button>
                         </div>

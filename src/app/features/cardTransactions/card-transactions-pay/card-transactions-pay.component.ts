@@ -128,27 +128,27 @@ export class CardTransactionsPayComponent implements OnInit {
     cardTransactionsArray.clear();
 
     
-    cardTransactions.forEach(movement => {
+    cardTransactions.forEach(transaction => {
 
 
-      const movementGroup = this.fb.group({
-        date: [movement.date],
-        transactionClassId: [movement.transactionClassId],
-        transactionClass: [movement.transactionClass],
-        detail: [movement.detail],
-        assetId: [movement.assetId],
-        asset: [movement.asset],
-        installment: [movement.installment],        
-        installmentAmount: [{ value: movement.installmentAmount, disabled: true }],
-        valueInPesos: [{ value: movement.valueInPesos, disabled: true }],
+      const transactionGroup = this.fb.group({
+        date: [transaction.date],
+        transactionClassId: [transaction.transactionClassId],
+        transactionClass: [transaction.transactionClass],
+        detail: [transaction.detail],
+        assetId: [transaction.assetId],
+        asset: [transaction.asset],
+        installment: [transaction.installment],        
+        installmentAmount: [{ value: transaction.installmentAmount, disabled: true }],
+        valueInPesos: [{ value: transaction.valueInPesos, disabled: true }],
         pay: true,
         isManual: false,
-        originalInstallmentAmount: [movement.installmentAmount],
-        originalValueInPesos: [movement.valueInPesos]
+        originalInstallmentAmount: [transaction.installmentAmount],
+        originalValueInPesos: [transaction.valueInPesos]
       });    
 
 
-      cardTransactionsArray.push(movementGroup);
+      cardTransactionsArray.push(transactionGroup);
 
 
 
