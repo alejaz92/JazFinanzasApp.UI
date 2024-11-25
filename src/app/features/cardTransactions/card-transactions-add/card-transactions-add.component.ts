@@ -1,21 +1,21 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { CardMovementsService } from '../../services/card-movements.service';
+import { CardTransactionsService } from '../services/card-transactions.service';
 import { HttpClient } from '@angular/common/http';
 import { Movement } from 'src/app/features/movement/models/movement.model';
 import { TransactionClassService } from 'src/app/features/transactionClass/services/transaction-class.service';
 import { AssetService } from 'src/app/features/asset/services/asset.service';
 import { CardService } from 'src/app/features/card/services/card.service';
-import { CardMovementsAdd } from '../../models/cardMovements-add.model';
+import { CardTransactionsAdd } from '../models/cardTransactions-add.model';
 import { first } from 'rxjs';
 
 @Component({
-  selector: 'app-card-movements-add',
-  templateUrl: './card-movements-add.component.html',
-  styleUrls: ['./card-movements-add.component.css']
+  selector: 'app-card-transactions-add',
+  templateUrl: './card-transactions-add.component.html',
+  styleUrls: ['./card-transactions-add.component.css']
 })
-export class CardMovementsAddComponent implements OnInit {
-  cardMovementForm!: FormGroup;
+export class CardTransactionsAddComponent implements OnInit {
+  cardTransactionForm!: FormGroup;
   selectedMovementType: string = '';
   assets: any[] = [];
   expenseClasses: any[] = [];
@@ -25,7 +25,7 @@ export class CardMovementsAddComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private cardMovementService: CardMovementsService,
+    private cardTransactionService: CardTransactionsService,
     private transactionClassesService: TransactionClassService,
     private assetService: AssetService,
     private cardService: CardService,
@@ -33,7 +33,7 @@ export class CardMovementsAddComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.cardMovementForm = this.fb.group({
+    this.cardTransactionForm = this.fb.group({
       movementType: ['', Validators.required],
       date: ['', Validators.required],
       asset: ['', Validators.required],
@@ -76,49 +76,49 @@ export class CardMovementsAddComponent implements OnInit {
   }
 
   onSubmit() {
-    const formValues = this.cardMovementForm.value;
+    const formValues = this.cardTransactionForm.value;
 
     if (formValues.movementType === '') {
-      this.cardMovementForm.controls['movementType'].setErrors({ 'incorrect': true });
+      this.cardTransactionForm.controls['movementType'].setErrors({ 'incorrect': true });
     }
 
     if(formValues.date === '') {
-      this.cardMovementForm.controls['date'].setErrors({ 'incorrect': true });
+      this.cardTransactionForm.controls['date'].setErrors({ 'incorrect': true });
     }
 
     if (formValues.asset === '') {
-      this.cardMovementForm.controls['asset'].setErrors({ 'incorrect': true });
+      this.cardTransactionForm.controls['asset'].setErrors({ 'incorrect': true });
     }
 
     if (formValues.card === '') {
-      this.cardMovementForm.controls['card'].setErrors({ 'incorrect': true });
+      this.cardTransactionForm.controls['card'].setErrors({ 'incorrect': true });
     }
 
     if (formValues.expenseClass === '') {
-      this.cardMovementForm.controls['expenseClass'].setErrors({ 'incorrect': true });
+      this.cardTransactionForm.controls['expenseClass'].setErrors({ 'incorrect': true });
     }
 
     if (formValues.detail === '') {
-      this.cardMovementForm.controls['detail'].setErrors({ 'incorrect': true });
+      this.cardTransactionForm.controls['detail'].setErrors({ 'incorrect': true });
     }
 
     if (formValues.totalAmount === '') {
-      this.cardMovementForm.controls['totalAmount'].setErrors({ 'incorrect': true });
+      this.cardTransactionForm.controls['totalAmount'].setErrors({ 'incorrect': true });
     }
 
     if(formValues.firstInstallmentDate === '') {
-      this.cardMovementForm.controls['firstInstallmentDate'].setErrors({ 'incorrect': true });
+      this.cardTransactionForm.controls['firstInstallmentDate'].setErrors({ 'incorrect': true });
     }
 
     if (formValues.movementType === 'U') {
       if (formValues.installments === '') {
-        this.cardMovementForm.controls['installments'].setErrors({ 'incorrect': true });
+        this.cardTransactionForm.controls['installments'].setErrors({ 'incorrect': true });
       }
     }
 
     const [year, month] = formValues.firstInstallmentDate.split('-');
 
-    var cardMovementAdd: CardMovementsAdd = {
+    var cardTransactionAdd: CardTransactionsAdd = {
       date: formValues.date,
       detail: formValues.detail,
       cardId: parseInt(formValues.card),
@@ -135,18 +135,18 @@ export class CardMovementsAddComponent implements OnInit {
 
     if (formValues.movementType === 'R') {
 
-      cardMovementAdd.repeat = "YES";
+      cardTransactionAdd.repeat = "YES";
 
     }
     else {
-      cardMovementAdd.lastInstallment = formValues.lastInstallmentDate + '-01';
+      cardTransactionAdd.lastInstallment = formValues.lastInstallmentDate + '-01';
     }
 
 
-    this.cardMovementService.addCardMovement(cardMovementAdd).subscribe((data: any) => {
-      this.cardMovementForm.reset();
-      this.cardMovementForm.controls['totalAmount'].setValue(0); 
-      this.cardMovementForm.controls['installments'].setValue(1); 
+    this.cardTransactionService.addCardTransaction(cardTransactionAdd).subscribe((data: any) => {
+      this.cardTransactionForm.reset();
+      this.cardTransactionForm.controls['totalAmount'].setValue(0); 
+      this.cardTransactionForm.controls['installments'].setValue(1); 
       this.successMessage = 'Gasto Tarjeta agregado correctamente';
 
       setTimeout(() => {
@@ -160,31 +160,31 @@ export class CardMovementsAddComponent implements OnInit {
 
   updateInstallments() {
     if (this.selectedMovementType === 'U') {
-      const [year, month] = this.cardMovementForm.value.firstInstallmentDate.split('-').map(Number);
+      const [year, month] = this.cardTransactionForm.value.firstInstallmentDate.split('-').map(Number);
     
       // Crear la fecha en el primer día del mes seleccionado
       const firstInstallmentDate = new Date(year, month - 1, 1);
 
       let lastInstallmentDate = new Date(firstInstallmentDate);
 
-      lastInstallmentDate.setMonth(firstInstallmentDate.getMonth() + this.cardMovementForm.value.installments - 1);
+      lastInstallmentDate.setMonth(firstInstallmentDate.getMonth() + this.cardTransactionForm.value.installments - 1);
 
-      this.cardMovementForm.controls['lastInstallmentDate'].setValue(this.formatDateToMonth(lastInstallmentDate));
+      this.cardTransactionForm.controls['lastInstallmentDate'].setValue(this.formatDateToMonth(lastInstallmentDate));
     }
   }
 
   assignFirstInstallment() {
 
-    const date = new Date(this.cardMovementForm.controls['date'].value);
+    const date = new Date(this.cardTransactionForm.controls['date'].value);
     const lastThursday = this.getLastThursday(date.getFullYear(), date.getMonth());
 
 
     // Comparación de fechas completa en lugar de solo días
     if (date > lastThursday) {
       const nextMonthDate = new Date(date.getFullYear(), date.getMonth() + 1);
-      this.cardMovementForm.controls['firstInstallmentDate'].setValue(this.formatDateToMonth(nextMonthDate));
+      this.cardTransactionForm.controls['firstInstallmentDate'].setValue(this.formatDateToMonth(nextMonthDate));
     } else {
-      this.cardMovementForm.controls['firstInstallmentDate'].setValue(this.formatDateToMonth(date));
+      this.cardTransactionForm.controls['firstInstallmentDate'].setValue(this.formatDateToMonth(date));
     }
 
     this.updateInstallments();

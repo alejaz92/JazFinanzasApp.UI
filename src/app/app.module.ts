@@ -32,10 +32,10 @@ import { MovementEditComponent } from './features/movement/movement-edit/movemen
 import { CommonModule } from '@angular/common';
 import { MovementRefundComponent } from './features/movement/movement-refund/movement-refund.component';
 import { SharedModule } from './shared/shared.module';
-import { CardMovementsListComponent } from './features/cardMovements/cardMovements-list/card-movements-list/card-movements-list.component';
-import { CardMovementsAddComponent } from './features/cardMovements/cardMovements-add/card-movements-add/card-movements-add.component';
-import { CardMovementsPayComponent } from './features/cardMovements/cardMovements-pay/card-movements-pay/card-movements-pay.component';
-import { CardMovementsEditRecurrentComponent } from './features/cardMovements/card-movements-edit-recurrent/card-movements-edit-recurrent.component';
+import { CardTransactionsListComponent } from './features/cardTransactions/card-transactions-list/card-transactions-list.component';
+import { CardTransactionsAddComponent } from './features/cardTransactions/card-transactions-add/card-transactions-add.component';
+import { CardTransactionsPayComponent } from './features/cardTransactions/card-transactions-pay/card-transactions-pay.component';
+import { CardTransactionsEditRecurrentComponent } from './features/cardTransactions/card-transactions-edit-recurrent/card-transactions-edit-recurrent.component';
 import { CryptoTransactionListComponent } from './features/cryptoTransaction/crypto-transaction-list/crypto-transaction-list.component';
 import { CryptoTransactionAddComponent } from './features/cryptoTransaction/crypto-transaction-add/crypto-transaction-add.component';
 import { StockTransactionListComponent } from './features/stockTransactions/stock-transaction-list/stock-transaction-list.component';
@@ -72,10 +72,10 @@ import { CurrencyExchangeAddComponent } from './features/CurrencyExchange/curren
     MovementAddComponent,
     MovementEditComponent,
     MovementRefundComponent,
-    CardMovementsListComponent,
-    CardMovementsAddComponent,
-    CardMovementsPayComponent,
-    CardMovementsEditRecurrentComponent,
+    CardTransactionsListComponent,
+    CardTransactionsAddComponent,
+    CardTransactionsPayComponent,
+    CardTransactionsEditRecurrentComponent,
     CryptoTransactionListComponent,
     CryptoTransactionAddComponent,
     StockTransactionListComponent,

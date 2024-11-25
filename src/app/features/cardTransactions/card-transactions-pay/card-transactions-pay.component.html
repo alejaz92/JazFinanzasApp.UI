@@ -103,7 +103,7 @@
                 </div>
             </div>
 
-            <div class="col-md-9 col-sm-12-" *ngIf="cardMovementsArray.length > 0">
+            <div class="col-md-9 col-sm-12-" *ngIf="cardTransactionsArray.length > 0">
                 <div class="card">
                     <div class="card-header">
                         <h5>Gastos Tarjeta</h5>
@@ -123,22 +123,22 @@
                                         <th>Pagar</th>
                                     </tr>
                                 </thead>
-                                <tbody formArrayName="cardMovementsArray">
+                                <tbody formArrayName="cardTransactionsArray">
                                     <tr 
                                         class="align-middle" 
-                                        *ngFor="let cardMovement of cardMovementsArray.controls; let i = index" 
+                                        *ngFor="let cardTransaction of cardTransactionsArray.controls; let i = index" 
                                         [formGroupName]="i"
                                         
                                     >
                                        
-                                        <td *ngIf="!cardMovement.get('isManual')?.value">{{ cardMovement.value.date | date: 'dd/MM/yyyy' }}</td>
-                                        <td *ngIf="cardMovement.get('isManual')?.value">
+                                        <td *ngIf="!cardTransaction.get('isManual')?.value">{{ cardTransaction.value.date | date: 'dd/MM/yyyy' }}</td>
+                                        <td *ngIf="cardTransaction.get('isManual')?.value">
                                             <input type="date" class="form-control small-font-input" formControlName="date">
                                         </td>
                                         
 
-                                        <td *ngIf="!cardMovement.get('isManual')?.value">{{ cardMovement.value.transactionClass }}</td>
-                                        <td *ngIf="cardMovement.get('isManual')?.value">
+                                        <td *ngIf="!cardTransaction.get('isManual')?.value">{{ cardTransaction.value.transactionClass }}</td>
+                                        <td *ngIf="cardTransaction.get('isManual')?.value">
                                             <select class="form-control small-font-input" formControlName="transactionClassId">
                                                 <option *ngFor="let option of transactionClasses" [value]="option.id">{{ option.description }}</option>
                                             </select>
@@ -146,15 +146,15 @@
 
 
 
-                                        <td *ngIf="!cardMovement.get('isManual')?.value">{{ cardMovement.value.detail }}</td>
-                                        <td *ngIf="cardMovement.get('isManual')?.value">
+                                        <td *ngIf="!cardTransaction.get('isManual')?.value">{{ cardTransaction.value.detail }}</td>
+                                        <td *ngIf="cardTransaction.get('isManual')?.value">
                                             <input type="text" class="form-control small-font-input" formControlName="detail">
                                         </td>
 
-                                        <td >{{ cardMovement.value.installment }}</td>
+                                        <td >{{ cardTransaction.value.installment }}</td>
 
-                                        <td *ngIf="!cardMovement.get('isManual')?.value">{{ cardMovement.value.asset}}</td> 
-                                        <td *ngIf="cardMovement.get('isManual')?.value">
+                                        <td *ngIf="!cardTransaction.get('isManual')?.value">{{ cardTransaction.value.asset}}</td> 
+                                        <td *ngIf="cardTransaction.get('isManual')?.value">
                                             <select class="form-control small-font-input" formControlName="assetId">
                                               <option *ngFor="let asset of assets" [value]="asset.id">{{ asset.name }}</option>
                                             </select>
@@ -178,8 +178,8 @@
                                                 appCurrencyInput
                                             >
                                         </td>
-                                        <!-- <td>{{cardMovement.value.installmentAmount}}</td>
-                                        <td>{{cardMovement.value.valueInPesos}}</td> -->
+                                        <!-- <td>{{cardTransaction.value.installmentAmount}}</td>
+                                        <td>{{cardTransaction.value.valueInPesos}}</td> -->
                                   
                                         <td>
                                             <input 
@@ -214,7 +214,7 @@
 
                             <div class="ms-auto">
                                 <button type="submit" class="btn btn-primary m-1">Pagar</button>
-                                <a class="btn btn-secondary m-1" [routerLink]="['/cardMovements']">Volver</a>
+                                <a class="btn btn-secondary m-1" [routerLink]="['/cardTransactions']">Volver</a>
                             </div>
                             
                         </div>

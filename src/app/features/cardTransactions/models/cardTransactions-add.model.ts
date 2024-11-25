@@ -1,4 +1,4 @@
-export interface CardMovementsAdd {
+export interface CardTransactionsAdd {
     date: Date;
     detail: string;
     cardId: number;

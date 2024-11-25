@@ -1,4 +1,4 @@
-export interface CardMovementPaymentList {
+export interface CardTransactionPaymentList {
     date: string;
     transactionClassId: number;
     transactionClass: string;

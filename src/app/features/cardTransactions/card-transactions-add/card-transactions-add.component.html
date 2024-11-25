@@ -4,7 +4,7 @@
         {{ successMessage }}
     </div>
 
-    <form [formGroup]="cardMovementForm" (ngSubmit)="onSubmit()">
+    <form [formGroup]="cardTransactionForm" (ngSubmit)="onSubmit()">
 
         <div class="row mb-3">
             <div class="col">
@@ -15,7 +15,7 @@
                     <option value="U">Unico</option>
                     <option value="R">Recurrente</option>
                 </select>
-                <div *ngIf="cardMovementForm.controls['movementType'].errors?.['incorrect'] " class="text-danger mt-2">
+                <div *ngIf="cardTransactionForm.controls['movementType'].errors?.['incorrect'] " class="text-danger mt-2">
                     Debe seleccionarse un tipo de movimiento.
                 </div>
             </div>
@@ -24,7 +24,7 @@
             <div class="col-md-6">
                 <label for="date" class="form-label">Fecha</label>
                 <input type="date" class="form-control" id="date" formControlName="date" (change)="assignFirstInstallment()">
-                <div *ngIf="cardMovementForm.controls['date'].errors?.['incorrect'] " class="text-danger mt-2">
+                <div *ngIf="cardTransactionForm.controls['date'].errors?.['incorrect'] " class="text-danger mt-2">
                     Debe seleccionarse una fecha.
                 </div>
             </div>
@@ -34,7 +34,7 @@
                     <option value="" disabled selected>Seleccione</option>
                     <option *ngFor="let asset of assets" [value]="asset.id">{{ asset.name }}</option>
                 </select>
-                <div *ngIf="cardMovementForm.controls['asset'].errors?.['incorrect'] " class="text-danger mt-2">
+                <div *ngIf="cardTransactionForm.controls['asset'].errors?.['incorrect'] " class="text-danger mt-2">
                     Debe seleccionarse una moneda.
                 </div>
             </div>
@@ -47,7 +47,7 @@
                     <option *ngFor="let card of cards" [value]="card.id">{{ card.name }}</option>
                 </select>
 
-                <div *ngIf="cardMovementForm.controls['card'].errors?.['incorrect'] " class="text-danger mt-2">
+                <div *ngIf="cardTransactionForm.controls['card'].errors?.['incorrect'] " class="text-danger mt-2">
                     Debe seleccionarse una tarjeta.
                 </div>
             </div>
@@ -58,7 +58,7 @@
                     <option *ngFor="let expenseClass of expenseClasses" [value]="expenseClass.id">
                         {{ expenseClass.description }}</option>
                 </select>     
-                <div *ngIf="cardMovementForm.controls['expenseClass'].errors?.['incorrect'] " class="text-danger mt-2">
+                <div *ngIf="cardTransactionForm.controls['expenseClass'].errors?.['incorrect'] " class="text-danger mt-2">
                     Debe seleccionarse una Clase de Movimiento.
                 </div>           
             </div>
@@ -67,7 +67,7 @@
             <div class="col">
                 <label for="detail" class="form-label">Detalle</label>
                 <input type="text" class="form-control" id="detail" formControlName="detail">
-                <div *ngIf="cardMovementForm.controls['detail'].errors?.['incorrect'] " class="text-danger mt-2">
+                <div *ngIf="cardTransactionForm.controls['detail'].errors?.['incorrect'] " class="text-danger mt-2">
                     Debe escribirse un detalle.
                 </div>
             </div>
@@ -82,7 +82,7 @@
                     <input type="text" class="form-control" id="totalAmount" formControlName="totalAmount" 
                         appCurrencyInput>
                 </div>
-                <div class="text-danger" *ngIf="cardMovementForm.controls['totalAmount'].errors?.['incorrect']">
+                <div class="text-danger" *ngIf="cardTransactionForm.controls['totalAmount'].errors?.['incorrect']">
                     El monto debe ser un número válido mayor que 0.
                 </div>
 
@@ -99,7 +99,7 @@
                 <label for="firstInstallmentDate" class="form-label">Primer Cuota</label>
                 <input type="month" class="form-control" id="firstInstallmentDate" formControlName="firstInstallmentDate"
                 (change)="updateInstallments()">
-                <div *ngIf="cardMovementForm.controls['firstInstallmentDate'].errors?.['incorrect'] " class="text-danger mt-2">
+                <div *ngIf="cardTransactionForm.controls['firstInstallmentDate'].errors?.['incorrect'] " class="text-danger mt-2">
                     Debe seleccionarse un mes de Pago Inicial.
                 </div>
             </div>
@@ -113,7 +113,7 @@
         <div class="row mb-3">
             <div class="mt-1">
                 <button type="submit" class="btn btn-primary m-1">Guardar</button>
-                <a [routerLink]="['/cardMovements']" class="btn btn-secondary m-1">Volver</a>
+                <a [routerLink]="['/cardTransactions']" class="btn btn-secondary m-1">Volver</a>
             </div>
         </div>
 

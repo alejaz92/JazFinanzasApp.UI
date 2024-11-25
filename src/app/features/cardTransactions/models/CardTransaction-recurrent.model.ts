@@ -1,4 +1,4 @@
-export interface RecurrentCardMovementGet {
+export interface RecurrentCardTransactionGet {
     id: number;
     date: Date;
     firstInstallment: Date;
@@ -7,7 +7,7 @@ export interface RecurrentCardMovementGet {
     amount: number;
 }
 
-export interface RecurrentCardMovementPut {
+export interface RecurrentCardTransactionPut {
     isUpdate: boolean;
     newDate: Date;
     newAmount?: number;

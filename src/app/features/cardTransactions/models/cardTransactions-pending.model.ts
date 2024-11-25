@@ -1,4 +1,4 @@
-export interface CardMovementPending {
+export interface CardTransactionPending {
     id: number;
     date: Date;
     card: string;

@@ -1,18 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { CardMovementsService } from '../services/card-movements.service';
+import { CardTransactionsService } from '../services/card-transactions.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { first, Subscription } from 'rxjs';
-import { RecurrentCardMovementPut } from '../models/CardMovement-recurrent.model';
+import { RecurrentCardTransactionPut } from '../models/CardTransaction-recurrent.model';
 import { DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'app-card-movements-edit-recurrent',
-  templateUrl: './card-movements-edit-recurrent.component.html',
-  styleUrls: ['./card-movements-edit-recurrent.component.css'],
+  selector: 'app-card-transactions-edit-recurrent',
+  templateUrl: './card-transactions-edit-recurrent.component.html',
+  styleUrls: ['./card-transactions-edit-recurrent.component.css'],
   providers: [DatePipe]
 })
-export class CardMovementsEditRecurrentComponent implements OnInit{
+export class CardTransactionsEditRecurrentComponent implements OnInit{
   successMessage: string = '';
   editRecurrentForm!: FormGroup;
   action: string = 'Edit';
@@ -22,7 +22,7 @@ export class CardMovementsEditRecurrentComponent implements OnInit{
     private route: ActivatedRoute,
     private router: Router,
     private fb: FormBuilder,
-    private cardMovementsService: CardMovementsService,
+    private cardTransactionsService: CardTransactionsService,
     private datePipe: DatePipe
   ) {
     const today = new Date();
@@ -50,7 +50,7 @@ export class CardMovementsEditRecurrentComponent implements OnInit{
   }
 
   loadMovementDetails(id: number) {
-    this.cardMovementsService.getRecurrentCardMovements(id).subscribe(
+    this.cardTransactionsService.getRecurrentCardTransactions(id).subscribe(
       (data) => {
 
         const formattedDate = this.datePipe.transform(data.date, 'dd/MM/yyyy');
@@ -99,7 +99,7 @@ export class CardMovementsEditRecurrentComponent implements OnInit{
     const formValue = {
       newDate: this.editRecurrentForm.get('newDate')?.value,
       isUpdate: true
-    } as RecurrentCardMovementPut;
+    } as RecurrentCardTransactionPut;
 
     if (this.action === 'Edit') {
       formValue.isUpdate = true
@@ -132,12 +132,12 @@ export class CardMovementsEditRecurrentComponent implements OnInit{
     }
 
 
-    this.cardMovementsService.editRecurrentCardMovement(this.id, formValue).subscribe(
+    this.cardTransactionsService.editRecurrentCardTransaction(this.id, formValue).subscribe(
       (response) => {
 
         this.successMessage = 'Movimiento de tarjeta actualizado correctamente';
         setTimeout(() => {
-          this.router.navigateByUrl('/cardMovements');
+          this.router.navigateByUrl('/cardTransactions');
         }, 3000);
       }, 
       (error) => {

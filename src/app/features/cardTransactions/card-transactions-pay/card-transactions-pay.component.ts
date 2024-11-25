@@ -2,24 +2,24 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { AccountService } from 'src/app/features/account/services/account.service';
 import { CardService } from 'src/app/features/card/services/card.service';
-import { CardMovementsService } from '../../services/card-movements.service';
-import { CardMovementPaymentList } from '../../models/CardMovementPayment-List.model';
+import { CardTransactionsService } from '../services/card-transactions.service';
+import { CardTransactionPaymentList } from '../models/CardTransactionPayment-List.model';
 import { TransactionClassService } from 'src/app/features/transactionClass/services/transaction-class.service';
 import { AssetService } from 'src/app/features/asset/services/asset.service';
 import { TmplAstVariable } from '@angular/compiler';
 
 @Component({
-  selector: 'app-card-movements-pay',
-  templateUrl: './card-movements-pay.component.html',
-  styleUrls: ['./card-movements-pay.component.css']
+  selector: 'app-card-transactions-pay',
+  templateUrl: './card-transactions-pay.component.html',
+  styleUrls: ['./card-transactions-pay.component.css']
 })
-export class CardMovementsPayComponent implements OnInit {
+export class CardTransactionsPayComponent implements OnInit {
   cardPaymentForm!: FormGroup;
   cards: any[] = [];
   accounts: any[] = [];
   transactionClasses: any[] = [];
   assets: any[] = [];
-  cardMovements: CardMovementPaymentList[] = [];
+  cardTransactions: CardTransactionPaymentList[] = [];
   selectedPaymentAssets: string | null = null;
   successMessage: string = '';
   tableLength: number = 0;
@@ -31,11 +31,11 @@ export class CardMovementsPayComponent implements OnInit {
     private accountService: AccountService,
     private assetService: AssetService,
     private transactionClassService: TransactionClassService,
-    private cardMovementService: CardMovementsService
+    private cardTransactionService: CardTransactionsService
   ) { }
 
-  get cardMovementsArray(): FormArray {
-    return this.cardPaymentForm.get('cardMovementsArray') as FormArray;
+  get cardTransactionsArray(): FormArray {
+    return this.cardPaymentForm.get('cardTransactionsArray') as FormArray;
   }
 
   ngOnInit(): void {  
@@ -52,7 +52,7 @@ export class CardMovementsPayComponent implements OnInit {
       paymentAssets: ['', Validators.required],
       pesosPayment: ['', Validators.required],
       cardExpenses: [''],
-      cardMovementsArray: this.fb.array([]) 
+      cardTransactionsArray: this.fb.array([]) 
     });
 
 
@@ -69,7 +69,7 @@ export class CardMovementsPayComponent implements OnInit {
       this.updateEditOptions();
     });
     this.cardPaymentForm.get('pesosPayment')?.valueChanges.subscribe(() => this.updateCardExpenses());
-    this.cardPaymentForm.get('cardMovementsArray')?.valueChanges.subscribe(() => this.updateCardExpenses());    
+    this.cardPaymentForm.get('cardTransactionsArray')?.valueChanges.subscribe(() => this.updateCardExpenses());    
   }
 
   loadCards() {
@@ -101,19 +101,19 @@ export class CardMovementsPayComponent implements OnInit {
     const card = this.cardPaymentForm.get('card')?.value;
     const paymentMonth = this.cardPaymentForm.get('paymentMonth')?.value;
 
-    this.cardMovementsArray.clear();
+    this.cardTransactionsArray.clear();
     
 
     if (card && paymentMonth) {
-      this.cardMovementService.getPaymentCardMovements(card, paymentMonth).subscribe((data: CardMovementPaymentList[]) => {
+      this.cardTransactionService.getPaymentCardTransactions(card, paymentMonth).subscribe((data: CardTransactionPaymentList[]) => {
         
 
 
-        this.cardMovements = data;
+        this.cardTransactions = data;
 
-        this.originalTableLength = this.tableLength = this.cardMovements.length;
+        this.originalTableLength = this.tableLength = this.cardTransactions.length;
 
-        this.populateCardMovementsArray(this.cardMovements);
+        this.populateCardTransactionsArray(this.cardTransactions);
 
         if (this.selectedPaymentAssets) {
           this.updateEditOptions();
@@ -123,12 +123,12 @@ export class CardMovementsPayComponent implements OnInit {
     }
   }
 
-  populateCardMovementsArray(cardMovements: CardMovementPaymentList[]) {
-    const cardMovementsArray = this.cardMovementsArray;
-    cardMovementsArray.clear();
+  populateCardTransactionsArray(cardTransactions: CardTransactionPaymentList[]) {
+    const cardTransactionsArray = this.cardTransactionsArray;
+    cardTransactionsArray.clear();
 
     
-    cardMovements.forEach(movement => {
+    cardTransactions.forEach(movement => {
 
 
       const movementGroup = this.fb.group({
@@ -148,7 +148,7 @@ export class CardMovementsPayComponent implements OnInit {
       });    
 
 
-      cardMovementsArray.push(movementGroup);
+      cardTransactionsArray.push(movementGroup);
 
 
 
@@ -159,7 +159,7 @@ export class CardMovementsPayComponent implements OnInit {
   updateEditOptions() {
     const paymentAssets = this.selectedPaymentAssets;
 
-    this.cardMovementsArray.controls.forEach((control) => {
+    this.cardTransactionsArray.controls.forEach((control) => {
       if (paymentAssets === 'Pesos') {
         control.get('valueInPesos')?.enable();
         control.get('installmentAmount')?.disable();
@@ -190,7 +190,7 @@ export class CardMovementsPayComponent implements OnInit {
   // Método para actualizar el formato
 refreshCurrencyFormat() {
   setTimeout(() => {
-    this.cardMovementsArray.controls.forEach((control) => {
+    this.cardTransactionsArray.controls.forEach((control) => {
       control.get('installmentAmount')?.updateValueAndValidity();
       control.get('valueInPesos')?.updateValueAndValidity();
     });
@@ -203,11 +203,11 @@ refreshCurrencyFormat() {
 
     if (pesosPayment != '' && paymentAssets != null) {
       
-      const cardMovementsArray = this.cardMovementsArray;
+      const cardTransactionsArray = this.cardTransactionsArray;
 
-      //recorrer cardMovementsArray y sumar installmentamount
+      //recorrer cardTransactionsArray y sumar installmentamount
       let total = 0;
-      cardMovementsArray.controls.forEach((control) => {
+      cardTransactionsArray.controls.forEach((control) => {
         if (control.get('pay')?.value) {
           if (paymentAssets === 'Pesos') {
             total += parseFloat(control.get('valueInPesos')?.value);
@@ -235,7 +235,7 @@ refreshCurrencyFormat() {
 
   addManualEntry() {
     // Chequear si la tabla tiene valores previamente
-    if (this.cardMovementsArray.length === 0) {
+    if (this.cardTransactionsArray.length === 0) {
       alert("La tabla está vacía. Debes tener al menos una fila existente antes de agregar una manual.");
       return;
     }
@@ -256,8 +256,8 @@ refreshCurrencyFormat() {
 
     })
 
-    this.cardMovementsArray.push(manualEntry);
-    this.tableLength = this.cardMovementsArray.length;
+    this.cardTransactionsArray.push(manualEntry);
+    this.tableLength = this.cardTransactionsArray.length;
 
     this.updateEditOptions();
   }
@@ -271,10 +271,10 @@ refreshCurrencyFormat() {
       return;
     }
 
-    const lastManualEntry = this.cardMovementsArray.controls[this.cardMovementsArray.length - 1];
+    const lastManualEntry = this.cardTransactionsArray.controls[this.cardTransactionsArray.length - 1];
     if (lastManualEntry.get('isManual')?.value) {
-      this.cardMovementsArray.removeAt(this.cardMovementsArray.length - 1);
-      this.tableLength = this.cardMovementsArray.length;
+      this.cardTransactionsArray.removeAt(this.cardTransactionsArray.length - 1);
+      this.tableLength = this.cardTransactionsArray.length;
     } else {
       alert("La última fila no es una fila manual.");
     }
@@ -307,7 +307,7 @@ refreshCurrencyFormat() {
     let totalPesos = 0;
     let totalDollars = 0;
 
-    this.cardMovementsArray.controls.forEach((control) => {
+    this.cardTransactionsArray.controls.forEach((control) => {
       if (control.get('pay')?.value) {
         if (this.selectedPaymentAssets === 'Pesos') {
           totalPesos += parseFloat(control.get('valueInPesos')?.value);
@@ -375,7 +375,7 @@ refreshCurrencyFormat() {
 
 
     // check if there are any rows with missing values, except for the disabled inputs
-    const incompleteRow = this.cardMovementsArray.controls.find((control) => this.isRowIncomplete(control as FormGroup));
+    const incompleteRow = this.cardTransactionsArray.controls.find((control) => this.isRowIncomplete(control as FormGroup));
     if (incompleteRow) {
       alert("Hay filas incompletas. Por favor, completa todos los campos antes de continuar.");
       return;
@@ -384,7 +384,7 @@ refreshCurrencyFormat() {
 
 
 
-    const cardMovements = this.cardMovementsArray.controls
+    const cardTransactions = this.cardTransactionsArray.controls
       .filter(control => control.get('pay')?.value)
       .map(control => ({
         date: control.get('date')?.value,
@@ -405,7 +405,7 @@ refreshCurrencyFormat() {
         pesosAmount: parseFloat(this.cardPaymentForm.get('pesosPayment')?.value),
         dolarAmount: 0,
         cardExpenses: parseFloat(this.cardPaymentForm.get('cardExpenses')?.value),
-        cardMovements: cardMovements        
+        cardTransactions: cardTransactions        
       }
 
       if (cardPaymentRequest.paymentAsset === 'Pesos+Dolar') {
@@ -416,10 +416,10 @@ refreshCurrencyFormat() {
 
 
       //console.log(cardPaymentRequest);
-      this.cardMovementService.createCardPayment(cardPaymentRequest).subscribe(() => {
+      this.cardTransactionService.createCardPayment(cardPaymentRequest).subscribe(() => {
         
         this.cardPaymentForm.reset();
-        this.cardMovementsArray.clear();
+        this.cardTransactionsArray.clear();
 
         this.successMessage = 'Movimiento creado con éxito';
         setTimeout(() => {

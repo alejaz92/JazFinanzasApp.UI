@@ -1,0 +1,54 @@
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>Movimientos Tarjeta de Credito</h1>
+        <div>
+            <a class="btn btn-primary m-1" [routerLink]="['/cardTransactions/add']">Nuevo <i class="bi-plus-lg"></i></a>
+            <a class="btn btn-warning" [routerLink]="['/cardTransactions/pay']">Pago Tarjeta</a> 
+        </div>        
+    </div>
+
+    <!-- tabla de movimientos-->
+     <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Tarjeta</th>
+                    <th>Clase Movimiento</th>
+                    <th>Detalle</th>
+                    <th>Cuotas</th>
+                    <th>Moneda</th>
+                    <th class="text-end">Monto</th>
+                    <th>Primer Cuota</th>
+                    <th>Ultima Cuota</th>
+                    <th class="text-end">Monto Cuota</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let cardTransaction of cardTransactions" >
+                    <td class="align-middle">{{cardTransaction.date | date: 'dd/MM/yyyy'}}</td>
+                    <td class="align-middle">{{cardTransaction.card}}</td>
+                    <td class="align-middle">{{cardTransaction.transactionClass}}</td>
+                    <td class="align-middle">{{cardTransaction.detail}}</td>
+                    <td class="align-middle">{{cardTransaction.installments}}</td>
+                    <td class="align-middle">{{cardTransaction.asset}}</td>
+                    <td class="align-middle text-end">{{cardTransaction.totalAmount | currencyFiatFormat}}</td>
+                    <td class="align-middle">{{cardTransaction.firstInstallment | date: 'MM/yyyy'}}</td>
+                    <td class="align-middle">{{cardTransaction.lastInstallment}}</td>
+                    <td class="align-middle text-end">{{cardTransaction.installmentAmount | currencyFiatFormat}}</td>
+                    <td class="align-middle">
+                        <div class="justify-content-around">
+                            <button 
+                                *ngIf="cardTransaction.installments == 'Recurrente'" 
+                                class="btn btn-sm btn-primary m-1" 
+                                title="Editar Recurrente" 
+                                [routerLink]="['/cardTransactions/editRecurrent', cardTransaction.id]"
+                            ><i class="bi-pencil-fill"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+     </div>
+</div>
