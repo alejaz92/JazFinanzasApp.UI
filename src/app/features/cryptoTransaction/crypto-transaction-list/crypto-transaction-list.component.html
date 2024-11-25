@@ -1,7 +1,7 @@
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1>Movimientos Crypto</h1>
-        <a class="btn btn-primary" [routerLink]="['/cryptoMovements/add']">Nuevo <i class="bi-plus-lg"></i></a>
+        <a class="btn btn-primary" [routerLink]="['/cryptoTransactions/add']">Nuevo <i class="bi-plus-lg"></i></a>
     </div>
 
     <!-- tabla de movimientos-->
@@ -26,7 +26,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let movement of cryptoMovements | paginate: { itemsPerPage: 20, currentPage: page, totalItems: totalCryptoMovements}">
+                <tr *ngFor="let movement of cryptoTransactions | paginate: { itemsPerPage: 20, currentPage: page, totalItems: totalCryptoTransactions}">
                     <td>{{ movement.date | date: 'dd/MM/yyyy' }}</td>
                     <td>{{ movement.movementType | movementType }}</td>
                     <td>{{ movement.commerceType | commerceType }}</td>

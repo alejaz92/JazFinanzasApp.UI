@@ -1,16 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { CryptoMovementService } from '../services/crypto-movement.service';
+import { CryptoTransactionService } from '../services/crypto-transaction.service';
 import { AccountService } from '../../account/services/account.service';
 import { AssetService } from '../../asset/services/asset.service';
 
 @Component({
-  selector: 'app-crypto-movement-add',
-  templateUrl: './crypto-movement-add.component.html',
-  styleUrls: ['./crypto-movement-add.component.css']
+  selector: 'app-crypto-transaction-add',
+  templateUrl: './crypto-transaction-add.component.html',
+  styleUrls: ['./crypto-transaction-add.component.css']
 })
-export class CryptoMovementAddComponent implements OnInit {
-  cryptoMovementForm!: FormGroup;
+export class CryptoTransactionAddComponent implements OnInit {
+  cryptoTransactionForm!: FormGroup;
   selectedMovementType: string = '';
   selectedCommerceType: string = '';
   cryptoAccounts: any[] = [];
@@ -28,13 +28,13 @@ export class CryptoMovementAddComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private cryptoMovementService: CryptoMovementService,
+    private cryptoTransactionService: CryptoTransactionService,
     private accountService: AccountService,
     private assetService: AssetService,
   ) { }
 
   ngOnInit(): void {
-    this.cryptoMovementForm = this.fb.group({
+    this.cryptoTransactionForm = this.fb.group({
       movementType: ['', Validators.required],
       commerceType: ['', Validators.required],
       date: ['', Validators.required],
@@ -73,7 +73,7 @@ export class CryptoMovementAddComponent implements OnInit {
   onMovementTypeChange(event: any) {
     this.selectedMovementType = event.target.value;
 
-    this.cryptoMovementForm.get('commerceType')?.setValue('');
+    this.cryptoTransactionForm.get('commerceType')?.setValue('');
     this.selectedCommerceType = '';
     
 
@@ -124,7 +124,7 @@ export class CryptoMovementAddComponent implements OnInit {
   }
 
   onSubmit() {
-    const formValues = this.cryptoMovementForm.value;
+    const formValues = this.cryptoTransactionForm.value;
     formValues.incomeAmount = parseFloat(formValues.incomeAmount);
     formValues.expenseAmount = parseFloat(formValues.expenseAmount);
     formValues.incomeQuote = parseFloat(formValues.incomeQuote);
@@ -136,89 +136,89 @@ export class CryptoMovementAddComponent implements OnInit {
 
 
     if (formValues.movementType === '') {
-      this.cryptoMovementForm.controls['movementType'].setErrors({ 'incorrect': true });
+      this.cryptoTransactionForm.controls['movementType'].setErrors({ 'incorrect': true });
       return;
     }
 
     if (formValues.commerceType === '') {
-      this.cryptoMovementForm.controls['commerceType'].setErrors({ 'incorrect': true });
+      this.cryptoTransactionForm.controls['commerceType'].setErrors({ 'incorrect': true });
       return;
     }
 
     if (formValues.date === '') {
-      this.cryptoMovementForm.controls['date'].setErrors({ 'incorrect': true });
+      this.cryptoTransactionForm.controls['date'].setErrors({ 'incorrect': true });
       return;
     }
 
     if (formValues.movementType === 'I' || formValues.movementType === 'EX') {
       if (formValues.incomeAccount === '') {
-        this.cryptoMovementForm.controls['incomeAccount'].setErrors({ 'incorrect': true });
+        this.cryptoTransactionForm.controls['incomeAccount'].setErrors({ 'incorrect': true });
         return;
       }
       if (formValues.incomeAsset === '') {
-        this.cryptoMovementForm.controls['incomeAsset'].setErrors({ 'incorrect': true });
+        this.cryptoTransactionForm.controls['incomeAsset'].setErrors({ 'incorrect': true });
         return;
       }
       if (isNaN(formValues.incomeAmount) || formValues.incomeAmount <= 0) {
-        this.cryptoMovementForm.controls['incomeAmount'].setErrors({ 'incorrect': true });
+        this.cryptoTransactionForm.controls['incomeAmount'].setErrors({ 'incorrect': true });
         return;
       }
       if (isNaN(formValues.incomeQuote) || formValues.incomeQuote <= 0) {
-        this.cryptoMovementForm.controls['incomeQuote'].setErrors({ 'incorrect': true });
+        this.cryptoTransactionForm.controls['incomeQuote'].setErrors({ 'incorrect': true });
         return;
       }
     }
 
     if (formValues.movementType === 'E' || formValues.movementType === 'EX') {
       if (formValues.expenseAccount === '') {
-        this.cryptoMovementForm.controls['expenseAccount'].setErrors({ 'incorrect': true });
+        this.cryptoTransactionForm.controls['expenseAccount'].setErrors({ 'incorrect': true });
         return;
       }
       if (formValues.expenseAsset === '') {
-        this.cryptoMovementForm.controls['expenseAsset'].setErrors({ 'incorrect': true });
+        this.cryptoTransactionForm.controls['expenseAsset'].setErrors({ 'incorrect': true });
         return;
       }
       if (isNaN(formValues.expenseAmount) || formValues.expenseAmount <= 0) {
-        this.cryptoMovementForm.controls['expenseAmount'].setErrors({ 'incorrect': true });
+        this.cryptoTransactionForm.controls['expenseAmount'].setErrors({ 'incorrect': true });
         return;
       }
       if (isNaN(formValues.expenseQuote) || formValues.expenseQuote <= 0) {
-        this.cryptoMovementForm.controls['expenseQuote'].setErrors({ 'incorrect': true });
+        this.cryptoTransactionForm.controls['expenseQuote'].setErrors({ 'incorrect': true });
         return;
       }
     }
 
     if(formValues.movementType === 'I' && formValues.commerceType === 'Fiat/Crypto Commerce') {
       if (formValues.expenseAccount === '') {
-        this.cryptoMovementForm.controls['expenseAccount'].setErrors({ 'incorrect': true });
+        this.cryptoTransactionForm.controls['expenseAccount'].setErrors({ 'incorrect': true });
         return;
       }
       if (formValues.expenseAsset === '') {
-        this.cryptoMovementForm.controls['expenseAsset'].setErrors({ 'incorrect': true });
+        this.cryptoTransactionForm.controls['expenseAsset'].setErrors({ 'incorrect': true });
         return;
       }
       if (isNaN(formValues.expenseAmount) || formValues.expenseAmount <= 0) {
-        this.cryptoMovementForm.controls['expenseAmount'].setErrors({ 'incorrect': true });
+        this.cryptoTransactionForm.controls['expenseAmount'].setErrors({ 'incorrect': true });
         return;
       }
     }
 
     if(formValues.movementType === 'E' && formValues.commerceType === 'Fiat/Crypto Commerce') {
       if (formValues.incomeAccount === '') {
-        this.cryptoMovementForm.controls['incomeAccount'].setErrors({ 'incorrect': true });
+        this.cryptoTransactionForm.controls['incomeAccount'].setErrors({ 'incorrect': true });
         return;
       }
       if (formValues.incomeAsset === '') {
-        this.cryptoMovementForm.controls['incomeAsset'].setErrors({ 'incorrect': true });
+        this.cryptoTransactionForm.controls['incomeAsset'].setErrors({ 'incorrect': true });
         return;
       }
       if (isNaN(formValues.incomeAmount) || formValues.incomeAmount <= 0) {
-        this.cryptoMovementForm.controls['incomeAmount'].setErrors({ 'incorrect': true });
+        this.cryptoTransactionForm.controls['incomeAmount'].setErrors({ 'incorrect': true });
         return;
       }
     }
 
-    if (this.cryptoMovementForm.invalid) {
+    if (this.cryptoTransactionForm.invalid) {
       return;
     }
     
@@ -238,11 +238,11 @@ export class CryptoMovementAddComponent implements OnInit {
     };
 
 
-    this.cryptoMovementService.createCryptoMovement(movementAdd)
+    this.cryptoTransactionService.createCryptoTransaction(movementAdd)
       .subscribe(() => {
 
         this.successMessage = 'Movimiento agregado correctamente';
-        this.cryptoMovementForm.reset();
+        this.cryptoTransactionForm.reset();
 
         setTimeout(() => {
           this.successMessage = '';

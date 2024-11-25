@@ -1,4 +1,4 @@
-export interface CryptoMovementAdd {
+export interface CryptoTransactionAdd {
     environment: string;
     date:  Date;
     movementType: string;

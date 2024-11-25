@@ -5,7 +5,7 @@
         {{ successMessage }}
     </div>
     <form 
-        [formGroup]="cryptoMovementForm"
+        [formGroup]="cryptoTransactionForm"
         (ngSubmit)="onSubmit()"
     >    
         <div class="row mb-3">
@@ -19,7 +19,7 @@
                     <option value="E">Egreso</option>
                     <option value="EX">Intercambio</option>
                 </select>
-                <div class="text-danger mt-2" *ngIf="cryptoMovementForm.controls['movementType'].errors?.['incorrect']">
+                <div class="text-danger mt-2" *ngIf="cryptoTransactionForm.controls['movementType'].errors?.['incorrect']">
                     Debe seleccionarse un tipo de movimiento.
                 </div>
             </div>
@@ -31,7 +31,7 @@
                     <option value="" disabled selected>Seleccione</option>
                     <option *ngFor="let commerceType of commerceTypes" [value]="commerceType.id">{{ commerceType.name }}</option>
                 </select>
-                <div class="text-danger mt-2" *ngIf="cryptoMovementForm.controls['commerceType'].errors?.['incorrect']">
+                <div class="text-danger mt-2" *ngIf="cryptoTransactionForm.controls['commerceType'].errors?.['incorrect']">
                     Debe seleccionarse un tipo de comercio.
                 </div>
             </div>
@@ -40,7 +40,7 @@
             <div class="col-md-6">
                 <label class="form-label" for="date">Fecha</label>
                 <input type="date" class="form-control" id="date" formControlName="date">
-                <div class="text-danger mt-2" *ngIf="cryptoMovementForm.controls['date'].errors?.['incorrect']">
+                <div class="text-danger mt-2" *ngIf="cryptoTransactionForm.controls['date'].errors?.['incorrect']">
                     Debe seleccionarse una fecha.
                 </div>
             </div>              
@@ -61,7 +61,7 @@
                     <option value="" disabled selected>Seleccione</option>
                     <option *ngFor="let asset of expenseAssets" [value]="asset.id">{{ asset.name }}</option>
                 </select>
-                <div class="text-danger mt-2" *ngIf="cryptoMovementForm.controls['expenseAsset'].errors?.['incorrect']">
+                <div class="text-danger mt-2" *ngIf="cryptoTransactionForm.controls['expenseAsset'].errors?.['incorrect']">
                     Debe seleccionarse un activo.
                 </div>
             </div>
@@ -71,21 +71,21 @@
                     <option value="" disabled selected>Seleccione</option>
                     <option *ngFor="let account of expenseAccounts" [value]="account.id">{{ account.name }}</option>
                 </select>
-                <div class="text-danger mt-2" *ngIf="cryptoMovementForm.controls['expenseAccount'].errors?.['incorrect']">
+                <div class="text-danger mt-2" *ngIf="cryptoTransactionForm.controls['expenseAccount'].errors?.['incorrect']">
                     Debe seleccionarse una cuenta.
                 </div>
             </div>
             <div class="col-md-6">
                 <label class="form-label" for="expenseAmount">Cantidad</label>
                 <input type="string" class="form-control" id="expenseAmount" formControlName="expenseAmount" appInvestmentInput>
-                <div class="text-danger mt-2" *ngIf="cryptoMovementForm.controls['expenseAmount'].errors?.['incorrect']">
+                <div class="text-danger mt-2" *ngIf="cryptoTransactionForm.controls['expenseAmount'].errors?.['incorrect']">
                     Debe ingresarse una cantidad.
                 </div>
             </div>
             <div class="col-md-6" *ngIf="selectedMovementType === 'E' || selectedMovementType == 'EX'">
                 <label class="form-label" for="expenseQuote">Cotizacion en USD</label>
                 <input type="string" class="form-control" id="expenseQuote" formControlName="expenseQuote" appInvestmentInput>
-                <div class="text-danger mt-2" *ngIf="cryptoMovementForm.controls['expenseQuote'].errors?.['incorrect']">
+                <div class="text-danger mt-2" *ngIf="cryptoTransactionForm.controls['expenseQuote'].errors?.['incorrect']">
                     Debe ingresarse una cotizacion.
                 </div>
             </div>
@@ -105,7 +105,7 @@
                     <option value="" disabled selected>Seleccione</option>
                     <option *ngFor="let asset of incomeAssets" [value]="asset.id">{{ asset.name }}</option>
                 </select>
-                <div class="text-danger mt-2" *ngIf="cryptoMovementForm.controls['incomeAsset'].errors?.['incorrect']">
+                <div class="text-danger mt-2" *ngIf="cryptoTransactionForm.controls['incomeAsset'].errors?.['incorrect']">
                     Debe seleccionarse un activo.
                 </div>
             </div>
@@ -115,21 +115,21 @@
                     <option value="" disabled selected>Seleccione</option>
                     <option *ngFor="let account of incomeAccounts" [value]="account.id">{{ account.name }}</option>
                 </select>
-                <div class="text-danger mt-2" *ngIf="cryptoMovementForm.controls['incomeAccount'].errors?.['incorrect']">
+                <div class="text-danger mt-2" *ngIf="cryptoTransactionForm.controls['incomeAccount'].errors?.['incorrect']">
                     Debe seleccionarse una cuenta.
                 </div>
             </div>
             <div class="col-md-6">
                 <label class="form-label" for="incomeAmount">Cantidad</label>
                 <input type="string" class="form-control" id="incomeAmount" formControlName="incomeAmount" appInvestmentInput>
-                <div class="text-danger mt-2" *ngIf="cryptoMovementForm.controls['incomeAmount'].errors?.['incorrect']">
+                <div class="text-danger mt-2" *ngIf="cryptoTransactionForm.controls['incomeAmount'].errors?.['incorrect']">
                     Debe ingresarse una cantidad.
                 </div>
             </div>
             <div class="col-md-6" *ngIf="selectedMovementType === 'I' || selectedMovementType == 'EX'">
                 <label class="form-label" for="incomeQuote">Cotizacion en USD</label>
                 <input type="string" class="form-control" id="incomeQuote" formControlName="incomeQuote" appInvestmentInput>
-                <div class="text-danger mt-2" *ngIf="cryptoMovementForm.controls['incomeQuote'].errors?.['incorrect']">
+                <div class="text-danger mt-2" *ngIf="cryptoTransactionForm.controls['incomeQuote'].errors?.['incorrect']">
                     Debe ingresarse una cotizacion.
                 </div>
             </div>
@@ -137,7 +137,7 @@
 
         <div class="d-flex">
             <button type="submit" class="btn btn-primary m-1">Guardar</button>
-            <a [routerLink]="['/cryptoMovements']" class="btn btn-secondary m-1">Volver</a>
+            <a [routerLink]="['/cryptoTransactions']" class="btn btn-secondary m-1">Volver</a>
         </div>       
         
     </form>

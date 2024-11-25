@@ -36,8 +36,8 @@ import { CardMovementsListComponent } from './features/cardMovements/cardMovemen
 import { CardMovementsAddComponent } from './features/cardMovements/cardMovements-add/card-movements-add/card-movements-add.component';
 import { CardMovementsPayComponent } from './features/cardMovements/cardMovements-pay/card-movements-pay/card-movements-pay.component';
 import { CardMovementsEditRecurrentComponent } from './features/cardMovements/card-movements-edit-recurrent/card-movements-edit-recurrent.component';
-import { CryptoMovementListComponent } from './features/cryptoMovement/crypto-movement-list/crypto-movement-list.component';
-import { CryptoMovementAddComponent } from './features/cryptoMovement/crypto-movement-add/crypto-movement-add.component';
+import { CryptoTransactionListComponent } from './features/cryptoTransaction/crypto-transaction-list/crypto-transaction-list.component';
+import { CryptoTransactionAddComponent } from './features/cryptoTransaction/crypto-transaction-add/crypto-transaction-add.component';
 import { StockTransactionListComponent } from './features/stockTransactions/stock-transaction-list/stock-transaction-list.component';
 import { StockTransactionAddComponent } from './features/stockTransactions/stock-transaction-add/stock-transaction-add.component';
 import { CurrencyExchangeListComponent } from './features/CurrencyExchange/currency-exchange-list/currency-exchange-list.component';
@@ -76,8 +76,8 @@ import { CurrencyExchangeAddComponent } from './features/CurrencyExchange/curren
     CardMovementsAddComponent,
     CardMovementsPayComponent,
     CardMovementsEditRecurrentComponent,
-    CryptoMovementListComponent,
-    CryptoMovementAddComponent,
+    CryptoTransactionListComponent,
+    CryptoTransactionAddComponent,
     StockTransactionListComponent,
     StockTransactionAddComponent,
     CurrencyExchangeListComponent,

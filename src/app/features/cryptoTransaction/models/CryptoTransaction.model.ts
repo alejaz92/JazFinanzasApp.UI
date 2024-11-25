@@ -1,4 +1,4 @@
-export interface CryptoMovement {
+export interface CryptoTransaction {
     id: number;
     date:  Date;
     movementType: string;

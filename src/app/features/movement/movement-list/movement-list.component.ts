@@ -21,6 +21,7 @@ export class MovementListComponent implements OnInit {
   loadMovements() {
     this.movementService.getMovements(this.page,20)
       .subscribe(response => {
+        
         this.movements = response.movements; 
         this.totalMovements = response.totalCount;
       });
