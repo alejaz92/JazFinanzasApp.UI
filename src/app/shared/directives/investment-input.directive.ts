@@ -28,16 +28,18 @@ export class InvestmentInputDirective implements AfterViewInit, OnDestroy {
   }
 
   @HostListener('focus') onFocus() {
+    // Elimina el formato al enfocar
     this.el.nativeElement.value = this.parseValue(this.el.nativeElement.value);
   }
 
   @HostListener('blur') onBlur() {
-    const value = parseFloat(this.el.nativeElement.value.replace(',', '.'));
-    if (!isNaN(value)) {
-      this.el.nativeElement.value = this.formatCurrency(value);
-    } else {
-      this.el.nativeElement.value = '';
-    }
+    // Aplica el formato al desenfocar
+    this.handleValueChange();
+  }
+
+  @HostListener('change') onChange() {
+    // Maneja los valores seleccionados del autocompletado
+    this.handleValueChange();
   }
 
   @HostListener('input', ['$event']) onInputChange(event: Event) {
@@ -45,8 +47,17 @@ export class InvestmentInputDirective implements AfterViewInit, OnDestroy {
     let value = input.value;
 
     // Limita la entrada a números, comas y puntos
-    value = value.replace(/[^0-9,.]/g, ''); 
+    value = value.replace(/[^0-9,.]/g, '');
     input.value = value;
+  }
+
+  private handleValueChange() {
+    const value = parseFloat(this.parseValue(this.el.nativeElement.value));
+    if (!isNaN(value)) {
+      this.el.nativeElement.value = this.formatCurrency(value);
+    } else {
+      this.el.nativeElement.value = '';
+    }
   }
 
   private applyInitialFormat() {
@@ -74,7 +85,7 @@ export class InvestmentInputDirective implements AfterViewInit, OnDestroy {
   }
 
   private parseValue(value: string): string {
-    // Si el valor ya está en un formato numérico adecuado, no lo convierte nuevamente
+    // Convierte valores al formato numérico adecuado
     if (value.includes('.') && value.includes(',')) {
       return value.replace(/\./g, '').replace(',', '.');
     } else if (value.includes('.')) {

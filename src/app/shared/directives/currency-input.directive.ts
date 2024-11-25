@@ -28,16 +28,18 @@ export class CurrencyInputDirective implements AfterViewInit, OnDestroy {
   }
 
   @HostListener('focus') onFocus() {
+    // Elimina el formato y deja solo el número crudo al enfocar
     this.el.nativeElement.value = this.parseValue(this.el.nativeElement.value);
   }
 
   @HostListener('blur') onBlur() {
-    const value = parseFloat(this.el.nativeElement.value.replace(',', '.'));
-    if (!isNaN(value)) {
-      this.el.nativeElement.value = this.formatCurrency(value);
-    } else {
-      this.el.nativeElement.value = '';
-    }
+    // Aplica el formato al desenfocar
+    this.handleValueChange();
+  }
+
+  @HostListener('change') onChange() {
+    // Asegura el formato cuando se selecciona un valor del autocompletado
+    this.handleValueChange();
   }
 
   @HostListener('input', ['$event']) onInputChange(event: Event) {
@@ -45,8 +47,18 @@ export class CurrencyInputDirective implements AfterViewInit, OnDestroy {
     let value = input.value;
 
     // Limita la entrada a números, comas y puntos
-    value = value.replace(/[^0-9,.]/g, ''); 
+    value = value.replace(/[^0-9,.]/g, '');
     input.value = value;
+  }
+
+  private handleValueChange() {
+    const inputValue = this.el.nativeElement.value;
+    const numericValue = parseFloat(this.parseValue(inputValue));
+    if (!isNaN(numericValue)) {
+      this.el.nativeElement.value = this.formatCurrency(numericValue);
+    } else {
+      this.el.nativeElement.value = '';
+    }
   }
 
   private applyInitialFormat() {
@@ -65,7 +77,7 @@ export class CurrencyInputDirective implements AfterViewInit, OnDestroy {
   }
 
   private parseValue(value: string): string {
-    // Si el valor ya está en un formato numérico adecuado, no lo convierte nuevamente
+    // Convierte valores al formato numérico adecuado
     if (value.includes('.') && value.includes(',')) {
       return value.replace(/\./g, '').replace(',', '.');
     } else if (value.includes('.')) {

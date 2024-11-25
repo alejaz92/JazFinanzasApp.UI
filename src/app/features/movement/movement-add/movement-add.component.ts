@@ -4,7 +4,7 @@ import { MovementService } from '../services/movement.service';
 import { HttpClient } from '@angular/common/http';
 import { AccountService } from '../../account/services/account.service';
 import { AssetService } from '../../asset/services/asset.service';
-import { MovementClassService } from '../../movementClass/services/movement-class.service';
+import { TransactionClassService } from '../../transactionClass/services/transaction-class.service';
 
 
 @Component({
@@ -28,7 +28,7 @@ export class MovementAddComponent implements OnInit{
     private movementService: MovementService, 
     private accountService: AccountService,
     private assetService: AssetService,
-    private movementClasses: MovementClassService) { }
+    private transactionClasses: TransactionClassService) { }
 
     ngOnInit(): void {
       this.movementForm = this.fb.group({
@@ -48,7 +48,7 @@ export class MovementAddComponent implements OnInit{
 
       this.loadAccounts();
       this.loadAssets();
-      this.loadMovementClasses();
+      this.loadTransactionClasses();
     }
 
     loadAccounts() {
@@ -65,8 +65,8 @@ export class MovementAddComponent implements OnInit{
       });
     }
 
-    loadMovementClasses() {
-      this.movementClasses.getAllMovementClasses().subscribe((data: any) => {
+    loadTransactionClasses() {
+      this.transactionClasses.getAllTransactionClasses().subscribe((data: any) => {
         this.incomeClasses = data.filter((x: any) => x.incExp === 'I');
         this.expenseClasses = data.filter((x: any) => x.incExp === 'E');
       });
@@ -138,7 +138,7 @@ export class MovementAddComponent implements OnInit{
         assetId: parseInt(formValues.asset),
         date: formValues.date,
         movementType: formValues.movementType,
-        movementClassId: formValues.movementType === 'I' 
+        transactionClassId: formValues.movementType === 'I' 
         ? (formValues.incomeClass ? parseInt(formValues.incomeClass, 10) : null)
         : (formValues.expenseClass ? parseInt(formValues.expenseClass, 10) : null),
         detail: formValues.detail,

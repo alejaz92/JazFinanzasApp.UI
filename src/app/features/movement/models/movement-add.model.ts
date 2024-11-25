@@ -4,7 +4,7 @@ export interface MovementAdd {
     assetId: number;
     date: Date;
     movementType: string;
-    movementClassId?: number | null;
+    transactionClassId?: number | null;
     detail: string;
     amount: number;
     quotePrice: number;

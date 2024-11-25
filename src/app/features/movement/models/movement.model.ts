@@ -6,8 +6,8 @@ export interface Movement {
     assetName: string;
     date: Date;
     movementType: string;
-    movementClassId?: number;
-    movementClassName?: string;
+    transactionClassId?: number;
+    transactionClassName?: string;
     detail: string;
     amount: number;
   }

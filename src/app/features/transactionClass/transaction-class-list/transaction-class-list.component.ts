@@ -1,28 +1,27 @@
 import { Component, OnInit } from '@angular/core';
-import { MovementClassService} from '../services/movement-class.service';
+import { TransactionClassService} from '../services/transaction-class.service';
 
 @Component({
-  selector: 'app-movement-class-list',
-  templateUrl: './movement-class-list.component.html',
-  styleUrls: ['./movement-class-list.component.css']
+  selector: 'app-transaction-class-list',
+  templateUrl: './transaction-class-list.component.html',
+  styleUrls: ['./transaction-class-list.component.css']
 })
-export class MovementClassListComponent implements OnInit {
+export class TransactionClassListComponent implements OnInit {
   incomeClasses: any[] | null = null;
   expenseClasses: any[] | null = null;
   restrictedClasses = ['Ajuste Saldos Ingreso', 'Ajuste Saldos Egreso', 'Gastos Tarjeta',
     'Ingreso Inversiones','Inversiones'];
 
 
-  constructor(private movementClassService: MovementClassService) { }
+  constructor(private transactionClassService: TransactionClassService) { }
 
   ngOnInit(): void {
-    this.loadMovementClasses();  
+    this.loadTransactionClasses();  
   }
 
-  loadMovementClasses(): void {
-    this.movementClassService.getAllMovementClasses().subscribe((data) => {
+  loadTransactionClasses(): void {
+    this.transactionClassService.getAllTransactionClasses().subscribe((data) => {
 
-      
       this.incomeClasses = data.filter((x) => x.incExp === 'I');
       this.expenseClasses = data.filter((x) => x.incExp === 'E' );
     });
@@ -32,15 +31,15 @@ export class MovementClassListComponent implements OnInit {
     return !this.restrictedClasses.includes(name);
   };
 
-  onDelete(movementClassId: number): void {
-    if(movementClassId){
+  onDelete(transactionClassId: number): void {
+    if(transactionClassId){
       const confirmed = window.confirm('¿Estás seguro de eliminar esta clase de movimiento?');
       if(confirmed) {
-        this.movementClassService.deleteMovementClass(movementClassId)
+        this.transactionClassService.deleteTransactionClass(transactionClassId)
         .subscribe({
           next: (response) => {
             alert('Clase de movimiento eliminada correctamente');
-            this.loadMovementClasses();
+            this.loadTransactionClasses();
           }
         });
       }

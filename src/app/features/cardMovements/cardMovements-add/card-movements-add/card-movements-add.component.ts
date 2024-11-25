@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CardMovementsService } from '../../services/card-movements.service';
 import { HttpClient } from '@angular/common/http';
 import { Movement } from 'src/app/features/movement/models/movement.model';
-import { MovementClassService } from 'src/app/features/movementClass/services/movement-class.service';
+import { TransactionClassService } from 'src/app/features/transactionClass/services/transaction-class.service';
 import { AssetService } from 'src/app/features/asset/services/asset.service';
 import { CardService } from 'src/app/features/card/services/card.service';
 import { CardMovementsAdd } from '../../models/cardMovements-add.model';
@@ -26,7 +26,7 @@ export class CardMovementsAddComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private cardMovementService: CardMovementsService,
-    private movementClassesService: MovementClassService,
+    private transactionClassesService: TransactionClassService,
     private assetService: AssetService,
     private cardService: CardService,
     private http: HttpClient
@@ -59,7 +59,7 @@ export class CardMovementsAddComponent implements OnInit {
   }
 
   loadExpenseClasses() {
-    this.movementClassesService.getAllMovementClasses().subscribe((data: any) => {
+    this.transactionClassesService.getAllTransactionClasses().subscribe((data: any) => {
       this.expenseClasses = data.filter((item: any) => item.incExp === 'E');
     });
   }
@@ -122,7 +122,7 @@ export class CardMovementsAddComponent implements OnInit {
       date: formValues.date,
       detail: formValues.detail,
       cardId: parseInt(formValues.card),
-      movementClassId: parseInt(formValues.expenseClass),
+      transactionClassId: parseInt(formValues.expenseClass),
       assetId: parseInt(formValues.asset),
       totalAmount: parseFloat(formValues.totalAmount) || 0,
       installments: parseInt(formValues.installments) || 1,

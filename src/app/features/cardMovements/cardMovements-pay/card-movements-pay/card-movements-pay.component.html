@@ -137,10 +137,10 @@
                                         </td>
                                         
 
-                                        <td *ngIf="!cardMovement.get('isManual')?.value">{{ cardMovement.value.movementClass }}</td>
+                                        <td *ngIf="!cardMovement.get('isManual')?.value">{{ cardMovement.value.transactionClass }}</td>
                                         <td *ngIf="cardMovement.get('isManual')?.value">
-                                            <select class="form-control small-font-input" formControlName="movementClassId">
-                                                <option *ngFor="let option of movementClasses" [value]="option.id">{{ option.description }}</option>
+                                            <select class="form-control small-font-input" formControlName="transactionClassId">
+                                                <option *ngFor="let option of transactionClasses" [value]="option.id">{{ option.description }}</option>
                                             </select>
                                         </td>
 

@@ -23,7 +23,7 @@
                 <tr *ngFor="let movement of movements | paginate: { itemsPerPage: 20, currentPage: page, totalItems: totalMovements}">
                     <td>{{ movement.date | date: 'dd/MM/yyyy' }}</td>
                     <td>{{ movement.movementType | movementType }}</td>
-                    <td>{{ movement.movementClassName }}</td>
+                    <td>{{ movement.transactionClassName }}</td>
                     <td>{{ movement.detail }}</td>
                     <td>{{ movement.accountName }}</td>
                     <td>{{ movement.assetName }}</td>

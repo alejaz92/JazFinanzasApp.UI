@@ -20,9 +20,9 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { ProfileComponent } from './features/user/profile/profile.component';
 import { ChangePasswordComponent } from './features/user/change-password/change-password.component';
 import { AccountAssetTypeComponent } from './features/account/account-assettype/account-assetType.component';
-import { MovementClassListComponent } from './features/movementClass/movement-class-list/movement-class-list.component';
-import { MovementClassAddComponent } from './features/movementClass/movement-class-add/movement-class-add.component';
-import { MovementClassEditComponent } from './features/movementClass/movement-class-edit/movement-class-edit.component';
+import { TransactionClassListComponent } from './features/transactionClass/transaction-class-list/transaction-class-list.component';
+import { TransactionClassAddComponent } from './features/transactionClass/transaction-class-add/transaction-class-add.component';
+import { TransactionClassEditComponent } from './features/transactionClass/transaction-class-edit/transaction-class-edit.component';
 import { AssetManagementComponent } from './features/asset/asset-management/asset-management.component';
 import { MovementListComponent } from './features/movement/movement-list/movement-list.component';
 import { NgxPaginationModule } from 'ngx-pagination';
@@ -63,9 +63,9 @@ import { CurrencyExchangeAddComponent } from './features/CurrencyExchange/curren
     ProfileComponent,
     ChangePasswordComponent,
     AccountAssetTypeComponent,
-    MovementClassListComponent,
-    MovementClassAddComponent,
-    MovementClassEditComponent,
+    TransactionClassListComponent,
+    TransactionClassAddComponent,
+    TransactionClassEditComponent,
     AssetManagementComponent,
     MovementListComponent,
     MovementTypePipe,

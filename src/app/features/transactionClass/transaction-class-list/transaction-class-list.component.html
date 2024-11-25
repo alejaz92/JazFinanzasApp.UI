@@ -1,7 +1,7 @@
 <div class="container">
     <h1 class="mt-3">Clases de Movimiento</h1>
     <div class="d-flex justify-content-end mt-3">
-        <a class="btn btn-primary" [routerLink]="['/management/movementClass/add']">
+        <a class="btn btn-primary" [routerLink]="['/management/transactionClass/add']">
             Crear Clase de Movimiento
         </a>
     </div>
@@ -17,15 +17,15 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr *ngFor="let movementClass of incomeClasses">
-                        <td>{{movementClass.description}}</td>
+                    <tr *ngFor="let transactionClass of incomeClasses">
+                        <td>{{transactionClass.description}}</td>
                         <td>
-                            <button *ngIf="canEditOrDelete(movementClass.description)" class="btn btn-primary m-1"
-                            [routerLink]="['/management/movementClass',movementClass.id]">
+                            <button *ngIf="canEditOrDelete(transactionClass.description)" class="btn btn-primary m-1"
+                            [routerLink]="['/management/transactionClass',transactionClass.id]">
                                 <i class="bi-pencil-fill"></i>
                             </button>
-                            <button *ngIf="canEditOrDelete(movementClass.description)"  class="btn btn-danger"
-                                (click)="onDelete(movementClass.id)">
+                            <button *ngIf="canEditOrDelete(transactionClass.description)"  class="btn btn-danger"
+                                (click)="onDelete(transactionClass.id)">
                                 <i class="bi-trash-fill"></i>
                             </button>
                         </td>
@@ -44,15 +44,15 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr *ngFor="let movementClass of expenseClasses">
-                        <td>{{movementClass.description}}</td>
+                    <tr *ngFor="let transactionClass of expenseClasses">
+                        <td>{{transactionClass.description}}</td>
                         <td>
-                            <button *ngIf="canEditOrDelete(movementClass.description)" class="btn btn-primary m-1"
-                            [routerLink]="['/management/movementClass',movementClass.id]">
+                            <button *ngIf="canEditOrDelete(transactionClass.description)" class="btn btn-primary m-1"
+                            [routerLink]="['/management/transactionClass',transactionClass.id]">
                                 <i class="bi-pencil-fill"></i>
                             </button>
-                            <button *ngIf="canEditOrDelete(movementClass.description)"  class="btn btn-danger"
-                                (click)="onDelete(movementClass.id)">
+                            <button *ngIf="canEditOrDelete(transactionClass.description)"  class="btn btn-danger"
+                                (click)="onDelete(transactionClass.id)">
                                 <i class="bi-trash-fill"></i>
                             </button>
                         </td>

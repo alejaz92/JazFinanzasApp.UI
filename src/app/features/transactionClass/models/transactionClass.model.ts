@@ -1,4 +1,4 @@
-export interface MovementClass {
+export interface TransactionClass {
     id: number;
     description: string; 
     incExp: string;

@@ -1,4 +1,4 @@
-export interface MovementClassAddRequest {
+export interface TransactionClassAddRequest {
     description: string; 
     incExp: string;
 }

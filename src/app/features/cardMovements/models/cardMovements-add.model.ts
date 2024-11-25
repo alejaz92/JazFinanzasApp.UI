@@ -2,7 +2,7 @@ export interface CardMovementsAdd {
     date: Date;
     detail: string;
     cardId: number;
-    movementClassId: number;
+    transactionClassId: number;
     assetId: number;
     totalAmount: number;
     installments: number;

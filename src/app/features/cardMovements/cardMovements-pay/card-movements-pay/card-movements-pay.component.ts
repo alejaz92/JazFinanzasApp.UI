@@ -4,7 +4,7 @@ import { AccountService } from 'src/app/features/account/services/account.servic
 import { CardService } from 'src/app/features/card/services/card.service';
 import { CardMovementsService } from '../../services/card-movements.service';
 import { CardMovementPaymentList } from '../../models/CardMovementPayment-List.model';
-import { MovementClassService } from 'src/app/features/movementClass/services/movement-class.service';
+import { TransactionClassService } from 'src/app/features/transactionClass/services/transaction-class.service';
 import { AssetService } from 'src/app/features/asset/services/asset.service';
 import { TmplAstVariable } from '@angular/compiler';
 
@@ -17,7 +17,7 @@ export class CardMovementsPayComponent implements OnInit {
   cardPaymentForm!: FormGroup;
   cards: any[] = [];
   accounts: any[] = [];
-  movementClasses: any[] = [];
+  transactionClasses: any[] = [];
   assets: any[] = [];
   cardMovements: CardMovementPaymentList[] = [];
   selectedPaymentAssets: string | null = null;
@@ -30,7 +30,7 @@ export class CardMovementsPayComponent implements OnInit {
     private cardService: CardService,
     private accountService: AccountService,
     private assetService: AssetService,
-    private movementClassService: MovementClassService,
+    private transactionClassService: TransactionClassService,
     private cardMovementService: CardMovementsService
   ) { }
 
@@ -59,7 +59,7 @@ export class CardMovementsPayComponent implements OnInit {
     this.loadCards();
     this.loadAccounts();
     this.loadAssets();
-    this.loadMovementClasses();
+    this.loadTransactionClasses();
     
 
     this.cardPaymentForm.get('card')?.valueChanges.subscribe(() =>  this.loadTable());
@@ -84,10 +84,10 @@ export class CardMovementsPayComponent implements OnInit {
     });
   }
 
-  loadMovementClasses() {
-    this.movementClassService.getAllMovementClasses().subscribe((data: any) => {
+  loadTransactionClasses() {
+    this.transactionClassService.getAllTransactionClasses().subscribe((data: any) => {
 
-      this.movementClasses = data.filter((movementClass: any) => movementClass.incExp === 'E');
+      this.transactionClasses = data.filter((transactionClass: any) => transactionClass.incExp === 'E');
     });
   }
 
@@ -133,8 +133,8 @@ export class CardMovementsPayComponent implements OnInit {
 
       const movementGroup = this.fb.group({
         date: [movement.date],
-        movementClassId: [movement.movementClassId],
-        movementClass: [movement.movementClass],
+        transactionClassId: [movement.transactionClassId],
+        transactionClass: [movement.transactionClass],
         detail: [movement.detail],
         assetId: [movement.assetId],
         asset: [movement.asset],
@@ -243,8 +243,8 @@ refreshCurrencyFormat() {
 
     const manualEntry = this.fb.group({
       date: [''],
-      movementClassId: [''],
-      movementClass: [''],
+      transactionClassId: [''],
+      transactionClass: [''],
       detail: [''],
       assetId: [''],
       asset: [''],
@@ -286,7 +286,7 @@ refreshCurrencyFormat() {
 
     
 
-    var result = !row.get('date')?.value || !row.get('movementClassId')?.value || !row.get('detail')?.value || !row.get('assetId')?.value;
+    var result = !row.get('date')?.value || !row.get('transactionClassId')?.value || !row.get('detail')?.value || !row.get('assetId')?.value;
     
     if(result) {
       return result;
@@ -388,7 +388,7 @@ refreshCurrencyFormat() {
       .filter(control => control.get('pay')?.value)
       .map(control => ({
         date: control.get('date')?.value,
-        movementClassId: parseInt(control.get('movementClassId')?.value),
+        transactionClassId: parseInt(control.get('transactionClassId')?.value),
         detail: control.get('detail')?.value,
         assetId: parseInt(control.get('assetId')?.value),
         installment: control.get('installment')?.value,

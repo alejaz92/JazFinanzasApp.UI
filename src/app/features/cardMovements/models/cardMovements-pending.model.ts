@@ -2,7 +2,7 @@ export interface CardMovementPending {
     id: number;
     date: Date;
     card: string;
-    movementClass: string;
+    transactionClass: string;
     detail: string;
     installments: string;   
     asset: string;

@@ -1,7 +1,7 @@
 export interface CardMovementPaymentList {
     date: string;
-    movementClassId: number;
-    movementClass: string;
+    transactionClassId: number;
+    transactionClass: string;
     detail: string;
     assetId: number;
     asset: string;

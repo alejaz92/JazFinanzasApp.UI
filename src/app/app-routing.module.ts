@@ -12,9 +12,9 @@ import { AccountEditComponent } from './features/account/account-edit/account-ed
 import { RegisterComponent } from './features/auth/register/register.component';
 import { ProfileComponent } from './features/user/profile/profile.component';
 import { ChangePasswordComponent } from './features/user/change-password/change-password.component';
-import { MovementClassListComponent } from './features/movementClass/movement-class-list/movement-class-list.component';
-import { MovementClassAddComponent } from './features/movementClass/movement-class-add/movement-class-add.component';
-import { MovementClassEditComponent } from './features/movementClass/movement-class-edit/movement-class-edit.component';
+import { TransactionClassListComponent } from './features/transactionClass/transaction-class-list/transaction-class-list.component';
+import { TransactionClassAddComponent } from './features/transactionClass/transaction-class-add/transaction-class-add.component';
+import { TransactionClassEditComponent } from './features/transactionClass/transaction-class-edit/transaction-class-edit.component';
 import { AccountAssetTypeComponent } from './features/account/account-assettype/account-assetType.component';
 import { AssetManagementComponent } from './features/asset/asset-management/asset-management.component';
 import { MovementListComponent } from './features/movement/movement-list/movement-list.component';
@@ -96,18 +96,18 @@ const routes: Routes = [
     canActivate: [AuthGuard]
   },
   {
-    path: 'management/movementClass',
-    component: MovementClassListComponent,
+    path: 'management/transactionClass',
+    component: TransactionClassListComponent,
     canActivate: [AuthGuard]
   },
   {
-    path: 'management/movementClass/add',
-    component: MovementClassAddComponent,
+    path: 'management/transactionClass/add',
+    component: TransactionClassAddComponent,
     canActivate: [AuthGuard]
   },
   {
-    path: 'management/movementClass/:id',
-    component: MovementClassEditComponent,
+    path: 'management/transactionClass/:id',
+    component: TransactionClassEditComponent,
     canActivate: [AuthGuard]
   },
   {
