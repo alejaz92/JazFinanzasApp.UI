@@ -13,7 +13,7 @@ export class CryptoTransactionService {
   constructor(private http: HttpClient) { }
 
   getCryptoTransactions(page: number, itemsPerPage: number): Observable<{ transactions: CryptoTransaction[], totalCount: number}> {
-    return this.http.get<{ transactions: CryptoTransaction[], totalCount: number}>(`${environment.apiBaseURL}/api/CryptoTransaction?page=${page}&itemsPerPage=${itemsPerPage}`);
+    return this.http.get<{ transactions: CryptoTransaction[], totalCount: number}>(`${environment.apiBaseURL}/api/CryptoTransaction?page=${page}&pageSize=${itemsPerPage}`);
   }
 
   createCryptoTransaction(transaction: CryptoTransactionAdd): Observable<CryptoTransactionAdd> {

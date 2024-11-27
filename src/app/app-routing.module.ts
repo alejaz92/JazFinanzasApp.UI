@@ -31,6 +31,8 @@ import { StockTransactionListComponent } from './features/stockTransactions/stoc
 import { StockTransactionAddComponent } from './features/stockTransactions/stock-transaction-add/stock-transaction-add.component';
 import { CurrencyExchangeListComponent } from './features/CurrencyExchange/currency-exchange-list/currency-exchange-list.component';
 import { CurrencyExchangeAddComponent } from './features/CurrencyExchange/currency-exchange-add/currency-exchange-add.component';
+import { ExchangeListComponent } from './features/exchange/exchange-list/exchange-list.component';
+import { ExchangeAddComponent } from './features/exchange/exchange-add/exchange-add.component';
 
 
 const routes: Routes = [
@@ -183,6 +185,16 @@ const routes: Routes = [
   {
     path: 'currencyExchange/add',
     component: CurrencyExchangeAddComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'exchange',
+    component: ExchangeListComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'exchange/add',
+    component: ExchangeAddComponent,
     canActivate: [AuthGuard]
   },
   {

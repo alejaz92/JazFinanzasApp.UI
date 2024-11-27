@@ -415,7 +415,6 @@ refreshCurrencyFormat() {
       }
 
 
-      //console.log(cardPaymentRequest);
       this.cardTransactionService.createCardPayment(cardPaymentRequest).subscribe(() => {
         
         this.cardPaymentForm.reset();

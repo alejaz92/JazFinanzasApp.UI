@@ -27,8 +27,7 @@ export class AccountEditComponent implements OnInit, OnDestroy {
   
           if (this.id) {
             // Get data from server
-
-            console.log(this.id);
+            
             this.accountService.getAccountById(Number(this.id)).subscribe({
               next: (response) => {
                 this.account = response;

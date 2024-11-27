@@ -12,8 +12,8 @@ export class StockTranctionsService {
 
   constructor(private http: HttpClient) { }
 
-  getStockTransactions(page: number, itemsPerPage: number): Observable<{ transactions: StockTransaction[], totalCount: number}> {
-    return this.http.get<{ transactions: StockTransaction[], totalCount: number}>(`${environment.apiBaseURL}/api/stockTransaction?page=${page}&itemsPerPage=${itemsPerPage}`);
+  getStockTransactions(page: number, itemsPerPage: number): Observable<{ transactionsDTO: StockTransaction[], totalCount: number}> {
+    return this.http.get<{ transactionsDTO: StockTransaction[], totalCount: number}>(`${environment.apiBaseURL}/api/stockTransaction?page=${page}&pageSize=${itemsPerPage}`);
   }
 
   createStockTransaction(transaction: StockTransactionAdd): Observable<StockTransactionAdd> {

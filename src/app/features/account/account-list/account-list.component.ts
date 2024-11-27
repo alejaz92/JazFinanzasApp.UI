@@ -36,7 +36,6 @@ export class AccountListComponent implements OnInit {
   }
 
   updateAssetTypes(accountId: number): void {
-    console.log('algo')
   }
 
 }

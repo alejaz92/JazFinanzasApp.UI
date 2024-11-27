@@ -130,9 +130,6 @@ export class CardTransactionsAddComponent implements OnInit {
       repeat: "NO"
     };
 
-    // console.log(Number(formValues.totalAmount));
-    // console.log(formValues.totalAmount);
-
     if (formValues.movementType === 'R') {
 
       cardTransactionAdd.repeat = "YES";

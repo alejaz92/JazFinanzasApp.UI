@@ -33,14 +33,12 @@ export class AssetManagementComponent implements OnInit {
 
     this.assetService.getAvailableAssets(this.selectedAssetType).subscribe(available => {
 
-      //console.log(available);
       
 
       this.assetService.getAssignedAssets(this.selectedAssetType).subscribe(used => {
 
         this.availableAssets = available.filter(a => !used.some(u => u.id === a.id));
         this.assignedAssets = used;
-        //console.log(used);
       });
 
     });

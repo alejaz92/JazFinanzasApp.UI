@@ -70,7 +70,6 @@ export class CurrencyExchangeAddComponent implements OnInit {
       return
     }
 
-    console.log(formValues.expenseAccount);
 
     if (isNaN(formValues.expenseAsset)) {
       this.currencyExchangeForm.controls['expenseAsset'].setErrors({ 'incorrect': true });

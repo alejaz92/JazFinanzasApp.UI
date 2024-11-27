@@ -67,7 +67,6 @@ export class RegisterComponent implements OnInit{
 
     this.authService.register(registerData).subscribe({
       next: (response) => {
-        console.log('Usuario registrado', response);
         this.router.navigate(['/login']);
       },
       error: (err) => {

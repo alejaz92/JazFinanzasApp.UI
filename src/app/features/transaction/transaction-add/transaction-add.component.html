@@ -13,7 +13,7 @@
                     <option value="" disabled selected>Seleccione</option>
                     <option value="I">Ingreso</option>
                     <option value="E">Egreso</option>
-                    <option value="EX">Intercambio</option>
+                    <!-- <option value="EX">Intercambio</option> -->
                 </select> 
                 <div *ngIf="transactionForm.controls['movementType'].errors?.['incorrect'] " class="text-danger mt-2">
                     Debe seleccionarse un tipo de movimiento.
@@ -90,7 +90,7 @@
                 </div>
             </div>
         </ng-container>
-        <ng-container *ngIf="selectedMovementType === 'EX'">
+        <!-- <ng-container *ngIf="selectedMovementType === 'EX'">
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label  class="form-label" for="incomeExchangeAccount">Cuenta Ingreso</label>
@@ -114,7 +114,7 @@
                     </div>
                 </div>
             </div>            
-        </ng-container>
+        </ng-container> -->
         <div class="row mb-3">
             <div class="col">
                 <label  class="form-label" for="Detail">Detalle</label>

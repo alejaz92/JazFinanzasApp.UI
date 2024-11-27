@@ -42,6 +42,8 @@ import { StockTransactionListComponent } from './features/stockTransactions/stoc
 import { StockTransactionAddComponent } from './features/stockTransactions/stock-transaction-add/stock-transaction-add.component';
 import { CurrencyExchangeListComponent } from './features/CurrencyExchange/currency-exchange-list/currency-exchange-list.component';
 import { CurrencyExchangeAddComponent } from './features/CurrencyExchange/currency-exchange-add/currency-exchange-add.component';
+import { ExchangeListComponent } from './features/exchange/exchange-list/exchange-list.component';
+import { ExchangeAddComponent } from './features/exchange/exchange-add/exchange-add.component';
 
 
 
@@ -81,7 +83,9 @@ import { CurrencyExchangeAddComponent } from './features/CurrencyExchange/curren
     StockTransactionListComponent,
     StockTransactionAddComponent,
     CurrencyExchangeListComponent,
-    CurrencyExchangeAddComponent
+    CurrencyExchangeAddComponent,
+    ExchangeListComponent,
+    ExchangeAddComponent
   ],
   imports: [
     BrowserModule,

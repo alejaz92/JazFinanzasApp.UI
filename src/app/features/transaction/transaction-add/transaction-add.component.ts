@@ -112,16 +112,16 @@ export class TransactionAddComponent implements OnInit{
           return;
         }
       }
-      if (formValues.movementType === 'EX') {
-        if(formValues.incomeExchangeAccount === '') {
-          this.transactionForm.controls['incomeExchangeAccount'].setErrors({ 'incorrect': true });
-          return;
-        }
-        if(formValues.expenseExchangeAccount === '') {
-          this.transactionForm.controls['expenseExchangeAccount'].setErrors({ 'incorrect': true });
-          return;
-        }
-      }
+      // if (formValues.movementType === 'EX') {
+      //   if(formValues.incomeExchangeAccount === '') {
+      //     this.transactionForm.controls['incomeExchangeAccount'].setErrors({ 'incorrect': true });
+      //     return;
+      //   }
+      //   if(formValues.expenseExchangeAccount === '') {
+      //     this.transactionForm.controls['expenseExchangeAccount'].setErrors({ 'incorrect': true });
+      //     return;
+      //   }
+      // }
 
 
       if(isNaN(formValues.amount) || formValues.amount <= 0) {
@@ -131,10 +131,12 @@ export class TransactionAddComponent implements OnInit{
 
       //mapeo de los valores del formulario para el dto
       const transactionAdd = {
-        incomeAccountId: formValues.movementType === "I" ? parseInt(formValues.incomeAccount) : 
-          formValues.movementType === "EX" ? parseInt(formValues.incomeExchangeAccount) : null,
-        expenseAccountId: formValues.movementType === "E" ? parseInt(formValues.expenseAccount) : 
-          formValues.movementType === "EX" ? parseInt(formValues.expenseExchangeAccount) : null,
+        // incomeAccountId: formValues.movementType === "I" ? parseInt(formValues.incomeAccount) : 
+        //   formValues.movementType === "EX" ? parseInt(formValues.incomeExchangeAccount) : null,
+        incomeAccountId: formValues.movementType === "I" ? parseInt(formValues.incomeAccount) : null,
+        // expenseAccountId: formValues.movementType === "E" ? parseInt(formValues.expenseAccount) : 
+        //   formValues.movementType === "EX" ? parseInt(formValues.expenseExchangeAccount) : null,
+        expenseAccountId: formValues.movementType === "E" ? parseInt(formValues.expenseAccount) : null,
         assetId: parseInt(formValues.asset),
         date: formValues.date,
         movementType: formValues.movementType,

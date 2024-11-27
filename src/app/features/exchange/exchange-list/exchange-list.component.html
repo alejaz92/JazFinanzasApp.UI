@@ -1,0 +1,48 @@
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>Intercambio de Cuentas</h1>
+        <a class="btn btn-primary" [routerLink]="['/exchange/add']">Nuevo <i class="bi-plus-lg"></i></a>
+    </div>
+
+    <!-- tabla de movimientos-->
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Activo</th>
+                    <th class="table-danger">Cuenta Egreso</th>
+                    <th class="table-success">Cuenta Ingreso</th>
+                    <th class="text-end">Monto</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let transaction of Exchanges | paginate: { itemsPerPage: 20, currentPage: page, totalItems: totalExchanges}">
+                    <td>{{ transaction.date | date: 'dd/MM/yyyy' }}</td>
+                    <td>{{ transaction.expenseAsset ?? ''}}</td>
+                    <td class="table-danger">{{ transaction.expenseAccount ?? '' }}</td>
+                    <td class="table-success">{{ transaction.incomeAccount ?? ''}}</td>
+                    <td class="text-end">
+                        {{ transaction.incomeAmount != null ? (transaction.incomeAmount | currencyFiatFormat) : ''   }}
+                    </td>
+                    <td>
+                        <div class="justify-content-around">
+                            <button class="btn btn-sm btn-danger m-1" title="Eliminar" (click)="onDeleteExchange(transaction)"><i class="bi-trash-fill"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Paginacion-->
+    <div class="d-flex justify-content-center">
+        <pagination-controls 
+        (pageChange)="onPageChange($event)"
+        [responsive]="true"
+        [previousLabel]="'Anterior'"
+        [nextLabel]="'Siguiente'">
+    </pagination-controls>
+    </div>
+</div>

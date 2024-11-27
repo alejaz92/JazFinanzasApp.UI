@@ -21,7 +21,6 @@ export class AccountAssetTypeComponent  implements OnInit {
       this.accountId = +params['id'];
 
       // get the account name
-      console.log(this.accountId);
       this.accountService.getAccountById(this.accountId).subscribe((data) => {
         this.accountName = data.name;
       });

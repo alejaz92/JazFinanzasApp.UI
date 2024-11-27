@@ -54,7 +54,6 @@ export class StockTransactionAddComponent implements OnInit{
 
     this.accountService.getAccountByTypeName("Moneda").subscribe((data: any) => {
       this.fiatAccounts = data;
-      console.log('1',this.fiatAccounts)
     });
 
     this.assetService.getAssetsByTypeName("Moneda").subscribe((data: any) => {

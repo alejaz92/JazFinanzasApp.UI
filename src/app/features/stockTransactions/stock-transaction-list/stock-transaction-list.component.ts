@@ -21,8 +21,9 @@ export class StockTransactionListComponent implements OnInit{
   loadStockTransactions() {
     this.stockTransactionService.getStockTransactions(this.page, 20)
       .subscribe(response => {
-        console.log(response);
-        this.stockTransactions = response.transactions; 
+        
+        this.stockTransactions = response.transactionsDTO; 
+
 
         this.totalStockTransactions = response.totalCount;
       });

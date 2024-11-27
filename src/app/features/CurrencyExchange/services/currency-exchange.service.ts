@@ -13,7 +13,7 @@ export class CurrencyExchangeService {
   constructor(private http: HttpClient) { }
 
   getCurrencyExchanges(page: number, itemsPerPage: number) {
-    return this.http.get<{transactions: CurrencyExchange[], totalCount: number}>(`${environment.apiBaseURL}/api/FiatCurrencyExchange?page=${page}&itemsPerPage=${itemsPerPage}`);
+    return this.http.get<{transactionsDTO: CurrencyExchange[], totalCount: number}>(`${environment.apiBaseURL}/api/FiatCurrencyExchange?page=${page}&pageSize=${itemsPerPage}`);
   }
   
   createCurrencyExchange(currencyExchange: CurrencyExchangeAdd): Observable<CurrencyExchangeAdd> {
