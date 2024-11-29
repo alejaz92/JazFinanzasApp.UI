@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs';
 import { AuthService } from 'src/app/features/auth/services/auth.service';
 import { UserService } from 'src/app/features/user/services/user.service';
 
@@ -18,7 +19,15 @@ export class NavbarComponent implements OnInit {
 
 
   ngOnInit(): void {
-    this.loadUsername();
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      if (!this.isLoginPage()) {
+        
+        this.loadUsername();
+      }
+
+    });        
   }
 
   loadUsername(): void {

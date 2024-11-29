@@ -307,15 +307,19 @@ refreshCurrencyFormat() {
     let totalPesos = 0;
     let totalDollars = 0;
 
+
+   
     this.cardTransactionsArray.controls.forEach((control) => {
+      
+
       if (control.get('pay')?.value) {
         if (this.selectedPaymentAssets === 'Pesos') {
           totalPesos += parseFloat(control.get('valueInPesos')?.value);
         } else if (this.selectedPaymentAssets === 'Pesos+Dolar') {
-          if (control.get('asset')?.value === 'Peso Argentino') {
+          if (Number(control.get('assetId')?.value) === 1) {
             totalPesos += parseFloat(control.get('installmentAmount')?.value);
           }
-          else {
+          else if (Number(control.get('assetId')?.value) === 2){
             totalDollars += parseFloat(control.get('installmentAmount')?.value);
           }          
         }
