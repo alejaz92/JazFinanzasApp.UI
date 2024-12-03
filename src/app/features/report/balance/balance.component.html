@@ -1,0 +1,78 @@
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>Saldos</h1>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-6">
+            <div class="card text-white bg-info mb-3 text-center">
+                <div class="card-header">
+                    Saldo en Pesos
+                </div>
+                <div class="card-body">
+                    <h4 class="card-title">{{ pesosBalance | currencyFiatFormat }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="card text-white bg-success mb-3 text-center">
+                <div class="card-header">
+                    Saldo en Dolares
+                </div>
+                <div class="card-body">
+                    <h4 class="card-title">{{ dollarBalance | currencyFiatFormat }}</h4>                 
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 col-md-6">
+            <label for="assetType" class="form-label">Tipo de Activo</label>
+            <select 
+                name="assetType" 
+                id="assetType" 
+                class="form-select"
+                [(ngModel)]="selectedAssetType"
+                (change)="onAssetTypeChange()"
+            >
+                <option value="0" disabled selected>Seleccione</option>
+                <option *ngFor="let type of assetTypes" [value]="type.id">{{ type.name }}</option>
+            </select>
+        </div>
+
+        <div class="col-12 col-md-6 mb-3">
+            <label for="asset" class="form-label">Activo</label>
+            <select 
+                name="asset" 
+                id="asset" 
+                class="form-select"
+                [(ngModel)]="selectedAsset"
+                (change)="onAssetChange()"
+            >
+                <option value="0" disabled selected>Seleccione</option>
+                <option *ngFor="let asset of assets" [value]="asset.id">{{ asset.name }}</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="row" *ngIf="balances.length > 0">
+        <div class="col-12">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">Cuenta</th>
+                        <th scope="col">Saldo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let balance of  balances">
+                        <td>{{ balance.account }}</td>
+                        <td *ngIf="this.selectedAssetType == 1">{{ balance.balance | currencyFiatFormat }}</td>
+                        <td *ngIf="this.selectedAssetType != 1">{{ balance.balance | currencyInvestmentFormat }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+            
+</div>
