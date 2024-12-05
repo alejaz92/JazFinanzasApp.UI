@@ -45,6 +45,7 @@ import { CurrencyExchangeAddComponent } from './features/CurrencyExchange/curren
 import { ExchangeListComponent } from './features/exchange/exchange-list/exchange-list.component';
 import { ExchangeAddComponent } from './features/exchange/exchange-add/exchange-add.component';
 import { BalanceComponent } from './features/report/balance/balance.component';
+import { ReportsComponent } from './features/report/reports/reports.component';
 
 
 
@@ -87,7 +88,8 @@ import { BalanceComponent } from './features/report/balance/balance.component';
     CurrencyExchangeAddComponent,
     ExchangeListComponent,
     ExchangeAddComponent,
-    BalanceComponent
+    BalanceComponent,
+    ReportsComponent
   ],
   imports: [
     BrowserModule,

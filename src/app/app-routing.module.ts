@@ -34,6 +34,7 @@ import { CurrencyExchangeAddComponent } from './features/CurrencyExchange/curren
 import { ExchangeListComponent } from './features/exchange/exchange-list/exchange-list.component';
 import { ExchangeAddComponent } from './features/exchange/exchange-add/exchange-add.component';
 import { BalanceComponent } from './features/report/balance/balance.component';
+import { ReportsComponent } from './features/report/reports/reports.component';
 
 
 const routes: Routes = [
@@ -201,6 +202,11 @@ const routes: Routes = [
   {
     path: 'balance',
     component: BalanceComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'report',
+    component: ReportsComponent,
     canActivate: [AuthGuard]
   },
   {
