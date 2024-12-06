@@ -49,28 +49,29 @@
         <div class="row">
             <div class="col-md-6">
                 <label for="month">Mes</label>
-                <input class="form-control" type="month" id="MonthDB2" [(ngModel)]="selectedMonthDB2" />
+                <input class="form-control" type="month" id="MonthDB2" [(ngModel)]="selectedMonthDB2" (change)="loadIncExpPesosStats()"/>
 
-                <!-- Graficos -->
-                <div class="row mt-4">
-                    <div class="col-md-6">
-                        <canvas id="incomeByClassPesosChart"></canvas>
-                    </div>
-                    <div class="col-md-6">
-                        <canvas id="expenseByClassPesosChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="row mt-4">
-                    <div class="col-md-6">
-                        <canvas id="incomeLast6MonthsPesosChart"></canvas>
-                    </div>
-                    <div class="col-md-6">
-                        <canvas id="expenseLast6MonthsPesosChart"></canvas>
-                    </div>
-                </div>
+                
+        </div>
+        <!-- Graficos -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <canvas id="incomeByClassPesosChart"></canvas>
+            </div>
+            <div class="col-md-6">
+                <canvas id="expenseByClassPesosChart"></canvas>
             </div>
         </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <canvas id="incomeLast6MonthsPesosChart"></canvas>
+            </div>
+            <div class="col-md-6">
+                <canvas id="expenseLast6MonthsPesosChart"></canvas>
+            </div>
+        </div>
+    </div>
         
       </div>
       <div class="tab-pane fade" id="content3" role="tabpanel" aria-labelledby="tab3">

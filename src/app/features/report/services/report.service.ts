@@ -24,4 +24,8 @@ export class ReportService {
   getIncExpDollarsStats(month: String): Observable<IncExpStats> {
     return this.http.get<IncExpStats>(`${environment.apiBaseURL}/api/report/IncExpStatsDollar?month=${month}`);
   }
+
+  getIncExpPesosStats(month: String): Observable<IncExpStats> {
+    return this.http.get<IncExpStats>(`${environment.apiBaseURL}/api/report/IncExpStatsPesos?month=${month}`);
+  }
 }
