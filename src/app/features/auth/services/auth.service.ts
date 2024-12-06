@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, of } from 'rxjs';
 import { environment } from 'src/environments/environment.development';
 
 @Injectable({
@@ -32,8 +32,10 @@ export class AuthService {
     return localStorage.getItem(this.tokenKey);
   }
 
-  isloggedIn(): boolean {
-    return !!this.getToken();
+  isLoggedIn(): Observable<boolean> {
+
+    console.log(!!this.getToken());
+    return of(!!this.getToken());
   }
 
   register(userData: any): Observable<any> {

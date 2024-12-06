@@ -1,2 +1,6 @@
-<app-navbar></app-navbar>
-<router-outlet></router-outlet>
+<div *ngIf="isLoading" class="loading-screen">
+    <!-- Pantalla de carga -->
+    Cargando...
+  </div>
+<app-navbar *ngIf="!isLoading"></app-navbar>
+<router-outlet *ngIf="!isLoading"></router-outlet>
