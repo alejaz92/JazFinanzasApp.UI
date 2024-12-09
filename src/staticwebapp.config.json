@@ -1,17 +1,1 @@
-{
-  "routes": [
-    {
-      "route": "/transactions",
-      "methods": [
-        "get"
-      ],
-      "redirect": "/transactions",
-      "statusCode": 301
-    },
-    {
-      "navigationFallback": {
-        "rewrite": "/index.html"
-      }
-    }
-  ]
-}
+{}
