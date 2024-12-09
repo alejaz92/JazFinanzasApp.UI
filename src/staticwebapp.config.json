@@ -7,6 +7,11 @@
       ],
       "redirect": "/transactions",
       "statusCode": 301
+    },
+    {
+      "navigationFallback": {
+        "rewrite": "/index.html"
+      }
     }
   ]
 }
