@@ -6,7 +6,7 @@
         "get"
       ],
       "redirect": "/transactions",
-      "statusCode": 200
+      "statusCode": 301
     }
   ]
 }
