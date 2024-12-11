@@ -2,6 +2,9 @@ import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { ReportService } from '../services/report.service';
 import { IncExpStats } from '../models/IncExpStats.model';
 import { Chart, ChartConfiguration, registerables } from 'chart.js/auto';
+import { CardService } from '../../card/services/card.service';
+import { Card } from '../../card/models/card.model';
+import { CardStats } from '../models/CardStats.model';
 
 @Component({
   selector: 'app-reports',
@@ -11,6 +14,8 @@ import { Chart, ChartConfiguration, registerables } from 'chart.js/auto';
 export class ReportsComponent implements OnInit {
   selectedMonthDB1: String = '';
   selectedMonthDB2: String = '';
+  selectedCardDB3: number = 0;
+  cards: Card[] = [];
   incExpDollarStats: IncExpStats | null = null;
   incExpPesosStats: IncExpStats | null = null;
   db1Graph1: Chart | undefined;
@@ -21,10 +26,13 @@ export class ReportsComponent implements OnInit {
   db2Graph2: Chart | undefined;
   db2Graph3: Chart | undefined;
   db2Graph4: Chart | undefined;
+  db3Graph1: Chart | undefined;
+  db3Graph2: Chart | undefined;
 
 
   constructor(
-    private reportService: ReportService
+    private reportService: ReportService,
+    private cardService: CardService
   ) {}
 
   ngOnInit(): void {
@@ -38,6 +46,15 @@ export class ReportsComponent implements OnInit {
 
     this.loadIncExpDollarStats();
     this.loadIncExpPesosStats();
+    this.loadCards();
+    
+  }
+
+  loadCards() {
+    this.cardService.getAllCards().subscribe(response => {
+      this.cards = response;
+      this.loadCardStats();
+    });
   }
 
   loadIncExpDollarStats() {
@@ -555,6 +572,206 @@ export class ReportsComponent implements OnInit {
          } as ChartConfiguration['options']
        });
   }
+
+  loadCardStats() {    
+
+    this.reportService.getCardStats(this.selectedCardDB3)
+      .subscribe(response => {
+        this.renderDB3(response);
+      });
   
+  }
+
+  renderDB3(cardStats: CardStats) {
+    var currentMonthIndex = 6;
+
+    //graph1
+    const ctx1 = document.getElementById('pesosCardsChart') as HTMLCanvasElement;
+
+    if (!ctx1) return;
+
+    this.db3Graph1?.destroy();
+    //console.log(cardStats.pesosCardGraphDTO.map(item => item.amount));
+    var labelsG1 = cardStats.pesosCardGraphDTO.map(item => {
+      const date = new Date(item.month);
+      return date.toLocaleString('es-AR', { month: 'long' }).charAt(0).toUpperCase() + date.toLocaleString('es-AR', { month: 'long' }).slice(1);
+    });
+    
+    var dataG1 = cardStats.pesosCardGraphDTO.map(item => item.amount);   
+
+    var backGroundColors = dataG1.map((item, index) => {
+      return index < currentMonthIndex ? 'rgba(255, 99, 132, 0.2)' : 'rgba(75, 192, 192, 0.2)'; // rojo para meses anteriores, verde para posteriores
+    });
+    
+    var borderColors = dataG1.map((item, index) => {
+      return index < currentMonthIndex ? 'rgba(255, 99, 132, 1)' : 'rgba(75, 192, 192, 1)'; // rojo para meses anteriores, verde para posteriores
+    });    
+
+    this.db3Graph1 = new Chart(ctx1, {
+      type: 'bar',
+      data: {
+        labels: labelsG1, // Etiquetas del eje X
+        datasets: [{
+          label: 'Gastos en Pesos',
+          data: dataG1 || [], // Datos del eje Y
+          backgroundColor: backGroundColors,  // Verde claro
+          borderColor: borderColors,        // Verde oscuro
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: 'Gastos en Pesos',
+            font: {
+              size: 18
+            },
+            padding: {
+              bottom: 10
+            }
+          },
+          legend: {
+            display: true,
+            labels: {
+              generateLabels: function (chart) {
+                  return [
+                      {
+                          text: '6 Meses Anteriores',
+                          fillStyle: 'rgba(255, 99, 132, 0.2)',
+                          strokeStyle: 'rgba(255, 99, 132, 1)',
+                          lineWidth: 1
+                      },
+                      {
+                          text: '6 Meses Posteriores',
+                          fillStyle: 'rgba(75, 192, 192, 0.2)',
+                          strokeStyle: 'rgba(75, 192, 192, 1)',
+                          lineWidth: 1
+                      }
+                  ];
+              }
+          }
+          },
+          datalabels: {
+            display: true,
+            color: '#000',
+            formatter: (value: number) => {
+              return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(value);
+            },
+            anchor: 'end',
+            align: 'top',
+            offset: 4
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: (value: number) => {
+                return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(value);
+              }
+            }
+          }
+        }
+      } as ChartConfiguration['options']
+    });
+
+    //graph 2
+    const ctx2 = document.getElementById('dollarCardsChart') as HTMLCanvasElement;
+
+    if (!ctx2) return;
+
+    this.db3Graph2?.destroy();
+
+    //console.log(cardStats);
+
+    var labelsG2 = cardStats.dollarsCardGraphDTO.map(item => {
+      const date = new Date(item.month);
+      return date.toLocaleString('es-AR', { month: 'long' }).charAt(0).toUpperCase() + date.toLocaleString('es-AR', { month: 'long' }).slice(1);
+    });
+    
+    var dataG2 = cardStats.dollarsCardGraphDTO.map(item => item.amount);   
+
+    backGroundColors = dataG1.map((item, index) => {
+      return index < currentMonthIndex ? 'rgba(255, 99, 132, 0.2)' : 'rgba(75, 192, 192, 0.2)'; // rojo para meses anteriores, verde para posteriores
+    });
+
+    borderColors = dataG1.map((item, index) => {
+      return index < currentMonthIndex ? 'rgba(255, 99, 132, 1)' : 'rgba(75, 192, 192, 1)'; // rojo para meses anteriores, verde para posteriores
+    });
+
+    this.db3Graph2 = new Chart(ctx2, {
+      type: 'bar',
+      data: {
+        labels: labelsG2, // Etiquetas del eje X
+        datasets: [{
+          label: 'Gastos en Dolares',
+          data: dataG2 || [], // Datos del eje Y
+          backgroundColor: backGroundColors,  // Verde claro
+          borderColor: borderColors,        // Verde oscuro
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: 'Gastos en Dolares',
+            font: {
+              size: 18
+            },
+            padding: {
+              bottom: 10
+            }
+          },
+          legend: {
+            display: true,
+            labels: {
+              generateLabels: function (chart) {
+                  return [
+                      {
+                          text: '6 Meses Anteriores',
+                          fillStyle: 'rgba(255, 99, 132, 0.2)',
+                          strokeStyle: 'rgba(255, 99, 132, 1)',
+                          lineWidth: 1
+                      },
+                      {
+                          text: '6 Meses Posteriores',
+                          fillStyle: 'rgba(75, 192, 192, 0.2)',
+                          strokeStyle: 'rgba(75, 192, 192, 1)',
+                          lineWidth: 1
+                      }
+                  ];
+              }
+          }
+          },
+          datalabels: {
+            display: true,
+            color: '#000',
+            formatter: (value: number) => {
+              return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(value);
+            },
+            anchor: 'end',
+            align: 'top',
+            offset: 4
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: (value: number) => {
+                return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(value);
+              }
+            }
+          }
+        }
+      } as ChartConfiguration['options']
+    });
+  }
+
+
 
 }

@@ -20,7 +20,6 @@ export class CurrencyExchangeListComponent implements OnInit{
   loadCurrencyExchanges() {
     this.currencyExchangeService.getCurrencyExchanges(this.page, 20)
       .subscribe(response => {
-        //console.log(response);
         this.currencyExchanges = response.transactionsDTO;        
 
         this.totalCurrencyExchanges = response.totalCount;

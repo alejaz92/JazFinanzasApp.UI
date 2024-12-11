@@ -34,7 +34,6 @@ export class AuthService {
 
   isLoggedIn(): Observable<boolean> {
 
-    console.log(!!this.getToken());
     return of(!!this.getToken());
   }
 

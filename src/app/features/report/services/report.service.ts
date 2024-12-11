@@ -5,6 +5,7 @@ import { environment } from 'src/environments/environment.development';
 import { Balance } from '../models/Balance.modelt';
 import { TotalBalance } from '../models/TotalBalance.model';
 import { IncExpStats } from '../models/IncExpStats.model';
+import { CardStats } from '../models/CardStats.model';
 
 @Injectable({
   providedIn: 'root'
@@ -27,5 +28,9 @@ export class ReportService {
 
   getIncExpPesosStats(month: String): Observable<IncExpStats> {
     return this.http.get<IncExpStats>(`${environment.apiBaseURL}/api/report/IncExpStatsPesos?month=${month}`);
+  }
+
+  getCardStats(cardId: number): Observable<CardStats> {
+    return this.http.get<CardStats>(`${environment.apiBaseURL}/api/report/CardStats/${cardId}`);
   }
 }

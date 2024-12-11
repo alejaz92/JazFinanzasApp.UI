@@ -1,5 +1,7 @@
 export interface CardTransactionPaymentList {
     date: string;
+    cardId: number;
+    card: string;
     transactionClassId: number;
     transactionClass: string;
     detail: string;

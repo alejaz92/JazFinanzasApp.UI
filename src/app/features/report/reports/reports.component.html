@@ -10,7 +10,7 @@
         <a class="nav-link" id="incExpPesos-tab" data-bs-toggle="tab" href="#incExpPesos" role="tab" aria-controls="incExpPesos" aria-selected="false">Ingresos y Egresos (ARS)</a>
       </li>
       <li class="nav-item" role="presentation">
-        <a class="nav-link" id="tab3" data-bs-toggle="tab" href="#content3" role="tab" aria-controls="content3" aria-selected="false">Tab 3</a>
+        <a class="nav-link" id="cards-tab" data-bs-toggle="tab" href="#cards" role="tab" aria-controls="cards" aria-selected="false">Tarjetas</a>
       </li>
     </ul>
   
@@ -74,9 +74,33 @@
     </div>
         
       </div>
-      <div class="tab-pane fade" id="content3" role="tabpanel" aria-labelledby="tab3">
-        <h4>Contenido de Tab 3</h4>
-        <p>Este es un contenido dummy para el Tab 3.</p>
+      <div class="tab-pane fade" id="cards" role="tabpanel" aria-labelledby="cards-tab">
+        <h4>Tarjetas</h4>
+        <div class="row">
+            <div class="col-md-6">
+                
+                <select
+                  id="card"
+                  class="form-select"
+                  [(ngModel)]="selectedCardDB3"
+                  (change)="loadCardStats()"
+                >
+                    <option value="0" selected>Todas</option>
+                    <option *ngFor="let card of cards" [value]="card.id">{{ card.name }}</option>
+                </select>
+            </div>
+        </div>
+
+          <!-- Graficos -->
+          <div class="row mt-4">
+              <div class="col-md-6">
+                  <canvas id="pesosCardsChart"></canvas>
+              </div>
+              <div class="col-md-6">
+                  <canvas id="dollarCardsChart"></canvas>
+              </div>
+          </div>
+
       </div>
     </div>
   </div>

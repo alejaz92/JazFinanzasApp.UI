@@ -21,7 +21,6 @@ export class ExchangeListComponent implements OnInit {
   loadExchanges() {
     this.exchangeService.getExchanges(this.page, 20)
       .subscribe(response => {
-        console.log(response);
         this.Exchanges = response.transactions;        
 
         this.totalExchanges = response.totalCount;

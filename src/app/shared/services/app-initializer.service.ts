@@ -9,7 +9,6 @@ export class AppInitializerService {
   constructor(private authService: AuthService) {}
 
   checkAuthStatus(): Observable<boolean> {
-    //console.log(this.authService.isLoggedIn());
     return this.authService.isLoggedIn(); // Supón que devuelve un Observable<boolean>
   }
 }
