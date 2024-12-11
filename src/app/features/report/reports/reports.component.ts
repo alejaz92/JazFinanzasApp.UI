@@ -5,6 +5,7 @@ import { Chart, ChartConfiguration, registerables } from 'chart.js/auto';
 import { CardService } from '../../card/services/card.service';
 import { Card } from '../../card/models/card.model';
 import { CardStats } from '../models/CardStats.model';
+import { CardTransactionPaymentList } from '../../cardTransactions/models/CardTransactionPayment-List.model';
 
 @Component({
   selector: 'app-reports',
@@ -15,6 +16,7 @@ export class ReportsComponent implements OnInit {
   selectedMonthDB1: String = '';
   selectedMonthDB2: String = '';
   selectedCardDB3: number = 0;
+  cardTransactionsDTO: CardTransactionPaymentList[] = [];
   cards: Card[] = [];
   incExpDollarStats: IncExpStats | null = null;
   incExpPesosStats: IncExpStats | null = null;
@@ -574,10 +576,12 @@ export class ReportsComponent implements OnInit {
   }
 
   loadCardStats() {    
+    this.cardTransactionsDTO = [];
 
     this.reportService.getCardStats(this.selectedCardDB3)
       .subscribe(response => {
         this.renderDB3(response);
+        this.cardTransactionsDTO = response.cardTransactionsDTO;
       });
   
   }

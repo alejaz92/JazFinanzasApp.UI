@@ -1,4 +1,15 @@
 #incomeByClassDollarChart {
-    width: 100% !important;
-    height: 400px; /* Ajusta la altura según lo necesites */
-  }
+  width: 100% !important;
+  height: 400px; /* Ajusta la altura según lo necesites */
+}
+
+.text-end {
+  text-align: right; /* Alineación a la derecha para el monto */
+}
+
+.table th, .table td {
+  white-space: nowrap;
+}
+.table {
+  font-size: 0.8rem;
+}
