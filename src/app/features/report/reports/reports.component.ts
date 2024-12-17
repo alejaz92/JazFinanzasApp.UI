@@ -6,6 +6,11 @@ import { CardService } from '../../card/services/card.service';
 import { Card } from '../../card/models/card.model';
 import { CardStats } from '../models/CardStats.model';
 import { CardTransactionPaymentList } from '../../cardTransactions/models/CardTransactionPayment-List.model';
+import { AssetType } from '../../account/models/assetType.model';
+import { AssetTypeService } from '../../assetType/services/asset-type.service';
+import { StockStatsDTO, StockStatsListDTO } from '../models/StockStats.model';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+
 
 @Component({
   selector: 'app-reports',
@@ -16,10 +21,13 @@ export class ReportsComponent implements OnInit {
   selectedMonthDB1: String = '';
   selectedMonthDB2: String = '';
   selectedCardDB3: number = 0;
+  selectedAssetTypeDB4: number = 0;
   cardTransactionsDTO: CardTransactionPaymentList[] = [];
   cards: Card[] = [];
+  assetTypes: AssetType[] = [];
   incExpDollarStats: IncExpStats | null = null;
   incExpPesosStats: IncExpStats | null = null;
+  stocksStatsDTO: StockStatsListDTO[] = [];
   db1Graph1: Chart | undefined;
   db1Graph2: Chart | undefined;
   db1Graph3: Chart | undefined;
@@ -30,11 +38,15 @@ export class ReportsComponent implements OnInit {
   db2Graph4: Chart | undefined;
   db3Graph1: Chart | undefined;
   db3Graph2: Chart | undefined;
+  db4Graph1: Chart | undefined;
+  db4Graph2: Chart | undefined;
+  db4Graph3: Chart | undefined;
 
 
   constructor(
     private reportService: ReportService,
-    private cardService: CardService
+    private cardService: CardService,
+    private assetTypeService: AssetTypeService
   ) {}
 
   ngOnInit(): void {
@@ -49,6 +61,7 @@ export class ReportsComponent implements OnInit {
     this.loadIncExpDollarStats();
     this.loadIncExpPesosStats();
     this.loadCards();
+    this.loadAssetTypes();
     
   }
 
@@ -56,6 +69,12 @@ export class ReportsComponent implements OnInit {
     this.cardService.getAllCards().subscribe(response => {
       this.cards = response;
       this.loadCardStats();
+    });
+  }
+
+  loadAssetTypes() {
+    this.assetTypeService.getAssetTypes('BOLSA').subscribe(response => {
+      this.assetTypes = response;
     });
   }
 
@@ -776,6 +795,217 @@ export class ReportsComponent implements OnInit {
     });
   }
 
+
+  loadStockStats() {
+    this.stocksStatsDTO = [];
+
+    this.reportService.getStockStats(this.selectedAssetTypeDB4)
+      .subscribe(response => {
+        this.renderDB4(response);
+
+        this.stocksStatsDTO = response.stockStatsInd;
+      });
+  }
+
+  renderDB4(data: StockStatsDTO) {
+    // graph1
+    const ctx1 = document.getElementById('percentajeByTickerChart') as HTMLCanvasElement;
+
+    if (!ctx1) return;
+
+    this.db4Graph1?.destroy();
+
+    var tickers = data.stockStatsInd.map(item => item.assetName);
+    var symbols = data.stockStatsInd.map(item => item.symbol);
+    var currentValues = data.stockStatsInd.map(item => item.actualValue);
+
+    // generate random colors to avoid contrast issues 
+    var controlledColors = this.generateControlledColors(currentValues.length);
+   
+     // Crear una nueva instancia del gráfico
+    this.db4Graph1 = new Chart(ctx1, {
+      type: 'pie',
+      data: {
+        labels: symbols,
+        datasets: [{
+          data: currentValues,
+          backgroundColor: controlledColors,
+          hoverOffset: 4
+        }]
+      },
+      options: {
+        plugins: {
+          legend: {
+            display: false,
+            position: 'right'
+          },
+          title: {
+            display: true,
+            text: 'Distribución por Ticker (En Dólares)'
+          },
+          tooltip: {
+            callbacks: {
+              label: (tooltipItem) => {
+                const total = currentValues.reduce((a, b) => a + b, 0);
+                const percentage = ((Number(tooltipItem.raw) / total) * 100).toFixed(2);
+                const nombreLargo = tickers[tooltipItem.dataIndex];
+                const simbolo = symbols[tooltipItem.dataIndex];
+                return `${nombreLargo} (${simbolo}): ${new Intl.NumberFormat('en-US', {
+                  style: 'currency',
+                  currency: 'USD'
+                }).format(Number(tooltipItem.raw))} (${percentage}%)`;
+              }
+            }
+          },
+          datalabels: {
+            display: true,
+            color: 'white',
+            align: 'center',
+            anchor: 'center',
+            font: {
+              weight: 'bold'
+            },
+            formatter: (value, context) => {
+              const total = context.chart.data.datasets[0].data.reduce((a, b) => (typeof a === 'number' && typeof b === 'number' ? a + b : 0), 0);
+              const percentage = total ? ((value / Number(total)) * 100).toFixed(2) : '0.00';
+              return Number(percentage) > 5 && context.chart.data.labels ? context.chart.data.labels[context.dataIndex] : '';
+            }
+          }
+        }
+      },
+      plugins: [ChartDataLabels]
+    });
+
+    // graph2
+
+    const ctx2 = document.getElementById('origVsActualChart') as HTMLCanvasElement;
+
+    if (!ctx2) return;
+
+    this.db4Graph2?.destroy();
+
+    this.db4Graph2 = new Chart(ctx2, {
+      type: 'bar',
+      data: {
+        labels: symbols,
+        datasets: [{
+          label: 'Valores Originales',
+          data: data.stockStatsInd.map(item => item.originalValue),
+          backgroundColor: 'rgba(255, 99, 132, 0.2)',
+          borderColor: 'rgba(255, 99, 132, 1)',
+          borderWidth: 1
+        },
+        {
+          label: 'Valores Actuales',
+          data: currentValues,
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          borderColor: 'rgba(75, 192, 192, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        plugins: {
+          title: {
+            display: true,
+            text: 'Valores Originales vs Actuales (En Dólares)'
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: function(value) {
+                return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(value));
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // graph3
+
+    const ctx3 = document.getElementById('stocksGralChart') as HTMLCanvasElement;
+
+    if (!ctx3) return;
+
+    this.db4Graph3?.destroy();
+
+    var assetTypes = data.stockStatsGral.map(item => item.assetType);
+    var currentGralValues = data.stockStatsGral.map(item => item.actualValue);
+
+    // generate random colors to avoid contrast issues
+    controlledColors = this.generateControlledColors(currentGralValues.length);
+
+    this.db4Graph3 = new Chart(ctx3, {
+      type: 'pie',
+      data: {
+        labels: assetTypes,
+        datasets: [{
+          data: currentGralValues,
+          backgroundColor: controlledColors,
+          hoverOffset: 4
+        }]
+      },
+      options: {
+        plugins: {
+          legend: {
+            display: true,
+            position: 'right'
+          },
+          title: {
+            display: true,
+            text: 'Distribución por Tipo de Activo (En Dólares)'
+          },
+          tooltip: {
+            callbacks: {
+              label: (tooltipItem) => {
+                const total = currentGralValues.reduce((a, b) => a + b, 0);
+                const percentage = ((Number(tooltipItem.raw) / total) * 100).toFixed(2);
+                const tipo = assetTypes[tooltipItem.dataIndex];
+                return `${tipo}: ${new Intl.NumberFormat('en-US', {
+                  style: 'currency',
+                  currency: 'USD'
+                }).format(Number(tooltipItem.raw))} (${percentage}%)`;
+              }
+            }
+          },
+          datalabels: {
+            display: true,
+            color: 'white',
+            align: 'center',
+            anchor: 'center',
+            font: {
+              weight: 'bold'
+            },
+            formatter: (value, context) => {
+              const total = context.chart.data.datasets[0].data.reduce((a, b) => (typeof a === 'number' && typeof b === 'number' ? a + b : 0), 0);
+              const percentage = total ? ((value / Number(total)) * 100).toFixed(2) : '0.00';
+              return Number(percentage) > 5 && context.chart.data.labels ? context.chart.data.labels[context.dataIndex] : '';
+            }
+          }
+        }
+      },
+      plugins: [ChartDataLabels]
+    });
+
+
+  }
+
+  generateControlledColors(quantity: number) {
+    var colors = [];
+
+    for (var i = 0; i < quantity; i++) {
+      var hue = Math.floor(Math.random() * 360); // Varía el tono entre 0 y 360 grados (todos los colores)
+      var saturation = Math.floor(Math.random() * (100 - 60) + 60);  // Saturación alta (60% a 100%) para colores vivos
+      var lightness = Math.floor(Math.random() * (70 - 40) + 40);  // Evita colores muy oscuros o muy claros (40% a 70%)
+
+      var color = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+      colors.push(color);
+
+    }
+    return colors;
+  }
 
 
 }

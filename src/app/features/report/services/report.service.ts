@@ -6,6 +6,7 @@ import { Balance } from '../models/Balance.modelt';
 import { TotalBalance } from '../models/TotalBalance.model';
 import { IncExpStats } from '../models/IncExpStats.model';
 import { CardStats } from '../models/CardStats.model';
+import { StockStatsDTO } from '../models/StockStats.model';
 
 @Injectable({
   providedIn: 'root'
@@ -32,5 +33,9 @@ export class ReportService {
 
   getCardStats(cardId: number): Observable<CardStats> {
     return this.http.get<CardStats>(`${environment.apiBaseURL}/api/report/CardStats/${cardId}`);
+  }
+
+  getStockStats(assetTypeId: number): Observable<StockStatsDTO> {
+    return this.http.get<StockStatsDTO>(`${environment.apiBaseURL}/api/report/StockStats/${assetTypeId}`);
   }
 }

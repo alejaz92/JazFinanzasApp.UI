@@ -12,97 +12,98 @@
       <li class="nav-item" role="presentation">
         <a class="nav-link" id="cards-tab" data-bs-toggle="tab" href="#cards" role="tab" aria-controls="cards" aria-selected="false">Tarjetas</a>
       </li>
+      <li class="nav-item" role="presentation">
+        <a class="nav-link" id="stocks-tab" data-bs-toggle="tab" href="#stocks" role="tab" aria-controls="stocks" aria-selected="false">Inv. Bolsa</a>
+      </li>
     </ul>
   
     <!-- Contenido de los Tabs -->
     <div class="tab-content mt-3" id="myTabContent">
-      <div class="tab-pane fade show active" id="incExpDollar" role="tabpanel" aria-labelledby="incExpDollar-tab">
-        <h4>Ingresos y Egresos en Dolares</h4>
-        <div class="row">
-            <div class="col-md-6">
-                <label for="month">Mes</label>
-                <input class="form-control" type="month" id="MonthDB1" [(ngModel)]="selectedMonthDB1" (change)="loadIncExpDollarStats()"/>
+        <div class="tab-pane fade show active" id="incExpDollar" role="tabpanel" aria-labelledby="incExpDollar-tab">
+            <h4>Ingresos y Egresos en Dolares</h4>
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="month">Mes</label>
+                    <input class="form-control" type="month" id="MonthDB1" [(ngModel)]="selectedMonthDB1" (change)="loadIncExpDollarStats()"/>
+                </div>
+            </div>
+
+            <!-- Graficos -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <canvas id="incomeByClassDollarChart"></canvas>
+                </div>
+                <div class="col-md-6">
+                    <canvas id="expenseByClassDollarChart"></canvas>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <canvas id="incomeLast6MonthsDollarChart"></canvas>
+                </div>
+                <div class="col-md-6">
+                    <canvas id="expenseLast6MonthsDollarChart"></canvas>
             </div>
         </div>
-
-          <!-- Graficos -->
-          <div class="row mt-4">
-              <div class="col-md-6">
-                  <canvas id="incomeByClassDollarChart"></canvas>
-              </div>
-              <div class="col-md-6">
-                  <canvas id="expenseByClassDollarChart"></canvas>
-              </div>
-          </div>
-
-          <div class="row mt-4">
-              <div class="col-md-6">
-                  <canvas id="incomeLast6MonthsDollarChart"></canvas>
-              </div>
-              <div class="col-md-6">
-                  <canvas id="expenseLast6MonthsDollarChart"></canvas>
-              </div>
-          </div>
-      </div>
-      <div class="tab-pane fade" id="incExpPesos" role="tabpanel" aria-labelledby="incExpPesos-tab">
-        <h4>Ingresos y Egresos en Pesos</h4>
-        <div class="row">
-            <div class="col-md-6">
-                <label for="month">Mes</label>
-                <input class="form-control" type="month" id="MonthDB2" [(ngModel)]="selectedMonthDB2" (change)="loadIncExpPesosStats()"/>
-
-                
-        </div>
-        <!-- Graficos -->
-        <div class="row mt-4">
-            <div class="col-md-6">
-                <canvas id="incomeByClassPesosChart"></canvas>
+        <div class="tab-pane fade" id="incExpPesos" role="tabpanel" aria-labelledby="incExpPesos-tab">
+            <h4>Ingresos y Egresos en Pesos</h4>
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="month">Mes</label>
+                    <input class="form-control" type="month" id="MonthDB2" [(ngModel)]="selectedMonthDB2" (change)="loadIncExpPesosStats()"/>                    
+                </div>
             </div>
-            <div class="col-md-6">
-                <canvas id="expenseByClassPesosChart"></canvas>
+            <!-- Graficos -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <canvas id="incomeByClassPesosChart"></canvas>
+                </div>
+                <div class="col-md-6">
+                    <canvas id="expenseByClassPesosChart"></canvas>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <canvas id="incomeLast6MonthsPesosChart"></canvas>
+                </div>
+                <div class="col-md-6">
+                    <canvas id="expenseLast6MonthsPesosChart"></canvas>
+                </div>
             </div>
         </div>
-
-        <div class="row mt-4">
-            <div class="col-md-6">
-                <canvas id="incomeLast6MonthsPesosChart"></canvas>
-            </div>
-            <div class="col-md-6">
-                <canvas id="expenseLast6MonthsPesosChart"></canvas>
-            </div>
-        </div>
-    </div>
         
-      </div>
-      <div class="tab-pane fade" id="cards" role="tabpanel" aria-labelledby="cards-tab">
-        <h4>Tarjetas</h4>
-        <div class="row">
-            <div class="col-md-6">
-                
-                <select
-                  id="card"
-                  class="form-select"
-                  [(ngModel)]="selectedCardDB3"
-                  (change)="loadCardStats()"
-                >
-                    <option value="0" selected>Todas</option>
-                    <option *ngFor="let card of cards" [value]="card.id">{{ card.name }}</option>
-                </select>
+    </div>
+        <div class="tab-pane fade" id="cards" role="tabpanel" aria-labelledby="cards-tab">
+            <h4>Tarjetas</h4>
+            <div class="row">
+                <div class="col-md-6">
+                    
+                    <select
+                    id="card"
+                    class="form-select"
+                    [(ngModel)]="selectedCardDB3"
+                    (change)="loadCardStats()"
+                    >
+                        <option value="0" selected>Todas</option>
+                        <option *ngFor="let card of cards" [value]="card.id">{{ card.name }}</option>
+                    </select>
+                </div>
             </div>
-        </div>
 
-          <!-- Graficos -->
-          <div class="row mt-4">
-              <div class="col-md-6">
-                  <canvas id="pesosCardsChart"></canvas>
-              </div>
-              <div class="col-md-6">
-                  <canvas id="dollarCardsChart"></canvas>
-              </div>
-          </div>
+            <!-- Graficos -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <canvas id="pesosCardsChart"></canvas>
+                </div>
+                <div class="col-md-6">
+                    <canvas id="dollarCardsChart"></canvas>
+                </div>
+            </div>
 
-          <!-- Tabla  -->
-           <div class="mt-4" *ngIf="cardTransactionsDTO.length > 0">
+        <!-- Tabla  -->
+            <div class="mt-4" *ngIf="cardTransactionsDTO.length > 0">
                 <div class="card">
                     <div class="card-header">
                         <h5>Gastos en el mes actual</h5>
@@ -138,9 +139,74 @@
                         </div>
                     </div>
                 </div>
-           </div>
+            </div>
+        </div>
 
-      </div>
+        <div class="tab-pane fade" id="stocks" role="tabpanel" aria-labelledby="stocks-tab">
+            <h4>Inversiones en Bolsa</h4>
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="assetType">Tipo de Activo</label>
+                    <select
+                    id="assetType"
+                    class="form-select"
+                    [(ngModel)]="selectedAssetTypeDB4"
+                    (change)="loadStockStats()"
+                    >
+                        <option value="0" selected disabled>Seleccione</option>
+                        <option *ngFor="let assetType of assetTypes" [value]="assetType.id">{{ assetType.name }}</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- graficos -->
+
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <canvas id="stocksGralChart"></canvas>
+                </div>
+                <div class="col-md-6">
+                    <canvas id="percentajeByTickerChart"></canvas>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <canvas id="origVsActualChart"></canvas>
+                </div>
+                <div class="col-md-6" *ngIf="stocksStatsDTO.length > 0">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Tenencias Actuales</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Ticker</th>
+                                            <th>Nombre</th>
+                                            <th>Cantidad</th>
+                                            <th>Valor Original</th>
+                                            <th>Valor Actual</th>                                            
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let stock of stocksStatsDTO">
+                                            <td>{{ stock.symbol  }}</td>
+                                            <td>{{ stock.assetName }}</td>
+                                            <td>{{ stock.quantity }}</td>
+                                            <td>{{ stock.originalValue | currencyFiatFormat }}</td>
+                                            <td>{{ stock.actualValue | currencyFiatFormat }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
-  </div>
+</div>
   
