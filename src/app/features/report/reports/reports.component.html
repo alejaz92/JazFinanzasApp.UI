@@ -15,6 +15,9 @@
       <li class="nav-item" role="presentation">
         <a class="nav-link" id="stocks-tab" data-bs-toggle="tab" href="#stocks" role="tab" aria-controls="stocks" aria-selected="false">Inv. Bolsa</a>
       </li>
+      <li class="nav-item" role="presentation">
+        <a class="nav-link" id="cryptosGral-tab" data-bs-toggle="tab" href="#cryptosGral" role="tab" aria-controls="cryptosGral" aria-selected="false">Cryptos Gral.</a>
+      </li>
     </ul>
   
     <!-- Contenido de los Tabs -->
@@ -44,8 +47,11 @@
                 </div>
                 <div class="col-md-6">
                     <canvas id="expenseLast6MonthsDollarChart"></canvas>
-            </div>
+                </div>
+            </div>       
+        
         </div>
+
         <div class="tab-pane fade" id="incExpPesos" role="tabpanel" aria-labelledby="incExpPesos-tab">
             <h4>Ingresos y Egresos en Pesos</h4>
             <div class="row">
@@ -73,8 +79,8 @@
                 </div>
             </div>
         </div>
-        
-    </div>
+
+
         <div class="tab-pane fade" id="cards" role="tabpanel" aria-labelledby="cards-tab">
             <h4>Tarjetas</h4>
             <div class="row">
@@ -162,6 +168,7 @@
             <!-- graficos -->
 
             <div class="row mt-4">
+                
                 <div class="col-md-6">
                     <canvas id="stocksGralChart"></canvas>
                 </div>
@@ -184,19 +191,21 @@
                                     <thead>
                                         <tr>
                                             <th>Ticker</th>
-                                            <th>Nombre</th>
+                                            <!-- <th>Nombre</th> -->
                                             <th>Cantidad</th>
-                                            <th>Valor Original</th>
-                                            <th>Valor Actual</th>                                            
+                                            <th>Valor Origen Promedio</th>
+                                            <th>Valor Actual</th>    
+                                            <th>%</th>                                        
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr *ngFor="let stock of stocksStatsDTO">
                                             <td>{{ stock.symbol  }}</td>
-                                            <td>{{ stock.assetName }}</td>
+                                            <!-- <td>{{ stock.assetName }}</td> -->
                                             <td>{{ stock.quantity }}</td>
                                             <td>{{ stock.originalValue | currencyFiatFormat }}</td>
                                             <td>{{ stock.actualValue | currencyFiatFormat }}</td>
+                                            <td>{{ (stock.actualValue / stock.originalValue * 100) -100 | currencyInvestmentFormat }} %</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -206,6 +215,75 @@
                 </div>
             </div>
 
+        </div>
+
+        <div class="tab-pane fade" id="cryptosGral" role="tabpanel" aria-labelledby="cryptosGral-tab">
+            <h4>Cryptos General</h4>
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="assetType">Incluir Monedas Estables</label>
+                    <select
+                    id="includeStables"
+                    class="form-select"
+                    [(ngModel)]="includeStables"
+                    (change)="loadCryptoGralStats()"
+                    >
+                        <option value="false" selected>No Incluir</option>
+                        <option value="true">Incluir</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Graphs -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <canvas id="cryptosGralDistributionChart"></canvas>
+                </div>
+                <div class="col-md-6">
+                    <div class="row">
+                        <canvas id="walletValueEvolutionChart"></canvas>
+                    </div>
+                    <div class="row"> 
+                        <canvas id="buyVolumeEvolutionChart"></canvas>
+                    </div>
+                    
+                </div>
+            </div>
+            <div class="row mt-4" *ngIf="cryptoGralStatsDTO.length > 0">
+                    <!--tabla -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Tenencias Actuales</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Crypto</th>
+                                        <th>Nombre</th>
+                                        <th>Cantidad</th>
+                                        <th>Valor Origen Promedio</th>
+                                        <th>Valor Actual</th>    
+                                        <th>%</th>                                        
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let stock of cryptoGralStatsDTO">
+                                        <td>{{ stock.symbol  }}</td>
+                                        <td>{{ stock.assetName }}</td>
+                                        <td>{{ stock.quantity }}</td>
+                                        <td>{{ stock.originalValue | currencyFiatFormat }}</td>
+                                        <td>{{ stock.actualValue | currencyFiatFormat }}</td>
+                                        <td>{{ (stock.actualValue / stock.originalValue * 100) -100 | currencyInvestmentFormat }} %</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
         </div>
     </div>
 </div>

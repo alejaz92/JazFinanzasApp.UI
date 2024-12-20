@@ -7,6 +7,7 @@ import { TotalBalance } from '../models/TotalBalance.model';
 import { IncExpStats } from '../models/IncExpStats.model';
 import { CardStats } from '../models/CardStats.model';
 import { StockStatsDTO } from '../models/StockStats.model';
+import { CryptoGralStatsDTO } from '../models/CryptoGralStats.model';
 
 @Injectable({
   providedIn: 'root'
@@ -37,5 +38,9 @@ export class ReportService {
 
   getStockStats(assetTypeId: number): Observable<StockStatsDTO> {
     return this.http.get<StockStatsDTO>(`${environment.apiBaseURL}/api/report/StockStats/${assetTypeId}`);
+  }
+
+  getCryptoGralStats(includeStables: boolean): Observable<CryptoGralStatsDTO> {
+    return this.http.get<CryptoGralStatsDTO>(`${environment.apiBaseURL}/api/report/CryptoGralStats?includeStables=${includeStables}`);
   }
 }

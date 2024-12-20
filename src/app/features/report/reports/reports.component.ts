@@ -10,6 +10,7 @@ import { AssetType } from '../../account/models/assetType.model';
 import { AssetTypeService } from '../../assetType/services/asset-type.service';
 import { StockStatsDTO, StockStatsListDTO } from '../models/StockStats.model';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import { CryptoGralStatsDTO } from '../models/CryptoGralStats.model';
 
 
 @Component({
@@ -22,12 +23,14 @@ export class ReportsComponent implements OnInit {
   selectedMonthDB2: String = '';
   selectedCardDB3: number = 0;
   selectedAssetTypeDB4: number = 0;
+  includeStables: boolean = false;
   cardTransactionsDTO: CardTransactionPaymentList[] = [];
   cards: Card[] = [];
   assetTypes: AssetType[] = [];
   incExpDollarStats: IncExpStats | null = null;
   incExpPesosStats: IncExpStats | null = null;
   stocksStatsDTO: StockStatsListDTO[] = [];
+  cryptoGralStatsDTO: StockStatsListDTO[] = [];
   db1Graph1: Chart | undefined;
   db1Graph2: Chart | undefined;
   db1Graph3: Chart | undefined;
@@ -41,6 +44,9 @@ export class ReportsComponent implements OnInit {
   db4Graph1: Chart | undefined;
   db4Graph2: Chart | undefined;
   db4Graph3: Chart | undefined;
+  db5Graph1: Chart | undefined;
+  db5Graph2: Chart | undefined;
+  db5Graph3: Chart | undefined;
 
 
   constructor(
@@ -62,6 +68,8 @@ export class ReportsComponent implements OnInit {
     this.loadIncExpPesosStats();
     this.loadCards();
     this.loadAssetTypes();
+    this.loadCryptoGralStats();
+
     
   }
 
@@ -889,7 +897,7 @@ export class ReportsComponent implements OnInit {
       data: {
         labels: symbols,
         datasets: [{
-          label: 'Valores Originales',
+          label: 'Valores Originales Promedio',
           data: data.stockStatsInd.map(item => item.originalValue),
           backgroundColor: 'rgba(255, 99, 132, 0.2)',
           borderColor: 'rgba(255, 99, 132, 1)',
@@ -907,7 +915,7 @@ export class ReportsComponent implements OnInit {
         plugins: {
           title: {
             display: true,
-            text: 'Valores Originales vs Actuales (En Dólares)'
+            text: 'Valores Originales Prom. vs Actuales (En Dólares)'
           }
         },
         scales: {
@@ -950,7 +958,7 @@ export class ReportsComponent implements OnInit {
       options: {
         plugins: {
           legend: {
-            display: true,
+            display: false,
             position: 'right'
           },
           title: {
@@ -1005,6 +1013,235 @@ export class ReportsComponent implements OnInit {
 
     }
     return colors;
+  }
+
+  loadCryptoGralStats() {
+    this.reportService.getCryptoGralStats(this.includeStables)
+      .subscribe(response => {
+        this.cryptoGralStatsDTO = response.cryptoGralStats;
+        this.renderDB5(response);
+      });
+  }
+
+  renderDB5(data: CryptoGralStatsDTO) {
+
+
+     // graph1
+     const ctx1 = document.getElementById('cryptosGralDistributionChart') as HTMLCanvasElement;
+
+     if (!ctx1) return;
+ 
+     this.db5Graph1?.destroy();
+ 
+     var tickers = data.cryptoGralStats.map(item => item.assetName);
+     var symbols = data.cryptoGralStats.map(item => item.symbol);
+     var currentValues = data.cryptoGralStats.map(item => item.actualValue);
+ 
+     // generate random colors to avoid contrast issues 
+     var controlledColors = this.generateControlledColors(currentValues.length);
+    
+      // Crear una nueva instancia del gráfico
+     this.db5Graph1 = new Chart(ctx1, {
+       type: 'pie',
+       data: {
+         labels: symbols,
+         datasets: [{
+           data: currentValues,
+           backgroundColor: controlledColors,
+           hoverOffset: 4
+         }]
+       },
+       options: {
+         plugins: {
+           legend: {
+             display: false,
+             position: 'right'
+           },
+           title: {
+             display: true,
+             text: 'Distribución por Crypto (En Dólares)'
+           },
+           tooltip: {
+             callbacks: {
+               label: (tooltipItem) => {
+                 const total = currentValues.reduce((a, b) => a + b, 0);
+                 const percentage = ((Number(tooltipItem.raw) / total) * 100).toFixed(2);
+                 const nombreLargo = tickers[tooltipItem.dataIndex];
+                 const simbolo = symbols[tooltipItem.dataIndex];
+                 return `${nombreLargo} (${simbolo}): ${new Intl.NumberFormat('en-US', {
+                   style: 'currency',
+                   currency: 'USD'
+                 }).format(Number(tooltipItem.raw))} (${percentage}%)`;
+               }
+             }
+           },
+           datalabels: {
+             display: true,
+             color: 'white',
+             align: 'center',
+             anchor: 'center',
+             font: {
+               weight: 'bold'
+             },
+             formatter: (value, context) => {
+               const total = context.chart.data.datasets[0].data.reduce((a, b) => (typeof a === 'number' && typeof b === 'number' ? a + b : 0), 0);
+               const percentage = total ? ((value / Number(total)) * 100).toFixed(2) : '0.00';
+               return Number(percentage) > 5 && context.chart.data.labels ? context.chart.data.labels[context.dataIndex] : '';
+             }
+           }
+         }
+       },
+       plugins: [ChartDataLabels]
+     });
+
+    // graph2
+    const ctx2 = document.getElementById('walletValueEvolutionChart') as HTMLCanvasElement;   
+
+
+     if (!ctx2) return;
+ 
+     this.db5Graph2?.destroy();
+
+     // 
+      var labels = data.cryptoStatsByDate.map(item => {
+        const date = new Date(item.date);
+        return date.toLocaleDateString('es-AR');
+      });
+
+      var values = data.cryptoStatsByDate.map(item => item.value);
+
+      this.db5Graph2 = new Chart(ctx2, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Valor de la Cartera',
+            data: values,
+            fill: true,
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1.5,
+            pointRadius: 0
+          }]
+        },
+        options: {
+          plugins: {
+            title: {
+              display: true,
+              text: 'Evolución del Valor de la Cartera (En Dólares)'
+            },
+            legend: {
+              display: false
+            },
+            tooltip: {
+              callbacks: {
+                label: (tooltipItem) => {
+                  return `${new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD'
+                  }).format(Number(tooltipItem.raw))}`;
+                }
+              }
+            },
+          },
+          scales: {
+            x: {
+              ticks: {
+                callback: function(value, index) {
+                  // Muestra solo cada 5 etiquetas
+                  return index % 2 === 0 ? this.getLabelForValue(Number(value)) : '';
+                }
+              }
+            },
+            y: {
+              beginAtZero: false,
+              ticks: {
+                callback: function(value) {
+                  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(value));
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // graph3
+    const ctx3 = document.getElementById('buyVolumeEvolutionChart') as HTMLCanvasElement;   
+
+
+    if (!ctx3) return;
+
+    this.db5Graph3?.destroy();
+
+    const commerceTypeTranslations: Record<string, string> = {
+      "BalanceAdj": "Ajuste de Saldos",
+      "Trading": "Trading",
+      "Fiat/Crypto Commerce": "Comercio Fiat/Crypto"
+    }
+
+    const groupedData: Record<string, Record<string, number>> = {};
+    const commerceTypes = new Set<string>();
+
+    data.cryptoPurchasesStatsByMonth.forEach((stat) => {
+      const month = new Date(stat.date).toLocaleString('default', { month: 'short', year: 'numeric' });
+      if (!groupedData[month]) groupedData[month] = {};
+      groupedData[month][stat.commerceType] = (groupedData[month][stat.commerceType] || 0) + stat.value;
+      commerceTypes.add(stat.commerceType);
+
+    });
+
+    labels = Object.keys(groupedData);
+    const commerceTypesArray = Array.from(commerceTypes);
+    const colors = this.generateControlledColors(commerceTypesArray.length);
+
+    const datasets = commerceTypesArray.map((type, index) => ({
+      label: commerceTypeTranslations[type] || type,
+      data: labels.map((month) => groupedData[month][type] || 0),
+      backgroundColor: colors[index]
+    }));
+
+    this.db5Graph3 = new Chart(ctx3, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets,
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: (tooltipItem) => {
+                return `${new Intl.NumberFormat('en-US', {
+                  style: 'currency',
+                  currency: 'USD'
+                }).format(Number(tooltipItem.raw))}`;
+              }
+            }
+          },
+          title: {
+            display: true,
+            text: 'Volumen Mensual de Ingresos (En Dólares)'
+          },
+          legend: {
+            position: 'top',
+          },
+        },
+        scales: {
+          x: {
+            stacked: true,
+          },
+          y: {
+            beginAtZero: false,
+            ticks: {
+              callback: function(value) {
+                return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(value));
+              }
+            }
+          },
+        },
+      },
+    });    
+ 
   }
 
 
