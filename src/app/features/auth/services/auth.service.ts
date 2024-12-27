@@ -32,9 +32,19 @@ export class AuthService {
     return localStorage.getItem(this.tokenKey);
   }
 
-  isLoggedIn(): Observable<boolean> {
+  isLoggedIn(): boolean {
+    return !!this.getToken() && !this.isTokenExpired();
+  }
 
-    return of(!!this.getToken());
+  isTokenExpired(): boolean {
+    const token = this.getToken();
+    if (!token) {
+      return true;
+    }
+  
+    const payload = JSON.parse(atob(token.split('.')[1])); // Decodifica el payload del JWT
+    const now = Math.floor(Date.now() / 1000);
+    return payload.exp < now; // Verifica si el token ha expirado
   }
 
   register(userData: any): Observable<any> {

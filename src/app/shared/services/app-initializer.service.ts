@@ -8,7 +8,7 @@ import { AuthService } from 'src/app/features/auth/services/auth.service';
 export class AppInitializerService {
   constructor(private authService: AuthService) {}
 
-  checkAuthStatus(): Observable<boolean> {
-    return this.authService.isLoggedIn(); // Supón que devuelve un Observable<boolean>
-  }
+  // checkAuthStatus(): Observable<boolean> {
+  //   return this.authService.isLoggedIn(); 
+  // }
 }

@@ -7,17 +7,11 @@ import { AppInitializerService } from './shared/services/app-initializer.service
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  isLoading = true;
   title = 'JazFinanzasApp';
 
-  constructor(appInitializerService: AppInitializerService) {
+  constructor() {
     
-    
-    appInitializerService.checkAuthStatus().subscribe({
-      next: () => this.isLoading = false,
-      error: () => this.isLoading = false
-    });
+  
 
-    
   }
 }
