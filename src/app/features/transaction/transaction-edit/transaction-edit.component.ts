@@ -17,6 +17,7 @@ export class TransactionEditComponent  implements OnInit, OnDestroy{
   editTransactionSubscription?: Subscription;
   transaction?: Transaction;
   successMessage: string = '';
+  isLoading: boolean = true;
 
   constructor(private route: ActivatedRoute, private transactionService: TransactionService, private router: Router) {  }
 
@@ -41,7 +42,12 @@ export class TransactionEditComponent  implements OnInit, OnDestroy{
                 this.transaction.movementType = 'Egreso';
               }
               
-              this.transaction.amount = Math.abs(this.transaction.amount);              
+              this.transaction.amount = Math.abs(this.transaction.amount);
+              
+              this.isLoading = false;
+            },
+            error: (error) => {
+              this.isLoading = false;
             }
           });
         } 

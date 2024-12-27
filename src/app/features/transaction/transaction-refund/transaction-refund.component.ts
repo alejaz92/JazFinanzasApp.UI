@@ -21,6 +21,7 @@ export class TransactionRefundComponent implements OnInit, OnDestroy {
   transaction?: Transaction;
   successMessage: string = '';
   accounts: any[] = []; 
+  isLoading: boolean = true;
   
   constructor(
     private fb: FormBuilder,
@@ -46,10 +47,15 @@ export class TransactionRefundComponent implements OnInit, OnDestroy {
             next: (response) => {
               this.transaction = response;
 
+              
               this.refundForm.patchValue({ // Actualiza el formulario
                 accountId: this.transaction.accountId,
                 date: this.transaction.date ? new Date(this.transaction.date).toISOString().split('T')[0] : '', // Asegúrate de que se formatee correctamente
               });
+              this.isLoading = false;
+            },
+            error: (error) => {
+              this.isLoading = false;
             }
           });
         } 

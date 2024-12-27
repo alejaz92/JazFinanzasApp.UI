@@ -1,95 +1,104 @@
 <div class="container">
     <h1 class="mt-3">Reintegro</h1>
 
-    <ng-container *ngIf="transaction; else notFound">
-        <div class="row">
-            <!-- Mensaje de éxito -->
-            <div *ngIf="successMessage" class="alert alert-success" role="alert">
-                {{ successMessage }}
-            </div>
-            <div class="col-md-6">
-                <h4 class="mb-3">Movimiento</h4>
-                <table class="table table-striped">
-                    <tbody>
-                        <tr>
-                            <th>Fecha</th>
-                            <td>{{ transaction.date | date: 'dd/MM/yyyy' }}</td>
-                        </tr>
-                        <tr>
-                            <th>Clase de Movimiento</th>
-                            <td>{{ transaction.transactionClassName }}</td>
-                        </tr>
-                        <tr>
-                            <th>Detalle</th>
-                            <td>{{ transaction.detail }}</td>
-                        </tr>
-                        <tr>
-                            <th>Cuenta</th>
-                            <td>{{ transaction.accountName }}</td>
-                        </tr>
-                        <tr>
-                            <th>Moneda</th>
-                            <td>{{ transaction.assetName }}</td>
-                        </tr>
-                        <tr>
-                            <th>Monto</th>
-                            <td>
-                                {{ -transaction.amount | currencyFiatFormat }}
-                            </td>
-                        </tr>
-                    </tbody>                    
-                </table>
-            </div>
-
-            <div class="col-md-6">
-                <h4 class="mb-3">Reintegro</h4>
-                <form [formGroup]="refundForm" (ngSubmit)="onFormSubmit()">
-                    <div class="mb-3">
-                        <label class="form-label" for="date">Fecha</label>
-                        <input type="date" class="form-control" id="date" formControlName="date">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label" for="account">Cuenta</label>
-                        <select class="form-select" id="account" formControlName="accountId">
-                            <option value="" disabled selected>Selecciona una cuenta</option>
-                            <option *ngFor="let account of accounts" [value]="account.id">{{ account.name }}</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label" for="amount">Monto</label>
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text">$</span>
+    <ng-container *ngIf="!isLoading; else loading">
+        <ng-container *ngIf="transaction; else notFound">
+            <div class="row">
+                <!-- Mensaje de éxito -->
+                <div *ngIf="successMessage" class="alert alert-success" role="alert">
+                    {{ successMessage }}
+                </div>
+                <div class="col-md-6">
+                    <h4 class="mb-3">Movimiento</h4>
+                    <table class="table table-striped">
+                        <tbody>
+                            <tr>
+                                <th>Fecha</th>
+                                <td>{{ transaction.date | date: 'dd/MM/yyyy' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Clase de Movimiento</th>
+                                <td>{{ transaction.transactionClassName }}</td>
+                            </tr>
+                            <tr>
+                                <th>Detalle</th>
+                                <td>{{ transaction.detail }}</td>
+                            </tr>
+                            <tr>
+                                <th>Cuenta</th>
+                                <td>{{ transaction.accountName }}</td>
+                            </tr>
+                            <tr>
+                                <th>Moneda</th>
+                                <td>{{ transaction.assetName }}</td>
+                            </tr>
+                            <tr>
+                                <th>Monto</th>
+                                <td>
+                                    {{ -transaction.amount | currencyFiatFormat }}
+                                </td>
+                            </tr>
+                        </tbody>                    
+                    </table>
+                </div>
+    
+                <div class="col-md-6">
+                    <h4 class="mb-3">Reintegro</h4>
+                    <form [formGroup]="refundForm" (ngSubmit)="onFormSubmit()">
+                        <div class="mb-3">
+                            <label class="form-label" for="date">Fecha</label>
+                            <input type="date" class="form-control" id="date" formControlName="date">
+                        </div>
+    
+                        <div class="mb-3">
+                            <label class="form-label" for="account">Cuenta</label>
+                            <select class="form-select" id="account" formControlName="accountId">
+                                <option value="" disabled selected>Selecciona una cuenta</option>
+                                <option *ngFor="let account of accounts" [value]="account.id">{{ account.name }}</option>
+                            </select>
+                        </div>
+    
+                        <div class="mb-3">
+                            <label class="form-label" for="amount">Monto</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">$</span>
+                                </div>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="amount" 
+                                       formControlName="amount" 
+                                       (focus)="selectAll($event)"
+                                       appCurrencyInput>
                             </div>
-                            <input type="text" 
-                                   class="form-control" 
-                                   id="amount" 
-                                   formControlName="amount" 
-                                   (focus)="selectAll($event)"
-                                   appCurrencyInput>
+                            <div *ngIf="refundForm.controls['amount']?.errors?.['incorrect'] && refundForm.controls['amount'].touched" class="text-danger mt-2">
+                                El monto debe ser un número válido mayor que 0.
+                            </div>
+                            <div *ngIf="refundForm.controls['amount'].value > -transaction.amount" class="text-danger mt-2">
+                                El monto no puede superar al valor original.
+                            </div>
                         </div>
-                        <div *ngIf="refundForm.controls['amount']?.errors?.['incorrect'] && refundForm.controls['amount'].touched" class="text-danger mt-2">
-                            El monto debe ser un número válido mayor que 0.
+                        
+                        <div class="d-flex justify-content-between mt-3">
+                            <button type="submit" class="btn btn-primary w-100 me-2" [disabled]="refundForm.invalid">Guardar</button>
+                            <a class="btn btn-secondary w-100" [routerLink]="['/transactions']">Volver</a>
                         </div>
-                        <div *ngIf="refundForm.controls['amount'].value > -transaction.amount" class="text-danger mt-2">
-                            El monto no puede superar al valor original.
-                        </div>
-                    </div>
-                    
-                    <div class="d-flex justify-content-between mt-3">
-                        <button type="submit" class="btn btn-primary w-100 me-2" [disabled]="refundForm.invalid">Guardar</button>
-                        <a class="btn btn-secondary w-100" [routerLink]="['/transactions']">Volver</a>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
-        </div>
+        </ng-container>
+    
+        <ng-template #notFound>
+            <div class="alert alert-warning" role="alert">
+                El movimiento no ha sido encontrado.
+            </div>
+        </ng-template>
     </ng-container>
 
-    <ng-template #notFound>
-        <div class="alert alert-warning" role="alert">
-            El movimiento no ha sido encontrado.
+    <ng-template #loading>
+        <div class="alert alert-info" role="alert">
+            Cargando datos...
         </div>
     </ng-template>
+    
 </div>
