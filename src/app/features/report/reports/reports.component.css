@@ -13,3 +13,24 @@
 .table {
   font-size: 0.8rem;
 }
+
+.report-container {
+  display: flex;
+  flex-wrap: wrap; /* Permite que los gráficos se acomoden en varias filas si no hay suficiente espacio */
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px; /* Espaciado entre los gráficos */
+}
+
+.graph {
+  flex: 1 1 45%; /* Ocupa 45% del ancho por defecto, pero es flexible */
+  max-width: 100%; /* Evita que el gráfico se salga del contenedor */
+  box-sizing: border-box; /* Incluye el padding en el tamaño total */
+}
+
+/* Ajustes para pantallas pequeñas */
+@media (max-width: 768px) {
+  .graph {
+    flex: 1 1 100%; /* Los gráficos ocuparán el 100% del ancho en pantallas pequeñas */
+  }
+}

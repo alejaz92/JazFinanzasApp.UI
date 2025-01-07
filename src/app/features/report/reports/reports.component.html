@@ -18,6 +18,9 @@
       <li class="nav-item" role="presentation">
         <a class="nav-link" id="cryptosGral-tab" data-bs-toggle="tab" href="#cryptosGral" role="tab" aria-controls="cryptosGral" aria-selected="false">Cryptos Gral.</a>
       </li>
+      <li class="nav-item" role="presentation">
+        <a class="nav-link" id="crypto-tab" data-bs-toggle="tab" href="#crypto" role="tab" aria-controls="crypto" aria-selected="false">Crypto</a>
+      </li>
     </ul>
   
     <!-- Contenido de los Tabs -->
@@ -284,6 +287,82 @@
                 </div>
 
             </div>
+        </div>
+
+        <div class="tab-pane fade" id="crypto" role="tabpanel" aria-labelledby="crypto-tab">
+            <h4>Crypto</h4>
+            <div class="row">
+                <div class="col-md-6">
+                    
+                    <select
+                    id="asset"
+                    class="form-select"
+                    [(ngModel)]="selectedCryptoDB6"
+                    (change)="loadCryptoStats()"
+                    >
+                        <option value="0" selected disabled>Seleccione</option>
+                        <option *ngFor="let crypto of cryptos" [value]="crypto.id">{{ crypto.name }}</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Graficos -->
+            <div class="row mt-4 report-container">
+                
+                <div class="col-md-6 graph">
+                    <canvas id="priceEvolutionChart"></canvas>
+                </div>
+                <div class="col-md-6 graph">
+                    <canvas id="cryptoBalanceChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Tabla  -->
+
+            <div class="row mt-4">
+                <div class="col-md-3">
+                    <div id="gaugeChart" style="width: 100%; height: 300px;"></div>
+                    
+                </div>
+                <div class="col-md-9">
+                    <div  *ngIf="cryptoTransactionsStatsDTO.length > 0">
+                        <div class="crypto">
+                            <div class="card-header">
+                                <h5>Ultimos Movimientos</h5>
+                                <div class="card-body">
+                                    <div class="rable-responsive">
+                                        <table class="table table-bordered table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Fecha</th>
+                                                    <th>Cuenta</th>
+                                                    <th>Tipo Movimiento</th>
+                                                    <th>Tipo Comercio</th>
+                                                    <th>Cantidad</th>
+                                                    <th>Cotización</th>
+                                                    <th>Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr *ngFor="let transaction of cryptoTransactionsStatsDTO">
+                                                    <td>{{ transaction.date | date: 'dd/MM/yyyy' }}</td>
+                                                    <td>{{ transaction.account }}</td>
+                                                    <td>{{ transaction.movementType | movementType }}</td>
+                                                    <td>{{ transaction.commerceType | commerceType}}</td>
+                                                    <td>{{ transaction.quantity }}</td>
+                                                    <td>{{ transaction.quotePrice | currencyFiatFormat}}</td>
+                                                    <td>{{ transaction.total | currencyFiatFormat}}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>                
+            </div>
+           
         </div>
     </div>
 </div>

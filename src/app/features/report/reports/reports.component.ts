@@ -1,7 +1,8 @@
 import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { ReportService } from '../services/report.service';
 import { IncExpStats } from '../models/IncExpStats.model';
-import { Chart, ChartConfiguration, registerables } from 'chart.js/auto';
+import { Chart, ChartConfiguration, registerables } from 'chart.js';
+Chart.register(...registerables);
 import { CardService } from '../../card/services/card.service';
 import { Card } from '../../card/models/card.model';
 import { CardStats } from '../models/CardStats.model';
@@ -11,6 +12,10 @@ import { AssetTypeService } from '../../assetType/services/asset-type.service';
 import { StockStatsDTO, StockStatsListDTO } from '../models/StockStats.model';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { CryptoGralStatsDTO } from '../models/CryptoGralStats.model';
+import { Asset } from '../../asset/models/asset.model';
+import { AssetService } from '../../asset/services/asset.service';
+import { CryptoStatsDTO, InvestmentTransactionsStatsDTO } from '../models/CryptoStats.model';
+import * as echarts from 'echarts';
 
 
 @Component({
@@ -23,14 +28,17 @@ export class ReportsComponent implements OnInit {
   selectedMonthDB2: String = '';
   selectedCardDB3: number = 0;
   selectedAssetTypeDB4: number = 0;
+  selectedCryptoDB6: number = 0;
   includeStables: boolean = false;
   cardTransactionsDTO: CardTransactionPaymentList[] = [];
   cards: Card[] = [];
   assetTypes: AssetType[] = [];
+  cryptos: Asset[] = [];
   incExpDollarStats: IncExpStats | null = null;
   incExpPesosStats: IncExpStats | null = null;
   stocksStatsDTO: StockStatsListDTO[] = [];
   cryptoGralStatsDTO: StockStatsListDTO[] = [];
+  cryptoTransactionsStatsDTO: InvestmentTransactionsStatsDTO[] = [];
   db1Graph1: Chart | undefined;
   db1Graph2: Chart | undefined;
   db1Graph3: Chart | undefined;
@@ -47,12 +55,16 @@ export class ReportsComponent implements OnInit {
   db5Graph1: Chart | undefined;
   db5Graph2: Chart | undefined;
   db5Graph3: Chart | undefined;
+  db6Graph1: Chart | undefined;
+  db6Graph2: Chart | undefined;
+  db6Graph3: Chart | undefined;
 
 
   constructor(
     private reportService: ReportService,
     private cardService: CardService,
-    private assetTypeService: AssetTypeService
+    private assetTypeService: AssetTypeService,
+    private assetService: AssetService 
   ) {}
 
   ngOnInit(): void {
@@ -69,6 +81,8 @@ export class ReportsComponent implements OnInit {
     this.loadCards();
     this.loadAssetTypes();
     this.loadCryptoGralStats();
+    this.loadCryptos(); 
+
 
     
   }
@@ -1244,5 +1258,220 @@ export class ReportsComponent implements OnInit {
  
   }
 
+  loadCryptos() {
+    this.assetService.getAssetsByTypeName('Criptomoneda')
+      .subscribe(response => {
+        this.cryptos = response;
+      });
+
+  }
+
+  loadCryptoStats() {
+    this.reportService.getCryptoStats(this.selectedCryptoDB6)
+      .subscribe(response => {
+        this.cryptoTransactionsStatsDTO = response.cryptoTransactionsStats;
+        this.renderDB6(response);
+      });
+  }
+
+  renderDB6(data: CryptoStatsDTO) {
+    // graph1
+
+
+    const minValue = data.cryptoRangeValuesStats.minValue.toFixed(2);
+    const maxValue = data.cryptoRangeValuesStats.maxValue.toFixed(2);
+    const currentValue = data.cryptoRangeValuesStats.currentValue.toFixed(2);
+
+
+    const chartDom = document.getElementById('gaugeChart');
+    if (!chartDom) {
+      console.error('Gauge container not found!');
+      return;
+    }
+  
+    // Destruir instancia previa si existe
+    const existingChart = echarts.getInstanceByDom(chartDom);
+    if (existingChart) {
+      existingChart.dispose(); // Destruir la instancia previa
+    }
+
+    // Inicializar una nueva instancia de ECharts
+    const myChart = echarts.init(chartDom);
+
+    const option = {
+      title: {
+        text: 'Estado de Valuación',
+        left: 'center',
+      },
+      series: [
+        {
+          type: 'gauge',
+          startAngle: 200,
+          endAngle: -20,
+          min: minValue,
+          max: maxValue,
+          splitNumber: 4,
+          axisLine: {
+            lineStyle: {
+              width: 10,
+              color: [[0.5, '#fd666d'], [1, '#67e0e3']],
+            },
+          },
+          pointer: {
+            length: '80%',
+            width: 4,
+          },
+          detail: {
+            formatter: '{value}', // Formato del valor
+            fontSize: 18,          // Reducir el tamaño de la fuente
+            offsetCenter: [0, '40%'],  // Posicionar el valor en el centro, pero más hacia abajo
+            color: '#333',        // Color del texto
+          },
+          data: [{ value: currentValue }],
+        },
+        
+      ],
+    };
+
+    myChart.setOption(option);
+
+    //graph2
+
+    const ctx2 = document.getElementById('priceEvolutionChart') as HTMLCanvasElement;
+
+    if (!ctx2) return;
+
+    this.db6Graph2?.destroy();
+
+    var labels = data.cryptoEvolutionStats.map(item => {
+      const date = new Date(item.date);
+      return date.toLocaleDateString('es-AR');
+    });
+
+    var values = data.cryptoEvolutionStats.map(item => item.value);
+
+    this.db6Graph2 = new Chart(ctx2, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Valor de la Criptomoneda',
+          data: values,
+          fill: true,
+          borderColor: 'rgba(75, 192, 192, 1)',
+          borderWidth: 1.5,
+          pointRadius: 0
+        }]
+      },
+      options: {
+        plugins: {
+          title: {
+            display: true,
+            text: 'Evolución del Valor de la Criptomoneda'
+          },
+          legend: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label: (tooltipItem) => {
+                return `${new Intl.NumberFormat('en-US', {
+                  style: 'currency',
+                  currency: 'USD'
+                }).format(Number(tooltipItem.raw))}`;
+              }
+            }
+          },
+        },
+        scales: {
+          x: {
+            ticks: {
+              callback: function(value, index) {
+                // Muestra solo cada 5 etiquetas
+                return index % 2 === 0 ? this.getLabelForValue(Number(value)) : '';
+              }
+            }
+          },
+          y: {
+            beginAtZero: false,
+            ticks: {
+              callback: function(value) {
+                return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(value));
+              }
+            }
+          }
+        }
+      }
+    });
+
+    //graph3
+
+    const ctx3 = document.getElementById('cryptoBalanceChart') as HTMLCanvasElement;
+
+    if (!ctx3) return;
+
+    this.db6Graph3?.destroy();
+
+    var cryptoAccounts = data.cryptoBalanceStats.map(item => item.account);
+    var currentValues = data.cryptoBalanceStats.map(item => item.balance);
+    var backGroundColors = this.generateControlledColors(currentValues.length);
+
+    // generate pie graph
+
+    this.db6Graph3 = new Chart(ctx3, {
+      type: 'pie',
+      data: {
+        labels: cryptoAccounts,
+        datasets: [{
+          data: currentValues,
+          backgroundColor: backGroundColors,
+          borderWidth: 1
+        }]
+      },
+      options: {
+        plugins: {
+          title: {
+            display: true,
+            text: 'Distribución de Saldo por Cuenta'
+          },
+          legend: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label: (tooltipItem) => {
+                const total = currentValues.reduce((a, b) => a + b, 0);
+                const percentage = ((Number(tooltipItem.raw) / total) * 100).toFixed(2);
+                const account = cryptoAccounts[tooltipItem.dataIndex];
+                return `${account}: ${new Intl.NumberFormat('en-US', {
+                  style: 'currency',
+                  currency: 'USD'
+                }).format(Number(tooltipItem.raw))} (${percentage}%)`;
+              }
+            }
+          },
+          datalabels: {
+            display: true,
+            color: 'white',
+            align: 'center',
+            anchor: 'center',
+            font: {
+              weight: 'bold'
+            },
+            formatter: (value, context) => {
+              const total = context.chart.data.datasets[0].data.reduce((a, b) => (typeof a === 'number' && typeof b === 'number' ? a + b : 0), 0);
+              const percentage = total ? ((value / Number(total)) * 100).toFixed(2) : '0.00';
+              return Number(percentage) > 5 && context.chart.data.labels ? context.chart.data.labels[context.dataIndex] : '';
+            }
+          }
+        }
+      },
+      plugins: [ChartDataLabels]
+    });
+
+
+
+
+  }
 
 }

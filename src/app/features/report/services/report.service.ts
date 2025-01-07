@@ -8,6 +8,7 @@ import { IncExpStats } from '../models/IncExpStats.model';
 import { CardStats } from '../models/CardStats.model';
 import { StockStatsDTO } from '../models/StockStats.model';
 import { CryptoGralStatsDTO } from '../models/CryptoGralStats.model';
+import { CryptoStatsDTO } from '../models/CryptoStats.model';
 
 @Injectable({
   providedIn: 'root'
@@ -42,5 +43,9 @@ export class ReportService {
 
   getCryptoGralStats(includeStables: boolean): Observable<CryptoGralStatsDTO> {
     return this.http.get<CryptoGralStatsDTO>(`${environment.apiBaseURL}/api/report/CryptoGralStats?includeStables=${includeStables}`);
+  }
+
+  getCryptoStats(cryptoId: number): Observable<CryptoStatsDTO> {
+    return this.http.get<CryptoStatsDTO>(`${environment.apiBaseURL}/api/report/CryptoStats/${cryptoId}`);
   }
 }
