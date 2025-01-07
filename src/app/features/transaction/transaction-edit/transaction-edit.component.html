@@ -46,9 +46,9 @@
                             </div>
                             <input type="text" class="form-control" name="amount" id="amount" [(ngModel)]="transaction.amount" appCurrencyInput>
                         </div>
-                        <div *ngIf="form.controls['amount']?.errors?.['incorrect'] && form.controls['amount'].touched" class="text-danger mt-2">
+                        <!-- <div *ngIf="form.controls['amount']?.errors?.['incorrect'] && form.controls['amount'].touched" class="text-danger mt-2">
                             El monto debe ser un número válido mayor que 0.
-                        </div>
+                        </div> -->
     
                     </div>
     

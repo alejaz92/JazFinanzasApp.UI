@@ -56,12 +56,20 @@ export class TransactionEditComponent  implements OnInit, OnDestroy{
   }
 
   onFormSubmit(): void {
-    const formValues = this.transactionForm.value;
-    if(isNaN(formValues.amount) || formValues.amount <= 0) {
-      this.transactionForm.controls['amount'].setErrors({ 'incorrect': true });
+    const formValues = this.transaction;
+
+    if (!formValues) {
       return;
     }
 
+    if(isNaN(formValues.amount) || formValues.amount <= 0) {
+      
+      // alerta de que el monto no es valido
+
+      alert('El monto no es valido');     
+
+      return;
+    }
 
     if (this.id && this.transaction) {
       this.editTransactionSubscription = this.transactionService.updateTransaction(Number(this.id), this.transaction).subscribe({
