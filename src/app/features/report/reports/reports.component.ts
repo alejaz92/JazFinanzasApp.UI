@@ -143,7 +143,7 @@ export class ReportsComponent implements OnInit {
       data: {
         labels: this.incExpStats?.classIncomeStats.map(item => item.transactionClass), // Etiquetas del eje X
         datasets: [{
-          label: 'Ingresos',
+          label: 'Ingresos en ' + this.selectedAssetDB1?.symbol,
           data: this.incExpStats?.classIncomeStats.map(item => item.amount) || [], // Datos del eje Y
           backgroundColor: 'rgba(75, 192, 192, 0.2)',  // Verde claro
           borderColor: 'rgba(75, 192, 192, 1)',        // Verde oscuro
@@ -202,7 +202,7 @@ export class ReportsComponent implements OnInit {
       data: {
         labels: this.incExpStats?.classExpenseStats.map(item => item.transactionClass), // Etiquetas del eje X
         datasets: [{
-          label: 'Egresos',
+          label: 'Egresos en ' + this.selectedAssetDB1?.symbol,
           data: this.incExpStats?.classExpenseStats.map(item => item.amount) || [], // Datos del eje Y
           backgroundColor: 'rgba(255, 99, 132, 0.2)',  // Rojo claro
           borderColor: 'rgba(255, 99, 132, 1)',        // Rojo oscuro
@@ -264,7 +264,7 @@ export class ReportsComponent implements OnInit {
           return date.toLocaleString('es-AR', { month: 'long' }).charAt(0).toUpperCase() + date.toLocaleString('es-AR', { month: 'long' }).slice(1);
         }), // Etiquetas del eje X
         datasets: [{
-          label: 'Ingresos',
+          label: 'Ingresos en ' + this.selectedAssetDB1?.symbol,
           data: this.incExpStats?.monthIncomeStats.map(item => item.amount) || [], // Datos del eje Y
           backgroundColor: 'rgba(75, 192, 192, 0.2)',  // Verde claro
           borderColor: 'rgba(75, 192, 192, 1)',        // Verde oscuro
@@ -326,7 +326,7 @@ export class ReportsComponent implements OnInit {
           return date.toLocaleString('es-AR', { month: 'long' }).charAt(0).toUpperCase() + date.toLocaleString('es-AR', { month: 'long' }).slice(1);
         }), // Etiquetas del eje X
         datasets: [{
-          label: 'Egresos',
+          label: 'Egresos en ' + this.selectedAssetDB1?.symbol,
           data: this.incExpStats?.monthExpenseStats.map(item => item.amount) || [], // Datos del eje Y
           backgroundColor: 'rgba(255, 99, 132, 0.2)',  // Rojo claro
           borderColor: 'rgba(255, 99, 132, 1)',        // Rojo oscuro
