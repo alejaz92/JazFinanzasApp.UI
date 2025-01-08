@@ -91,35 +91,35 @@
                 <div class="card">
                     <div class="card-header">
                         <h5>Gastos en el mes actual</h5>
-                        <div class="card-body">
-                            <div class="rable-responsive">
-                                <table class="table table-bordered table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Tarjeta</th>
-                                            <th>Moneda</th>
-                                            <th>Fecha</th>
-                                            <th>Tipo Movimiento</th>
-                                            <th>Detalle</th>
-                                            <th>Cuota</th>
-                                            <th>Monto Cuota</th>
-                                            <th>Valor Pesos</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr *ngFor="let transaction of cardTransactionsDTO">
-                                            <td>{{ transaction.card }}</td>
-                                            <td>{{ transaction.asset }}</td>
-                                            <td>{{ transaction.date | date: 'dd/MM/yyyy'}}</td>
-                                            <td>{{ transaction.transactionClass }}</td>
-                                            <td>{{ transaction.detail }}</td>
-                                            <td>{{ transaction.installment }}</td>
-                                            <td>{{ transaction.installmentAmount | currencyFiatFormat}}</td>
-                                            <td>{{ transaction.valueInPesos | currencyFiatFormat}}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Tarjeta</th>
+                                        <th>Moneda</th>
+                                        <th>Fecha</th>
+                                        <th>Tipo Movimiento</th>
+                                        <th>Detalle</th>
+                                        <th>Cuota</th>
+                                        <th>Monto Cuota</th>
+                                        <th>Valor Pesos</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let transaction of cardTransactionsDTO">
+                                        <td>{{ transaction.card }}</td>
+                                        <td>{{ transaction.asset }}</td>
+                                        <td>{{ transaction.date | date: 'dd/MM/yyyy'}}</td>
+                                        <td>{{ transaction.transactionClass }}</td>
+                                        <td>{{ transaction.detail }}</td>
+                                        <td>{{ transaction.installment }}</td>
+                                        <td>{{ transaction.installmentAmount | currencyFiatFormat}}</td>
+                                        <td>{{ transaction.valueInPesos | currencyFiatFormat}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
