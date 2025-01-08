@@ -25,12 +25,8 @@ export class ReportService {
     return this.http.get<TotalBalance[]>(`${environment.apiBaseURL}/api/report/balance`);
   }
 
-  getIncExpDollarsStats(month: String): Observable<IncExpStats> {
-    return this.http.get<IncExpStats>(`${environment.apiBaseURL}/api/report/IncExpStatsDollar?month=${month}`);
-  }
-
-  getIncExpPesosStats(month: String): Observable<IncExpStats> {
-    return this.http.get<IncExpStats>(`${environment.apiBaseURL}/api/report/IncExpStatsPesos?month=${month}`);
+  getIncExpStats(month: string, assetId: number): Observable<IncExpStats> {
+    return this.http.get<IncExpStats>(`${environment.apiBaseURL}/api/report/IncExpStats?month=${month}&assetId=${assetId}`);
   }
 
   getCardStats(cardId: number): Observable<CardStats> {

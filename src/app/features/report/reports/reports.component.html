@@ -4,10 +4,7 @@
     <!-- Navegación de Tabs -->
     <ul class="nav nav-tabs" id="dashboardTabs" role="tablist">
       <li class="nav-item" role="presentation">
-        <a class="nav-link active" id="incExpDollar-tab" data-bs-toggle="tab" href="#incExpDollar" role="tab" aria-controls="incExpDollar" aria-selected="true">Ingresos y Egresos (USD)</a>
-      </li>
-      <li class="nav-item" role="presentation">
-        <a class="nav-link" id="incExpPesos-tab" data-bs-toggle="tab" href="#incExpPesos" role="tab" aria-controls="incExpPesos" aria-selected="false">Ingresos y Egresos (ARS)</a>
+        <a class="nav-link active" id="incExp-tab" data-bs-toggle="tab" href="#incExp" role="tab" aria-controls="incExp" aria-selected="true">Ingresos y Egresos</a>
       </li>
       <li class="nav-item" role="presentation">
         <a class="nav-link" id="cards-tab" data-bs-toggle="tab" href="#cards" role="tab" aria-controls="cards" aria-selected="false">Tarjetas</a>
@@ -25,64 +22,42 @@
   
     <!-- Contenido de los Tabs -->
     <div class="tab-content mt-3" id="myTabContent">
-        <div class="tab-pane fade show active" id="incExpDollar" role="tabpanel" aria-labelledby="incExpDollar-tab">
-            <h4>Ingresos y Egresos en Dolares</h4>
+        <div class="tab-pane fade show active" id="incExp" role="tabpanel" aria-labelledby="incExp-tab">
+            <h4>Ingresos y Egresos</h4>
             <div class="row">
                 <div class="col-md-6">
+                    <label for="asset">Moneda a Visualizar</label>
+                    <select class="form-select" id="asset" [(ngModel)]="selectedAssetIdDB1" (change)="loadIncExpStats()">
+                        <option value="0" selected disabled>Seleccione</option>
+                        <option *ngFor="let asset of assetsDB1" [value]="asset.id">{{ asset.name }}</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
                     <label for="month">Mes</label>
-                    <input class="form-control" type="month" id="MonthDB1" [(ngModel)]="selectedMonthDB1" (change)="loadIncExpDollarStats()"/>
+                    <input class="form-control" type="month" id="MonthDB1" [(ngModel)]="selectedMonthDB1" (change)="loadIncExpStats()"/>
                 </div>
             </div>
 
             <!-- Graficos -->
             <div class="row mt-4">
                 <div class="col-md-6">
-                    <canvas id="incomeByClassDollarChart"></canvas>
+                    <canvas id="incomeByClassChart"></canvas>
                 </div>
                 <div class="col-md-6">
-                    <canvas id="expenseByClassDollarChart"></canvas>
+                    <canvas id="expenseByClassChart"></canvas>
                 </div>
             </div>
 
             <div class="row mt-4">
                 <div class="col-md-6">
-                    <canvas id="incomeLast6MonthsDollarChart"></canvas>
+                    <canvas id="incomeLast6MonthsChart"></canvas>
                 </div>
                 <div class="col-md-6">
-                    <canvas id="expenseLast6MonthsDollarChart"></canvas>
+                    <canvas id="expenseLast6MonthsChart"></canvas>
                 </div>
             </div>       
         
         </div>
-
-        <div class="tab-pane fade" id="incExpPesos" role="tabpanel" aria-labelledby="incExpPesos-tab">
-            <h4>Ingresos y Egresos en Pesos</h4>
-            <div class="row">
-                <div class="col-md-6">
-                    <label for="month">Mes</label>
-                    <input class="form-control" type="month" id="MonthDB2" [(ngModel)]="selectedMonthDB2" (change)="loadIncExpPesosStats()"/>                    
-                </div>
-            </div>
-            <!-- Graficos -->
-            <div class="row mt-4">
-                <div class="col-md-6">
-                    <canvas id="incomeByClassPesosChart"></canvas>
-                </div>
-                <div class="col-md-6">
-                    <canvas id="expenseByClassPesosChart"></canvas>
-                </div>
-            </div>
-
-            <div class="row mt-4">
-                <div class="col-md-6">
-                    <canvas id="incomeLast6MonthsPesosChart"></canvas>
-                </div>
-                <div class="col-md-6">
-                    <canvas id="expenseLast6MonthsPesosChart"></canvas>
-                </div>
-            </div>
-        </div>
-
 
         <div class="tab-pane fade" id="cards" role="tabpanel" aria-labelledby="cards-tab">
             <h4>Tarjetas</h4>
