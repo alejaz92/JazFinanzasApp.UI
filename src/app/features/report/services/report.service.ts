@@ -9,6 +9,7 @@ import { CardStats } from '../models/CardStats.model';
 import { StockStatsDTO } from '../models/StockStats.model';
 import { CryptoGralStatsDTO } from '../models/CryptoGralStats.model';
 import { CryptoStatsDTO } from '../models/CryptoStats.model';
+import { HomeStatsDTO } from '../models/HomeStats.model';
 
 @Injectable({
   providedIn: 'root'
@@ -43,5 +44,9 @@ export class ReportService {
 
   getCryptoStats(cryptoId: number): Observable<CryptoStatsDTO> {
     return this.http.get<CryptoStatsDTO>(`${environment.apiBaseURL}/api/report/CryptoStats/${cryptoId}`);
+  }
+
+  getHomeStats():Observable<HomeStatsDTO> {
+    return this.http.get<HomeStatsDTO>(`${environment.apiBaseURL}/api/report/HomeStats`);
   }
 }

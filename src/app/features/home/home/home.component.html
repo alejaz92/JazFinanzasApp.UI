@@ -1,1 +1,101 @@
-<p>home works!</p>
+<div class="container py-4">
+    <!--Welcome message -->
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h1>Bienvenido, {{ userName }}</h1>
+            <p class="lead">Aquí hay un resumen de tu estado financiero.</p>
+        </div>
+    </div>
+    <!-- latest transactions -->
+     <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card" [routerLink]="['transactions']">
+                <div class="card-header bg-primary text-white">
+                    Últimos movimientos
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <!-- <th>Clase Movimiento</th> -->
+                                <th>Detalle</th>
+                                <th>Moneda</th>
+                                <th class="text-end">Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let transaction of transactions | slice:0:6">
+                                <!-- <td>{{ transaction.transactionClassName }}</td> -->
+                                <td>{{ transaction.detail }}</td>
+                                <td>{{ transaction.assetSymbol }}</td>
+                                <td class="text-end" [ngClass]="{'table-danger': transaction.amount < 0, 'table-success': transaction.amount >= 0}">
+                                    {{ transaction.amount | currencyFiatFormat }}
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md-6">
+            <div class="card" [routerLink]="['cardTransactions']">
+                <div class="card-header bg-primary text-white">
+                    Últimos movimientos Tarjeta
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <!-- <th>Clase Movimiento</th> -->
+                                <th>Detalle</th>
+                                <th>Moneda</th>
+                                <th>Cuotas</th>
+                                <th class="text-end">Monto Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let cardTransaction of cardTransactions | slice:0:6">
+                                <!-- <td>{{ transaction.transactionClassName }}</td> -->
+                                <td>{{ cardTransaction.detail }}</td>
+                                <td>{{ cardTransaction.assetSymbol }}</td>
+                                <td>{{ cardTransaction.installments }}</td>
+
+                                <td class="text-end">
+                                    {{ cardTransaction.totalAmount | currencyFiatFormat }}
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        
+     </div>
+     <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    Tenencias de Bolsa
+                </div>
+                <div class="card-body">
+                    <canvas id="stocksHomeChart"></canvas>
+                </div>
+            </div>            
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    Tenencias de Criptomonedas
+                </div>
+                <div class="card-body">
+                    <canvas id="cryptosHomeChart"></canvas>
+                </div>
+            </div>                
+        </div>
+    </div>
+</div>

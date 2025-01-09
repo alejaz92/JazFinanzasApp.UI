@@ -6,6 +6,7 @@ export interface CardTransactionPending {
     detail: string;
     installments: string;   
     asset: string;
+    assetSymbol: string;
     totalAmount: number;
     firstInstallment: Date;
     lastInstallment: string;

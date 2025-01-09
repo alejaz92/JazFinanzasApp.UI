@@ -4,6 +4,7 @@ export interface Transaction {
     accountName: string;
     assetId: number;
     assetName: string;
+    assetSymbol: string;
     date: Date;
     movementType: string;
     transactionClassId?: number;
