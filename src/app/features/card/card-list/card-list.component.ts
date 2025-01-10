@@ -9,12 +9,16 @@ import { Observable } from 'rxjs';
   styleUrls: ['./card-list.component.css']
 })
 export class CardListComponent implements OnInit {
-  cards$?: Observable<Card[]>;
+  isLoading: boolean = true;
+  cards: any[] | null = null;
   constructor(private cardService: CardService) { 
 
   }
   ngOnInit(): void {
-    this.cards$ = this.cardService.getAllCards();  
+    this.cardService.getAllCards().subscribe((response) => {
+      this.cards = response;
+      this.isLoading = false;
+    });
   }
 
   onDelete(cardId: number): void {

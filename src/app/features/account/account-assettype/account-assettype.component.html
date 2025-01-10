@@ -1,4 +1,6 @@
-<div class="container">
+<app-loading [isLoading]="isLoading"></app-loading>
+
+<div class="container mt-4" *ngIf="!isLoading">
     <h1 class="mt-3">Gestion de tipos de Activo</h1>
     <h3 class="mt-3">Cuenta: <strong>{{ accountName }}</strong></h3>
 

@@ -8,6 +8,7 @@ import { StockTranctionsService } from '../services/stock-tranctions.service';
   styleUrls: ['./stock-transaction-list.component.css']
 })
 export class StockTransactionListComponent implements OnInit{
+  isLoading: boolean = true;
   stockTransactions: StockTransaction[] = [];
   page: number = 1;
   totalStockTransactions: number = 0;
@@ -26,6 +27,8 @@ export class StockTransactionListComponent implements OnInit{
 
 
         this.totalStockTransactions = response.totalCount;
+
+        this.isLoading = false;
       });
   }
 

@@ -8,6 +8,7 @@ import { CryptoTransaction } from '../models/CryptoTransaction.model';
   styleUrls: ['./crypto-transaction-list.component.css']
 })
 export class CryptoTransactionListComponent implements OnInit{
+  isLoading: boolean = true;
   cryptoTransactions: CryptoTransaction[] = [];
   page: number = 1;
   totalCryptoTransactions: number = 0;
@@ -24,6 +25,8 @@ export class CryptoTransactionListComponent implements OnInit{
         this.cryptoTransactions = response.transactions; 
 
         this.totalCryptoTransactions = response.totalCount;
+
+        this.isLoading = false;
       });
   }
 

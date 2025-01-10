@@ -7,6 +7,7 @@ import { TransactionClassService} from '../services/transaction-class.service';
   styleUrls: ['./transaction-class-list.component.css']
 })
 export class TransactionClassListComponent implements OnInit {
+  isLoading: boolean = true;
   incomeClasses: any[] | null = null;
   expenseClasses: any[] | null = null;
   restrictedClasses = ['Ajuste Saldos Ingreso', 'Ajuste Saldos Egreso', 'Gastos Tarjeta',
@@ -24,6 +25,8 @@ export class TransactionClassListComponent implements OnInit {
 
       this.incomeClasses = data.filter((x) => x.incExp === 'I');
       this.expenseClasses = data.filter((x) => x.incExp === 'E' );
+
+      this.isLoading = false;
     });
   }
 

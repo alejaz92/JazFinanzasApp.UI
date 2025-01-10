@@ -13,6 +13,7 @@ import { TransactionClassService } from '../../transactionClass/services/transac
   styleUrls: ['./transaction-add.component.css']
 })
 export class TransactionAddComponent implements OnInit{
+  isLoading: boolean = true;
   transactionForm!: FormGroup;
   selectedMovementType: string = '';
   accounts: any[] = [];
@@ -69,6 +70,8 @@ export class TransactionAddComponent implements OnInit{
       this.transactionClasses.getAllTransactionClasses().subscribe((data: any) => {
         this.incomeClasses = data.filter((x: any) => x.incExp === 'I');
         this.expenseClasses = data.filter((x: any) => x.incExp === 'E');
+
+        this.isLoading = false;
       });
     }
 

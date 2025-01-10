@@ -10,6 +10,7 @@ import { TransactionClassService } from '../services/transaction-class.service';
   styleUrls: ['./transaction-class-edit.component.css']
 })
 export class TransactionClassEditComponent implements OnInit, OnDestroy{
+  isLoading: boolean = true;
   id: string | null = null;
   paramsSubcription?: Subscription;
   editTransactionClassSubscription?: Subscription;
@@ -27,6 +28,8 @@ export class TransactionClassEditComponent implements OnInit, OnDestroy{
           this.transactionClassService.getTransactionClassById(Number(this.id)).subscribe({
             next: (response) => {
               this.transactionClass = response;
+
+              this.isLoading = false;
             }
           });
         } 

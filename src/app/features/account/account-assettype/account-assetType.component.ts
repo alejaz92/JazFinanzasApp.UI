@@ -9,7 +9,7 @@ import { ActivatedRoute } from '@angular/router';
   styleUrls: ['./account-assettype.component.css']
 })
 export class AccountAssetTypeComponent  implements OnInit {
-  
+  isLoading: boolean = true;
   assetTypes: AssetType[] = [];
   accountName: string = '';
   accountId!: number;;
@@ -32,6 +32,7 @@ export class AccountAssetTypeComponent  implements OnInit {
   getAssetTypes(): void {
     this.accountService.getAccountAssetTypes(this.accountId).subscribe((data) => {
       this.assetTypes = data;
+      this.isLoading = false;
     });
   }
 

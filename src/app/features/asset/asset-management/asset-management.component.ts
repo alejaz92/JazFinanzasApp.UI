@@ -8,6 +8,7 @@ import { AssetService } from '../services/asset.service';
   styleUrls: ['./asset-management.component.css']
 })
 export class AssetManagementComponent implements OnInit {
+  isLoading: boolean = true;
   assetTypes: any[] = [];
   selectedAssetType: number = 0;
   availableAssets: Asset[] = [];
@@ -18,6 +19,7 @@ export class AssetManagementComponent implements OnInit {
   ngOnInit(): void {
     this.assetService.getAssetTypes().subscribe(types => {
       this.assetTypes = types;
+      this.isLoading = false;
     });
 
 

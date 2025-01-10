@@ -8,6 +8,7 @@ import { CardTransactionsService } from '../services/card-transactions.service';
   styleUrls: ['./card-transactions-list.component.css']
 })
 export class CardTransactionsListComponent implements OnInit {
+  isLoading: boolean = true;
   cardTransactions: CardTransactionPending[] = [];
 
 
@@ -23,6 +24,8 @@ export class CardTransactionsListComponent implements OnInit {
     this.cardTransactioneService.getPendingCardTransactions()
       .subscribe(response => {
         this.cardTransactions = response;
+
+        this.isLoading = false;
       });
   }
 

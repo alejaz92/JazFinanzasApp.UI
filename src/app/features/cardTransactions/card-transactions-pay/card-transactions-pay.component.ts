@@ -14,6 +14,7 @@ import { TmplAstVariable } from '@angular/compiler';
   styleUrls: ['./card-transactions-pay.component.css']
 })
 export class CardTransactionsPayComponent implements OnInit {
+  isLoading: boolean = true;
   cardPaymentForm!: FormGroup;
   cards: any[] = [];
   accounts: any[] = [];
@@ -75,6 +76,8 @@ export class CardTransactionsPayComponent implements OnInit {
   loadCards() {
     this.cardService.getAllCards().subscribe((data: any) => {
       this.cards = data;
+
+      this.isLoading = false;
     });
   }
 

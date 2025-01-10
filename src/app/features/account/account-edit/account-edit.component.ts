@@ -11,7 +11,7 @@ import { AccountAddRequest } from '../models/account-add-request.model';
   styleUrls: ['./account-edit.component.css']
 })
 export class AccountEditComponent implements OnInit, OnDestroy {
-
+  isLoading: boolean = true;
   id: string | null = null;
   paramsSubcription?: Subscription;
   editAccountSubscription?: Subscription;
@@ -31,6 +31,8 @@ export class AccountEditComponent implements OnInit, OnDestroy {
             this.accountService.getAccountById(Number(this.id)).subscribe({
               next: (response) => {
                 this.account = response;
+
+                this.isLoading = false;
               }
             });
           } 

@@ -1,4 +1,6 @@
-<div class="container mt-4">
+<app-loading [isLoading]="isLoading"></app-loading>
+
+<div class="container mt-4" *ngIf="!isLoading">
 
     <h1>Reportes y Estadisticas</h1>
     <!-- Navegación de Tabs -->

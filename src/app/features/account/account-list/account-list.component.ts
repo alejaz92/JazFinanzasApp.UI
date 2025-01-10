@@ -9,14 +9,22 @@ import { AccountService } from '../services/account.service';
   styleUrls: ['./account-list.component.css']
 })
 export class AccountListComponent implements OnInit {
-
-  accounts$?: Observable<Account[]>;
+  isLoading: boolean = true;
+  accounts: any[] | null = null;
   constructor(private AccountService: AccountService) {
 
    }
 
   ngOnInit(): void {
-    this.accounts$ = this.AccountService.getAllAccounts();
+
+   
+    this.AccountService.getAllAccounts().subscribe((response) => {
+      this.accounts = response;
+
+      this.isLoading = false;
+    });
+
+    
   }
   
   onDelete(accountId: number): void {

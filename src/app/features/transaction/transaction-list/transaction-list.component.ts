@@ -8,6 +8,7 @@ import { TransactionService } from '../services/transaction.service';
   styleUrls: ['./transaction-list.component.css']
 })
 export class TransactionListComponent implements OnInit {
+  isLoading: boolean = true;
   transactions: Transaction[] = []; 
   page: number = 1;
   totalTransactions: number = 0;
@@ -24,6 +25,8 @@ export class TransactionListComponent implements OnInit {
         
         this.transactions = response.transactions; 
         this.totalTransactions = response.totalCount;
+
+        this.isLoading = false;
       });
   }
 

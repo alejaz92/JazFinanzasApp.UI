@@ -1,4 +1,7 @@
-<div class="container">
+<app-loading [isLoading]="isLoading"></app-loading>
+
+
+<div class="container mt-4" *ngIf="!isLoading">
     <h1 class="mt-3">Cuentas</h1>
     <div class="d-flex justify-content-end mt-3">
         <a class="btn btn-primary" [routerLink]="['/management/account/add']">
@@ -6,7 +9,7 @@
         </a>
     </div>
 
-    <ng-container *ngIf="accounts$ | async as accounts">
+    <ng-container *ngIf="accounts">
         <table class="table table-bordered mt-3">
             <thead>
                 <tr>

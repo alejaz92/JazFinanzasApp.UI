@@ -24,6 +24,7 @@ import * as echarts from 'echarts';
   styleUrls: ['./reports.component.css']
 })
 export class ReportsComponent implements OnInit {
+  isLoading: boolean = true;
   assetsDB1: any[] = [];
   selectedAssetIdDB1: number = 0;
   selectedAssetDB1: Asset | null = null;
@@ -90,6 +91,8 @@ export class ReportsComponent implements OnInit {
     this.assetService.getAssetsByTypeName("Moneda").subscribe((data: any) => {
         
       this.assetsDB1 = data;      
+
+      this.isLoading = false;
     });
   }
 

@@ -46,6 +46,8 @@ import { ExchangeListComponent } from './features/exchange/exchange-list/exchang
 import { ExchangeAddComponent } from './features/exchange/exchange-add/exchange-add.component';
 import { BalanceComponent } from './features/report/balance/balance.component';
 import { ReportsComponent } from './features/report/reports/reports.component';
+import { NgxSpinnerModule } from 'ngx-spinner';
+import { LoadingComponent } from './core/components/loading/loading.component';
 
 
 
@@ -89,7 +91,8 @@ import { ReportsComponent } from './features/report/reports/reports.component';
     ExchangeListComponent,
     ExchangeAddComponent,
     BalanceComponent,
-    ReportsComponent
+    ReportsComponent,
+    LoadingComponent
   ],
   imports: [
     BrowserModule,
@@ -99,8 +102,8 @@ import { ReportsComponent } from './features/report/reports/reports.component';
     ReactiveFormsModule,
     NgxPaginationModule,
     CommonModule,
-    SharedModule
-    
+    SharedModule,
+    NgxSpinnerModule.forRoot({ type: 'ball-spin-clockwise-fade-rotating' })    
   ],
   providers: [ {
     provide: HTTP_INTERCEPTORS,

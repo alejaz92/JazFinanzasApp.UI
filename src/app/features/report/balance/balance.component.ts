@@ -11,6 +11,7 @@ import { TotalBalance } from '../models/TotalBalance.model';
   styleUrls: ['./balance.component.css']
 })
 export class BalanceComponent implements OnInit {
+  isLoading: boolean = true;
   totalBalance: TotalBalance[] = [];
   pesosBalance: number = 0;
   dollarBalance: number = 0;
@@ -37,6 +38,8 @@ export class BalanceComponent implements OnInit {
 
         this.pesosBalance = this.totalBalance.find(b => b.asset === 'Pesos')?.balance || 0;
         this.dollarBalance = this.totalBalance.find(b => b.asset === 'Dólares')?.balance || 0;
+
+        this.isLoading = false;
       });
   }
 
@@ -45,6 +48,8 @@ export class BalanceComponent implements OnInit {
     this.assetService.getAssetTypes()
       .subscribe(response => {
         this.assetTypes = response;
+
+        
       });
   }
 

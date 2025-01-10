@@ -11,7 +11,7 @@ import { CardUpdateRequest } from '../models/card-update-request.model';
   styleUrls: ['./card-edit.component.css']
 })
 export class CardEditComponent implements OnInit, OnDestroy {
-
+  isLoading: boolean = true;
   id: string | null = null;
   paramsSubcription?: Subscription;
   editCardSubscription?: Subscription;
@@ -29,6 +29,7 @@ export class CardEditComponent implements OnInit, OnDestroy {
           this.cardService.getCardById(Number(this.id)).subscribe({
             next: (response) => {
               this.card = response;
+              this.isLoading = false;
             }
           });
         } 

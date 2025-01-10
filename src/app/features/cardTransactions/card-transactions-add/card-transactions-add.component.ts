@@ -15,6 +15,7 @@ import { first } from 'rxjs';
   styleUrls: ['./card-transactions-add.component.css']
 })
 export class CardTransactionsAddComponent implements OnInit {
+  isLoading: boolean = true;
   cardTransactionForm!: FormGroup;
   selectedMovementType: string = '';
   assets: any[] = [];
@@ -61,6 +62,8 @@ export class CardTransactionsAddComponent implements OnInit {
   loadExpenseClasses() {
     this.transactionClassesService.getAllTransactionClasses().subscribe((data: any) => {
       this.expenseClasses = data.filter((item: any) => item.incExp === 'E');
+
+      this.isLoading = false;
     });
   }
 
