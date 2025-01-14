@@ -13,11 +13,12 @@
                     <input type="password" class="form-control" id="password" name="password"
                     [(ngModel)]="password" required>
                 </div>
-                <div class="error-message">{{errorMessages}}</div>
                 <div class="mt-3">
                     <button type="submit" class="btn btn-primary">Acceder</button>
                 </div>
             </form>
+
+            <div *ngIf="errorMessages" class="alert alert-danger mt-3">{{ errorMessages }}</div>
 
             <div class="form-group">
                 <a routerLink="/register">Registrarse</a>

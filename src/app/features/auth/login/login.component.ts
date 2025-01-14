@@ -23,7 +23,8 @@ export class LoginComponent {
         this.router.navigate(['/']);
       },
       error: (error) => {
-        this.errorMessages = error.error.message;
+        
+        this.errorMessages = 'Usuario y/o contraseña incorrectos';
       }
     });
   }
