@@ -35,6 +35,7 @@ import { ExchangeListComponent } from './features/exchange/exchange-list/exchang
 import { ExchangeAddComponent } from './features/exchange/exchange-add/exchange-add.component';
 import { BalanceComponent } from './features/report/balance/balance.component';
 import { ReportsComponent } from './features/report/reports/reports.component';
+import { ResetPasswordComponent } from './features/user/reset-password/reset-password.component';
 
 
 const routes: Routes = [
@@ -207,6 +208,11 @@ const routes: Routes = [
   {
     path: 'report',
     component: ReportsComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'resetPassword',
+    component: ResetPasswordComponent,
     canActivate: [AuthGuard]
   },
   {

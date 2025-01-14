@@ -58,6 +58,7 @@
             <ul class="dropdown-menu dropdown-menu-end">
               <li><a class="dropdown-item" [routerLink]="['profile']">Perfil</a></li>
               <li><a class="dropdown-item" [routerLink]="['change-password']">Cambiar Contraseña</a></li>
+              <li *ngIf="username === 'ajazmatie'"><a class="dropdown-item" [routerLink]="['resetPassword']">Resetear Contraseña</a></li>
               <li><a class="dropdown-item" (click)="logout()">Cerrar Sesión</a></li>
             </ul>
 

@@ -4,6 +4,7 @@ import { User } from '../models/user.model';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment.development';
 import { UpdateUser } from '../models/updateUser.model';
+import {  ResetPasswordDTO } from '../models/ResetPasswordDTO';
 
 @Injectable({
   providedIn: 'root'
@@ -27,6 +28,11 @@ export class UserService {
   // get username desde el api
   getUsername(): Observable< {userName: string }> {
     return this.http.get< {userName: string }>(`${environment.apiBaseURL}/api/user/getUserName`);
+  }
+
+  // reset password with the username
+  resetPassword(resetPassword: ResetPasswordDTO): Observable<any> {
+    return this.http.put<any>(`${environment.apiBaseURL}api/user/reset-password`, resetPassword);
   }
   
 }
