@@ -38,7 +38,6 @@ export class AssetManagementComponent implements OnInit {
       
 
       this.assetService.getAssignedAssets(this.selectedAssetType).subscribe(used => {
-
         this.availableAssets = available.filter(a => !used.some(u => u.id === a.id));
         this.assignedAssets = used;
       });
@@ -67,6 +66,26 @@ export class AssetManagementComponent implements OnInit {
         alert('Asset is in use and cannot be unassigned');
       }
     });
+
+  }
+
+  onReferenceChange(asset: Asset) {
+    this.assetService.updateReference(asset).subscribe(
+      response => {
+        console.log('Reference updated');
+      },
+      error => {
+
+        if (error.error === 'Only 3 reference assets allowed') {
+          alert('No puede elegir más de 3 activos de referencia');
+
+          //update de checkbox
+          asset.isReference = false;
+        }
+      }
+    );
+
+
 
   }
 

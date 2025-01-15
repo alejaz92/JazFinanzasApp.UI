@@ -3,4 +3,5 @@ export interface Asset {
     name: string;
     symbol: string;
     assetTypeName: string;
+    isReference: boolean;
 }
