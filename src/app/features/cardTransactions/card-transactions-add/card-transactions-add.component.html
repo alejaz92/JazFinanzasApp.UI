@@ -68,7 +68,7 @@
         <div class="row mb-3">
             <div class="col">
                 <label for="detail" class="form-label">Detalle</label>
-                <input type="text" class="form-control" id="detail" formControlName="detail">
+                <textarea class="form-control" id="detail" formControlName="detail"></textarea>
                 <div *ngIf="cardTransactionForm.controls['detail'].errors?.['incorrect'] " class="text-danger mt-2">
                     Debe escribirse un detalle.
                 </div>
