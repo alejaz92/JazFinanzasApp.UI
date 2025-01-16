@@ -22,4 +22,5 @@ export interface InvestmentRangeValuesStatsDTO {
     minValue: number;
     maxValue: number;
     currentValue: number;
+    averageBuyValue: number;
 }

@@ -1041,6 +1041,9 @@ export class ReportsComponent implements OnInit {
     const minValue = data.cryptoRangeValuesStats.minValue.toFixed(2);
     const maxValue = data.cryptoRangeValuesStats.maxValue.toFixed(2);
     const currentValue = data.cryptoRangeValuesStats.currentValue.toFixed(2);
+    const averageBuyValue = data.cryptoRangeValuesStats.averageBuyValue.toFixed(2);
+    
+    var earnLostLine = (Number(averageBuyValue) - Number(minValue)) / ((Number(maxValue) - Number(minValue)));
 
 
     const chartDom = document.getElementById('gaugeChart');
@@ -1074,7 +1077,7 @@ export class ReportsComponent implements OnInit {
           axisLine: {
             lineStyle: {
               width: 10,
-              color: [[0.5, '#fd666d'], [1, '#67e0e3']],
+              color: [[earnLostLine, '#fd666d'], [1, '#67e0e3']],
             },
           },
           pointer: {
