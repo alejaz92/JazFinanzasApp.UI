@@ -12,9 +12,7 @@ import { TotalBalance } from '../models/TotalBalance.model';
 })
 export class BalanceComponent implements OnInit {
   isLoading: boolean = true;
-  totalBalance: TotalBalance[] = [];
-  pesosBalance: number = 0;
-  dollarBalance: number = 0;
+  totalBalances: TotalBalance[] = [];
   balances: Balance[] = [];
   assetTypes: any[] = [];
   selectedAssetType: any = "0";
@@ -33,12 +31,9 @@ export class BalanceComponent implements OnInit {
 
   loadTotalBalance() {
     this.reportService.getTotalBalance()
-      .subscribe(response => {
-        this.totalBalance = response;
-
-        this.pesosBalance = this.totalBalance.find(b => b.asset === 'Pesos')?.balance || 0;
-        this.dollarBalance = this.totalBalance.find(b => b.asset === 'Dólares')?.balance || 0;
-
+      .subscribe((response: TotalBalance[]) => {
+        this.totalBalances = response;
+        console.log(this.totalBalances);
         this.isLoading = false;
       });
   }
@@ -79,5 +74,28 @@ export class BalanceComponent implements OnInit {
       });
 
   }
+
+  getTextColor(backgroundColor: string): string {
+    // Eliminar el símbolo # si está presente
+    const hex = backgroundColor.replace('#', '');
+    
+    // Convertir a componentes RGB
+    const r = parseInt(hex.substring(0, 2), 16) / 255;
+    const g = parseInt(hex.substring(2, 4), 16) / 255;
+    const b = parseInt(hex.substring(4, 6), 16) / 255;
+  
+    // Convertir a luminancia relativa
+    const luminance = 0.2126 * this.calculateChannel(r) +
+                      0.7152 * this.calculateChannel(g) +
+                      0.0722 * this.calculateChannel(b);
+  
+    // Devolver blanco o negro según el contraste
+    return luminance > 0.5 ? '#000000' : '#FFFFFF';
+  }
+  
+  calculateChannel(channel: number): number {
+    return channel <= 0.03928 ? channel / 12.92 : Math.pow((channel + 0.055) / 1.055, 2.4);
+  }
+  
 
 }

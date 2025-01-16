@@ -6,23 +6,26 @@
     </div>
     <div class="row">
         <h6>Valoración de Tenencias</h6>
-        <div class="col-12 col-md-6">
-            <div class="card text-white bg-info mb-3 text-center">
+        
+        <div 
+            class="col-12" 
+            [ngClass]="{
+                'col-md-12': totalBalances.length === 1,
+                'col-md-6': totalBalances.length === 2,
+                'col-md-4': totalBalances.length === 3
+            }"
+            *ngFor="let total of totalBalances"
+        >
+            <div 
+                class="card mb-3 text-center" 
+                [style.backgroundColor]="total.color"
+                [style.color]="getTextColor(total.color)"
+            >
                 <div class="card-header">
-                    Saldo en Pesos
+                    Saldo en {{ total.asset }}
                 </div>
                 <div class="card-body">
-                    <h4 class="card-title">{{ pesosBalance | currencyFiatFormat }}</h4>
-                </div>
-            </div>
-        </div>
-        <div class="col-12 col-md-6">
-            <div class="card text-white bg-success mb-3 text-center">
-                <div class="card-header">
-                    Saldo en Dolares
-                </div>
-                <div class="card-body">
-                    <h4 class="card-title">{{ dollarBalance | currencyFiatFormat }}</h4>                 
+                    <h4 class="card-title">{{ total.balance | currencyFiatFormat }}</h4>
                 </div>
             </div>
         </div>
