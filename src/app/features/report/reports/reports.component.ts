@@ -88,7 +88,7 @@ export class ReportsComponent implements OnInit {
   }
 
   loadAssetsDB1() {
-    this.assetService.getAssetsByTypeName("Moneda").subscribe((data: any) => {
+    this.assetService.getReferenceAssets().subscribe((data: any) => {
         
       this.assetsDB1 = data;      
 

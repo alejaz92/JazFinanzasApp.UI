@@ -54,5 +54,9 @@ export class AssetService {
   updateReference(asset: Asset): Observable<any> {
     return this.http.put(`${environment.apiBaseURL}/api/asset/updateReference`, asset);
   }
+
+  getReferenceAssets(): Observable<Asset[]> {
+    return this.http.get<Asset[]>(`${environment.apiBaseURL}/api/asset/reference`);
+  }
   
 }
