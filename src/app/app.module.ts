@@ -49,6 +49,7 @@ import { ReportsComponent } from './features/report/reports/reports.component';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { LoadingComponent } from './core/components/loading/loading.component';
 import { ResetPasswordComponent } from './features/user/reset-password/reset-password.component';
+import { FooterComponent } from './core/components/footer/footer.component';
 
 
 
@@ -94,7 +95,8 @@ import { ResetPasswordComponent } from './features/user/reset-password/reset-pas
     BalanceComponent,
     ReportsComponent,
     LoadingComponent,
-    ResetPasswordComponent
+    ResetPasswordComponent,
+    FooterComponent
   ],
   imports: [
     BrowserModule,
