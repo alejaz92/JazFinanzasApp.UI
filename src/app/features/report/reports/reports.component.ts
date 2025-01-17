@@ -775,17 +775,18 @@ export class ReportsComponent implements OnInit {
   }
 
   generateControlledColors(quantity: number) {
-    var colors = [];
-
-    for (var i = 0; i < quantity; i++) {
-      var hue = Math.floor(Math.random() * 360); // Varía el tono entre 0 y 360 grados (todos los colores)
-      var saturation = Math.floor(Math.random() * (100 - 60) + 60);  // Saturación alta (60% a 100%) para colores vivos
-      var lightness = Math.floor(Math.random() * (70 - 40) + 40);  // Evita colores muy oscuros o muy claros (40% a 70%)
-
-      var color = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    const colors = [];
+    const step = 360 / quantity; // Divide el espectro de tonos uniformemente
+  
+    for (let i = 0; i < quantity; i++) {
+      const hue = Math.floor(i * step); // Asigna un tono único basado en el índice
+      const saturation = Math.floor(Math.random() * (100 - 70) + 70); // Mantén una saturación alta (70% a 100%)
+      const lightness = Math.floor(Math.random() * (60 - 40) + 40); // Mantén colores balanceados (40% a 60%)
+  
+      const color = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
       colors.push(color);
-
     }
+    
     return colors;
   }
 

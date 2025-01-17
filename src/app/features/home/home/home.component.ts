@@ -181,11 +181,18 @@ export class HomeComponent implements OnInit, AfterViewInit {
   
 
   generateControlledColors(quantity: number) {
-    return Array.from({ length: quantity }, () => {
-      const hue = Math.floor(Math.random() * 360);
-      const saturation = Math.floor(Math.random() * (100 - 60) + 60);
-      const lightness = Math.floor(Math.random() * (70 - 40) + 40);
-      return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-    });
+    const colors = [];
+    const step = 360 / quantity; // Divide el espectro de tonos uniformemente
+  
+    for (let i = 0; i < quantity; i++) {
+      const hue = Math.floor(i * step); // Asigna un tono único basado en el índice
+      const saturation = Math.floor(Math.random() * (100 - 70) + 70); // Mantén una saturación alta (70% a 100%)
+      const lightness = Math.floor(Math.random() * (60 - 40) + 40); // Mantén colores balanceados (40% a 60%)
+  
+      const color = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+      colors.push(color);
+    }
+    
+    return colors;
   }
 }
