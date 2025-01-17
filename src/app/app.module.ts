@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule, isDevMode } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -50,6 +50,7 @@ import { NgxSpinnerModule } from 'ngx-spinner';
 import { LoadingComponent } from './core/components/loading/loading.component';
 import { ResetPasswordComponent } from './features/user/reset-password/reset-password.component';
 import { FooterComponent } from './core/components/footer/footer.component';
+import { ServiceWorkerModule } from '@angular/service-worker';
 
 
 
@@ -107,7 +108,13 @@ import { FooterComponent } from './core/components/footer/footer.component';
     NgxPaginationModule,
     CommonModule,
     SharedModule,
-    NgxSpinnerModule.forRoot({ type: 'ball-spin-clockwise-fade-rotating' })    
+    NgxSpinnerModule.forRoot({ type: 'ball-spin-clockwise-fade-rotating' }),
+    ServiceWorkerModule.register('ngsw-worker.js', {
+      enabled: !isDevMode(),
+      // Register the ServiceWorker as soon as the application is stable
+      // or after 30 seconds (whichever comes first).
+      registrationStrategy: 'registerWhenStable:30000'
+    })    
   ],
   providers: [ {
     provide: HTTP_INTERCEPTORS,
