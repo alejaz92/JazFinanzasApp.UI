@@ -1,4 +1,4 @@
-import { AfterViewInit, Component } from '@angular/core';
+import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
 declare var bootstrap: any;
@@ -10,7 +10,8 @@ declare var bootstrap: any;
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent implements AfterViewInit {
+export class LoginComponent implements AfterViewInit{
+  isLoading: boolean = false;
   username: string = '';
   password: string = '';
   errorMessages: string = '';
@@ -18,13 +19,15 @@ export class LoginComponent implements AfterViewInit {
   constructor(private authService: AuthService, private router: Router) { }
   
 
+
   login(): void {
+    this.isLoading = true;
     this.authService.login(this.username,this.password).subscribe({
       next: () => {
         this.router.navigate(['/']);
       },
       error: (error) => {
-        
+        this.isLoading = false;
         this.errorMessages = 'Usuario y/o contraseña incorrectos';
       }
     });

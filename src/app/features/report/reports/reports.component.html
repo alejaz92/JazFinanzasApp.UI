@@ -303,36 +303,36 @@
                 </div>
                 <div class="col-md-9">
                     <div  *ngIf="cryptoTransactionsStatsDTO.length > 0">
-                        <div class="crypto">
+                        <div class="crypto card">
                             <div class="card-header">
                                 <h5>Ultimos Movimientos</h5>
-                                <div class="card-body">
-                                    <div class="rable-responsive">
-                                        <table class="table table-bordered table-hover">
-                                            <thead>
-                                                <tr>
-                                                    <th>Fecha</th>
-                                                    <th>Cuenta</th>
-                                                    <th>Tipo Movimiento</th>
-                                                    <th>Tipo Comercio</th>
-                                                    <th>Cantidad</th>
-                                                    <th>Cotización</th>
-                                                    <th>Total</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr *ngFor="let transaction of cryptoTransactionsStatsDTO">
-                                                    <td>{{ transaction.date | date: 'dd/MM/yyyy' }}</td>
-                                                    <td>{{ transaction.account }}</td>
-                                                    <td>{{ transaction.movementType | movementType }}</td>
-                                                    <td>{{ transaction.commerceType | commerceType}}</td>
-                                                    <td>{{ transaction.quantity }}</td>
-                                                    <td>{{ transaction.quotePrice | currencyFiatFormat}}</td>
-                                                    <td>{{ transaction.total | currencyFiatFormat}}</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="rable-responsive">
+                                    <table class="table table-bordered table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Fecha</th>
+                                                <th>Cuenta</th>
+                                                <th>Tipo Movimiento</th>
+                                                <th>Tipo Comercio</th>
+                                                <th>Cantidad</th>
+                                                <th>Cotización</th>
+                                                <th>Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let transaction of cryptoTransactionsStatsDTO">
+                                                <td>{{ transaction.date | date: 'dd/MM/yyyy' }}</td>
+                                                <td>{{ transaction.account }}</td>
+                                                <td>{{ transaction.movementType | movementType }}</td>
+                                                <td>{{ transaction.commerceType | commerceType}}</td>
+                                                <td>{{ transaction.quantity }}</td>
+                                                <td>{{ transaction.quotePrice | currencyFiatFormat}}</td>
+                                                <td>{{ transaction.total | currencyFiatFormat}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
