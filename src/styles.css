@@ -1,1 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
+body {
+    margin-bottom: 30px; /* Ajusta este valor según la altura del footer */
+  }
+  footer {
+    height: 30px; /* Asegúrate de que coincida con este valor */
+  }
