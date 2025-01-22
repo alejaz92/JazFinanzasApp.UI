@@ -43,6 +43,11 @@ export class TransactionClassListComponent implements OnInit {
           next: (response) => {
             alert('Clase de movimiento eliminada correctamente');
             this.loadTransactionClasses();
+          },
+          error: (error) => {
+            if(error.error == 'Transaction Class is being used in transactions') {
+              alert('No se puede eliminar la clase de movimiento porque fue utilizada en transacciones');
+            }
           }
         });
       }

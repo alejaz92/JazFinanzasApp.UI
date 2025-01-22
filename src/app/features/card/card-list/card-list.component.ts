@@ -31,6 +31,11 @@ export class CardListComponent implements OnInit {
           next: (response) => {
             alert('Tarjeta eliminada correctamente');
             this.ngOnInit();
+          },
+          error: (error) => {
+            if(error.error == 'Card is used in transactions') {
+              alert('No se puede eliminar la tarjeta porque fue utilizada en transacciones');
+            }
           }
         });
       }

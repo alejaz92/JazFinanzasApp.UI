@@ -37,6 +37,12 @@ export class AccountListComponent implements OnInit {
           next: (response) => {
             alert('Cuenta eliminada correctamente');
             this.ngOnInit();
+          }, 
+          error: (error) => {
+            if (error.error == 'Account is used in transactions') {
+              alert('No se puede eliminar la cuenta porque está siendo utilizada en transacciones');
+            }
+            
           }
         });
       }

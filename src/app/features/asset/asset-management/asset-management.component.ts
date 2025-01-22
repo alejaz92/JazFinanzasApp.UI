@@ -56,17 +56,19 @@ export class AssetManagementComponent implements OnInit {
   }
 
   unassignAsset(asset: Asset) {
-    this.assetService.checkAssetUsage(asset.id).subscribe(canUnassign => {
-      if (canUnassign) {
-        this.assetService.unassignAsset(asset.id).subscribe(response => {
-          this.availableAssets.push(asset);
-          this.assignedAssets = this.assignedAssets.filter(a => a.id !== asset.id);
-        });
-      } else {
-        alert('Asset is in use and cannot be unassigned');
-      }
-    });
-
+      this.assetService.unassignAsset(asset.id).subscribe(response => {
+        this.availableAssets.push(asset);
+        this.assignedAssets = this.assignedAssets.filter(a => a.id !== asset.id);
+      },
+        error => {
+          if (error.error === 'Asset is used in transactions') {
+            alert('No se puede desasignar un activo que está siendo utilizado en una transacción');
+          } else {
+            alert(error.error);
+          }
+          
+        }
+    );
   }
 
   onReferenceChange(asset: Asset) {

@@ -32,15 +32,15 @@ export class AssetService {
     return this.http.post(`${environment.apiBaseURL}/api/asset/unassign-asset/`, assetId);
   }
 
-  checkAssetUsage(assetId: number): Observable<boolean> {
+  // checkAssetUsage(assetId: number): Observable<boolean> {
 
-    //luego arreglar para que haga el chequeo
-    //return this.http.get<boolean>(`${environment.apiBaseURL}/api/asset/check-usage/${assetId}`);
-    return new Observable<boolean>(observer => {
-      observer.next(true);
-      observer.complete();
-    });
-  }
+  //   //luego arreglar para que haga el chequeo
+  //   //return this.http.get<boolean>(`${environment.apiBaseURL}/api/asset/check-usage/${assetId}`);
+  //   return new Observable<boolean>(observer => {
+  //     observer.next(true);
+  //     observer.complete();
+  //   });
+  // }
 
   
   getAssetsByTypeName(typeName: string): Observable<Asset[]> {
