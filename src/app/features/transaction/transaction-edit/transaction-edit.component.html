@@ -21,22 +21,39 @@
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="date">Fecha</label>
-                        <input type="text" class="form-control" name="date" id="date" 
-                        [ngModel]="transaction.date | date:'dd/MM/yyyy'" disabled>
+                        <input type="date" class="form-control" name="date" id="date" 
+                        [ngModel]="transaction.date | date:'yyyy-MM-dd'"
+                        (ngModelChange)="updateDate($event)">
                     </div>
                     <div class="col-md-6">
                         <label for="asset">Moneda</label>
-                        <input type="text" class="form-control" name="asset" id="asset" [(ngModel)]="transaction.assetName" disabled>
+                        <!-- <input type="text" class="form-control" name="asset" id="asset" [(ngModel)]="transaction.assetName" disabled> -->
+                        <select class="form-control" name="asset" id="asset" [(ngModel)]="transaction.assetId" required>
+                            <option *ngFor="let asset of assets" [value]="asset.id">{{asset.name}}</option>
+                        </select>
                     </div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="account">Cuenta</label>
-                        <input type="text" class="form-control" name="account" id="account" [(ngModel)]="transaction.accountName" disabled>
+                        <!-- <input type="text" class="form-control" name="account" id="account" [(ngModel)]="transaction.accountName" disabled> -->
+                        <select class="form-control" name="account" id="account" [(ngModel)]="transaction.accountId" required>
+                            <option *ngFor="let account of accounts" [value]="account.id">{{account.name}}</option>
+                        </select>
                     </div>
                     <div class="col-md-6">
                         <label for="transactionClass">Clase de Movimiento</label>
-                        <input type="text" class="form-control" name="transactionClass" id="transactionClass" [(ngModel)]="transaction.transactionClassName" disabled>
+                        <!-- <input type="text" class="form-control" name="transactionClass" id="transactionClass" [(ngModel)]="transaction.transactionClassName" disabled> -->
+                        <select class="form-control" name="transactionClass" id="transactionClass" [(ngModel)]="transaction.transactionClassId" required>
+                            <option *ngFor="let transactionClass of transactionClasses" [value]="transactionClass.id">{{transactionClass.description}}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col">
+                        <label for="detail">Detalle</label>
+                        <!-- <input type="text" class="form-control" name="description" id="description" [(ngModel)]="transaction.description"> -->
+                        <textarea class="form-control" name="detail" id="detail" [(ngModel)]="transaction.detail"></textarea>
                     </div>
                 </div>
                 <div class="row mb-3">

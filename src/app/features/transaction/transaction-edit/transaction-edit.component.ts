@@ -4,6 +4,9 @@ import { TransactionService } from '../services/transaction.service';
 import { Subscription } from 'rxjs';
 import { Transaction } from '../models/transaction.model';
 import { FormGroup } from '@angular/forms';
+import { AssetService } from '../../asset/services/asset.service';
+import { AccountService } from '../../account/services/account.service';
+import { TransactionClassService } from '../../transactionClass/services/transaction-class.service';
 
 @Component({
   selector: 'app-transaction-edit',
@@ -13,15 +16,29 @@ import { FormGroup } from '@angular/forms';
 export class TransactionEditComponent  implements OnInit, OnDestroy{
   transactionForm!: FormGroup;
   id: string | null = null;
+  assets: any[] = [];
+  accounts: any[] = [];
+  transactionClasses: any[] = []; 
   paramsSubcription?: Subscription;
   editTransactionSubscription?: Subscription;
   transaction?: Transaction;
   successMessage: string = '';
   isLoading: boolean = true;
 
-  constructor(private route: ActivatedRoute, private transactionService: TransactionService, private router: Router) {  }
+  constructor(
+    private route: ActivatedRoute,
+    private transactionService: TransactionService,
+    private assetsService: AssetService,
+    private accountService: AccountService,
+    private transactionClassService: TransactionClassService,
+    private router: Router
+    ) {  }
 
   ngOnInit(): void {
+
+    this.loadAssets();
+    this.loadAccounts();
+    
     
     this.paramsSubcription = this.route.paramMap.subscribe({
       next: (params) => {        
@@ -42,7 +59,10 @@ export class TransactionEditComponent  implements OnInit, OnDestroy{
                 this.transaction.movementType = 'Egreso';
               }
               
+              this.loadTransactionClasses();
+
               this.transaction.amount = Math.abs(this.transaction.amount);
+            
               
               this.isLoading = false;
             },
@@ -55,8 +75,33 @@ export class TransactionEditComponent  implements OnInit, OnDestroy{
     });
   }
 
+  loadAssets() {
+    this.assetsService.getAssetsByTypeName("Moneda").subscribe((data: any) => {
+      this.assets = data;
+    });
+  }
+
+  loadAccounts() {
+    this.accountService.getAccountByTypeName("Moneda").subscribe((data: any) => {
+      this.accounts = data;
+    });
+  }
+
+  loadTransactionClasses() {
+    this.transactionClassService.getAllTransactionClasses().subscribe((data: any) => {
+
+      if (this.transaction?.movementType === 'Ingreso') {
+        this.transactionClasses = data.filter((x: any) => x.incExp === 'I');
+      } else {
+        this.transactionClasses = data.filter((x: any) => x.incExp === 'E');
+      }
+    });
+  }
+
   onFormSubmit(): void {
     const formValues = this.transaction;
+
+    console.log(formValues?.date)
 
     if (!formValues) {
       return;
@@ -83,6 +128,12 @@ export class TransactionEditComponent  implements OnInit, OnDestroy{
   ngOnDestroy(): void {
     this.paramsSubcription?.unsubscribe();
     this.editTransactionSubscription?.unsubscribe();
+  }
+
+  updateDate(newDate: string) {
+    if (this.transaction) {
+      this.transaction.date = new Date(newDate); // Convertir el string a un objeto Date
+    }
   }
 
 }
