@@ -53,5 +53,4 @@ export class TransactionClassListComponent implements OnInit {
       }
     }
   }
-
 }

@@ -38,6 +38,8 @@ export class AssetManagementComponent implements OnInit {
       
 
       this.assetService.getAssignedAssets(this.selectedAssetType).subscribe(used => {
+
+        
         this.availableAssets = available.filter(a => !used.some(u => u.id === a.id));
         this.assignedAssets = used;
       });
@@ -72,9 +74,14 @@ export class AssetManagementComponent implements OnInit {
   }
 
   onReferenceChange(asset: Asset) {
+
+    
     this.assetService.updateReference(asset).subscribe(
       response => {
-        console.log('Reference updated');
+        console.log(response)
+        if (asset.isReference == false) {
+          asset.isMainReference = false;
+        }
       },
       error => {
 
@@ -86,9 +93,30 @@ export class AssetManagementComponent implements OnInit {
         }
       }
     );
-
-
-
   }
+
+  onMainReferenceChange(asset: Asset) {
+    if (asset.isMainReference == true) {
+      this.assignedAssets.forEach(a => {
+        if (a.id !== asset.id) {
+          a.isMainReference = false;
+        }
+      });
+    }
+    this.assetService.updateMainReference(asset).subscribe(
+      response => {
+       console.log(response);
+      },
+      error => {
+        if (error.error === 'Only 1 main reference asset allowed') {
+          alert('No puede elegir más de 1 activo de referencia principal');
+
+          //update de checkbox
+          asset.isMainReference = false;
+        }
+      }
+    );
+  }
+
 
 }

@@ -4,4 +4,5 @@ export interface Asset {
     symbol: string;
     assetTypeName: string;
     isReference: boolean;
+    isMainReference: boolean;
 }

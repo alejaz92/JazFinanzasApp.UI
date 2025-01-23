@@ -1,0 +1,46 @@
+/* Cambia el color de fondo del switch cuando está activado */
+.custom-switch:checked {
+    background-color: #28a745 !important; /* Verde o el color que prefieras */
+    border-color: #28a745 !important;    /* Asegura que el borde coincida */
+  }
+  
+  /* Cambia el color del "toggle" (la bolita dentro del switch) */
+  .custom-switch:checked::before {
+    background-color: #ffffff; /* Blanco, para que contraste */
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.3); /* Sombra para resaltarlo */
+  }
+  
+  /* Opcional: ajusta el estado inactivo para personalización adicional */
+  .custom-switch {
+    background-color: #ccc;
+    border-color: #ccc;
+  }
+  
+  .custom-switch::before {
+    background-color: #ffffff;
+  }
+  
+
+  
+
+  .btn-danger {
+    background-color: #dc3545; /* Rojo predeterminado de Bootstrap */
+    border-color: #dc3545;
+    color: white;
+    font-weight: bold;
+  }
+  
+  .btn-danger:hover {
+    background-color: #b02a37; /* Rojo más oscuro para hover */
+    border-color: #b02a37;
+  }
+  
+  .btn-danger:focus {
+    box-shadow: 0 0 5px rgba(220, 53, 69, 0.5); /* Resalta con sombra */
+  }
+  
+  .btn-sm {
+    padding: 0.3rem 0.75rem; /* Ajusta el tamaño */
+    border-radius: 50px; /* Bordes redondeados para un diseño más moderno */
+  }
+  
