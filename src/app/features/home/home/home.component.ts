@@ -9,6 +9,8 @@ import { Chart, registerables } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { Transaction } from '../../transaction/models/transaction.model';
 import { CardTransactionPending } from '../../cardTransactions/models/cardTransactions-pending.model';
+import { AssetService } from '../../asset/services/asset.service';
+import { Asset } from '../../asset/models/asset.model';
 
 Chart.register(...registerables);
 
@@ -24,12 +26,14 @@ export class HomeComponent implements OnInit, AfterViewInit {
   userName: string = '';
   stocksChart: any;
   cryptosChart: any;
+  mainReference: Asset | null = null;
 
   constructor(
     private transactionService: TransactionService,
     private userService: UserService,
     private cardTransactioneService: CardTransactionsService,
-    private reportService: ReportService
+    private reportService: ReportService,
+    private assetService: AssetService
   ) {}
 
   ngOnInit(): void {
@@ -52,7 +56,8 @@ export class HomeComponent implements OnInit, AfterViewInit {
         this.transactions = transactionsData.transactions;
         this.cardTransactions = cardTransactionsData.reverse();
         setTimeout(() => {
-          this.renderHomeGraphs(homeStatsData); // Asegurarse de que el DOM esté listo
+          this.loadMainReferences(homeStatsData);  
+          
         });
       },
       complete: () => {
@@ -64,8 +69,18 @@ export class HomeComponent implements OnInit, AfterViewInit {
     });
   }
 
+  loadMainReferences(homeStatsData: HomeStatsDTO) {
+    // Cargar las referencias 
+    const stocksRef = this.assetService.getReferenceAssets().subscribe((data: any) => {
+            
+          //check for the mainReference asset
+          this.mainReference = data.find((x: Asset) => x.isMainReference);
+          this.renderHomeGraphs(homeStatsData); // Asegurarse de que el DOM esté listo
+        });
+  }
   
   renderHomeGraphs(data: HomeStatsDTO) {
+
     const ctx1 = document.getElementById('stocksHomeChart') as HTMLCanvasElement;
     if (ctx1) {
       const assetTypes = data.stockStatsGral.map(x => x.assetType);
@@ -85,7 +100,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
         options: {
           plugins: {
             legend: { display: false, position: 'right' },
-            title: { display: true, text: 'Distribución por Tipo de Activo (En Dólares)' },
+            title: { display: true, text: 'Distribución por Tipo de Activo (En ' + this.mainReference?.name + ')' },
             tooltip: {
               callbacks: {
                 label: (tooltipItem) => {
@@ -141,7 +156,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
         options: {
           plugins: {
             legend: { display: false, position: 'right' },
-            title: { display: true, text: 'Distribución por Criptomoneda (En Dólares)' },
+            title: { display: true, text: 'Distribución por Criptomoneda (En ' + this.mainReference?.name + ')' },
             tooltip: {
               callbacks: {
                 label: (tooltipItem) => {

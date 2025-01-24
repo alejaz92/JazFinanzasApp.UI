@@ -62,6 +62,7 @@ export class ReportsComponent implements OnInit {
   db6Graph1: Chart | undefined;
   db6Graph2: Chart | undefined;
   db6Graph3: Chart | undefined;
+  mainReference: Asset | null = null;
 
 
   constructor(
@@ -81,6 +82,7 @@ export class ReportsComponent implements OnInit {
 
     
     this.loadAssetsDB1();
+    
     this.loadCards();
     this.loadAssetTypes();
     this.loadCryptoGralStats();
@@ -90,8 +92,10 @@ export class ReportsComponent implements OnInit {
   loadAssetsDB1() {
     this.assetService.getReferenceAssets().subscribe((data: any) => {
         
-      this.assetsDB1 = data;      
+      //check for the mainReference asset
+      this.mainReference = data.find((x: Asset) => x.isMainReference);
 
+      this.assetsDB1 = data;      
       this.isLoading = false;
     });
   }
@@ -113,7 +117,6 @@ export class ReportsComponent implements OnInit {
 
     //transform this.selectedMonthDB1 to Date
 
-    
 
     if (this.selectedMonthDB1 != null && this.selectedAssetIdDB1 != 0) {
       // search in asssets for selectedAssetDB1
@@ -129,6 +132,7 @@ export class ReportsComponent implements OnInit {
           this.incExpStats = response;
 
           this.renderDB1();
+
         });
     }
   }
@@ -136,9 +140,9 @@ export class ReportsComponent implements OnInit {
   renderDB1() {
     //graph1
     const ctx1 = document.getElementById('incomeByClassChart') as HTMLCanvasElement;
-
+    
     if (!ctx1) return;
-
+    
     this.db1Graph1?.destroy();
 
     this.db1Graph1 = new Chart(ctx1, {
@@ -374,6 +378,8 @@ export class ReportsComponent implements OnInit {
         }
       } as ChartConfiguration['options']
     });
+
+   
   }
 
   loadCardStats() {    
@@ -583,7 +589,11 @@ export class ReportsComponent implements OnInit {
 
     this.reportService.getStockStats(this.selectedAssetTypeDB4)
       .subscribe(response => {
+
         this.renderDB4(response);
+
+        
+        
 
         this.stocksStatsDTO = response.stockStatsInd;
       });
@@ -623,7 +633,7 @@ export class ReportsComponent implements OnInit {
           },
           title: {
             display: true,
-            text: 'Distribución por Ticker (En Dólares)'
+            text: 'Distribución por Ticker (En ' + this.mainReference?.name + ')'
           },
           tooltip: {
             callbacks: {
@@ -689,7 +699,7 @@ export class ReportsComponent implements OnInit {
         plugins: {
           title: {
             display: true,
-            text: 'Valores Originales Prom. vs Actuales (En Dólares)'
+            text: 'Valores Originales Prom. vs Actuales (En ' + this.mainReference?.name + ')'
           }
         },
         scales: {
@@ -737,7 +747,7 @@ export class ReportsComponent implements OnInit {
           },
           title: {
             display: true,
-            text: 'Distribución por Tipo de Activo (En Dólares)'
+            text: 'Distribución por Tipo de Activo (En ' + this.mainReference?.name + ')'
           },
           tooltip: {
             callbacks: {
@@ -834,7 +844,7 @@ export class ReportsComponent implements OnInit {
            },
            title: {
              display: true,
-             text: 'Distribución por Crypto (En Dólares)'
+             text: 'Distribución por Crypto (En ' + this.mainReference?.name + ')'
            },
            tooltip: {
              callbacks: {
@@ -902,7 +912,7 @@ export class ReportsComponent implements OnInit {
           plugins: {
             title: {
               display: true,
-              text: 'Evolución del Valor de la Cartera (En Dólares)'
+              text: 'Evolución del Valor de la Cartera (En ' + this.mainReference?.name + ')',
             },
             legend: {
               display: false
@@ -995,7 +1005,7 @@ export class ReportsComponent implements OnInit {
           },
           title: {
             display: true,
-            text: 'Volumen Mensual de Ingresos (En Dólares)'
+            text: 'Volumen Mensual de Ingresos (En ' + this.mainReference?.name + ')',
           },
           legend: {
             position: 'top',
