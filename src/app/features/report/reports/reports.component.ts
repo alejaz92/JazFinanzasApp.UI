@@ -1074,7 +1074,7 @@ export class ReportsComponent implements OnInit {
 
     const option = {
       title: {
-        text: 'Estado de Valuación',
+        text: 'Estado de Valuación (en ' + this.mainReference?.symbol + ')',
         left: 'center',
       },
       series: [
