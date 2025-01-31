@@ -18,6 +18,8 @@ import { CryptoStatsDTO, InvestmentTransactionsStatsDTO } from '../models/Crypto
 import * as echarts from 'echarts';
 
 
+
+
 @Component({
   selector: 'app-reports',
   templateUrl: './reports.component.html',
@@ -65,6 +67,7 @@ export class ReportsComponent implements OnInit {
   mainReference: Asset | null = null;
   viewAux: boolean = false;
   isLoadingGraph: boolean = false;
+  selectedTab: string = 'incExp-tab';
 
 
   constructor(
@@ -88,10 +91,45 @@ export class ReportsComponent implements OnInit {
     
     this.loadCards();
     this.loadAssetTypes();
-    this.loadCryptoGralStats();
     this.loadCryptos();    
     
     
+  }
+
+  onTabChange(selectedTabId: string) {
+    if (this.selectedTab === selectedTabId) {
+      return;
+    }
+    else {
+      this.selectedTab = selectedTabId;
+    }
+
+    if (selectedTabId === 'incExp-tab') {
+        this.loadIncExpStats();
+        return;      
+    }
+    if (selectedTabId === 'cards-tab') {
+      this.loadCardStats();
+      return;
+    }
+    if (selectedTabId === 'stocks-tab') {
+      if (this.selectedAssetTypeDB4 == 0) {
+        this.viewAux = false;
+        return;
+      }
+      else {
+        this.loadStockStats();
+        return;
+      }
+    }
+    if(selectedTabId === 'cryptosGral-tab') { 
+      this.loadCryptoGralStats();
+      return;
+    }
+    if (selectedTabId === 'crypto-tab') {
+      this.loadCryptoStats();
+    }
+
   }
 
   loadAssetsDB1() {
@@ -108,7 +146,6 @@ export class ReportsComponent implements OnInit {
   loadCards() {
     this.cardService.getAllCards().subscribe(response => {
       this.cards = response;
-      this.loadCardStats();
     });
   }
 
@@ -120,19 +157,20 @@ export class ReportsComponent implements OnInit {
 
   loadIncExpStats() {
 
+    // search in asssets for selectedAssetDB1
+    this.selectedAssetDB1 = this.assetsDB1.find(x => x.id == this.selectedAssetIdDB1);
+
+    if (this.selectedAssetDB1 == null) {
+      this.viewAux = false;
+      return;
+    }
+
     //transform this.selectedMonthDB1 to Date
-
-
     if (this.selectedMonthDB1 != null && this.selectedAssetIdDB1 != 0) {
 
       
 
-      // search in asssets for selectedAssetDB1
-      this.selectedAssetDB1 = this.assetsDB1.find(x => x.id == this.selectedAssetIdDB1);
 
-      if (this.selectedAssetDB1 == null) {
-        return;
-      }
 
       this.isLoadingGraph = true;
       this.viewAux = false;
@@ -1019,10 +1057,14 @@ export class ReportsComponent implements OnInit {
 
   loadCryptoStats() {
 
-    this.isLoadingGraph = true;
+
+    
     if (this.selectedCryptoDB6 == 0) {
       this.viewAux = false;
+      return
     }
+    this.isLoadingGraph = true;
+
     this.reportService.getCryptoStats(this.selectedCryptoDB6)
       .subscribe(response => {
         this.cryptoTransactionsStatsDTO = response.cryptoTransactionsStats;
