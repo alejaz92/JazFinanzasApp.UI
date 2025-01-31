@@ -26,7 +26,7 @@
     <div class="tab-content mt-3" id="myTabContent">
         <div class="tab-pane fade show active" id="incExp" role="tabpanel" aria-labelledby="incExp-tab">
             <h4>Ingresos y Egresos</h4>
-            <div class="row">
+            <div class="row mt-1">
                 <div class="col-md-6">
                     <label for="asset">Moneda a Visualizar</label>
                     <select class="form-select" id="asset" [(ngModel)]="selectedAssetIdDB1" (change)="loadIncExpStats()">
@@ -40,25 +40,58 @@
                 </div>
             </div>
 
-            <!-- Graficos -->
-            <div class="row mt-4">
-                <div class="col-md-6">
-                    <canvas id="incomeByClassChart"></canvas>
-                </div>
-                <div class="col-md-6">
-                    <canvas id="expenseByClassChart"></canvas>
-                </div>
-            </div>
+            <app-loading [isLoading]="isLoadingGraph"></app-loading>
 
-            <div class="row mt-4">
-                <div class="col-md-6">
-                    <canvas id="incomeLast6MonthsChart"></canvas>
+            <div *ngIf="viewAux && !isLoadingGraph">
+                <!-- Graficos -->
+                <div class="row mt-4">
+                    <div class="col-md-6 mt-1">
+                        <div class="card">
+                            <div class="card-header">
+                                Ingresos por Clase
+                            </div>
+                            <div class="card-body">
+                                <canvas id="incomeByClassChart"></canvas>
+                            </div>
+                        </div>
+       
+                    </div>
+                    <div class="col-md-6 mt-1">
+                        <div class="card">
+                            <div class="card-header">
+                                Egresos por Clase
+                            </div>
+                            <div class="card-body">
+                                <canvas id="expenseByClassChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-6">
-                    <canvas id="expenseLast6MonthsChart"></canvas>
-                </div>
-            </div>       
-        
+    
+                <div class="row mt-4">
+                    <div class="col-md-6 mt-1">
+                        <div class="card">
+                            <div class="card-header">
+                                Ingresos por Mes
+                            </div>
+                            <div class="card-body">
+                                <canvas id="incomeLast6MonthsChart"></canvas>
+                            </div>
+                        </div>                    
+                    </div>
+                    <div class="col-md-6 mt-1">
+                        <div class="card">
+                            <div class="card-header">
+                                Egresos por Mes
+                            </div>
+                            <div class="card-body">
+                                <canvas id="expenseLast6MonthsChart"></canvas>
+                            </div>
+                        </div>                    
+                    </div>
+                </div>       
+            
+            </div>
         </div>
 
         <div class="tab-pane fade" id="cards" role="tabpanel" aria-labelledby="cards-tab">
@@ -78,50 +111,68 @@
                 </div>
             </div>
 
-            <!-- Graficos -->
-            <div class="row mt-4">
-                <div class="col-md-6">
-                    <canvas id="pesosCardsChart"></canvas>
-                </div>
-                <div class="col-md-6">
-                    <canvas id="dollarCardsChart"></canvas>
-                </div>
-            </div>
+            <app-loading [isLoading]="isLoadingGraph"></app-loading>
 
-        <!-- Tabla  -->
-            <div class="mt-4" *ngIf="cardTransactionsDTO.length > 0">
-                <div class="card">
-                    <div class="card-header">
-                        <h5>Gastos en el mes actual</h5>
+            <div *ngIf="!isLoadingGraph">
+                <!-- Graficos -->
+                <div class="row mt-4">
+                    <div class="col-md-6 mt-1">
+                        <div class="card">
+                            <div class="card-header">
+                                Gastos en Pesos
+                            </div>
+                            <div class="card-body">
+                                <canvas id="pesosCardsChart"></canvas>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Tarjeta</th>
-                                        <th>Moneda</th>
-                                        <th>Fecha</th>
-                                        <th>Tipo Movimiento</th>
-                                        <th>Detalle</th>
-                                        <th>Cuota</th>
-                                        <th>Monto Cuota</th>
-                                        <th>Valor Pesos</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr *ngFor="let transaction of cardTransactionsDTO">
-                                        <td>{{ transaction.card }}</td>
-                                        <td>{{ transaction.asset }}</td>
-                                        <td>{{ transaction.date | date: 'dd/MM/yyyy'}}</td>
-                                        <td>{{ transaction.transactionClass }}</td>
-                                        <td>{{ transaction.detail }}</td>
-                                        <td>{{ transaction.installment }}</td>
-                                        <td>{{ transaction.installmentAmount | currencyFiatFormat}}</td>
-                                        <td>{{ transaction.valueInPesos | currencyFiatFormat}}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                    <div class="col-md-6 mt-1">
+                        <div class="card">
+                            <div class="card-header">
+                                Gastos en Dolares
+                            </div>
+                            <div class="card-body">
+                                <canvas id="dollarCardsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    
+                <!-- Tabla  -->
+                <div class="mt-4" *ngIf="cardTransactionsDTO.length > 0">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Gastos en el mes actual</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Tarjeta</th>
+                                            <th>Moneda</th>
+                                            <th>Fecha</th>
+                                            <th>Tipo Movimiento</th>
+                                            <th>Detalle</th>
+                                            <th>Cuota</th>
+                                            <th>Monto Cuota</th>
+                                            <th>Valor Pesos</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let transaction of cardTransactionsDTO">
+                                            <td>{{ transaction.card }}</td>
+                                            <td>{{ transaction.asset }}</td>
+                                            <td>{{ transaction.date | date: 'dd/MM/yyyy'}}</td>
+                                            <td>{{ transaction.transactionClass }}</td>
+                                            <td>{{ transaction.detail }}</td>
+                                            <td>{{ transaction.installment }}</td>
+                                            <td>{{ transaction.installmentAmount | currencyFiatFormat}}</td>
+                                            <td>{{ transaction.valueInPesos | currencyFiatFormat}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -144,57 +195,80 @@
                     </select>
                 </div>
             </div>
-            
-            <!-- graficos -->
 
-            <div class="row mt-4">
-                
-                <div class="col-md-6">
-                    <canvas id="stocksGralChart"></canvas>
-                </div>
-                <div class="col-md-6">
-                    <canvas id="percentajeByTickerChart"></canvas>
-                </div>
-            </div>
-            <div class="row mt-4">
-                <div class="col-md-6">
-                    <canvas id="origVsActualChart"></canvas>
-                </div>
-                <div class="col-md-6" *ngIf="stocksStatsDTO.length > 0">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>Tenencias Actuales (En {{ mainReference?.name }})</h5>
+            <app-loading [isLoading]="isLoadingGraph"></app-loading>
+            
+            <div *ngIf="viewAux && !isLoadingGraph">
+                <!-- graficos -->
+                <div class="row mt-4">
+                    
+                    <div class="col-md-6 mt-1">
+                        <div class="card">
+                            <div class="card-header">
+                                Distribución por Tipo de Activo (En {{ mainReference?.symbol }})
+                            </div>
+                            <div class="card-body">
+                                <canvas id="stocksGralChart"></canvas>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Ticker</th>
-                                            <!-- <th>Nombre</th> -->
-                                            <th>Cantidad</th>
-                                            <th>Valor Origen Promedio</th>
-                                            <th>Valor Actual</th>    
-                                            <th>%</th>                                        
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr *ngFor="let stock of stocksStatsDTO">
-                                            <td>{{ stock.symbol  }}</td>
-                                            <!-- <td>{{ stock.assetName }}</td> -->
-                                            <td>{{ stock.quantity }}</td>
-                                            <td>{{ stock.originalValue | currencyFiatFormat }}</td>
-                                            <td>{{ stock.actualValue | currencyFiatFormat }}</td>
-                                            <td>{{ (stock.actualValue / stock.originalValue * 100) -100 | currencyInvestmentFormat }} %</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                    </div>
+                    <div class="col-md-6 mt-1">
+                        <div class="card">
+                            <div class="card-header">
+                                Distribución por Ticker (En {{ mainReference?.symbol }})
+                            </div>
+                            <div class="card-body">
+                                <canvas id="percentajeByTickerChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col-md-6 mt-1">
+                        <div class="card">
+                            <div class="card-header">
+                                Valores Originales Promedio vs Valores Actuales (En {{ mainReference?.symbol }})
+                            </div>
+                            <div class="card-body">
+                                <canvas id="origVsActualChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mt-1" *ngIf="stocksStatsDTO.length > 0">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Tenencias Actuales (En {{ mainReference?.name }})</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Ticker</th>
+                                                <!-- <th>Nombre</th> -->
+                                                <th>Cantidad</th>
+                                                <th>Valor Origen Promedio</th>
+                                                <th>Valor Actual</th>    
+                                                <th>%</th>                                        
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let stock of stocksStatsDTO">
+                                                <td>{{ stock.symbol  }}</td>
+                                                <!-- <td>{{ stock.assetName }}</td> -->
+                                                <td>{{ stock.quantity }}</td>
+                                                <td>{{ stock.originalValue | currencyFiatFormat }}</td>
+                                                <td>{{ stock.actualValue | currencyFiatFormat }}</td>
+                                                <td>{{ (stock.actualValue / stock.originalValue * 100) -100 | currencyInvestmentFormat }} %</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
         </div>
 
         <div class="tab-pane fade" id="cryptosGral" role="tabpanel" aria-labelledby="cryptosGral-tab">
@@ -214,55 +288,80 @@
                 </div>
             </div>
 
-            <!-- Graphs -->
-            <div class="row mt-4">
-                <div class="col-md-6">
-                    <canvas id="cryptosGralDistributionChart"></canvas>
-                </div>
-                <div class="col-md-6">
-                    <div class="row">
-                        <canvas id="walletValueEvolutionChart"></canvas>
-                    </div>
-                    <div class="row"> 
-                        <canvas id="buyVolumeEvolutionChart"></canvas>
-                    </div>
-                    
-                </div>
-            </div>
-            <div class="row mt-4" *ngIf="cryptoGralStatsDTO.length > 0">
-                    <!--tabla -->
-                <div class="card">
-                    <div class="card-header">
-                        <h5>Tenencias Actuales (En {{ this.mainReference?.name  }})</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-bordered- table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Crypto</th>
-                                        <th>Nombre</th>
-                                        <th>Cantidad</th>
-                                        <th>Valor Origen Promedio</th>
-                                        <th>Valor Actual</th>    
-                                        <th>%</th>                                        
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr *ngFor="let stock of cryptoGralStatsDTO">
-                                        <td>{{ stock.symbol  }}</td>
-                                        <td>{{ stock.assetName }}</td>
-                                        <td>{{ stock.quantity }}</td>
-                                        <td>{{ stock.originalValue | currencyFiatFormat }}</td>
-                                        <td>{{ stock.actualValue | currencyFiatFormat }}</td>
-                                        <td>{{ (stock.actualValue / stock.originalValue * 100) -100 | currencyInvestmentFormat }} %</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+            <app-loading [isLoading]="isLoadingGraph"></app-loading>
+
+
+            <div *ngIf="!isLoadingGraph">
+                <!-- Graphs -->
+                <div class="row mt-4">
+                    <div class="col-md-6 mt-1">
+                        <div class="card">
+                            <div class="card-header">
+                                Distribución por Crypto (En {{ mainReference?.symbol }})
+                            </div>
+                            <div class="card-body">
+                                <canvas id="cryptosGralDistributionChart"></canvas>
+                            </div>
                         </div>
                     </div>
+                    <div class="col-md-6 mt-1">
+                        <div class="row">
+                            <div class="card">
+                                <div class="card-header">
+                                    Evolución del Valor de la Cartera (En {{ mainReference?.symbol }})
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="walletValueEvolutionChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row"> 
+                            <div class="card">
+                                <div class="card-header">
+                                    Volumen Mensual de Movimientos (En {{ mainReference?.symbol }})
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="buyVolumeEvolutionChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
                 </div>
-
+                <div class="row mt-4" *ngIf="cryptoGralStatsDTO.length > 0">
+                        <!--tabla -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Tenencias Actuales (En {{ this.mainReference?.name  }})</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered- table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Crypto</th>
+                                            <th>Nombre</th>
+                                            <th>Cantidad</th>
+                                            <th>Valor Origen Promedio</th>
+                                            <th>Valor Actual</th>    
+                                            <th>%</th>                                        
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let stock of cryptoGralStatsDTO">
+                                            <td>{{ stock.symbol  }}</td>
+                                            <td>{{ stock.assetName }}</td>
+                                            <td>{{ stock.quantity }}</td>
+                                            <td>{{ stock.originalValue | currencyFiatFormat }}</td>
+                                            <td>{{ stock.actualValue | currencyFiatFormat }}</td>
+                                            <td>{{ (stock.actualValue / stock.originalValue * 100) -100 | currencyInvestmentFormat }} %</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>    
+                </div>
             </div>
         </div>
 
@@ -283,61 +382,90 @@
                 </div>
             </div>
 
-            <!-- Graficos -->
-            <div class="row mt-4 report-container">
-                
-                <div class="col-md-6 graph">
-                    <canvas id="priceEvolutionChart"></canvas>
-                </div>
-                <div class="col-md-6 graph">
-                    <canvas id="cryptoBalanceChart"></canvas>
-                </div>
-            </div>
+            <app-loading [isLoading]="isLoadingGraph"></app-loading>
 
-            <!-- Tabla  -->
-
-            <div class="row mt-4">
-                <div class="col-md-3">
-                    <div id="gaugeChart" style="width: 100%; height: 300px;"></div>
+            <div *ngIf="viewAux && !isLoadingGraph">
+                <!-- Graficos -->
+                <div class="row mt-4 report-container">
                     
-                </div>
-                <div class="col-md-9">
-                    <div  *ngIf="cryptoTransactionsStatsDTO.length > 0">
-                        <div class="crypto card">
-                            <div class="card-header">
-                                <h5>Ultimos Movimientos</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="rable-responsive">
-                                    <table class="table table-bordered table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th>Fecha</th>
-                                                <th>Cuenta</th>
-                                                <th>Tipo Movimiento</th>
-                                                <th>Tipo Comercio</th>
-                                                <th>Cantidad</th>
-                                                <th>Cotización</th>
-                                                <th>Total</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr *ngFor="let transaction of cryptoTransactionsStatsDTO">
-                                                <td>{{ transaction.date | date: 'dd/MM/yyyy' }}</td>
-                                                <td>{{ transaction.account }}</td>
-                                                <td>{{ transaction.movementType | movementType }}</td>
-                                                <td>{{ transaction.commerceType | commerceType}}</td>
-                                                <td>{{ transaction.quantity }}</td>
-                                                <td>{{ transaction.quotePrice | currencyFiatFormat}}</td>
-                                                <td>{{ transaction.total | currencyFiatFormat}}</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+    
+                    <div class="col-md-6 graph">
+    
+                        <div class="row mt-1">
+                            <div class="card">
+                                <div class="card-header">
+                                    Estado de Valuación (En {{ mainReference?.symbol }})
+                                </div>
+                                <div class="card-body ">
+                                    <div id="gaugeChart" style="width: 100%; height: 300px;"></div>
                                 </div>
                             </div>
                         </div>
+                        <div class="row mt-1">
+                            <div class="card">
+                                <div class="card-header">
+                                    Evolución del Valor de la Criptomoneda (En {{ mainReference?.symbol }})
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="priceEvolutionChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        
                     </div>
-                </div>                
+                    <div class="col-md-6 graph">
+                        <div class="card">
+                            <div class="card-header">
+                                Distribución de Saldos por Cuenta
+                            </div>
+                            <div class="card-body">
+                                <canvas id="cryptoBalanceChart"></canvas>                            
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    
+                <!-- Tabla  -->
+    
+                <div class="row mt-4">
+                    <div class="col-md-12">
+                        <div  *ngIf="cryptoTransactionsStatsDTO.length > 0">
+                            <div class="crypto card">
+                                <div class="card-header">
+                                    <h5>Ultimos Movimientos (En {{ mainReference?.symbol }})</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Fecha</th>
+                                                    <th>Cuenta</th>
+                                                    <th>Tipo Movimiento</th>
+                                                    <th>Tipo Comercio</th>
+                                                    <th>Cantidad</th>
+                                                    <th>Cotización</th>
+                                                    <th>Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr *ngFor="let transaction of cryptoTransactionsStatsDTO">
+                                                    <td>{{ transaction.date | date: 'dd/MM/yyyy' }}</td>
+                                                    <td>{{ transaction.account }}</td>
+                                                    <td>{{ transaction.movementType | movementType }}</td>
+                                                    <td>{{ transaction.commerceType | commerceType}}</td>
+                                                    <td>{{ transaction.quantity }}</td>
+                                                    <td>{{ transaction.quotePrice | currencyFiatFormat}}</td>
+                                                    <td>{{ transaction.total | currencyFiatFormat}}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>                
+                </div>
             </div>
            
         </div>

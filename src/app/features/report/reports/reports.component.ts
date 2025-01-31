@@ -63,6 +63,8 @@ export class ReportsComponent implements OnInit {
   db6Graph2: Chart | undefined;
   db6Graph3: Chart | undefined;
   mainReference: Asset | null = null;
+  viewAux: boolean = false;
+  isLoadingGraph: boolean = false;
 
 
   constructor(
@@ -74,6 +76,7 @@ export class ReportsComponent implements OnInit {
 
   ngOnInit(): void {
 
+    this.viewAux = false;
     const now = new Date();
     const year = now.getFullYear();
     const month = (now.getMonth() + 1).toString().padStart(2, '0');
@@ -86,7 +89,9 @@ export class ReportsComponent implements OnInit {
     this.loadCards();
     this.loadAssetTypes();
     this.loadCryptoGralStats();
-    this.loadCryptos();     
+    this.loadCryptos();    
+    
+    
   }
 
   loadAssetsDB1() {
@@ -119,6 +124,9 @@ export class ReportsComponent implements OnInit {
 
 
     if (this.selectedMonthDB1 != null && this.selectedAssetIdDB1 != 0) {
+
+      
+
       // search in asssets for selectedAssetDB1
       this.selectedAssetDB1 = this.assetsDB1.find(x => x.id == this.selectedAssetIdDB1);
 
@@ -126,12 +134,22 @@ export class ReportsComponent implements OnInit {
         return;
       }
 
+      this.isLoadingGraph = true;
+      this.viewAux = false;
+
       this.reportService.getIncExpStats(this.selectedMonthDB1, this.selectedAssetDB1.id)
         .subscribe(response => {
           
           this.incExpStats = response;
 
-          this.renderDB1();
+          this.isLoadingGraph = false;
+          this.viewAux = true;
+
+
+          setTimeout(() => {
+            this.renderDB1();
+
+          }, 0);
 
         });
     }
@@ -160,16 +178,6 @@ export class ReportsComponent implements OnInit {
       options: {
         responsive: true,
         plugins: {
-          title: {
-            display: true,
-            text: 'Ingresos por Clase',
-            font: {
-              size: 18
-            },
-            padding: {
-              bottom: 10
-            }
-          },
           legend: {
             display: false
           },
@@ -219,16 +227,6 @@ export class ReportsComponent implements OnInit {
       options: {
         responsive: true,
         plugins: {
-          title: {
-            display: true,
-            text: 'Egresos por Clase',
-            font: {
-              size: 18
-            },
-            padding: {
-              bottom: 10
-            }
-          },
           legend: {
             display: false
           },
@@ -281,16 +279,6 @@ export class ReportsComponent implements OnInit {
       options: {
         responsive: true,
         plugins: {
-          title: {
-            display: true,
-            text: 'Ingresos por Mes',
-            font: {
-              size: 18
-            },
-            padding: {
-              bottom: 10
-            }
-          },
           legend: {
             display: false
           },
@@ -343,16 +331,6 @@ export class ReportsComponent implements OnInit {
       options: {
         responsive: true,
         plugins: {
-          title: {
-            display: true,
-            text: 'Egresos por Mes',
-            font: {
-              size: 18
-            },
-            padding: {
-              bottom: 10
-            }
-          },
           legend: {
             display: false
           },
@@ -380,15 +358,24 @@ export class ReportsComponent implements OnInit {
     });
 
    
+    this.viewAux = true;
+
   }
 
   loadCardStats() {    
     this.cardTransactionsDTO = [];
 
+    this.isLoadingGraph = true;
+
     this.reportService.getCardStats(this.selectedCardDB3)
       .subscribe(response => {
-        this.renderDB3(response);
-        this.cardTransactionsDTO = response.cardTransactionsDTO;
+
+        this.isLoadingGraph = false;
+
+        setTimeout(() => {
+          this.renderDB3(response);
+          this.cardTransactionsDTO = response.cardTransactionsDTO;
+        }, 0);
       });
   
   }
@@ -433,16 +420,6 @@ export class ReportsComponent implements OnInit {
       options: {
         responsive: true,
         plugins: {
-          title: {
-            display: true,
-            text: 'Gastos en Pesos',
-            font: {
-              size: 18
-            },
-            padding: {
-              bottom: 10
-            }
-          },
           legend: {
             display: true,
             labels: {
@@ -527,16 +504,6 @@ export class ReportsComponent implements OnInit {
       options: {
         responsive: true,
         plugins: {
-          title: {
-            display: true,
-            text: 'Gastos en Dolares',
-            font: {
-              size: 18
-            },
-            padding: {
-              bottom: 10
-            }
-          },
           legend: {
             display: true,
             labels: {
@@ -587,15 +554,20 @@ export class ReportsComponent implements OnInit {
   loadStockStats() {
     this.stocksStatsDTO = [];
 
+    this.viewAux = false;
+    this.isLoadingGraph = true;
+
     this.reportService.getStockStats(this.selectedAssetTypeDB4)
       .subscribe(response => {
 
-        this.renderDB4(response);
+        this.isLoadingGraph = false;
+        this.viewAux = true;
 
-        
-        
+        setTimeout(() => {
+          this.renderDB4(response);
+          this.stocksStatsDTO = response.stockStatsInd;
+        }, 0);
 
-        this.stocksStatsDTO = response.stockStatsInd;
       });
   }
 
@@ -801,10 +773,18 @@ export class ReportsComponent implements OnInit {
   }
 
   loadCryptoGralStats() {
+
+    this.isLoadingGraph = true;
+
     this.reportService.getCryptoGralStats(this.includeStables)
       .subscribe(response => {
-        this.cryptoGralStatsDTO = response.cryptoGralStats;
-        this.renderDB5(response);
+
+        this.isLoadingGraph = false;
+
+        setTimeout(() => {
+          this.cryptoGralStatsDTO = response.cryptoGralStats;
+          this.renderDB5(response);
+        }, 0);
       });
   }
 
@@ -1005,7 +985,7 @@ export class ReportsComponent implements OnInit {
           },
           title: {
             display: true,
-            text: 'Volumen Mensual de Ingresos (En ' + this.mainReference?.name + ')',
+            text: 'Volumen Mensual de Movimientos (En ' + this.mainReference?.name + ')',
           },
           legend: {
             position: 'top',
@@ -1038,10 +1018,22 @@ export class ReportsComponent implements OnInit {
   }
 
   loadCryptoStats() {
+
+    this.isLoadingGraph = true;
+    if (this.selectedCryptoDB6 == 0) {
+      this.viewAux = false;
+    }
     this.reportService.getCryptoStats(this.selectedCryptoDB6)
       .subscribe(response => {
         this.cryptoTransactionsStatsDTO = response.cryptoTransactionsStats;
-        this.renderDB6(response);
+
+        this.viewAux = true;
+        this.isLoadingGraph = false;
+
+        setTimeout(() => {
+          this.renderDB6(response);
+
+        }, 0);
       });
   }
 
@@ -1071,12 +1063,7 @@ export class ReportsComponent implements OnInit {
 
     // Inicializar una nueva instancia de ECharts
     const myChart = echarts.init(chartDom);
-
     const option = {
-      title: {
-        text: 'Estado de Valuación (en ' + this.mainReference?.symbol + ')',
-        left: 'center',
-      },
       series: [
         {
           type: 'gauge',
@@ -1085,29 +1072,35 @@ export class ReportsComponent implements OnInit {
           min: minValue,
           max: maxValue,
           splitNumber: 4,
+          radius: '110%',
+          center: ['50%', '60%'],
           axisLine: {
             lineStyle: {
-              width: 10,
+              width: 15,
               color: [[earnLostLine, '#fd666d'], [1, '#67e0e3']],
             },
           },
           pointer: {
             length: '80%',
-            width: 4,
+            width: 6,
           },
           detail: {
-            formatter: '{value}', // Formato del valor
-            fontSize: 18,          // Reducir el tamaño de la fuente
-            offsetCenter: [0, '40%'],  // Posicionar el valor en el centro, pero más hacia abajo
-            color: '#333',        // Color del texto
+            formatter: '{value}',
+            fontSize: 20,
+            offsetCenter: [0, '60%'],
+            color: '#333',
           },
           data: [{ value: currentValue }],
         },
-        
       ],
     };
-
+    
     myChart.setOption(option);
+    
+    // Ajustar tamaño automáticamente
+    window.addEventListener('resize', () => {
+      myChart.resize();
+    });
 
     //graph2
 
@@ -1139,10 +1132,6 @@ export class ReportsComponent implements OnInit {
       },
       options: {
         plugins: {
-          title: {
-            display: true,
-            text: 'Evolución del Valor de la Criptomoneda'
-          },
           legend: {
             display: false
           },
@@ -1204,10 +1193,6 @@ export class ReportsComponent implements OnInit {
       },
       options: {
         plugins: {
-          title: {
-            display: true,
-            text: 'Distribución de Saldo por Cuenta'
-          },
           legend: {
             display: false
           },
@@ -1244,8 +1229,8 @@ export class ReportsComponent implements OnInit {
     });
 
 
-
-
+   
+   
   }
 
 }
