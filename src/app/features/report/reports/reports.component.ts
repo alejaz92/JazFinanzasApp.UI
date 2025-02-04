@@ -195,6 +195,23 @@ export class ReportsComponent implements OnInit {
 
   renderDB1() {
     //graph1
+    const rawDataInc = this.incExpStats?.classIncomeStats || [];
+    const totalInc = rawDataInc.reduce((sum, item) => sum + item.amount, 0);
+    const thresholdInc = totalInc * 0.05; // 5% del total
+
+    let filteredDataInc = rawDataInc.filter(item => item.amount >= thresholdInc);
+    const otherTotalInc = rawDataInc
+      .filter(item => item.amount < thresholdInc)
+      .reduce((sum, item) => sum + item.amount, 0);
+
+    if (otherTotalInc > 0) {
+      filteredDataInc.push({ transactionClass: 'Otros', amount: otherTotalInc });
+    }
+
+    const labelsInc = filteredDataInc.map(item => item.transactionClass);
+    const dataValuesInc = filteredDataInc.map(item => item.amount);
+
+
     const ctx1 = document.getElementById('incomeByClassChart') as HTMLCanvasElement;
     
     if (!ctx1) return;
@@ -204,10 +221,10 @@ export class ReportsComponent implements OnInit {
     this.db1Graph1 = new Chart(ctx1, {
       type: 'bar',
       data: {
-        labels: this.incExpStats?.classIncomeStats.map(item => item.transactionClass), // Etiquetas del eje X
+        labels: labelsInc, // Etiquetas del eje X
         datasets: [{
           label: 'Ingresos en ' + this.selectedAssetDB1?.symbol,
-          data: this.incExpStats?.classIncomeStats.map(item => item.amount) || [], // Datos del eje Y
+          data: dataValuesInc, // Datos del eje Y
           backgroundColor: 'rgba(75, 192, 192, 0.2)',  // Verde claro
           borderColor: 'rgba(75, 192, 192, 1)',        // Verde oscuro
           borderWidth: 1
@@ -242,6 +259,25 @@ export class ReportsComponent implements OnInit {
       } as ChartConfiguration['options']
     });
 
+    
+    // graph 2
+
+    const rawDataExp = this.incExpStats?.classExpenseStats || [];
+    const totalExp = rawDataExp.reduce((sum, item) => sum + item.amount, 0);
+    const thresholdExp = totalExp * 0.05; // 5% del total
+
+    let filteredDataExp = rawDataExp.filter(item => item.amount >= thresholdExp);
+    const otherTotalExp = rawDataExp
+      .filter(item => item.amount < thresholdExp)
+      .reduce((sum, item) => sum + item.amount, 0);
+
+    if (otherTotalExp > 0) {
+      filteredDataExp.push({ transactionClass: 'Otros', amount: otherTotalExp });
+    }
+
+    const labelsExp = filteredDataExp.map(item => item.transactionClass);
+    const dataValuesExp = filteredDataExp.map(item => item.amount);
+
 
     const ctx2 = document.getElementById('expenseByClassChart') as HTMLCanvasElement;
 
@@ -253,10 +289,10 @@ export class ReportsComponent implements OnInit {
     this.db1Graph2 = new Chart(ctx2, {
       type: 'bar',
       data: {
-        labels: this.incExpStats?.classExpenseStats.map(item => item.transactionClass), // Etiquetas del eje X
+        labels: labelsExp, // Etiquetas del eje X
         datasets: [{
           label: 'Egresos en ' + this.selectedAssetDB1?.symbol,
-          data: this.incExpStats?.classExpenseStats.map(item => item.amount) || [], // Datos del eje Y
+          data: dataValuesExp, // Datos del eje Y
           backgroundColor: 'rgba(255, 99, 132, 0.2)',  // Rojo claro
           borderColor: 'rgba(255, 99, 132, 1)',        // Rojo oscuro
           borderWidth: 1
