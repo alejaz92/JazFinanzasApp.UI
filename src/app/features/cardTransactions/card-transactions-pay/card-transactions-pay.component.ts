@@ -399,9 +399,12 @@ refreshCurrencyFormat() {
         detail: control.get('detail')?.value,
         assetId: parseInt(control.get('assetId')?.value),
         installment: control.get('installment')?.value,
-        installmentAmount: parseFloat(control.get('installmentAmount')?.value) | 0,
-        valueInPesos: parseFloat(control.get('valueInPesos')?.value) | 0
+        installmentAmount: parseFloat(control.get('installmentAmount')?.value) || 0,
+        valueInPesos: parseFloat(control.get('valueInPesos')?.value) || 0
       }));
+
+      console.log(this.cardTransactionsArray);
+      console.log(cardTransactions);
 
       const cardPaymentRequest = {
         cardId: parseInt(this.cardPaymentForm.get('card')?.value),
@@ -421,6 +424,7 @@ refreshCurrencyFormat() {
         cardPaymentRequest.paymentAsset = 'P';
       }
 
+      //console.log(cardPaymentRequest);
 
       this.cardTransactionService.createCardPayment(cardPaymentRequest).subscribe(() => {
         
