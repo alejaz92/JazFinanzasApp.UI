@@ -210,12 +210,25 @@ refreshCurrencyFormat() {
 
       //recorrer cardTransactionsArray y sumar installmentamount
       let total = 0;
+
+
       cardTransactionsArray.controls.forEach((control) => {
+
+
+
+        if(parseInt(control.get('assetId')?.value) === 1 && control.get('asset')?.value === '') {
+          control.get('asset')!.setValue('Peso Argentino');
+        } else if (control.get('assetId')?.value === 2 && control.get('asset')?.value === '') {
+          control.get('asset')!.setValue('Dolar Estadounidense');
+        }
+
         if (control.get('pay')?.value) {
           if (paymentAssets === 'Pesos') {
             total += parseFloat(control.get('valueInPesos')?.value);
           } else if (paymentAssets === 'Pesos+Dolar') {
-            if(control.get('asset')?.value === 'Peso Argentino'){
+            
+            if(control.get('asset')?.value === 'Peso Argentino' || control.get('assetId')?.value === 1){
+             
               total += parseFloat(control.get('installmentAmount')?.value);
             }
           }
@@ -403,8 +416,6 @@ refreshCurrencyFormat() {
         valueInPesos: parseFloat(control.get('valueInPesos')?.value) || 0
       }));
 
-      console.log(this.cardTransactionsArray);
-      console.log(cardTransactions);
 
       const cardPaymentRequest = {
         cardId: parseInt(this.cardPaymentForm.get('card')?.value),
@@ -424,18 +435,17 @@ refreshCurrencyFormat() {
         cardPaymentRequest.paymentAsset = 'P';
       }
 
-      //console.log(cardPaymentRequest);
 
-      this.cardTransactionService.createCardPayment(cardPaymentRequest).subscribe(() => {
+      // this.cardTransactionService.createCardPayment(cardPaymentRequest).subscribe(() => {
         
-        this.cardPaymentForm.reset();
-        this.cardTransactionsArray.clear();
+      //   this.cardPaymentForm.reset();
+      //   this.cardTransactionsArray.clear();
 
-        this.successMessage = 'Movimiento creado con éxito';
-        setTimeout(() => {
-          this.successMessage = '';
-        }, 3000);
-      });
+      //   this.successMessage = 'Movimiento creado con éxito';
+      //   setTimeout(() => {
+      //     this.successMessage = '';
+      //   }, 3000);
+      // });
 
   }
 }

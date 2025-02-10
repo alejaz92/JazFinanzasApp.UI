@@ -157,7 +157,7 @@
 
                                         <td *ngIf="!cardTransaction.get('isManual')?.value">{{ cardTransaction.value.asset}}</td> 
                                         <td *ngIf="cardTransaction.get('isManual')?.value">
-                                            <select class="form-control small-font-input" formControlName="assetId">
+                                            <select class="form-control small-font-input" formControlName="assetId" >
                                               <option *ngFor="let asset of assets" [value]="asset.id">{{ asset.name }}</option>
                                             </select>
                                         </td>
