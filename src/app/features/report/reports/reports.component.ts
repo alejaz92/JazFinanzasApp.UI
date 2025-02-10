@@ -677,10 +677,6 @@ export class ReportsComponent implements OnInit {
             display: false,
             position: 'right'
           },
-          title: {
-            display: true,
-            text: 'Distribución por Ticker (En ' + this.mainReference?.name + ')'
-          },
           tooltip: {
             callbacks: {
               label: (tooltipItem) => {
@@ -743,10 +739,6 @@ export class ReportsComponent implements OnInit {
       },
       options: {
         plugins: {
-          title: {
-            display: true,
-            text: 'Valores Originales Prom. vs Actuales (En ' + this.mainReference?.name + ')'
-          }
         },
         scales: {
           y: {
@@ -790,10 +782,6 @@ export class ReportsComponent implements OnInit {
           legend: {
             display: false,
             position: 'right'
-          },
-          title: {
-            display: true,
-            text: 'Distribución por Tipo de Activo (En ' + this.mainReference?.name + ')'
           },
           tooltip: {
             callbacks: {
@@ -896,10 +884,6 @@ export class ReportsComponent implements OnInit {
              display: false,
              position: 'right'
            },
-           title: {
-             display: true,
-             text: 'Distribución por Crypto (En ' + this.mainReference?.name + ')'
-           },
            tooltip: {
              callbacks: {
                label: (tooltipItem) => {
@@ -964,10 +948,6 @@ export class ReportsComponent implements OnInit {
         },
         options: {
           plugins: {
-            title: {
-              display: true,
-              text: 'Evolución del Valor de la Cartera (En ' + this.mainReference?.name + ')',
-            },
             legend: {
               display: false
             },
@@ -1056,10 +1036,6 @@ export class ReportsComponent implements OnInit {
                 }).format(Number(tooltipItem.raw))}`;
               }
             }
-          },
-          title: {
-            display: true,
-            text: 'Volumen Mensual de Movimientos (En ' + this.mainReference?.name + ')',
           },
           legend: {
             position: 'top',
