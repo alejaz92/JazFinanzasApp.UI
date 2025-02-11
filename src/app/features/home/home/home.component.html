@@ -16,27 +16,29 @@
                     Últimos movimientos
                 </div>
                 <div class="card-body">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <!-- <th>Clase Movimiento</th> -->
-                                <th>Detalle</th>
-                                <th>Moneda</th>
-                                <th class="text-end">Monto</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let transaction of transactions | slice:0:6">
-                                <!-- <td>{{ transaction.transactionClassName }}</td> -->
-                                <td>{{ transaction.detail }}</td>
-                                <td>{{ transaction.assetSymbol }}</td>
-                                <td class="text-end" [ngClass]="{'table-danger': transaction.amount < 0, 'table-success': transaction.amount >= 0}">
-                                    {{ transaction.amount | currencyFiatFormat }}
-                                </td>
-
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <!-- <th>Clase Movimiento</th> -->
+                                    <th>Detalle</th>
+                                    <th>Moneda</th>
+                                    <th class="text-end">Monto</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let transaction of transactions | slice:0:6">
+                                    <!-- <td>{{ transaction.transactionClassName }}</td> -->
+                                    <td>{{ transaction.detail }}</td>
+                                    <td>{{ transaction.assetSymbol }}</td>
+                                    <td class="text-end" [ngClass]="{'table-danger': transaction.amount < 0, 'table-success': transaction.amount >= 0}">
+                                        {{ transaction.amount | currencyFiatFormat }}
+                                    </td>
+    
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -48,30 +50,32 @@
                     Últimos movimientos Tarjeta
                 </div>
                 <div class="card-body">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <!-- <th>Clase Movimiento</th> -->
-                                <th>Detalle</th>
-                                <th>Moneda</th>
-                                <!-- <th>Cuotas</th> -->
-                                <th class="text-end">Monto Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let cardTransaction of cardTransactions | slice:0:6">
-                                <!-- <td>{{ transaction.transactionClassName }}</td> -->
-                                <td>{{ cardTransaction.detail }}</td>
-                                <td>{{ cardTransaction.assetSymbol }}</td>
-                                <!-- <td>{{ cardTransaction.installments }}</td> -->
-
-                                <td class="text-end">
-                                    {{ cardTransaction.totalAmount | currencyFiatFormat }}
-                                </td>
-
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <!-- <th>Clase Movimiento</th> -->
+                                    <th>Detalle</th>
+                                    <th>Moneda</th>
+                                    <!-- <th>Cuotas</th> -->
+                                    <th class="text-end">Monto Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let cardTransaction of cardTransactions | slice:0:6">
+                                    <!-- <td>{{ transaction.transactionClassName }}</td> -->
+                                    <td>{{ cardTransaction.detail }}</td>
+                                    <td>{{ cardTransaction.assetSymbol }}</td>
+                                    <!-- <td>{{ cardTransaction.installments }}</td> -->
+    
+                                    <td class="text-end">
+                                        {{ cardTransaction.totalAmount | currencyFiatFormat }}
+                                    </td>
+    
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
