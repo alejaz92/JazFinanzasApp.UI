@@ -436,16 +436,16 @@ refreshCurrencyFormat() {
       }
 
 
-      // this.cardTransactionService.createCardPayment(cardPaymentRequest).subscribe(() => {
-        
-      //   this.cardPaymentForm.reset();
-      //   this.cardTransactionsArray.clear();
+         this.cardTransactionService.createCardPayment(cardPaymentRequest).subscribe(() => {
+          
+           this.cardPaymentForm.reset();
+           this.cardTransactionsArray.clear();
 
-      //   this.successMessage = 'Movimiento creado con éxito';
-      //   setTimeout(() => {
-      //     this.successMessage = '';
-      //   }, 3000);
-      // });
+           this.successMessage = 'Movimiento creado con éxito';
+           setTimeout(() => {
+             this.successMessage = '';
+           }, 3000);
+         });
 
   }
 }
