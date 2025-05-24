@@ -51,6 +51,9 @@ import { LoadingComponent } from './core/components/loading/loading.component';
 import { ResetPasswordComponent } from './features/user/reset-password/reset-password.component';
 import { FooterComponent } from './core/components/footer/footer.component';
 import { ServiceWorkerModule } from '@angular/service-worker';
+import { PortfolioListComponent } from './features/portfolios/portfolio-list/portfolio-list.component';
+import { PortfolioAddComponent } from './features/portfolios/portfolio-add/portfolio-add.component';
+import { PortfolioEditComponent } from './features/portfolios/portfolio-edit/portfolio-edit.component';
 
 
 
@@ -97,7 +100,10 @@ import { ServiceWorkerModule } from '@angular/service-worker';
     ReportsComponent,
     LoadingComponent,
     ResetPasswordComponent,
-    FooterComponent
+    FooterComponent,
+    PortfolioListComponent,
+    PortfolioAddComponent,
+    PortfolioEditComponent
   ],
   imports: [
     BrowserModule,

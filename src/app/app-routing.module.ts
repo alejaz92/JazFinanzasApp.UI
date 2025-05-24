@@ -36,6 +36,9 @@ import { ExchangeAddComponent } from './features/exchange/exchange-add/exchange-
 import { BalanceComponent } from './features/report/balance/balance.component';
 import { ReportsComponent } from './features/report/reports/reports.component';
 import { ResetPasswordComponent } from './features/user/reset-password/reset-password.component';
+import { PortfolioListComponent } from './features/portfolios/portfolio-list/portfolio-list.component';
+import { PortfolioAddComponent } from './features/portfolios/portfolio-add/portfolio-add.component';
+import { PortfolioEditComponent } from './features/portfolios/portfolio-edit/portfolio-edit.component';
 
 
 const routes: Routes = [
@@ -75,6 +78,20 @@ const routes: Routes = [
   {
     path: 'management/account/:id',
     component: AccountEditComponent,
+    canActivate: [AuthGuard]
+  },
+    {
+    path: 'management/portfolio',
+    component: PortfolioListComponent
+  },
+  {
+    path: 'management/portfolio/add',
+    component: PortfolioAddComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'management/portfolio/:id',
+    component: PortfolioEditComponent,
     canActivate: [AuthGuard]
   },
   {

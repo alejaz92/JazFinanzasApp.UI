@@ -89,6 +89,16 @@
                     Debe ingresarse una cotizacion.
                 </div>
             </div>
+            <div class="col-md-12" *ngIf="portfolios.length > 1">
+                <label class="form-label" for="expensePorfolio">Cartera</label>
+                <select id="expensePortfolio" class="form-control" formControlName="expensePortfolio">
+                    <option value="" disabled selected>Seleccione</option>
+                    <option *ngFor="let portfolio of portfolios" [value]="portfolio.id">{{ portfolio.name }}</option>
+                </select>
+                <div class="text-danger mt-2" *ngIf="cryptoTransactionForm.controls['expensePortfolio'].errors?.['incorrect']">
+                    Debe seleccionarse una cartera.
+                </div>
+            </div>
         </div>
         <div 
             class="row mb-3"
@@ -131,6 +141,16 @@
                 <input type="string" class="form-control" id="incomeQuote" formControlName="incomeQuote" appInvestmentInput>
                 <div class="text-danger mt-2" *ngIf="cryptoTransactionForm.controls['incomeQuote'].errors?.['incorrect']">
                     Debe ingresarse una cotizacion.
+                </div>
+            </div>
+            <div class="col-md-12" *ngIf="portfolios.length > 1">
+                <label class="form-label" for="incomePorfolio">Cartera</label>
+                <select id="incomePortfolio" class="form-control" formControlName="incomePortfolio">
+                    <option value="" disabled selected>Seleccione</option>
+                    <option *ngFor="let portfolio of portfolios" [value]="portfolio.id">{{ portfolio.name }}</option>
+                </select>
+                <div class="text-danger mt-2" *ngIf="cryptoTransactionForm.controls['incomePortfolio'].errors?.['incorrect']">
+                    Debe seleccionarse una cartera.
                 </div>
             </div>
         </div>

@@ -1,0 +1,19 @@
+<div class="container">
+    <h1 class="mt-3">
+        Crear Cartera
+    </h1>
+    <form #form="ngForm" (ngSubmit)="onFormSubmit()">
+
+        <div class="mt-2">
+            <div class="mt-3">
+                <label for="portfolioName" class="form-label">Nombre</label>
+                <input type="text" class="form-control" id="portfolioName" name="portfolioName" 
+                [(ngModel)]="model.name">
+            </div>
+        </div>  
+        <div class="mt-3">
+            <button type="submit" class="btn btn-primary m-1">Insertar</button>
+            <a class="btn btn-secondary" [routerLink]="['/management/portfolio']">Cancelar</a>   
+        </div>
+    </form>
+</div>

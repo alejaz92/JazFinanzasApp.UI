@@ -15,15 +15,17 @@
                     <th rowspan="2">Tipo Mov.</th>
                     <th rowspan="2">Tipo Comercio</th>
                     <th rowspan="2">Tipo de Activo</th>
-                    <th colspan="3" class="text-center table-danger">Egreso</th>
-                    <th colspan="3" class="text-center table-success">Ingreso</th>
+                    <th colspan="4" class="text-center table-danger">Egreso</th>
+                    <th colspan="4" class="text-center table-success">Ingreso</th>
                     <th rowspan="2">Acciones</th>
                 </tr>
                 <tr>
                     <th class="table-danger">Activo</th>
+                    <th class="table-danger">Cartera</th>
                     <th class="text-end table-danger">Cantidad</th>
                     <th class="text-end table-danger">Cotización</th>
                     <th class="table-success">Activo</th>
+                    <th class="table-success">Cartera</th>
                     <th class="text-end table-success">Cantidad</th>
                     <th class="text-end table-success">Cotización</th>
                 </tr>
@@ -35,6 +37,7 @@
                     <td>{{ transaction.commerceType | commerceType }}</td>
                     <td>{{ transaction.assetType }}</td>
                     <td class="table-danger">{{ transaction.expenseAsset ?? ''}}</td>
+                    <td class="table-danger">{{ transaction.expensePortfolio ?? ''}}</td>
                     <td class="text-end table-danger">
                         {{ transaction.expenseQuantity != null ? (-transaction.expenseQuantity | currencyInvestmentFormat) : '' }}
                     </td>
@@ -42,6 +45,7 @@
                         {{ transaction.expenseQuotePrice != null ? (transaction.expenseQuotePrice | currencyInvestmentFormat) : '' }}
                     </td>
                     <td class="table-success">{{ transaction.incomeAsset ?? ''}}</td>
+                    <td class="table-success">{{ transaction.incomePortfolio ?? ''}}</td>
                     <td class="text-end table-success">
                         {{ transaction.incomeQuantity != null ? (transaction.incomeQuantity | currencyInvestmentFormat) : '' }}
                     </td>

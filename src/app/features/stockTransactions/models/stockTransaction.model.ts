@@ -6,10 +6,12 @@ export interface StockTransaction {
     assetType: string;
     expenseAsset?: string;
     expenseAccount?: string;
+    expensePortfolio?: string;
     expenseQuantity?: number;
     expenseQuotePrice?: number;
     incomeAsset?: string;
     incomeAccount?: string;
+    incomePortfolio?: string;
     incomeQuantity?: number;
     incomeQuotePrice?: number;
 }

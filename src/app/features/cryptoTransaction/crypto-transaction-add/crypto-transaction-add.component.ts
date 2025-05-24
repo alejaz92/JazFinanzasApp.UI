@@ -3,6 +3,8 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CryptoTransactionService } from '../services/crypto-transaction.service';
 import { AccountService } from '../../account/services/account.service';
 import { AssetService } from '../../asset/services/asset.service';
+import { PortfolioService } from '../../portfolios/services/portfolio.service';
+import { Portfolio } from '../../portfolios/models/portfolio.model';
 
 @Component({
   selector: 'app-crypto-transaction-add',
@@ -15,6 +17,8 @@ export class CryptoTransactionAddComponent implements OnInit {
   selectedCommerceType: string = '';
   cryptoAccounts: any[] = [];
   fiatAccounts: any[] = [];
+  portfolios: any[] = [];
+  defaultPortfolio?: Portfolio;
   cryptoAssets: any[] = [];
   commerceTypes: any[] = [];
   incomeAccounts: any[] = [];
@@ -31,6 +35,7 @@ export class CryptoTransactionAddComponent implements OnInit {
     private cryptoTransactionService: CryptoTransactionService,
     private accountService: AccountService,
     private assetService: AssetService,
+    private portfolioService: PortfolioService
   ) { }
 
   ngOnInit(): void {
@@ -40,6 +45,8 @@ export class CryptoTransactionAddComponent implements OnInit {
       date: ['', Validators.required],
       incomeAccount: [''],
       expenseAccount: [''],
+      incomePortfolio: [''],
+      expensePortfolio: [''],
       incomeAsset: [''],
       expenseAsset: [''],
       incomeAmount: [''],
@@ -50,6 +57,14 @@ export class CryptoTransactionAddComponent implements OnInit {
 
     this.loadAccounts();
     this.loadAssets();
+    this.loadPortfolios();
+  }
+
+  loadPortfolios() {
+    this.portfolioService.getAllPortfolios().subscribe((data: any) => {
+      this.portfolios = data;
+      this.defaultPortfolio = this.portfolios.find((portfolio: any) => portfolio.isDefault);
+    });
   }
 
   loadAccounts() {
@@ -133,6 +148,19 @@ export class CryptoTransactionAddComponent implements OnInit {
     formValues.expenseAccount = parseInt(formValues.expenseAccount);
     formValues.incomeAsset = parseInt(formValues.incomeAsset);
     formValues.expenseAsset = parseInt(formValues.expenseAsset);
+
+    //si no se selecciona portfolio, se selecciona el por defecto
+
+    if (formValues.incomePortfolio === '' && (formValues.movementType === 'I' || formValues.movementType === 'EX')) {
+      formValues.incomePortfolio = this.defaultPortfolio?.id;
+    } else {
+      formValues.incomePortfolio = parseInt(formValues.incomePortfolio);
+    }
+    if (formValues.expensePortfolio === ''  && (formValues.movementType === 'E' || formValues.movementType === 'EX')) {
+      formValues.expensePortfolio = this.defaultPortfolio?.id;
+    } else {
+      formValues.expensePortfolio = parseInt(formValues.expensePortfolio);
+    }
 
 
     if (formValues.movementType === '') {
@@ -228,6 +256,8 @@ export class CryptoTransactionAddComponent implements OnInit {
       date: formValues.date,
       incomeAccountId: formValues.incomeAccount || null,
       expenseAccountId: formValues.expenseAccount || null,
+      incomePortfolioId: formValues.incomePortfolio || null,
+      expensePortfolioId: formValues.expensePortfolio || null,
       incomeAssetId: formValues.incomeAsset || null,
       expenseAssetId: formValues.expenseAsset || null,
       incomeQuantity: formValues.incomeAmount || null,

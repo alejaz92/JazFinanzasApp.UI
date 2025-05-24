@@ -1,0 +1,46 @@
+<app-loading [isLoading]="isLoading"></app-loading>
+
+<div class="container mt-4" *ngIf="!isLoading">
+    <h1 class="mt-3">Carteras</h1>
+    <div class="d-flex justify-content-end mt-3">
+        <a class="btn btn-primary" [routerLink]="['/management/portfolio/add']">
+            Crear Cartera
+        </a>
+    </div>
+
+    <ng-container *ngIf="portfolios">
+        <table class="table table-bordered mt-3">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr *ngFor="let portfolio of portfolios">
+                    <td>{{ portfolio.name }}</td>
+
+                    <td>
+                        <a 
+                            title="Editar" 
+                            class="btn btn-primary ms-2" 
+                            [routerLink]="['/management/portfolio', portfolio.id]"
+                        >
+                            <i class="bi-pencil-fill"></i>
+                        </a>
+                        <button 
+                            title="Eliminar" 
+                            class="btn btn-danger ms-2" 
+                            (click)="onDelete(portfolio.id)"
+                            *ngIf="!portfolio.isDefault"
+                        >
+                            <i class="bi-trash-fill"></i>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </ng-container>
+
+</div>

@@ -4,6 +4,8 @@ import { AccountService } from '../../account/services/account.service';
 import { StockTranctionsService } from '../services/stock-tranctions.service';
 import { AssetService } from '../../asset/services/asset.service';
 import { AssetTypeService } from '../../assetType/services/asset-type.service';
+import { Portfolio } from '../../portfolios/models/portfolio.model';
+import { PortfolioService } from '../../portfolios/services/portfolio.service';
 
 @Component({
   selector: 'app-stock-transaction-add',
@@ -16,6 +18,8 @@ export class StockTransactionAddComponent implements OnInit{
   selectedCommerceType: string = '';
   selectedAssetType: string = '';
   stockAccounts: any[] = [];
+  portfolios: any[] = [];
+  defaultPortfolio?: Portfolio;
   fiatAccounts: any[] = [];
   stockAssets: any[] = [];
   assetTypes: any[] = [];
@@ -33,7 +37,8 @@ export class StockTransactionAddComponent implements OnInit{
     private stockTransactionService: StockTranctionsService,
     private accountService: AccountService,
     private assetService: AssetService,
-    private assetTypeService: AssetTypeService
+    private assetTypeService: AssetTypeService,
+    private portfolioService: PortfolioService
   ) { }
 
   ngOnInit(): void {
@@ -42,8 +47,10 @@ export class StockTransactionAddComponent implements OnInit{
       commerceType: ['', Validators.required],
       assetType: ['', Validators.required],
       date: ['', Validators.required],
-      incomeAccount: [''],
+      incomeAccount: [''],      
       expenseAccount: [''],
+      incomePortfolio: [''],
+      expensePortfolio: [''],
       incomeAsset: [''],
       expenseAsset: [''],
       incomeAmount: [''],
@@ -62,8 +69,16 @@ export class StockTransactionAddComponent implements OnInit{
 
     this.loadAssetTypes();
     this.loadAssets();
+    this.loadPortfolios();
 
   }  
+
+  loadPortfolios() {    
+    this.portfolioService.getAllPortfolios().subscribe((data: any) => {
+      this.portfolios = data;
+      this.defaultPortfolio = this.portfolios.find((portfolio: Portfolio) => portfolio.idDefault);
+    });
+  }
   
   loadAssets() {    
     this.stockAssets = [];
@@ -160,6 +175,20 @@ export class StockTransactionAddComponent implements OnInit{
     formValues.expenseAccount = parseInt(formValues.expenseAccount);
     formValues.incomeAsset = parseInt(formValues.incomeAsset);
     formValues.expenseAsset = parseInt(formValues.expenseAsset);
+
+    //si no se selecciona portfolio, se selecciona el por defecto
+
+    if (formValues.incomePortfolio === '' && (formValues.movementType === 'I' || formValues.movementType === 'EX')) {
+      formValues.incomePortfolio = this.defaultPortfolio?.id;
+    } else {
+      formValues.incomePortfolio = parseInt(formValues.incomePortfolio);
+    }
+    if (formValues.expensePortfolio === ''  && (formValues.movementType === 'E' || formValues.movementType === 'EX')) {
+      formValues.expensePortfolio = this.defaultPortfolio?.id;
+    } else {
+      formValues.expensePortfolio = parseInt(formValues.expensePortfolio);
+    }
+
 
     if (formValues.movementType === '') {
       this.stockTransactionForm.controls['movementType'].setErrors({ 'incorrect': true });
@@ -260,6 +289,8 @@ export class StockTransactionAddComponent implements OnInit{
       date: formValues.date,
       incomeAccountId: formValues.incomeAccount || null,
       expenseAccountId: formValues.expenseAccount || null,
+      incomePortfolioId: formValues.incomePortfolio || null,
+      expensePortfolioId: formValues.expensePortfolio || null,
       expenseAssetId: formValues.expenseAsset || null,
       incomeAssetId: formValues.incomeAsset || null,
       expenseQuantity: formValues.expenseAmount || null,

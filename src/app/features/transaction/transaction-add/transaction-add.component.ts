@@ -5,6 +5,8 @@ import { HttpClient } from '@angular/common/http';
 import { AccountService } from '../../account/services/account.service';
 import { AssetService } from '../../asset/services/asset.service';
 import { TransactionClassService } from '../../transactionClass/services/transaction-class.service';
+import { Portfolio } from '../../portfolios/models/portfolio.model';
+import { PortfolioService } from '../../portfolios/services/portfolio.service';
 
 
 @Component({
@@ -29,7 +31,8 @@ export class TransactionAddComponent implements OnInit{
     private transactionService: TransactionService, 
     private accountService: AccountService,
     private assetService: AssetService,
-    private transactionClasses: TransactionClassService) { }
+    private transactionClasses: TransactionClassService
+  ) { }
 
     ngOnInit(): void {
       this.transactionForm = this.fb.group({
@@ -51,6 +54,8 @@ export class TransactionAddComponent implements OnInit{
       this.loadAssets();
       this.loadTransactionClasses();
     }
+
+
 
     loadAccounts() {
       this.accountService.getAccountByTypeName("Moneda").subscribe((data: any) => {
@@ -82,6 +87,8 @@ export class TransactionAddComponent implements OnInit{
         this.transactionForm.controls['movementType'].setErrors({ 'incorrect': true });
         return;
       }
+
+
 
       
       if(formValues.date === '') {

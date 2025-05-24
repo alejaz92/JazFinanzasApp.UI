@@ -2,6 +2,8 @@ export interface Transaction {
     id: number;
     accountId: number;
     accountName: string;
+    portfolioId: number;
+    portfolioName: string;
     assetId: number;
     assetName: string;
     assetSymbol: string;
