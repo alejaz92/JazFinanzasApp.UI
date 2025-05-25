@@ -39,6 +39,8 @@ import { ResetPasswordComponent } from './features/user/reset-password/reset-pas
 import { PortfolioListComponent } from './features/portfolios/portfolio-list/portfolio-list.component';
 import { PortfolioAddComponent } from './features/portfolios/portfolio-add/portfolio-add.component';
 import { PortfolioEditComponent } from './features/portfolios/portfolio-edit/portfolio-edit.component';
+import { PortfolioExchangeListComponent } from './features/portfolioExchange/portfolio-exchange-list/portfolio-exchange-list.component';
+import { PortfolioExchangeAddComponent } from './features/portfolioExchange/portfolio-exchange-add/portfolio-exchange-add.component';
 
 
 const routes: Routes = [
@@ -215,6 +217,16 @@ const routes: Routes = [
   {
     path: 'exchange/add',
     component: ExchangeAddComponent,
+    canActivate: [AuthGuard]
+  },
+   {
+    path: 'portfolioExchange',
+    component: PortfolioExchangeListComponent,
+    canActivate: [AuthGuard]
+  },
+   {
+    path: 'portfolioExchange/add',
+    component: PortfolioExchangeAddComponent,
     canActivate: [AuthGuard]
   },
   {

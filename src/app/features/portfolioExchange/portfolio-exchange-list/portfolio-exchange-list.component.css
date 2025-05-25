@@ -1,0 +1,22 @@
+.text-end {
+    text-align: right; /* Alineación a la derecha para el monto */
+}
+
+.table th, .table td {
+    white-space: nowrap;
+}
+.table {
+    font-size: 1rem;
+}
+
+th {
+    vertical-align: middle !important;
+}
+
+thead th {
+    border: 1px solid #dee2e6 !important;
+}
+
+thead .bg-light {
+    background-color: #f8f9fa !important;
+}

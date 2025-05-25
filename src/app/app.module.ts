@@ -54,6 +54,8 @@ import { ServiceWorkerModule } from '@angular/service-worker';
 import { PortfolioListComponent } from './features/portfolios/portfolio-list/portfolio-list.component';
 import { PortfolioAddComponent } from './features/portfolios/portfolio-add/portfolio-add.component';
 import { PortfolioEditComponent } from './features/portfolios/portfolio-edit/portfolio-edit.component';
+import { PortfolioExchangeListComponent } from './features/portfolioExchange/portfolio-exchange-list/portfolio-exchange-list.component';
+import { PortfolioExchangeAddComponent } from './features/portfolioExchange/portfolio-exchange-add/portfolio-exchange-add.component';
 
 
 
@@ -103,7 +105,9 @@ import { PortfolioEditComponent } from './features/portfolios/portfolio-edit/por
     FooterComponent,
     PortfolioListComponent,
     PortfolioAddComponent,
-    PortfolioEditComponent
+    PortfolioEditComponent,
+    PortfolioExchangeListComponent,
+    PortfolioExchangeAddComponent
   ],
   imports: [
     BrowserModule,

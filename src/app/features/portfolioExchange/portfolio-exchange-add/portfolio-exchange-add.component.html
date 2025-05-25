@@ -1,0 +1,121 @@
+<div class="container">
+    <h1 class="mt-3">Crear Intercambio de Carteras</h1>
+    
+    <div class="alert alert-success" *ngIf="successMessage">
+        {{ successMessage }}
+    </div>
+    <div class="alert alert-danger" *ngIf="errorMessage">
+        {{ errorMessage }}
+    </div>
+
+    <form 
+        [formGroup]="portfolioExchangeForm"
+        (ngSubmit)="onSubmit()"
+    >
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <label class="form-label" for="date">Fecha</label>
+                <input type="date" class="form-control" id="date" formControlName="date">
+                <div class="text-danger mt-2" *ngIf="portfolioExchangeForm.controls['date'].errors?.['incorrect']">
+                    Debe seleccionarse una fecha.
+                </div>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <label class="form-label" for="assetType">Tipo de Activo</label>
+                <select id="assetType" class="form-control" formControlName="assetType" 
+                    (change)="onAssetTypeChange($event)"
+                >
+                    <option value="" disabled selected>Seleccione</option>
+                    <option *ngFor="let assetType of assetTypes" [value]="assetType.id">{{ assetType.name }}</option>
+                </select>
+                <div class="text-danger mt-2" *ngIf="portfolioExchangeForm.controls['assetType'].errors?.['incorrect']">
+                    Debe seleccionarse un tipo de activo.
+                </div>
+            </div>   
+        </div>
+        <div class="row mb-3" *ngIf="selectedAssetType">
+            <div class="col-md-6">
+                <label class="form-label" for="account">Cuenta</label>
+                <select id="account" class="form-control" formControlName="account" 
+                >
+                    <option value="" disabled selected>Seleccione</option>
+                    <option *ngFor="let account of accounts" [value]="account.id">{{ account.name }}</option>
+                </select>
+                <div class="text-danger mt-2" *ngIf="portfolioExchangeForm.controls['account'].errors?.['incorrect']">
+                    Debe seleccionarse una cuenta.
+                </div>
+            </div>   
+            <div class="col-md-6">
+                <label class="form-label" for="asset">Activo</label>
+                <select id="asset" class="form-control" formControlName="asset" 
+                >
+                    <option value="" disabled selected>Seleccione</option>
+                    <option *ngFor="let asset of assets" [value]="asset.id">{{ asset.name }}</option>
+                </select>
+                <div class="text-danger mt-2" *ngIf="portfolioExchangeForm.controls['asset'].errors?.['incorrect']">
+                    Debe seleccionarse un activo.
+                </div>
+            </div> 
+            
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <label class="form-label" for="amount">Monto</label>
+                <input type="text" class="form-control" id="amount" formControlName="amount" appInvestmentInput>
+                <div class="text-danger mt-2" *ngIf="portfolioExchangeForm.controls['amount'].errors?.['incorrect']">
+                    Debe ingresarse un monto.
+                </div>
+            </div> 
+        </div>
+
+        <div 
+            class="row mb-3"
+            id="ExpensesGroup"            
+        >
+            <div class="col-12">
+                <h4>Egreso</h4>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="expensePortfolio">Cartera</label>
+                <select id="expensePortfolio" class="form-control" formControlName="expensePortfolio">
+                    <option value="" disabled selected>Seleccione</option>
+                    <option *ngFor="let portfolio of portfolios" [value]="portfolio.id">{{ portfolio.name }}</option>
+                </select>
+                <div class="text-danger mt-2" *ngIf="portfolioExchangeForm.controls['expensePortfolio'].errors?.['incorrect']">
+                    Debe seleccionarse una cartera de egresp.
+                </div>
+            </div>
+        </div>
+
+        <div 
+            class="row mb-3"
+            id="IncomesGroup"            
+        >
+            <div class="col-12">
+                <h4>Ingreso</h4>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="incomePortfolio">Cartera</label>
+                <select id="incomePortfolio" class="form-control" formControlName="incomePortfolio">
+                    <option value="" disabled selected>Seleccione</option>
+                    <option *ngFor="let portfolio of portfolios" [value]="portfolio.id">{{ portfolio.name }}</option>
+                </select>
+                <div class="text-danger mt-2" *ngIf="portfolioExchangeForm.controls['incomePortfolio'].errors?.['incorrect']">
+                    Debe seleccionarse una cartera de ingreso.
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <button type="button" class="btn btn-secondary ms-2" (click)="onCancel()">Cancelar</button>
+        </div>
+
+        
+  
+    </form>
+            
+</div>
