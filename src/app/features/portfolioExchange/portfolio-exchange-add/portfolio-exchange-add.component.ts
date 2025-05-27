@@ -47,6 +47,7 @@ export class PortfolioExchangeAddComponent implements  OnInit {
   }
 
   loadAccounts() {
+
     this.accountService.getAccountByTypeId(Number(this.selectedAssetType)).subscribe((data: any) => {
       this.accounts = data;
     });
@@ -56,7 +57,6 @@ export class PortfolioExchangeAddComponent implements  OnInit {
     this.assetService.getAssetTypes().subscribe((data: any) => {
       
       this.assetTypes = data;
-      console.log(this.assetTypes);
     });
   }
 
@@ -67,15 +67,15 @@ export class PortfolioExchangeAddComponent implements  OnInit {
   }
 
   loadAssets() {
-    const selectedAssetType = this.portfolioExchangeForm.get('Asset').value;
+    const selectedAssetType = this.portfolioExchangeForm.get('assetType').value;
     this.assetService.getAssignedAssets(Number(this.selectedAssetType)).subscribe((data: any) => {
       this.assets = data;
     });
   }
 
   onAssetTypeChange(event: any) {
-    console.log(event.target);
-    this.selectedAssetType = event.target;
+    //console.log(event.target.value);
+    this.selectedAssetType = event.target.value;
     this.loadAssets();
     this.loadAccounts();
   }
@@ -85,9 +85,9 @@ export class PortfolioExchangeAddComponent implements  OnInit {
     if (this.portfolioExchangeForm.valid) {
       const portfolioExchange = {
         date: this.portfolioExchangeForm.get('date').value,
-        accountId: this.portfolioExchangeForm.get('Account').value,
-        assetId: this.portfolioExchangeForm.get('Asset').value,
-        amount: this.portfolioExchangeForm.get('Amount').value,
+        accountId: this.portfolioExchangeForm.get('account').value,
+        assetId: this.portfolioExchangeForm.get('asset').value,
+        amount: this.portfolioExchangeForm.get('amount').value,
         expensePortfolioId: this.portfolioExchangeForm.get('expensePortfolio').value,
         incomePortfolioId: this.portfolioExchangeForm.get('incomePortfolio').value
       };

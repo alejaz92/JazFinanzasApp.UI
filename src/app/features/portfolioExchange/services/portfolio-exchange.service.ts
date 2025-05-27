@@ -23,8 +23,8 @@ export class PortfolioExchangeService {
     return this.http.post<PortfolioExchangeAdd>(`${environment.apiBaseURL}/api/PortfolioTransaction`, portfolioExchange);
   }
 
-  // deleteCurrencyExchange(id: number): Observable<void> {
-  //   return this.http.delete<void>(`${environment.apiBaseURL}/api/FiatCurrencyExchange/${id}`);
-  // }
+  deleteCurrencyExchange(id: number): Observable<void> {
+    return this.http.delete<void>(`${environment.apiBaseURL}/api/PortfolioTransaction/${id}`);
+  }
 
 }

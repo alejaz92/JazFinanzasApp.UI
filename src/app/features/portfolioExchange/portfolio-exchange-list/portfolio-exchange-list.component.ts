@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { PortfolioExchangeService } from '../services/portfolio-exchange.service';
+import { CurrencyExchange } from '../../CurrencyExchange/models/CurrencyExchange.model';
 
 @Component({
   selector: 'app-portfolio-exchange-list',
@@ -7,6 +8,7 @@ import { PortfolioExchangeService } from '../services/portfolio-exchange.service
   styleUrls: ['./portfolio-exchange-list.component.css']
 })
 export class PortfolioExchangeListComponent implements OnInit {
+  isLoading: boolean = true;
   portfolioExchanges: any[] = [];
   page: number = 1;
   totalPortfolioExchanges: number = 0;
@@ -21,6 +23,8 @@ export class PortfolioExchangeListComponent implements OnInit {
       .subscribe(response => {
         this.portfolioExchanges = response.transactionsDTO;
         this.totalPortfolioExchanges = response.totalCount;
+
+        this.isLoading = false;
       });
   }
 
@@ -28,6 +32,17 @@ export class PortfolioExchangeListComponent implements OnInit {
     this.page = page;
     this.loadPortfolioExchanges();
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  onDeleteExchange(portfolioExchange: CurrencyExchange) {
+    if (!confirm(`¿Estás seguro de eliminar el movimiento?`)) {
+      return
+    }
+
+    this.portfolioExchangeService.deleteCurrencyExchange(portfolioExchange.id)
+      .subscribe(() => {
+        this.loadPortfolioExchanges();
+      })  
   }
   
 }

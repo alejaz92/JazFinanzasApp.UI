@@ -1,4 +1,7 @@
-<div class="container mt-4">
+<app-loading [isLoading]="isLoading"></app-loading>
+
+
+<div class="container mt-4" *ngIf="!isLoading">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1>Intercambio de Carteras</h1>
         <a class="btn btn-primary" [routerLink]="['/portfolioExchange/add']">Nuevo <i class="bi-plus-lg"></i></a>
@@ -7,18 +10,15 @@
     <!-- tabla de movimientos-->
     <div class="table-responsive">
         <table class="table table-striped">
-            <thead class="align-middle text-center">
+            <thead>
                 <tr>
-                    <th rowspan="2">Fecha</th>
-                    <th rowspan="2">Activo</th>
-                    <th rowspan="2">Cuenta</th>
-                    <th colspan="6" class="border border-dark  fw-bold">Cartera</th>
-                    <th rowspan="2" class="text-end">Monto</th>
-                    <th rowspan="2">Acciones</th>
-                </tr>
-                <tr>
-                    <th colspan="3" class="table-danger border border-dark">Egreso</th>
-                    <th colspan="3" class="table-success border border-dark">Ingreso</th>
+                    <th>Fecha</th>
+                    <th>Activo</th>
+                    <th>Cuenta</th>
+                    <th class="text-center table-danger">Cartera Egreso</th>
+                    <th class="text-center table-success">Cartera Ingreso</th>
+                    <th class="text-end">Monto</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -29,11 +29,11 @@
                     <td class="text-center table-danger">{{ transaction.expensePortfolio ?? '' }}</td>
                     <td class="text-center table-success">{{ transaction.incomePortfolio ?? '' }}</td>
                     <td class="text-end">
-                        {{ transaction.incomeAmount != null ? (transaction.incomeAmount | currencyFiatFormat) : ''   }}
+                        {{ transaction.incomeAmount != null ? (transaction.incomeAmount ) : ''   }}
                     </td>
                     <td>
                         <div class="justify-content-around">
-                            <!-- <button class="btn btn-sm btn-danger m-1" title="Eliminar" (click)="onDeleteExchange(transaction)"><i class="bi-trash-fill"></i></button> -->
+                            <button class="btn btn-sm btn-danger m-1" title="Eliminar" (click)="onDeleteExchange(transaction)"><i class="bi-trash-fill"></i></button>
                         </div>
                     </td>
                 </tr>
