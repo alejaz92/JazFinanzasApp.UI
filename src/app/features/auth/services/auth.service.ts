@@ -18,18 +18,18 @@ export class AuthService {
     return this.http.post<any>(`${this.apiUrl}/login`, { username, password })
     .pipe(
       tap(response => {
-        localStorage.setItem(this.tokenKey, response.token);
+        sessionStorage.setItem(this.tokenKey, response.token);
       })
     );
   }
 
   logout(): void {
-    localStorage.removeItem(this.tokenKey);
+    sessionStorage.removeItem(this.tokenKey);
     this.router.navigate(['/login']);
   }
 
   getToken(): string | null {
-    return localStorage.getItem(this.tokenKey);
+    return sessionStorage.getItem(this.tokenKey);
   }
 
   isLoggedIn(): boolean {
