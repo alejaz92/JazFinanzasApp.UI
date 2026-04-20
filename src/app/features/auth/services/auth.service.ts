@@ -47,6 +47,19 @@ export class AuthService {
     return payload.exp < now; // Verifica si el token ha expirado
   }
 
+  isAdmin(): boolean {
+    const token = this.getToken();
+    if (!token) return false;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const role = payload['role'];
+      if (Array.isArray(role)) return role.includes('Admin');
+      return role === 'Admin';
+    } catch {
+      return false;
+    }
+  }
+
   register(userData: any): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/register`, userData);
   }
