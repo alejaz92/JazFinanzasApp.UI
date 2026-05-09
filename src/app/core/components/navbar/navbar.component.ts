@@ -11,6 +11,7 @@ import { UserService } from 'src/app/features/user/services/user.service';
 })
 export class NavbarComponent implements OnInit {
   username: string = '';
+  isAdmin: boolean = false;
 
   constructor(
     public router: Router, 
@@ -25,6 +26,7 @@ export class NavbarComponent implements OnInit {
       if (!this.isLoginPage()) {
         
         this.loadUsername();
+        this.isAdmin = this.authService.isAdmin();
       }
 
     });        

@@ -18,18 +18,18 @@ export class AuthService {
     return this.http.post<any>(`${this.apiUrl}/login`, { username, password })
     .pipe(
       tap(response => {
-        localStorage.setItem(this.tokenKey, response.token);
+        sessionStorage.setItem(this.tokenKey, response.token);
       })
     );
   }
 
   logout(): void {
-    localStorage.removeItem(this.tokenKey);
+    sessionStorage.removeItem(this.tokenKey);
     this.router.navigate(['/login']);
   }
 
   getToken(): string | null {
-    return localStorage.getItem(this.tokenKey);
+    return sessionStorage.getItem(this.tokenKey);
   }
 
   isLoggedIn(): boolean {
@@ -45,6 +45,19 @@ export class AuthService {
     const payload = JSON.parse(atob(token.split('.')[1])); // Decodifica el payload del JWT
     const now = Math.floor(Date.now() / 1000);
     return payload.exp < now; // Verifica si el token ha expirado
+  }
+
+  isAdmin(): boolean {
+    const token = this.getToken();
+    if (!token) return false;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const role = payload['role'];
+      if (Array.isArray(role)) return role.includes('Admin');
+      return role === 'Admin';
+    } catch {
+      return false;
+    }
   }
 
   register(userData: any): Observable<any> {
