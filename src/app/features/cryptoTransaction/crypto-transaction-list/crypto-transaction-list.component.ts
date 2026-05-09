@@ -22,7 +22,6 @@ export class CryptoTransactionListComponent implements OnInit{
   loadCryptoTransactions() {
     this.cryptoTransactionService.getCryptoTransactions(this.page, 20)
       .subscribe(response => {
-        console.log(response);
         this.cryptoTransactions = response.transactions; 
 
         this.totalCryptoTransactions = response.totalCount;
