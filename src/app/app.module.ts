@@ -56,6 +56,7 @@ import { PortfolioAddComponent } from './features/portfolios/portfolio-add/portf
 import { PortfolioEditComponent } from './features/portfolios/portfolio-edit/portfolio-edit.component';
 import { PortfolioExchangeListComponent } from './features/portfolioExchange/portfolio-exchange-list/portfolio-exchange-list.component';
 import { PortfolioExchangeAddComponent } from './features/portfolioExchange/portfolio-exchange-add/portfolio-exchange-add.component';
+import { SplitEventComponent } from './features/stockTransactions/split-event/split-event.component';
 
 
 
@@ -107,7 +108,8 @@ import { PortfolioExchangeAddComponent } from './features/portfolioExchange/port
     PortfolioAddComponent,
     PortfolioEditComponent,
     PortfolioExchangeListComponent,
-    PortfolioExchangeAddComponent
+    PortfolioExchangeAddComponent,
+    SplitEventComponent
   ],
   imports: [
     BrowserModule,

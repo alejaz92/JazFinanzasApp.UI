@@ -41,6 +41,7 @@ import { PortfolioAddComponent } from './features/portfolios/portfolio-add/portf
 import { PortfolioEditComponent } from './features/portfolios/portfolio-edit/portfolio-edit.component';
 import { PortfolioExchangeListComponent } from './features/portfolioExchange/portfolio-exchange-list/portfolio-exchange-list.component';
 import { PortfolioExchangeAddComponent } from './features/portfolioExchange/portfolio-exchange-add/portfolio-exchange-add.component';
+import { SplitEventComponent } from './features/stockTransactions/split-event/split-event.component';
 
 
 const routes: Routes = [
@@ -197,6 +198,11 @@ const routes: Routes = [
   {
     path: 'stockTransactions/add',
     component: StockTransactionAddComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'stockTransactions/splits',
+    component: SplitEventComponent,
     canActivate: [AuthGuard]
   },
   {

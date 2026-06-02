@@ -1,0 +1,127 @@
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Splits de Acciones</h1>
+        <a class="btn btn-outline-secondary" [routerLink]="['/stockTransactions']">
+            <i class="bi-arrow-left"></i> Volver
+        </a>
+    </div>
+
+    <!-- Selectores de activo -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Tipo de Activo</label>
+                    <select class="form-select" (change)="onAssetTypeChange($event)">
+                        <option value="">-- Seleccionar tipo --</option>
+                        <option *ngFor="let at of assetTypes" [value]="at.id">{{ at.name }}</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Activo</label>
+                    <select class="form-select" (change)="onAssetChange($event)" [disabled]="assets.length === 0">
+                        <option value="">-- Seleccionar activo --</option>
+                        <option *ngFor="let a of assets" [value]="a.id">{{ a.name }} ({{ a.symbol }})</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="selectedAssetId">
+
+        <!-- Lista de splits -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Splits registrados</h5>
+            </div>
+            <div class="card-body">
+                <div *ngIf="isLoadingSplits" class="text-center py-3">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                </div>
+                <p *ngIf="!isLoadingSplits && splits.length === 0" class="text-muted mb-0">
+                    No hay splits registrados para este activo.
+                </p>
+                <div class="table-responsive" *ngIf="!isLoadingSplits && splits.length > 0">
+                    <table class="table table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Ratio</th>
+                                <th>Tipo</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let split of splits">
+                                <td>{{ split.date | date: 'dd/MM/yyyy' }}</td>
+                                <td>{{ split.splitRatio }}</td>
+                                <td>
+                                    <span *ngIf="split.splitRatio > 1" class="badge bg-success">
+                                        Split {{ split.splitRatio }}:1
+                                    </span>
+                                    <span *ngIf="split.splitRatio < 1" class="badge bg-warning text-dark">
+                                        Reverse split {{ (1 / split.splitRatio).toFixed(0) }}:1
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-danger" (click)="onDelete(split)" title="Eliminar">
+                                        <i class="bi-trash-fill"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario para nuevo split -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Registrar nuevo split</h5>
+            </div>
+            <div class="card-body">
+                <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+                <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+
+                <form [formGroup]="splitForm" (ngSubmit)="onSubmit()">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-5">
+                            <label class="form-label">Fecha del split</label>
+                            <input
+                                type="date"
+                                class="form-control"
+                                formControlName="date"
+                                [class.is-invalid]="splitForm.get('date')?.invalid && splitForm.get('date')?.touched"
+                            >
+                            <div class="invalid-feedback">La fecha es obligatoria.</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Ratio</label>
+                            <input
+                                type="number"
+                                class="form-control"
+                                formControlName="splitRatio"
+                                placeholder="ej: 2 para split 2:1 / 0.5 para reverse 1:2"
+                                step="0.0001"
+                                min="0.0001"
+                                [class.is-invalid]="splitForm.get('splitRatio')?.invalid && splitForm.get('splitRatio')?.touched"
+                            >
+                            <div class="invalid-feedback">Ingresá un ratio válido mayor a 0.</div>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-primary w-100">Registrar</button>
+                        </div>
+                    </div>
+                    <div *ngIf="splitInterpretation" class="mt-2 text-muted small">
+                        <i class="bi-info-circle"></i> {{ splitInterpretation }}
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
