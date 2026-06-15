@@ -16,8 +16,8 @@ export class TransactionService {
   getTransactions(page: number, itemsPerPage: number): Observable<{ transactions: Transaction[], totalCount: number}> {
     return this.http.get<{ transactions: Transaction[], totalCount: number}>(`${environment.apiBaseURL}/api/transaction?page=${page}&itemsPerPage=${itemsPerPage}`);
   }
-  createTransaction(transaction: TransactionAdd): Observable<TransactionAdd> {
-    return this.http.post<TransactionAdd>(`${environment.apiBaseURL}/api/transaction`, transaction);
+  createTransaction(transaction: TransactionAdd): Observable<{ id: number }> {
+    return this.http.post<{ id: number }>(`${environment.apiBaseURL}/api/transaction`, transaction);
   }
   deleteTransaction(id: number): Observable<void> {
     return this.http.delete<void>(`${environment.apiBaseURL}/api/transaction/${id}`);

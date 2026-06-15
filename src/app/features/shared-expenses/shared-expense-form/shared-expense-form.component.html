@@ -1,0 +1,111 @@
+<div class="shared-expense-form mt-2">
+
+  <!-- Modo de división -->
+  <div class="mb-3">
+    <label class="form-label fw-semibold">Modo de división</label>
+    <div class="btn-group d-flex" role="group">
+      <input type="radio" class="btn-check" name="splitMode" id="modeEqual" value="equal"
+             [(ngModel)]="splitMode" (change)="onModeChange()">
+      <label class="btn btn-outline-primary btn-sm" for="modeEqual">Partes iguales</label>
+
+      <input type="radio" class="btn-check" name="splitMode" id="modeAmount" value="amount"
+             [(ngModel)]="splitMode" (change)="onModeChange()">
+      <label class="btn btn-outline-primary btn-sm" for="modeAmount">Por monto</label>
+
+      <input type="radio" class="btn-check" name="splitMode" id="modePct" value="percentage"
+             [(ngModel)]="splitMode" (change)="onModeChange()">
+      <label class="btn btn-outline-primary btn-sm" for="modePct">Por porcentaje</label>
+    </div>
+  </div>
+
+  <!-- Agregar persona -->
+  <div class="row mb-3">
+    <div class="col">
+      <div class="input-group">
+        <select class="form-control" [(ngModel)]="selectedPersonId" name="selectedPerson">
+          <option value="" disabled>Agregar persona...</option>
+          <option *ngFor="let p of availablePeople" [value]="p.id">
+            {{ p.alias || p.name }}
+          </option>
+        </select>
+        <button type="button" class="btn btn-outline-secondary" (click)="addPerson()" [disabled]="!selectedPersonId">
+          + Agregar
+        </button>
+      </div>
+      <small *ngIf="people.length === 0" class="text-muted">
+        No hay personas registradas.
+        <a routerLink="/management/people">Agregar personas</a>
+      </small>
+      <small *ngIf="people.length > 0 && availablePeople.length === 0 && rows.length < people.length" class="text-muted">
+        Todas las personas ya fueron agregadas.
+      </small>
+    </div>
+  </div>
+
+  <!-- Tabla de splits -->
+  <div *ngIf="rows.length > 0" class="mb-3">
+    <table class="table table-sm table-bordered mb-2">
+      <thead class="table-light">
+        <tr>
+          <th>Persona</th>
+          <th *ngIf="splitMode === 'percentage'" style="width: 130px">Porcentaje</th>
+          <th style="width: 140px">Monto</th>
+          <th style="width: 40px"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of rows; let i = index">
+          <td class="align-middle">{{ row.personName }}</td>
+
+          <!-- Columna de porcentaje (solo modo porcentaje) -->
+          <td *ngIf="splitMode === 'percentage'">
+            <div class="input-group input-group-sm">
+              <input type="number" class="form-control" [name]="'pct_' + i"
+                     [(ngModel)]="row.percentage" (ngModelChange)="onPercentageChange(row)"
+                     min="0.01" step="0.01">
+              <span class="input-group-text">%</span>
+            </div>
+          </td>
+
+          <!-- Monto: editable en modo amount, de solo lectura en los demás -->
+          <td class="align-middle">
+            <div *ngIf="splitMode === 'amount'" class="input-group input-group-sm">
+              <span class="input-group-text">$</span>
+              <input type="number" class="form-control" [name]="'amt_' + i"
+                     [(ngModel)]="row.amount" (ngModelChange)="onAmountChange(row)"
+                     min="0.01" step="0.01">
+            </div>
+            <span *ngIf="splitMode !== 'amount'" class="text-muted ps-1">
+              $ {{ row.amount | number:'1.2-2' }}
+            </span>
+          </td>
+
+          <td class="text-center align-middle">
+            <button type="button" class="btn btn-sm btn-outline-danger" (click)="removePerson(i)">×</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Resumen de la parte del usuario -->
+    <div class="d-flex justify-content-between align-items-center px-2 py-1 rounded"
+         [ngClass]="userShare >= 0 ? 'bg-light' : 'bg-danger text-white'">
+      <span><strong>Tu parte:</strong></span>
+      <span class="fw-bold">$ {{ userShare | number:'1.2-2' }}</span>
+    </div>
+    <div *ngIf="userShare < 0" class="text-danger small mt-1">
+      La suma de los montos supera el total del gasto.
+    </div>
+    <div *ngIf="splitMode === 'percentage'" class="text-muted small mt-1">
+      Tu porcentaje: {{ 100 - sumOfPercentages | number:'1.2-2' }}%
+    </div>
+  </div>
+
+  <!-- Notas -->
+  <div class="mb-2">
+    <label class="form-label">Notas del gasto compartido (opcional)</label>
+    <textarea class="form-control form-control-sm" name="sharedExpenseNotes"
+              [(ngModel)]="notes" rows="2" (ngModelChange)="onNotesChange()"></textarea>
+  </div>
+
+</div>

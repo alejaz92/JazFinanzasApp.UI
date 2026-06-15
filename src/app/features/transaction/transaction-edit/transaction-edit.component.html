@@ -1,98 +1,154 @@
 <app-loading [isLoading]="isLoading"></app-loading>
 
 <div class="container mt-4" *ngIf="!isLoading">
-    <h1 class="mt-3">
-        Editar Movimiento
-    </h1>
+    <h1 class="mt-3">Editar Movimiento</h1>
 
-    <ng-container *ngIf="!isLoading; else loading">
-        <ng-container *ngIf="transaction; else notFound">
-            <form #form="ngForm" (ngSubmit)="onFormSubmit()">
-                <div class="row mb-3">
-                    <div class="col">
-                        <label for="movementType"> Tipo de Movimiento</label>
-                        <input type="text" class="form-control" name="movementType" id="movementType" [(ngModel)]="transaction.movementType" disabled>
-    
-                        
-    
-                        
-                    </div>
+    <ng-container *ngIf="transaction; else notFound">
+        <form #form="ngForm" (ngSubmit)="onFormSubmit()">
+            <div class="row mb-3">
+                <div class="col">
+                    <label for="movementType">Tipo de Movimiento</label>
+                    <input type="text" class="form-control" name="movementType" id="movementType"
+                           [(ngModel)]="transaction.movementType" disabled>
                 </div>
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="date">Fecha</label>
-                        <input type="date" class="form-control" name="date" id="date" 
-                        [ngModel]="transaction.date | date:'yyyy-MM-dd'"
-                        (ngModelChange)="updateDate($event)">
-                    </div>
-                    <div class="col-md-6">
-                        <label for="asset">Moneda</label>
-                        <!-- <input type="text" class="form-control" name="asset" id="asset" [(ngModel)]="transaction.assetName" disabled> -->
-                        <select class="form-control" name="asset" id="asset" [(ngModel)]="transaction.assetId" required>
-                            <option *ngFor="let asset of assets" [value]="asset.id">{{asset.name}}</option>
-                        </select>
-                    </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="date">Fecha</label>
+                    <input type="date" class="form-control" name="date" id="date"
+                           [ngModel]="transaction.date | date:'yyyy-MM-dd'"
+                           (ngModelChange)="updateDate($event)">
                 </div>
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="account">Cuenta</label>
-                        <!-- <input type="text" class="form-control" name="account" id="account" [(ngModel)]="transaction.accountName" disabled> -->
-                        <select class="form-control" name="account" id="account" [(ngModel)]="transaction.accountId" required>
-                            <option *ngFor="let account of accounts" [value]="account.id">{{account.name}}</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <label for="transactionClass">Clase de Movimiento</label>
-                        <!-- <input type="text" class="form-control" name="transactionClass" id="transactionClass" [(ngModel)]="transaction.transactionClassName" disabled> -->
-                        <select class="form-control" name="transactionClass" id="transactionClass" [(ngModel)]="transaction.transactionClassId" required>
-                            <option *ngFor="let transactionClass of transactionClasses" [value]="transactionClass.id">{{transactionClass.description}}</option>
-                        </select>
-                    </div>
+                <div class="col-md-6">
+                    <label for="asset">Moneda</label>
+                    <select class="form-control" name="asset" id="asset" [(ngModel)]="transaction.assetId" required>
+                        <option *ngFor="let asset of assets" [value]="asset.id">{{asset.name}}</option>
+                    </select>
                 </div>
-                <div class="row mb-3">
-                    <div class="col">
-                        <label for="detail">Detalle</label>
-                        <!-- <input type="text" class="form-control" name="description" id="description" [(ngModel)]="transaction.description"> -->
-                        <textarea class="form-control" name="detail" id="detail" [(ngModel)]="transaction.detail"></textarea>
-                    </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="account">Cuenta</label>
+                    <select class="form-control" name="account" id="account" [(ngModel)]="transaction.accountId" required>
+                        <option *ngFor="let account of accounts" [value]="account.id">{{account.name}}</option>
+                    </select>
                 </div>
-                <div class="row mb-3">
-                    <div class="col">
-                        <label for="amount">Monto</label>
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text">$</span>
-                            </div>
-                            <input type="text" class="form-control" name="amount" id="amount" [(ngModel)]="transaction.amount" appCurrencyInput>
+                <div class="col-md-6">
+                    <label for="transactionClass">Clase de Movimiento</label>
+                    <select class="form-control" name="transactionClass" id="transactionClass"
+                            [(ngModel)]="transaction.transactionClassId" required>
+                        <option *ngFor="let transactionClass of transactionClasses" [value]="transactionClass.id">
+                            {{transactionClass.description}}
+                        </option>
+                    </select>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col">
+                    <label for="detail">Detalle</label>
+                    <textarea class="form-control" name="detail" id="detail" [(ngModel)]="transaction.detail"></textarea>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col">
+                    <label for="amount">Monto</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">$</span>
                         </div>
-                        <!-- <div *ngIf="form.controls['amount']?.errors?.['incorrect'] && form.controls['amount'].touched" class="text-danger mt-2">
-                            El monto debe ser un número válido mayor que 0.
-                        </div> -->
-    
-                    </div>
-    
-                    <div class="row mb-3">
-                
-                        <div class="mt-1">
-                            <button type="submit" class="btn btn-primary m-1">Guardar</button>
-                            <a class="btn btn-secondary" [routerLink]="['/transactions']">Volver</a>
-                        </div>                             
+                        <input type="text" class="form-control" name="amount" id="amount"
+                               [(ngModel)]="transaction.amount" appCurrencyInput>
                     </div>
                 </div>
-            </form>
+            </div>
+            <div class="row mb-3">
+                <div class="mt-1">
+                    <button type="submit" class="btn btn-primary m-1">Guardar</button>
+                    <a class="btn btn-secondary" [routerLink]="['/transactions']">Volver</a>
+                </div>
+            </div>
+        </form>
+
+        <!-- Sección Gasto Compartido (solo para egresos) -->
+        <ng-container *ngIf="transaction.movementType === 'Egreso' && sharedExpenseLoaded">
+            <hr>
+            <h5>Gasto Compartido</h5>
+
+            <!-- Tiene gasto compartido: mostrar splits -->
+            <ng-container *ngIf="sharedExpense; else noSharedExpense">
+                <p *ngIf="sharedExpense.notes" class="text-muted small">{{ sharedExpense.notes }}</p>
+                <table class="table table-sm table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Persona</th>
+                            <th>Monto original</th>
+                            <th>Reintegrado</th>
+                            <th>Pendiente</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let split of sharedExpense.splits">
+                            <td>{{ split.personName }}</td>
+                            <td>$ {{ split.amount | number:'1.2-2' }}</td>
+                            <td>$ {{ split.amountReimbursed | number:'1.2-2' }}</td>
+                            <td>$ {{ (split.amount - split.amountReimbursed) | number:'1.2-2' }}</td>
+                            <td>
+                                <span [class]="splitStatusClass[split.status]">
+                                    {{ splitStatusLabel[split.status] }}
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button type="button" class="btn btn-sm btn-outline-danger mt-1"
+                        (click)="deleteSharedExpense()">
+                    Eliminar gasto compartido
+                </button>
+            </ng-container>
+
+            <!-- No tiene gasto compartido: botón para agregar -->
+            <ng-template #noSharedExpense>
+                <ng-container *ngIf="!showAddSharedExpenseForm">
+                    <p class="text-muted">Este egreso no tiene un gasto compartido asociado.</p>
+                    <button type="button" class="btn btn-outline-primary btn-sm"
+                            (click)="showAddSharedExpenseForm = true">
+                        + Agregar gasto compartido
+                    </button>
+                </ng-container>
+
+                <ng-container *ngIf="showAddSharedExpenseForm">
+                    <div class="card border-secondary mb-3">
+                        <div class="card-body">
+                            <app-shared-expense-form
+                                [totalAmount]="transactionAmountForForm"
+                                (formChange)="onPendingSharedExpenseChange($event)">
+                            </app-shared-expense-form>
+                            <div *ngIf="sharedExpenseError" class="alert alert-danger mt-2">
+                                {{ sharedExpenseError }}
+                            </div>
+                            <div class="mt-3">
+                                <button type="button" class="btn btn-primary btn-sm me-2"
+                                        (click)="saveSharedExpense()"
+                                        [disabled]="!pendingSharedExpenseData || sharedExpenseSaving">
+                                    {{ sharedExpenseSaving ? 'Guardando...' : 'Guardar gasto compartido' }}
+                                </button>
+                                <button type="button" class="btn btn-secondary btn-sm"
+                                        (click)="showAddSharedExpenseForm = false">
+                                    Cancelar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </ng-container>
+            </ng-template>
         </ng-container>
-    
-    
-        <ng-template #notFound>
-            <div class="alert alert-warning" role="alert">
-                El movimiento no ha sido encontrada.
-              </div>
-        </ng-template>
+
     </ng-container>
-    
-    <ng-template #loading>
-        <div class="alert alert-info" role="alert">
-            Cargando datos...
+
+    <ng-template #notFound>
+        <div class="alert alert-warning" role="alert">
+            El movimiento no ha sido encontrado.
         </div>
     </ng-template>
 </div>

@@ -60,6 +60,7 @@ import { SplitEventComponent } from './features/stockTransactions/split-event/sp
 import { PeopleListComponent } from './features/people/people-list/people-list.component';
 import { PeopleAddComponent } from './features/people/people-add/people-add.component';
 import { PeopleEditComponent } from './features/people/people-edit/people-edit.component';
+import { SharedExpenseFormComponent } from './features/shared-expenses/shared-expense-form/shared-expense-form.component';
 
 
 
@@ -115,7 +116,8 @@ import { PeopleEditComponent } from './features/people/people-edit/people-edit.c
     SplitEventComponent,
     PeopleListComponent,
     PeopleAddComponent,
-    PeopleEditComponent
+    PeopleEditComponent,
+    SharedExpenseFormComponent
   ],
   imports: [
     BrowserModule,

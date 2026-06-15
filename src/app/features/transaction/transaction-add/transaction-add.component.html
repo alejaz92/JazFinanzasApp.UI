@@ -15,12 +15,11 @@
                     <option value="" disabled selected>Seleccione</option>
                     <option value="I">Ingreso</option>
                     <option value="E">Egreso</option>
-                    <!-- <option value="EX">Intercambio</option> -->
-                </select> 
+                </select>
                 <div *ngIf="transactionForm.controls['movementType'].errors?.['incorrect'] " class="text-danger mt-2">
                     Debe seleccionarse un tipo de movimiento.
                 </div>
-            </div>            
+            </div>
         </div>
         <div class="row mb-3">
             <div class="col-md-6">
@@ -36,7 +35,6 @@
                     <option value="" disabled selected>Seleccione</option>
                     <option *ngFor="let asset of assets" [value]="asset.id">{{ asset.name }}</option>
                 </select>
-
                 <div *ngIf="transactionForm.controls['asset'].errors?.['incorrect'] " class="text-danger mt-2">
                     Debe seleccionarse una Moneda.
                 </div>
@@ -55,7 +53,7 @@
                         Debe seleccionarse una Cuenta de Ingresos.
                     </div>
                 </div>
-            
+
                 <div class="col-md-6">
                     <label class="form-label"  for="incomeClass">Clase de Movimiento de Ingreso</label>
                     <select  class="form-control" id="incomeClass" formControlName="incomeClass">
@@ -68,6 +66,7 @@
                 </div>
             </div>
         </ng-container>
+
         <ng-container *ngIf="selectedMovementType === 'E'">
             <div class="row mb-3">
                 <div class="col-md-6">
@@ -92,36 +91,12 @@
                 </div>
             </div>
         </ng-container>
-        <!-- <ng-container *ngIf="selectedMovementType === 'EX'">
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label  class="form-label" for="incomeExchangeAccount">Cuenta Ingreso</label>
-                    <select  class="form-control" id="incomeExchangeAccount" formControlName="incomeExchangeAccount">
-                        <option value="" disabled selected>Seleccione</option>
-                        <option *ngFor="let account of accounts" [value]="account.id">{{ account.name }}</option>
-                    </select>
-                    <div *ngIf="transactionForm.controls['incomeExchangeAccount'].errors?.['incorrect'] " class="text-danger mt-2">
-                        Debe seleccionarse una Cuenta de Ingreso.
-                    </div>
-                </div> 
-                
-                <div class="col-md-6">
-                    <label  class="form-label" for="expenseExchangeAccount">Cuenta Egreso</label>
-                    <select  class="form-control" id="expenseExchangeAccount" formControlName="expenseExchangeAccount">
-                        <option value="" disabled selected>Seleccione</option>
-                        <option *ngFor="let account of accounts" [value]="account.id">{{ account.name }}</option>
-                    </select>
-                    <div *ngIf="transactionForm.controls['expenseExchangeAccount'].errors?.['incorrect'] " class="text-danger mt-2">
-                        Debe seleccionarse una Cuenta de Egreso.
-                    </div>
-                </div>
-            </div>            
-        </ng-container> -->
+
         <div class="row mb-3">
             <div class="col">
                 <label  class="form-label" for="Detail">Detalle</label>
                 <textarea class="form-control" id="detail" formControlName="detail"></textarea>
-            </div>            
+            </div>
         </div>
         <div class="row mb-3">
             <div class="col">
@@ -130,23 +105,50 @@
                     <div class="input-group-prepend">
                         <span class="input-group-text">$</span>
                     </div>
-                    <input type="text" class="form-control" id="amount" 
+                    <input type="text" class="form-control" id="amount"
                     formControlName="amount"
                     appCurrencyInput>
-                    
                 </div>
                 <div *ngIf="transactionForm.controls['amount'].errors?.['incorrect'] && transactionForm.controls['amount'].touched" class="text-danger mt-2">
                     El monto debe ser un número válido mayor que 0.
                 </div>
-                
-            </div>            
-        </div>    
+            </div>
+        </div>
+
+        <!-- Sección Gasto Compartido (solo para egresos) -->
+        <ng-container *ngIf="selectedMovementType === 'E'">
+            <div class="row mb-3">
+                <div class="col">
+                    <div class="card border-secondary">
+                        <div class="card-header d-flex align-items-center">
+                            <div class="form-check form-switch mb-0">
+                                <input class="form-check-input" type="checkbox" id="sharedExpenseToggle"
+                                       [(ngModel)]="sharedExpenseActive" [ngModelOptions]="{standalone: true}"
+                                       (change)="onSharedExpenseToggle()">
+                                <label class="form-check-label fw-semibold" for="sharedExpenseToggle">
+                                    Gasto compartido
+                                </label>
+                            </div>
+                        </div>
+                        <div class="card-body" *ngIf="sharedExpenseActive">
+                            <app-shared-expense-form
+                                [totalAmount]="transactionAmountForForm"
+                                (formChange)="onSharedExpenseChange($event)">
+                            </app-shared-expense-form>
+                            <div *ngIf="sharedExpenseError" class="alert alert-danger mt-2">
+                                {{ sharedExpenseError }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ng-container>
+
         <div class="row mb-3">
-            
             <div class="mt-1">
                 <button type="submit" class="btn btn-primary m-1">Guardar</button>
                 <a class="btn btn-secondary" [routerLink]="['/transactions']">Volver</a>
-            </div>                             
+            </div>
         </div>
     </form>
 </div>
