@@ -3,104 +3,189 @@
 <div class="container mt-4" *ngIf="!isLoading">
     <h1 class="mt-3">Reintegro</h1>
 
-    <ng-container *ngIf="!isLoading; else loading">
-        <ng-container *ngIf="transaction; else notFound">
-            <div class="row">
-                <!-- Mensaje de éxito -->
-                <div *ngIf="successMessage" class="alert alert-success" role="alert">
-                    {{ successMessage }}
-                </div>
-                <div class="col-md-6">
-                    <h4 class="mb-3">Movimiento</h4>
-                    <table class="table table-striped">
+    <ng-container *ngIf="transaction; else notFound">
+        <div class="row">
+            <!-- Mensaje de éxito -->
+            <div *ngIf="successMessage" class="alert alert-success" role="alert">
+                {{ successMessage }}
+            </div>
+
+            <!-- Datos del movimiento original -->
+            <div class="col-md-6">
+                <h4 class="mb-3">Movimiento</h4>
+                <table class="table table-striped">
+                    <tbody>
+                        <tr>
+                            <th>Fecha</th>
+                            <td>{{ transaction.date | date: 'dd/MM/yyyy' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Clase de Movimiento</th>
+                            <td>{{ transaction.transactionClassName }}</td>
+                        </tr>
+                        <tr>
+                            <th>Detalle</th>
+                            <td>{{ transaction.detail }}</td>
+                        </tr>
+                        <tr>
+                            <th>Cuenta</th>
+                            <td>{{ transaction.accountName }}</td>
+                        </tr>
+                        <tr>
+                            <th>Moneda</th>
+                            <td>{{ transaction.assetName }}</td>
+                        </tr>
+                        <tr>
+                            <th>Monto</th>
+                            <td>{{ -transaction.amount | currencyFiatFormat }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Deudas pendientes del gasto compartido (solo lectura) -->
+                <ng-container *ngIf="pendingSplits.length > 0">
+                    <h6 class="mt-3">Deudas pendientes</h6>
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Persona</th>
+                                <th>Pendiente</th>
+                            </tr>
+                        </thead>
                         <tbody>
-                            <tr>
-                                <th>Fecha</th>
-                                <td>{{ transaction.date | date: 'dd/MM/yyyy' }}</td>
+                            <tr *ngFor="let s of pendingSplits">
+                                <td>{{ s.personName }}</td>
+                                <td>$ {{ (s.amount - s.amountReimbursed) | number:'1.2-2' }}</td>
                             </tr>
-                            <tr>
-                                <th>Clase de Movimiento</th>
-                                <td>{{ transaction.transactionClassName }}</td>
-                            </tr>
-                            <tr>
-                                <th>Detalle</th>
-                                <td>{{ transaction.detail }}</td>
-                            </tr>
-                            <tr>
-                                <th>Cuenta</th>
-                                <td>{{ transaction.accountName }}</td>
-                            </tr>
-                            <tr>
-                                <th>Moneda</th>
-                                <td>{{ transaction.assetName }}</td>
-                            </tr>
-                            <tr>
-                                <th>Monto</th>
-                                <td>
-                                    {{ -transaction.amount | currencyFiatFormat }}
-                                </td>
-                            </tr>
-                        </tbody>                    
+                        </tbody>
                     </table>
-                </div>
-    
-                <div class="col-md-6">
-                    <h4 class="mb-3">Reintegro</h4>
-                    <form [formGroup]="refundForm" (ngSubmit)="onFormSubmit()">
-                        <div class="mb-3">
-                            <label class="form-label" for="date">Fecha</label>
-                            <input type="date" class="form-control" id="date" formControlName="date">
+                </ng-container>
+            </div>
+
+            <!-- Formulario de reintegro -->
+            <div class="col-md-6">
+                <h4 class="mb-3">Reintegro</h4>
+                <form [formGroup]="refundForm" (ngSubmit)="onFormSubmit()">
+                    <div class="mb-3">
+                        <label class="form-label" for="date">Fecha</label>
+                        <input type="date" class="form-control" id="date" formControlName="date">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="account">Cuenta</label>
+                        <select class="form-select" id="account" formControlName="accountId">
+                            <option value="" disabled selected>Selecciona una cuenta</option>
+                            <option *ngFor="let account of accounts" [value]="account.id">{{ account.name }}</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="amount">Monto</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">$</span>
+                            </div>
+                            <input type="text"
+                                   class="form-control"
+                                   id="amount"
+                                   formControlName="amount"
+                                   (focus)="selectAll($event)"
+                                   appCurrencyInput>
                         </div>
-    
-                        <div class="mb-3">
-                            <label class="form-label" for="account">Cuenta</label>
-                            <select class="form-select" id="account" formControlName="accountId">
-                                <option value="" disabled selected>Selecciona una cuenta</option>
-                                <option *ngFor="let account of accounts" [value]="account.id">{{ account.name }}</option>
-                            </select>
+                        <div *ngIf="refundForm.controls['amount']?.errors?.['incorrect'] && refundForm.controls['amount'].touched"
+                             class="text-danger mt-2">
+                            El monto debe ser un número válido mayor que 0.
                         </div>
-    
-                        <div class="mb-3">
-                            <label class="form-label" for="amount">Monto</label>
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text">$</span>
+                        <div *ngIf="refundForm.controls['amount'].value > -transaction.amount"
+                             class="text-danger mt-2">
+                            El monto no puede superar al valor original.
+                        </div>
+                    </div>
+
+                    <!-- Sección de distribución por persona (solo si hay splits pendientes) -->
+                    <ng-container *ngIf="pendingSplits.length > 0">
+                        <div class="card border-secondary mb-3">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span class="fw-semibold">¿A cuenta de quién aplicar este reintegro?</span>
+                                <button type="button" class="btn btn-outline-secondary btn-sm"
+                                        (click)="distributeEqually()"
+                                        [disabled]="refundAmountValue <= 0">
+                                    Distribuir por igual
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-sm mb-2">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Persona</th>
+                                            <th>Máx. disponible</th>
+                                            <th>Asignar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let row of allocations">
+                                            <td class="align-middle">{{ row.personName }}</td>
+                                            <td class="align-middle text-muted">
+                                                $ {{ row.pendingAmount | number:'1.2-2' }}
+                                            </td>
+                                            <td>
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text">$</span>
+                                                    <input type="number"
+                                                           class="form-control"
+                                                           [(ngModel)]="row.assigned"
+                                                           [ngModelOptions]="{standalone: true}"
+                                                           min="0"
+                                                           [max]="row.pendingAmount"
+                                                           step="0.01">
+                                                </div>
+                                                <small *ngIf="row.assigned > row.pendingAmount" class="text-danger">
+                                                    Supera la deuda pendiente.
+                                                </small>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                <!-- Contador asignado / total -->
+                                <div class="d-flex justify-content-between px-1 py-1 rounded"
+                                     [ngClass]="hasAnyAllocation && !allocationsValid ? 'bg-danger text-white' : 'bg-light'">
+                                    <span class="small">Asignado:</span>
+                                    <span class="small fw-bold">
+                                        $ {{ allocationSum | number:'1.2-2' }} / $ {{ refundAmountValue | number:'1.2-2' }}
+                                    </span>
                                 </div>
-                                <input type="text" 
-                                       class="form-control" 
-                                       id="amount" 
-                                       formControlName="amount" 
-                                       (focus)="selectAll($event)"
-                                       appCurrencyInput>
-                            </div>
-                            <div *ngIf="refundForm.controls['amount']?.errors?.['incorrect'] && refundForm.controls['amount'].touched" class="text-danger mt-2">
-                                El monto debe ser un número válido mayor que 0.
-                            </div>
-                            <div *ngIf="refundForm.controls['amount'].value > -transaction.amount" class="text-danger mt-2">
-                                El monto no puede superar al valor original.
+                                <div *ngIf="hasAnyAllocation && allocationRemaining !== 0" class="text-danger small mt-1">
+                                    <span *ngIf="allocationRemaining > 0">
+                                        Faltan asignar $ {{ allocationRemaining | number:'1.2-2' }}.
+                                    </span>
+                                    <span *ngIf="allocationRemaining < 0">
+                                        La suma excede el monto del reintegro en $ {{ -allocationRemaining | number:'1.2-2' }}.
+                                    </span>
+                                </div>
+                                <p class="text-muted small mt-2 mb-0">
+                                    Si no asignás ningún monto, el reintegro contable se registra sin actualizar las deudas.
+                                </p>
                             </div>
                         </div>
-                        
-                        <div class="d-flex justify-content-between mt-3">
-                            <button type="submit" class="btn btn-primary w-100 me-2" [disabled]="refundForm.invalid">Guardar</button>
-                            <a class="btn btn-secondary w-100" [routerLink]="['/transactions']">Volver</a>
-                        </div>
-                    </form>
-                </div>
+                    </ng-container>
+
+                    <div class="d-flex justify-content-between mt-3">
+                        <button type="submit"
+                                class="btn btn-primary w-100 me-2"
+                                [disabled]="refundForm.invalid || (hasAnyAllocation && !allocationsValid)">
+                            Guardar
+                        </button>
+                        <a class="btn btn-secondary w-100" [routerLink]="['/transactions']">Volver</a>
+                    </div>
+                </form>
             </div>
-        </ng-container>
-    
-        <ng-template #notFound>
-            <div class="alert alert-warning" role="alert">
-                El movimiento no ha sido encontrado.
-            </div>
-        </ng-template>
+        </div>
     </ng-container>
 
-    <ng-template #loading>
-        <div class="alert alert-info" role="alert">
-            Cargando datos...
+    <ng-template #notFound>
+        <div class="alert alert-warning" role="alert">
+            El movimiento no ha sido encontrado.
         </div>
     </ng-template>
-    
 </div>
