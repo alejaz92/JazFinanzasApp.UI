@@ -1,0 +1,42 @@
+<app-loading [isLoading]="isLoading"></app-loading>
+
+<div class="container mt-4" *ngIf="!isLoading">
+    <h1 class="mt-3">Personas</h1>
+    <div class="d-flex justify-content-end mt-3">
+        <a class="btn btn-primary" [routerLink]="['/management/people/add']">
+            Agregar Persona
+        </a>
+    </div>
+
+    <ng-container *ngIf="people && people.length > 0; else empty">
+        <table class="table table-bordered mt-3">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Alias</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let person of people">
+                    <td>{{ person.name }}</td>
+                    <td>{{ person.alias || '-' }}</td>
+                    <td>
+                        <a title="Editar" class="btn btn-primary ms-2" [routerLink]="['/management/people', person.id]">
+                            <i class="bi-pencil-fill"></i>
+                        </a>
+                        <button title="Eliminar" class="btn btn-danger ms-2" (click)="onDelete(person.id)">
+                            <i class="bi-trash-fill"></i>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </ng-container>
+
+    <ng-template #empty>
+        <div class="alert alert-info mt-3" role="alert">
+            No hay personas registradas.
+        </div>
+    </ng-template>
+</div>

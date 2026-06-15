@@ -1,0 +1,19 @@
+<div class="container mt-4">
+    <h1 class="mt-3">Agregar Persona</h1>
+    <form #form="ngForm" (ngSubmit)="onFormSubmit()">
+        <div class="mt-3">
+            <label for="personName" class="form-label">Nombre <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="personName" name="personName"
+                [(ngModel)]="model.name" required>
+        </div>
+        <div class="mt-3">
+            <label for="personAlias" class="form-label">Alias (opcional)</label>
+            <input type="text" class="form-control" id="personAlias" name="personAlias"
+                [(ngModel)]="model.alias">
+        </div>
+        <div class="mt-3">
+            <button type="submit" class="btn btn-primary m-1" [disabled]="!form.valid">Guardar</button>
+            <a class="btn btn-secondary" [routerLink]="['/management/people']">Cancelar</a>
+        </div>
+    </form>
+</div>

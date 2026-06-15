@@ -1,0 +1,29 @@
+<app-loading [isLoading]="isLoading"></app-loading>
+
+<div class="container mt-4" *ngIf="!isLoading">
+    <h1 class="mt-3">Editar Persona</h1>
+    <ng-container *ngIf="person; else notFound">
+        <form #form="ngForm" (ngSubmit)="onFormSubmit()">
+            <div class="mt-3">
+                <label class="form-label" for="personName">Nombre <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="personName" name="personName"
+                    [(ngModel)]="person.name" required>
+            </div>
+            <div class="mt-3">
+                <label class="form-label" for="personAlias">Alias (opcional)</label>
+                <input type="text" class="form-control" id="personAlias" name="personAlias"
+                    [(ngModel)]="person.alias">
+            </div>
+            <div class="mt-3">
+                <button type="submit" class="btn btn-primary m-1" [disabled]="!form.valid">Guardar</button>
+                <a class="btn btn-secondary" [routerLink]="['/management/people']">Cancelar</a>
+            </div>
+        </form>
+    </ng-container>
+
+    <ng-template #notFound>
+        <div class="alert alert-warning" role="alert">
+            La persona no ha sido encontrada.
+        </div>
+    </ng-template>
+</div>

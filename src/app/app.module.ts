@@ -57,6 +57,9 @@ import { PortfolioEditComponent } from './features/portfolios/portfolio-edit/por
 import { PortfolioExchangeListComponent } from './features/portfolioExchange/portfolio-exchange-list/portfolio-exchange-list.component';
 import { PortfolioExchangeAddComponent } from './features/portfolioExchange/portfolio-exchange-add/portfolio-exchange-add.component';
 import { SplitEventComponent } from './features/stockTransactions/split-event/split-event.component';
+import { PeopleListComponent } from './features/people/people-list/people-list.component';
+import { PeopleAddComponent } from './features/people/people-add/people-add.component';
+import { PeopleEditComponent } from './features/people/people-edit/people-edit.component';
 
 
 
@@ -109,7 +112,10 @@ import { SplitEventComponent } from './features/stockTransactions/split-event/sp
     PortfolioEditComponent,
     PortfolioExchangeListComponent,
     PortfolioExchangeAddComponent,
-    SplitEventComponent
+    SplitEventComponent,
+    PeopleListComponent,
+    PeopleAddComponent,
+    PeopleEditComponent
   ],
   imports: [
     BrowserModule,
