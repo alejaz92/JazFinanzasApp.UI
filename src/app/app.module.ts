@@ -61,6 +61,7 @@ import { PeopleListComponent } from './features/people/people-list/people-list.c
 import { PeopleAddComponent } from './features/people/people-add/people-add.component';
 import { PeopleEditComponent } from './features/people/people-edit/people-edit.component';
 import { SharedExpenseFormComponent } from './features/shared-expenses/shared-expense-form/shared-expense-form.component';
+import { SharedExpenseDashboardComponent } from './features/shared-expenses/shared-expense-dashboard/shared-expense-dashboard.component';
 
 
 
@@ -117,7 +118,8 @@ import { SharedExpenseFormComponent } from './features/shared-expenses/shared-ex
     PeopleListComponent,
     PeopleAddComponent,
     PeopleEditComponent,
-    SharedExpenseFormComponent
+    SharedExpenseFormComponent,
+    SharedExpenseDashboardComponent
   ],
   imports: [
     BrowserModule,

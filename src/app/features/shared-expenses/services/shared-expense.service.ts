@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment.development';
-import { SharedExpenseAdd, SharedExpenseDetail } from '../models/shared-expense.model';
+import { PersonDebtSummary, SharedExpenseAdd, SharedExpenseDetail } from '../models/shared-expense.model';
 
 @Injectable({
   providedIn: 'root'
@@ -21,5 +21,9 @@ export class SharedExpenseService {
 
   deleteSharedExpense(id: number): Observable<void> {
     return this.http.delete<void>(`${environment.apiBaseURL}/api/shared-expense/${id}`);
+  }
+
+  getSummary(): Observable<PersonDebtSummary[]> {
+    return this.http.get<PersonDebtSummary[]>(`${environment.apiBaseURL}/api/shared-expense/summary`);
   }
 }

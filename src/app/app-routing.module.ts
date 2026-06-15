@@ -45,6 +45,7 @@ import { SplitEventComponent } from './features/stockTransactions/split-event/sp
 import { PeopleListComponent } from './features/people/people-list/people-list.component';
 import { PeopleAddComponent } from './features/people/people-add/people-add.component';
 import { PeopleEditComponent } from './features/people/people-edit/people-edit.component';
+import { SharedExpenseDashboardComponent } from './features/shared-expenses/shared-expense-dashboard/shared-expense-dashboard.component';
 
 
 const routes: Routes = [
@@ -266,6 +267,11 @@ const routes: Routes = [
   {
     path: 'management/people/:id',
     component: PeopleEditComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'shared-expenses',
+    component: SharedExpenseDashboardComponent,
     canActivate: [AuthGuard]
   },
   {

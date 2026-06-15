@@ -11,6 +11,7 @@ import { Transaction } from '../../transaction/models/transaction.model';
 import { CardTransactionPending } from '../../cardTransactions/models/cardTransactions-pending.model';
 import { AssetService } from '../../asset/services/asset.service';
 import { Asset } from '../../asset/models/asset.model';
+import { SharedExpenseService } from '../../shared-expenses/services/shared-expense.service';
 
 Chart.register(...registerables);
 
@@ -27,13 +28,15 @@ export class HomeComponent implements OnInit, AfterViewInit {
   stocksChart: any;
   cryptosChart: any;
   mainReference: Asset | null = null;
+  totalDebtPending: number = 0;
 
   constructor(
     private transactionService: TransactionService,
     private userService: UserService,
     private cardTransactioneService: CardTransactionsService,
     private reportService: ReportService,
-    private assetService: AssetService
+    private assetService: AssetService,
+    private sharedExpenseService: SharedExpenseService
   ) {}
 
   ngOnInit(): void {
@@ -49,15 +52,17 @@ export class HomeComponent implements OnInit, AfterViewInit {
       userData: this.userService.getUserData(),
       transactionsData: this.transactionService.getTransactions(1, 6),
       cardTransactionsData: this.cardTransactioneService.getPendingCardTransactions(),
-      homeStatsData: this.reportService.getHomeStats()
+      homeStatsData: this.reportService.getHomeStats(),
+      debtSummaryData: this.sharedExpenseService.getSummary()
     }).subscribe({
-      next: ({ userData, transactionsData, cardTransactionsData, homeStatsData }) => {
+      next: ({ userData, transactionsData, cardTransactionsData, homeStatsData, debtSummaryData }) => {
         this.userName = userData.name;
         this.transactions = transactionsData.transactions;
         this.cardTransactions = cardTransactionsData.reverse();
+        this.totalDebtPending = debtSummaryData.reduce((sum, s) => sum + s.totalPending, 0);
         setTimeout(() => {
-          this.loadMainReferences(homeStatsData);  
-          
+          this.loadMainReferences(homeStatsData);
+
         });
       },
       complete: () => {

@@ -31,3 +31,9 @@ export interface SharedExpenseAdd {
   notes?: string;
   splits: SplitInput[];
 }
+
+export interface PersonDebtSummary {
+  personId: number;
+  personName: string;
+  totalPending: number;
+}
