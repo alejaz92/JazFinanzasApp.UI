@@ -22,11 +22,11 @@
                     <tr *ngFor="let transactionClass of incomeClasses">
                         <td>{{transactionClass.description}}</td>
                         <td>
-                            <button *ngIf="canEditOrDelete(transactionClass.description)" class="btn btn-primary m-1"
+                            <button *ngIf="canEditOrDelete(transactionClass)" class="btn btn-primary m-1"
                             [routerLink]="['/management/transactionClass',transactionClass.id]">
                                 <i class="bi-pencil-fill"></i>
                             </button>
-                            <button *ngIf="canEditOrDelete(transactionClass.description)"  class="btn btn-danger"
+                            <button *ngIf="canEditOrDelete(transactionClass)"  class="btn btn-danger"
                                 (click)="onDelete(transactionClass.id)">
                                 <i class="bi-trash-fill"></i>
                             </button>
@@ -49,11 +49,11 @@
                     <tr *ngFor="let transactionClass of expenseClasses">
                         <td>{{transactionClass.description}}</td>
                         <td>
-                            <button *ngIf="canEditOrDelete(transactionClass.description)" class="btn btn-primary m-1"
+                            <button *ngIf="canEditOrDelete(transactionClass)" class="btn btn-primary m-1"
                             [routerLink]="['/management/transactionClass',transactionClass.id]">
                                 <i class="bi-pencil-fill"></i>
                             </button>
-                            <button *ngIf="canEditOrDelete(transactionClass.description)"  class="btn btn-danger"
+                            <button *ngIf="canEditOrDelete(transactionClass)"  class="btn btn-danger"
                                 (click)="onDelete(transactionClass.id)">
                                 <i class="bi-trash-fill"></i>
                             </button>

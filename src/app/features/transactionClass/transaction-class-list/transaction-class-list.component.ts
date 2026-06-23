@@ -10,11 +10,12 @@ export class TransactionClassListComponent implements OnInit {
   isLoading: boolean = true;
   incomeClasses: any[] | null = null;
   expenseClasses: any[] | null = null;
-  restrictedClasses = ['Ajuste Saldos Ingreso', 'Ajuste Saldos Egreso', 'Gastos Tarjeta',
-    'Ingreso Inversiones','Inversiones'];
-
 
   constructor(private transactionClassService: TransactionClassService) { }
+
+  canEditOrDelete(transactionClass: any): boolean {
+    return !transactionClass.isSystem;
+  };
 
   ngOnInit(): void {
     this.loadTransactionClasses();  
@@ -29,10 +30,6 @@ export class TransactionClassListComponent implements OnInit {
       this.isLoading = false;
     });
   }
-
-  canEditOrDelete(name: string) : boolean {
-    return !this.restrictedClasses.includes(name);
-  };
 
   onDelete(transactionClassId: number): void {
     if(transactionClassId){
