@@ -7,6 +7,7 @@ import { CardTransactionPaymentList } from '../models/CardTransactionPayment-Lis
 import { TransactionClassService } from 'src/app/features/transactionClass/services/transaction-class.service';
 import { AssetService } from 'src/app/features/asset/services/asset.service';
 import { TmplAstVariable } from '@angular/compiler';
+import { SharedExpenseService } from 'src/app/features/shared-expenses/services/shared-expense.service';
 
 @Component({
   selector: 'app-card-transactions-pay',
@@ -25,6 +26,7 @@ export class CardTransactionsPayComponent implements OnInit {
   successMessage: string = '';
   tableLength: number = 0;
   originalTableLength: number = 0;
+  reimbursementsPreview: number = 0;
 
   constructor(
     private fb: FormBuilder,
@@ -32,7 +34,8 @@ export class CardTransactionsPayComponent implements OnInit {
     private accountService: AccountService,
     private assetService: AssetService,
     private transactionClassService: TransactionClassService,
-    private cardTransactionService: CardTransactionsService
+    private cardTransactionService: CardTransactionsService,
+    private sharedExpenseService: SharedExpenseService
   ) { }
 
   get cardTransactionsArray(): FormArray {
@@ -109,7 +112,7 @@ export class CardTransactionsPayComponent implements OnInit {
 
     if (card && paymentMonth) {
       this.cardTransactionService.getPaymentCardTransactions(card, paymentMonth).subscribe((data: CardTransactionPaymentList[]) => {
-        
+
 
 
         this.cardTransactions = data;
@@ -121,9 +124,37 @@ export class CardTransactionsPayComponent implements OnInit {
         if (this.selectedPaymentAssets) {
           this.updateEditOptions();
         }
-        
+
+        this.loadReimbursementsPreview(this.cardTransactions);
+
       });
     }
+  }
+
+  private loadReimbursementsPreview(transactions: CardTransactionPaymentList[]): void {
+    this.reimbursementsPreview = 0;
+
+    transactions
+      .filter(t => t.cardTransactionId)
+      .forEach(t => {
+        this.sharedExpenseService.getByCardTransactionId(t.cardTransactionId).subscribe({
+          next: (detail) => {
+            const applicable = detail.splits.reduce((sum, s) => {
+              const available = s.amountReimbursed - (s.amountApplied || 0);
+              const installmentCap = s.installmentSplitAmount || 0;
+              const toApply = Math.min(Math.max(available, 0), installmentCap);
+              return sum + toApply;
+            }, 0);
+            this.reimbursementsPreview = Math.round((this.reimbursementsPreview + applicable) * 100) / 100;
+          },
+          error: () => { /* esta CardTransaction no tiene gasto compartido */ }
+        });
+      });
+  }
+
+  get netPesosAfterReimbursement(): number {
+    const totals = this.getTotalValues();
+    return Math.round((totals.totalPesos - this.reimbursementsPreview) * 100) / 100;
   }
 
   populateCardTransactionsArray(cardTransactions: CardTransactionPaymentList[]) {
@@ -135,20 +166,22 @@ export class CardTransactionsPayComponent implements OnInit {
 
 
       const transactionGroup = this.fb.group({
+        cardTransactionId: [transaction.cardTransactionId],
+        installmentNumber: [transaction.installmentNumber],
         date: [transaction.date],
         transactionClassId: [transaction.transactionClassId],
         transactionClass: [transaction.transactionClass],
         detail: [transaction.detail],
         assetId: [transaction.assetId],
         asset: [transaction.asset],
-        installment: [transaction.installment],        
+        installment: [transaction.installment],
         installmentAmount: [{ value: transaction.installmentAmount, disabled: true }],
         valueInPesos: [{ value: transaction.valueInPesos, disabled: true }],
         pay: true,
         isManual: false,
         originalInstallmentAmount: [transaction.installmentAmount],
         originalValueInPesos: [transaction.valueInPesos]
-      });    
+      });
 
 
       cardTransactionsArray.push(transactionGroup);
@@ -258,6 +291,8 @@ refreshCurrencyFormat() {
 
 
     const manualEntry = this.fb.group({
+      cardTransactionId: [0],
+      installmentNumber: [0],
       date: [''],
       transactionClassId: [''],
       transactionClass: [''],
@@ -407,6 +442,8 @@ refreshCurrencyFormat() {
     const cardTransactions = this.cardTransactionsArray.controls
       .filter(control => control.get('pay')?.value)
       .map(control => ({
+        cardTransactionId: parseInt(control.get('cardTransactionId')?.value) || 0,
+        installmentNumber: parseInt(control.get('installmentNumber')?.value) || 0,
         date: control.get('date')?.value,
         transactionClassId: parseInt(control.get('transactionClassId')?.value),
         detail: control.get('detail')?.value,
@@ -437,9 +474,10 @@ refreshCurrencyFormat() {
 
 
          this.cardTransactionService.createCardPayment(cardPaymentRequest).subscribe(() => {
-          
+
            this.cardPaymentForm.reset();
            this.cardTransactionsArray.clear();
+           this.reimbursementsPreview = 0;
 
            this.successMessage = 'Movimiento creado con éxito';
            setTimeout(() => {

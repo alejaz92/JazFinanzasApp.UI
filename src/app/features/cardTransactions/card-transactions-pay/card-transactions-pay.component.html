@@ -111,6 +111,12 @@
                         <h5>Gastos Tarjeta</h5>
                     </div>
                     <div class="card-body">
+                        <div *ngIf="reimbursementsPreview > 0" class="alert alert-info" role="alert">
+                            Hay <strong>{{ reimbursementsPreview | currencyFiatFormat }}</strong> en reintegros aplicables a estos gastos.
+                            <span *ngIf="selectedPaymentAssets">
+                                Tu egreso neto será aproximadamente <strong>{{ netPesosAfterReimbursement | currencyFiatFormat }}</strong>.
+                            </span>
+                        </div>
                         <div class="table-responsive">
                             <table class="table table-bordered table-hover text-center">
                                 <thead>

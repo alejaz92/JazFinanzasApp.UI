@@ -19,8 +19,8 @@ export class CardTransactionsService {
     return this.http.get<CardTransactionPending[]>(`${environment.apiBaseURL}/api/cardTransaction`);
   }
 
-  addCardTransaction(cardTransaction: CardTransactionsAdd): Observable<CardTransactionsAdd> {
-    return this.http.post<CardTransactionsAdd>(`${environment.apiBaseURL}/api/CardTransaction`, cardTransaction);
+  addCardTransaction(cardTransaction: CardTransactionsAdd): Observable<{ id: number }> {
+    return this.http.post<{ id: number }>(`${environment.apiBaseURL}/api/CardTransaction`, cardTransaction);
   }
 
   getPaymentCardTransactions(cardId: Number, paymentMonth: string): Observable<CardTransactionPaymentList[]> {

@@ -110,7 +110,34 @@
                 <input readonly type="month" class="form-control" id="lastInstallmentDate" formControlName="lastInstallmentDate">
 
             </div>
-        </div>  
+        </div>
+
+        <!-- Sección Gasto Compartido -->
+        <div class="row mb-3">
+            <div class="col">
+                <div class="card border-secondary">
+                    <div class="card-header d-flex align-items-center">
+                        <div class="form-check form-switch mb-0">
+                            <input class="form-check-input" type="checkbox" id="sharedExpenseToggle"
+                                   [(ngModel)]="sharedExpenseActive" [ngModelOptions]="{standalone: true}"
+                                   (change)="onSharedExpenseToggle()">
+                            <label class="form-check-label fw-semibold" for="sharedExpenseToggle">
+                                Gasto compartido
+                            </label>
+                        </div>
+                    </div>
+                    <div class="card-body" *ngIf="sharedExpenseActive">
+                        <app-shared-expense-form
+                            [totalAmount]="totalAmountForSharedExpense"
+                            (formChange)="onSharedExpenseChange($event)">
+                        </app-shared-expense-form>
+                        <div *ngIf="sharedExpenseError" class="alert alert-danger mt-2">
+                            {{ sharedExpenseError }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div class="row mb-3">
             <div class="mt-1">

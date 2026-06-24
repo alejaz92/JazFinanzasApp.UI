@@ -1,7 +1,27 @@
+<style>
+.modal-backdrop-custom {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1050;
+}
+.modal-dialog-custom {
+    width: 100%;
+    max-width: 480px;
+}
+</style>
+
 <app-loading [isLoading]="isLoading"></app-loading>
 
 <div class="container mt-4" *ngIf="!isLoading">
     <h1 class="mt-3">Gastos Compartidos</h1>
+
+    <div *ngIf="reimbursementSuccess" class="alert alert-success" role="alert">
+        {{ reimbursementSuccess }}
+    </div>
 
     <!-- Total widget -->
     <div class="card bg-light mb-4">
@@ -30,20 +50,61 @@
         <table class="table table-bordered">
             <thead>
                 <tr>
+                    <th style="width: 40px"></th>
                     <th>Persona</th>
                     <th class="text-end">Monto pendiente</th>
                     <th class="text-center">Estado</th>
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let item of filtered">
-                    <td>{{ item.personName }}</td>
-                    <td class="text-end">{{ item.totalPending | currencyFiatFormat }}</td>
-                    <td class="text-center">
-                        <span *ngIf="item.totalPending > 0" class="badge bg-warning text-dark">Pendiente</span>
-                        <span *ngIf="item.totalPending === 0" class="badge bg-success">Saldado</span>
-                    </td>
-                </tr>
+                <ng-container *ngFor="let item of filtered">
+                    <tr (click)="toggleExpand(item.personId)" style="cursor: pointer;">
+                        <td class="text-center">
+                            <i class="bi" [ngClass]="expandedPersonId === item.personId ? 'bi-chevron-down' : 'bi-chevron-right'"></i>
+                        </td>
+                        <td>{{ item.personName }}</td>
+                        <td class="text-end">{{ item.totalPending | currencyFiatFormat }}</td>
+                        <td class="text-center">
+                            <span *ngIf="item.totalPending > 0" class="badge bg-warning text-dark">Pendiente</span>
+                            <span *ngIf="item.totalPending === 0" class="badge bg-success">Saldado</span>
+                        </td>
+                    </tr>
+                    <tr *ngIf="expandedPersonId === item.personId">
+                        <td></td>
+                        <td colspan="3">
+                            <table class="table table-sm table-borderless mb-0">
+                                <thead>
+                                    <tr class="text-muted small">
+                                        <th>Gasto</th>
+                                        <th class="text-end">Total</th>
+                                        <th class="text-end">Pendiente</th>
+                                        <th class="text-center">Estado</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let split of item.splits">
+                                        <td>{{ split.description }}</td>
+                                        <td class="text-end">{{ split.amount | currencyFiatFormat }}</td>
+                                        <td class="text-end">{{ split.pending | currencyFiatFormat }}</td>
+                                        <td class="text-center">
+                                            <span *ngIf="split.status === 0" class="badge bg-warning text-dark">Pendiente</span>
+                                            <span *ngIf="split.status === 1" class="badge bg-info text-dark">Parcial</span>
+                                            <span *ngIf="split.status === 2" class="badge bg-success">Pagado</span>
+                                        </td>
+                                        <td class="text-end">
+                                            <button type="button" class="btn btn-sm btn-primary"
+                                                    *ngIf="isCardSplit(split) && split.pending > 0"
+                                                    (click)="openReimbursementModal(split)">
+                                                Registrar reintegro
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                </ng-container>
             </tbody>
         </table>
     </ng-container>
@@ -53,4 +114,57 @@
             No hay personas en este estado.
         </div>
     </ng-template>
+</div>
+
+<!-- Modal Registrar Reintegro -->
+<div class="modal-backdrop-custom" *ngIf="selectedSplit">
+    <div class="modal-dialog-custom">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Registrar reintegro</h5>
+                <button type="button" class="btn-close" (click)="closeReimbursementModal()"></button>
+            </div>
+            <div class="card-body">
+                <p class="mb-2"><strong>Gasto:</strong> {{ selectedSplit.description }}</p>
+                <p class="mb-3"><strong>Pendiente:</strong> {{ selectedSplit.pending | currencyFiatFormat }}</p>
+
+                <form [formGroup]="reimbursementForm" (ngSubmit)="confirmReimbursement()">
+                    <div class="mb-3">
+                        <label class="form-label">Monto</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control" formControlName="amount" min="0.01" step="0.01">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Fecha</label>
+                        <input type="date" class="form-control" formControlName="date">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Cuenta</label>
+                        <select class="form-select" formControlName="accountId">
+                            <option value="" disabled selected>Seleccione</option>
+                            <option *ngFor="let account of accounts" [value]="account.id">{{ account.name }}</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Categoría</label>
+                        <select class="form-select" formControlName="transactionClassId">
+                            <option value="" disabled selected>Seleccione</option>
+                            <option *ngFor="let c of incomeClasses" [value]="c.id">{{ c.description }}</option>
+                        </select>
+                    </div>
+
+                    <div *ngIf="reimbursementError" class="alert alert-danger">
+                        {{ reimbursementError }}
+                    </div>
+
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-secondary me-2" (click)="closeReimbursementModal()">Cancelar</button>
+                        <button type="submit" class="btn btn-primary" [disabled]="reimbursementForm.invalid">Confirmar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>

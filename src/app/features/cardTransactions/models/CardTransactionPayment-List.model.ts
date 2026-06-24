@@ -1,4 +1,5 @@
 export interface CardTransactionPaymentList {
+    cardTransactionId: number;
     date: string;
     cardId: number;
     card: string;
@@ -8,6 +9,7 @@ export interface CardTransactionPaymentList {
     assetId: number;
     asset: string;
     installment: string;
+    installmentNumber: number;
     installmentAmount: number;
     valueInPesos: number;
     pay: boolean | true;

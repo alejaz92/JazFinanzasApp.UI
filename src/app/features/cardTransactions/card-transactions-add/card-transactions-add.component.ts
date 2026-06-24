@@ -7,7 +7,9 @@ import { TransactionClassService } from 'src/app/features/transactionClass/servi
 import { AssetService } from 'src/app/features/asset/services/asset.service';
 import { CardService } from 'src/app/features/card/services/card.service';
 import { CardTransactionsAdd } from '../models/cardTransactions-add.model';
-import { first } from 'rxjs';
+import { first, of, switchMap } from 'rxjs';
+import { SharedExpenseService } from 'src/app/features/shared-expenses/services/shared-expense.service';
+import { SharedExpenseFormData } from 'src/app/features/shared-expenses/models/shared-expense.model';
 
 @Component({
   selector: 'app-card-transactions-add',
@@ -24,12 +26,17 @@ export class CardTransactionsAddComponent implements OnInit {
 
   successMessage: string = '';
 
+  sharedExpenseActive: boolean = false;
+  sharedExpenseData: SharedExpenseFormData | null = null;
+  sharedExpenseError: string = '';
+
   constructor(
     private fb: FormBuilder,
     private cardTransactionService: CardTransactionsService,
     private transactionClassesService: TransactionClassService,
     private assetService: AssetService,
     private cardService: CardService,
+    private sharedExpenseService: SharedExpenseService,
     private http: HttpClient
   ) {}
 
@@ -76,6 +83,22 @@ export class CardTransactionsAddComponent implements OnInit {
   onMovementTypeChange(event: any) {
     this.selectedMovementType = event.target.value;
     //this.updateInstallments();
+  }
+
+  get totalAmountForSharedExpense(): number {
+    const raw = this.cardTransactionForm?.get('totalAmount')?.value;
+    return parseFloat(raw) || 0;
+  }
+
+  onSharedExpenseToggle(): void {
+    if (!this.sharedExpenseActive) {
+      this.sharedExpenseData = null;
+    }
+  }
+
+  onSharedExpenseChange(data: SharedExpenseFormData | null): void {
+    this.sharedExpenseData = data;
+    this.sharedExpenseError = '';
   }
 
   onSubmit() {
@@ -142,20 +165,43 @@ export class CardTransactionsAddComponent implements OnInit {
       cardTransactionAdd.lastInstallment = formValues.lastInstallmentDate + '-01';
     }
 
+    if (this.sharedExpenseActive && !this.sharedExpenseData) {
+      this.sharedExpenseError = 'Debe agregar al menos una persona con monto válido al gasto compartido.';
+      return;
+    }
 
-    this.cardTransactionService.addCardTransaction(cardTransactionAdd).subscribe((data: any) => {
-      this.cardTransactionForm.reset();
-      this.cardTransactionForm.controls['totalAmount'].setValue(0); 
-      this.cardTransactionForm.controls['installments'].setValue(1); 
-      this.successMessage = 'Gasto Tarjeta agregado correctamente';
+    const createAndLinkSharedExpense = this.sharedExpenseActive && this.sharedExpenseData !== null;
 
-      setTimeout(() => {
-        this.successMessage = '';
-      }, 3000);
+    this.cardTransactionService.addCardTransaction(cardTransactionAdd).pipe(
+      switchMap(response => {
+        if (createAndLinkSharedExpense && this.sharedExpenseData) {
+          return this.sharedExpenseService.createSharedExpenseCard({
+            cardTransactionId: response.id,
+            notes: this.sharedExpenseData.notes,
+            splits: this.sharedExpenseData.splits
+          });
+        }
+        return of(null);
+      })
+    ).subscribe({
+      next: () => {
+        this.cardTransactionForm.reset();
+        this.cardTransactionForm.controls['totalAmount'].setValue(0);
+        this.cardTransactionForm.controls['installments'].setValue(1);
+        this.sharedExpenseActive = false;
+        this.sharedExpenseData = null;
+        this.sharedExpenseError = '';
+        this.successMessage = 'Gasto Tarjeta agregado correctamente';
 
+        setTimeout(() => {
+          this.successMessage = '';
+        }, 3000);
+      },
+      error: (err) => {
+        const msg = err?.error?.message || 'Error al guardar el gasto compartido.';
+        this.sharedExpenseError = msg;
+      }
     });
-
-    
   }
 
   updateInstallments() {
