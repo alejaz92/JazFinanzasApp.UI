@@ -129,6 +129,7 @@
                     <div class="card-body" *ngIf="sharedExpenseActive">
                         <app-shared-expense-form
                             [totalAmount]="totalAmountForSharedExpense"
+                            [allowBankPromotion]="true"
                             (formChange)="onSharedExpenseChange($event)">
                         </app-shared-expense-form>
                         <div *ngIf="sharedExpenseError" class="alert alert-danger mt-2">

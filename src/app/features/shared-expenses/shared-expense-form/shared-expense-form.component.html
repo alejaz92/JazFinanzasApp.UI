@@ -101,6 +101,59 @@
     </div>
   </div>
 
+  <!-- Promoción bancaria (solo en gastos de tarjeta) -->
+  <div *ngIf="allowBankPromotion" class="card border-secondary mb-3">
+    <div class="card-header d-flex align-items-center">
+      <div class="form-check form-switch mb-0">
+        <input class="form-check-input" type="checkbox" id="bankPromotionToggle"
+               [(ngModel)]="bankPromotionActive" name="bankPromotionToggle"
+               (change)="onBankPromotionToggle()">
+        <label class="form-check-label fw-semibold" for="bankPromotionToggle">
+          Promoción bancaria
+        </label>
+      </div>
+    </div>
+    <div class="card-body" *ngIf="bankPromotionActive">
+      <div class="row mb-2">
+        <div class="col-md-6">
+          <label class="form-label">Monto devuelto por el banco</label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text">$</span>
+            <input type="number" class="form-control" name="bankPromotionAmount"
+                   [(ngModel)]="bankPromotionAmount" (ngModelChange)="onBankPromotionChange()"
+                   min="0.01" step="0.01">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Fecha de acreditación</label>
+          <input type="date" class="form-control form-control-sm" name="bankPromotionDate"
+                 [(ngModel)]="bankPromotionDate" (ngModelChange)="onBankPromotionChange()">
+        </div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-md-6">
+          <label class="form-label">Cuenta donde se acreditó</label>
+          <select class="form-select form-select-sm" name="bankPromotionAccount"
+                  [(ngModel)]="bankPromotionAccountId" (ngModelChange)="onBankPromotionChange()">
+            <option value="" disabled selected>Seleccione</option>
+            <option *ngFor="let a of accounts" [value]="a.id">{{ a.name }}</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Categoría</label>
+          <select class="form-select form-select-sm" name="bankPromotionClass"
+                  [(ngModel)]="bankPromotionTransactionClassId" (ngModelChange)="onBankPromotionChange()">
+            <option value="" disabled selected>Seleccione</option>
+            <option *ngFor="let c of incomeClasses" [value]="c.id">{{ c.description }}</option>
+          </select>
+        </div>
+      </div>
+      <small class="text-muted">
+        El banco acreditó este monto al momento de la compra; se descontará de las próximas cuotas hasta agotarse.
+      </small>
+    </div>
+  </div>
+
   <!-- Notas -->
   <div class="mb-2">
     <label class="form-label">Notas del gasto compartido (opcional)</label>
