@@ -62,6 +62,7 @@ import { PeopleAddComponent } from './features/people/people-add/people-add.comp
 import { PeopleEditComponent } from './features/people/people-edit/people-edit.component';
 import { SharedExpenseFormComponent } from './features/shared-expenses/shared-expense-form/shared-expense-form.component';
 import { SharedExpenseDashboardComponent } from './features/shared-expenses/shared-expense-dashboard/shared-expense-dashboard.component';
+import { BankPromotionFormComponent } from './features/shared-expenses/bank-promotion-form/bank-promotion-form.component';
 
 
 
@@ -119,7 +120,8 @@ import { SharedExpenseDashboardComponent } from './features/shared-expenses/shar
     PeopleAddComponent,
     PeopleEditComponent,
     SharedExpenseFormComponent,
-    SharedExpenseDashboardComponent
+    SharedExpenseDashboardComponent,
+    BankPromotionFormComponent
   ],
   imports: [
     BrowserModule,

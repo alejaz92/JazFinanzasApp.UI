@@ -112,7 +112,33 @@
             </div>
         </div>
 
-        <!-- Sección Gasto Compartido -->
+        <!-- Sección Promoción Bancaria: ajusta el monto, va primero -->
+        <div class="row mb-2">
+            <div class="col">
+                <div class="card border-info">
+                    <div class="card-header d-flex align-items-center bg-info-subtle">
+                        <div class="form-check form-switch mb-0">
+                            <input class="form-check-input" type="checkbox" id="bankPromotionToggle"
+                                   [(ngModel)]="bankPromotionActive" [ngModelOptions]="{standalone: true}"
+                                   (change)="onBankPromotionToggle()">
+                            <label class="form-check-label fw-semibold" for="bankPromotionToggle">
+                                Promoción bancaria
+                            </label>
+                        </div>
+                    </div>
+                    <div class="card-body" *ngIf="bankPromotionActive">
+                        <app-bank-promotion-form
+                            (formChange)="onBankPromotionChange($event)">
+                        </app-bank-promotion-form>
+                        <div *ngIf="bankPromotionError" class="alert alert-danger mt-2">
+                            {{ bankPromotionError }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección Gasto Compartido con personas: divide lo que queda, va después -->
         <div class="row mb-3">
             <div class="col">
                 <div class="card border-secondary">
@@ -127,9 +153,11 @@
                         </div>
                     </div>
                     <div class="card-body" *ngIf="sharedExpenseActive">
+                        <div *ngIf="bankPromotionActive" class="text-muted small mb-2">
+                            Monto a dividir: $ {{ totalAmountForPersons | number:'1.2-2' }} (neto de la promoción bancaria)
+                        </div>
                         <app-shared-expense-form
-                            [totalAmount]="totalAmountForSharedExpense"
-                            [allowBankPromotion]="true"
+                            [totalAmount]="totalAmountForPersons"
                             (formChange)="onSharedExpenseChange($event)">
                         </app-shared-expense-form>
                         <div *ngIf="sharedExpenseError" class="alert alert-danger mt-2">

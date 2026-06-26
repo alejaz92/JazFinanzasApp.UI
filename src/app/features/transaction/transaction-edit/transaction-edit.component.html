@@ -118,27 +118,23 @@
                 </ng-container>
 
                 <ng-container *ngIf="showAddSharedExpenseForm">
-                    <div class="card border-secondary mb-3">
-                        <div class="card-body">
-                            <app-shared-expense-form
-                                [totalAmount]="transactionAmountForForm"
-                                (formChange)="onPendingSharedExpenseChange($event)">
-                            </app-shared-expense-form>
-                            <div *ngIf="sharedExpenseError" class="alert alert-danger mt-2">
-                                {{ sharedExpenseError }}
-                            </div>
-                            <div class="mt-3">
-                                <button type="button" class="btn btn-primary btn-sm me-2"
-                                        (click)="saveSharedExpense()"
-                                        [disabled]="!pendingSharedExpenseData || sharedExpenseSaving">
-                                    {{ sharedExpenseSaving ? 'Guardando...' : 'Guardar gasto compartido' }}
-                                </button>
-                                <button type="button" class="btn btn-secondary btn-sm"
-                                        (click)="showAddSharedExpenseForm = false">
-                                    Cancelar
-                                </button>
-                            </div>
-                        </div>
+                    <app-shared-expense-form
+                        [totalAmount]="transactionAmountForForm"
+                        (formChange)="onPendingSharedExpenseChange($event)">
+                    </app-shared-expense-form>
+                    <div *ngIf="sharedExpenseError" class="alert alert-danger mt-2">
+                        {{ sharedExpenseError }}
+                    </div>
+                    <div class="mt-3">
+                        <button type="button" class="btn btn-primary btn-sm me-2"
+                                (click)="saveSharedExpense()"
+                                [disabled]="!pendingSharedExpenseData || sharedExpenseSaving">
+                            {{ sharedExpenseSaving ? 'Guardando...' : 'Guardar gasto compartido' }}
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-sm"
+                                (click)="showAddSharedExpenseForm = false">
+                            Cancelar
+                        </button>
                     </div>
                 </ng-container>
             </ng-template>

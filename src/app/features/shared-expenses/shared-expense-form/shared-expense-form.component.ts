@@ -2,8 +2,6 @@ import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChange
 import { SharedExpenseFormData, SharedExpenseSplitType, SplitInput } from '../models/shared-expense.model';
 import { PersonService } from '../../people/services/person.service';
 import { Person } from '../../people/models/person.model';
-import { AccountService } from '../../account/services/account.service';
-import { TransactionClassService } from '../../transactionClass/services/transaction-class.service';
 
 interface SplitRow {
   personId: number;
@@ -19,7 +17,6 @@ interface SplitRow {
 })
 export class SharedExpenseFormComponent implements OnInit, OnChanges {
   @Input() totalAmount: number = 0;
-  @Input() allowBankPromotion: boolean = false;
   @Output() formChange = new EventEmitter<SharedExpenseFormData | null>();
 
   people: Person[] = [];
@@ -28,33 +25,12 @@ export class SharedExpenseFormComponent implements OnInit, OnChanges {
   selectedPersonId: string = '';
   notes: string = '';
 
-  bankPromotionActive: boolean = false;
-  bankPromotionAmount: number = 0;
-  bankPromotionAccountId: string = '';
-  bankPromotionDate: string = '';
-  bankPromotionTransactionClassId: string = '';
-  accounts: any[] = [];
-  incomeClasses: any[] = [];
-
-  constructor(
-    private personService: PersonService,
-    private accountService: AccountService,
-    private transactionClassService: TransactionClassService
-  ) {}
+  constructor(private personService: PersonService) {}
 
   ngOnInit(): void {
     this.personService.getAllPeople().subscribe((data: Person[]) => {
       this.people = data;
     });
-
-    if (this.allowBankPromotion) {
-      this.accountService.getAccountByTypeName('Moneda').subscribe((data: any) => {
-        this.accounts = data;
-      });
-      this.transactionClassService.getAllTransactionClasses().subscribe((data: any) => {
-        this.incomeClasses = data.filter((c: any) => c.incExp === 'I');
-      });
-    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -72,31 +48,18 @@ export class SharedExpenseFormComponent implements OnInit, OnChanges {
     return Math.round(this.rows.reduce((sum, r) => sum + r.amount, 0) * 100) / 100;
   }
 
-  get bankPromotionAmountValue(): number {
-    return this.bankPromotionActive ? (Number(this.bankPromotionAmount) || 0) : 0;
-  }
-
   get userShare(): number {
-    return Math.round((this.totalAmount - this.sumOfSplits - this.bankPromotionAmountValue) * 100) / 100;
+    return Math.round((this.totalAmount - this.sumOfSplits) * 100) / 100;
   }
 
   get sumOfPercentages(): number {
     return Math.round(this.rows.reduce((sum, r) => sum + r.percentage, 0) * 100) / 100;
   }
 
-  get isBankPromotionValid(): boolean {
-    if (!this.bankPromotionActive) return true;
-    return this.bankPromotionAmountValue > 0
-      && !!this.bankPromotionAccountId
-      && !!this.bankPromotionDate
-      && !!this.bankPromotionTransactionClassId;
-  }
-
   get isValid(): boolean {
-    return (this.rows.length > 0 || this.bankPromotionActive)
+    return this.rows.length > 0
       && this.userShare >= 0
-      && this.rows.every(r => r.amount > 0)
-      && this.isBankPromotionValid;
+      && this.rows.every(r => r.amount > 0);
   }
 
   addPerson(): void {
@@ -158,30 +121,11 @@ export class SharedExpenseFormComponent implements OnInit, OnChanges {
     this.emit();
   }
 
-  onBankPromotionToggle(): void {
-    if (!this.bankPromotionActive) {
-      this.bankPromotionAmount = 0;
-      this.bankPromotionAccountId = '';
-      this.bankPromotionDate = '';
-      this.bankPromotionTransactionClassId = '';
-    }
-    this.emit();
-  }
-
-  onBankPromotionChange(): void {
-    this.emit();
-  }
-
   reset(): void {
     this.rows = [];
     this.splitMode = 'equal';
     this.selectedPersonId = '';
     this.notes = '';
-    this.bankPromotionActive = false;
-    this.bankPromotionAmount = 0;
-    this.bankPromotionAccountId = '';
-    this.bankPromotionDate = '';
-    this.bankPromotionTransactionClassId = '';
     this.emit();
   }
 
@@ -196,16 +140,6 @@ export class SharedExpenseFormComponent implements OnInit, OnChanges {
       splitType: SharedExpenseSplitType.Person,
       amount: r.amount
     }));
-
-    if (this.bankPromotionActive) {
-      splits.push({
-        splitType: SharedExpenseSplitType.BankPromotion,
-        amount: this.bankPromotionAmountValue,
-        accountId: Number(this.bankPromotionAccountId),
-        date: this.bankPromotionDate,
-        transactionClassId: Number(this.bankPromotionTransactionClassId)
-      });
-    }
 
     this.formChange.emit({
       splits,

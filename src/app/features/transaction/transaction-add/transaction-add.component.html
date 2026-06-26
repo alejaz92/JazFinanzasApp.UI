@@ -130,14 +130,14 @@
                                 </label>
                             </div>
                         </div>
-                        <div class="card-body" *ngIf="sharedExpenseActive">
-                            <app-shared-expense-form
-                                [totalAmount]="transactionAmountForForm"
-                                (formChange)="onSharedExpenseChange($event)">
-                            </app-shared-expense-form>
-                            <div *ngIf="sharedExpenseError" class="alert alert-danger mt-2">
-                                {{ sharedExpenseError }}
-                            </div>
+                    </div>
+                    <div *ngIf="sharedExpenseActive" class="mt-2">
+                        <app-shared-expense-form
+                            [totalAmount]="transactionAmountForForm"
+                            (formChange)="onSharedExpenseChange($event)">
+                        </app-shared-expense-form>
+                        <div *ngIf="sharedExpenseError" class="alert alert-danger mt-2">
+                            {{ sharedExpenseError }}
                         </div>
                     </div>
                 </div>

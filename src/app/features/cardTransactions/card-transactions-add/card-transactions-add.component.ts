@@ -9,7 +9,8 @@ import { CardService } from 'src/app/features/card/services/card.service';
 import { CardTransactionsAdd } from '../models/cardTransactions-add.model';
 import { first, of, switchMap } from 'rxjs';
 import { SharedExpenseService } from 'src/app/features/shared-expenses/services/shared-expense.service';
-import { SharedExpenseFormData } from 'src/app/features/shared-expenses/models/shared-expense.model';
+import { SharedExpenseFormData, SharedExpenseSplitType, SplitInput } from 'src/app/features/shared-expenses/models/shared-expense.model';
+import { BankPromotionFormData } from 'src/app/features/shared-expenses/bank-promotion-form/bank-promotion-form.component';
 
 @Component({
   selector: 'app-card-transactions-add',
@@ -27,8 +28,11 @@ export class CardTransactionsAddComponent implements OnInit {
   successMessage: string = '';
 
   sharedExpenseActive: boolean = false;
+  bankPromotionActive: boolean = false;
   sharedExpenseData: SharedExpenseFormData | null = null;
+  bankPromotionData: BankPromotionFormData | null = null;
   sharedExpenseError: string = '';
+  bankPromotionError: string = '';
 
   constructor(
     private fb: FormBuilder,
@@ -90,9 +94,27 @@ export class CardTransactionsAddComponent implements OnInit {
     return parseFloat(raw) || 0;
   }
 
+  get totalAmountForPersons(): number {
+    const promoAmount = this.bankPromotionActive && this.bankPromotionData ? this.bankPromotionData.amount : 0;
+    return this.totalAmountForSharedExpense - promoAmount;
+  }
+
+  onBankPromotionToggle(): void {
+    if (!this.bankPromotionActive) {
+      this.bankPromotionData = null;
+      this.bankPromotionError = '';
+    }
+  }
+
+  onBankPromotionChange(data: BankPromotionFormData | null): void {
+    this.bankPromotionData = data;
+    this.bankPromotionError = '';
+  }
+
   onSharedExpenseToggle(): void {
     if (!this.sharedExpenseActive) {
       this.sharedExpenseData = null;
+      this.sharedExpenseError = '';
     }
   }
 
@@ -166,19 +188,36 @@ export class CardTransactionsAddComponent implements OnInit {
     }
 
     if (this.sharedExpenseActive && !this.sharedExpenseData) {
-      this.sharedExpenseError = 'Debe agregar al menos una persona con monto válido al gasto compartido.';
+      this.sharedExpenseError = 'Debe agregar al menos una persona con monto válido.';
       return;
     }
 
-    const createAndLinkSharedExpense = this.sharedExpenseActive && this.sharedExpenseData !== null;
+    if (this.bankPromotionActive && !this.bankPromotionData) {
+      this.bankPromotionError = 'Debe completar los datos de la promoción bancaria.';
+      return;
+    }
+
+    const splits: SplitInput[] = [
+      ...(this.sharedExpenseData?.splits ?? []),
+      ...(this.bankPromotionActive && this.bankPromotionData ? [{
+        splitType: SharedExpenseSplitType.BankPromotion,
+        amount: this.bankPromotionData.amount,
+        accountId: this.bankPromotionData.accountId,
+        date: this.bankPromotionData.date,
+        transactionClassId: this.bankPromotionData.transactionClassId,
+        notes: this.bankPromotionData.notes
+      } as SplitInput] : [])
+    ];
+
+    const createAndLinkSharedExpense = splits.length > 0;
 
     this.cardTransactionService.addCardTransaction(cardTransactionAdd).pipe(
       switchMap(response => {
-        if (createAndLinkSharedExpense && this.sharedExpenseData) {
+        if (createAndLinkSharedExpense) {
           return this.sharedExpenseService.createSharedExpenseCard({
             cardTransactionId: response.id,
-            notes: this.sharedExpenseData.notes,
-            splits: this.sharedExpenseData.splits
+            notes: this.sharedExpenseData?.notes ?? '',
+            splits
           });
         }
         return of(null);
@@ -189,8 +228,11 @@ export class CardTransactionsAddComponent implements OnInit {
         this.cardTransactionForm.controls['totalAmount'].setValue(0);
         this.cardTransactionForm.controls['installments'].setValue(1);
         this.sharedExpenseActive = false;
+        this.bankPromotionActive = false;
         this.sharedExpenseData = null;
+        this.bankPromotionData = null;
         this.sharedExpenseError = '';
+        this.bankPromotionError = '';
         this.successMessage = 'Gasto Tarjeta agregado correctamente';
 
         setTimeout(() => {
