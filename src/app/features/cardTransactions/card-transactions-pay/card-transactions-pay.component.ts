@@ -8,6 +8,7 @@ import { TransactionClassService } from 'src/app/features/transactionClass/servi
 import { AssetService } from 'src/app/features/asset/services/asset.service';
 import { TmplAstVariable } from '@angular/compiler';
 import { SharedExpenseService } from 'src/app/features/shared-expenses/services/shared-expense.service';
+import { CardTransactionDiscountService } from 'src/app/features/card-transaction-discount/services/card-transaction-discount.service';
 import { catchError, merge, of, switchMap } from 'rxjs';
 
 @Component({
@@ -36,7 +37,8 @@ export class CardTransactionsPayComponent implements OnInit {
     private assetService: AssetService,
     private transactionClassService: TransactionClassService,
     private cardTransactionService: CardTransactionsService,
-    private sharedExpenseService: SharedExpenseService
+    private sharedExpenseService: SharedExpenseService,
+    private cardTransactionDiscountService: CardTransactionDiscountService
   ) { }
 
   get cardTransactionsArray(): FormArray {
@@ -151,6 +153,18 @@ export class CardTransactionsPayComponent implements OnInit {
             this.reimbursementsPreview = Math.round((this.reimbursementsPreview + applicable) * 100) / 100;
           },
           error: () => { /* esta CardTransaction no tiene gasto compartido */ }
+        });
+
+        // El descuento/promoción bancaria viene pre-particionado por cuota exacta (FIFO);
+        // solo cuenta lo que esté etiquetado para el installmentNumber que se está pagando ahora.
+        this.cardTransactionDiscountService.getByCardTransactionId(t.cardTransactionId).subscribe({
+          next: (detail) => {
+            const applicable = detail.installments
+              .filter(i => i.installmentNumber === t.installmentNumber)
+              .reduce((sum, i) => sum + i.amount, 0);
+            this.reimbursementsPreview = Math.round((this.reimbursementsPreview + applicable) * 100) / 100;
+          },
+          error: () => { /* esta CardTransaction no tiene descuento/promoción bancaria */ }
         });
       });
   }

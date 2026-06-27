@@ -6,10 +6,16 @@ export interface CardTransactionDiscountAdd {
   notes?: string;
 }
 
+export interface CardTransactionDiscountInstallment {
+  installmentNumber: number;
+  amount: number;
+}
+
 export interface CardTransactionDiscountDetail {
   id: number;
   cardTransactionId: number;
   amount: number;
   amountApplied: number;
   notes?: string;
+  installments: CardTransactionDiscountInstallment[];
 }
