@@ -5,9 +5,10 @@ import { AccountService } from '../../account/services/account.service';
 import { AssetService } from '../../asset/services/asset.service';
 
 @Component({
-  selector: 'app-exchange-add',
-  templateUrl: './exchange-add.component.html',
-  styleUrls: ['./exchange-add.component.css']
+    selector: 'app-exchange-add',
+    templateUrl: './exchange-add.component.html',
+    styleUrls: ['./exchange-add.component.css'],
+    standalone: false
 })
 export class ExchangeAddComponent implements OnInit {
   transactionForm!: FormGroup;

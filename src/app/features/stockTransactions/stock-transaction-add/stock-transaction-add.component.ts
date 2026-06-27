@@ -8,9 +8,10 @@ import { Portfolio } from '../../portfolios/models/portfolio.model';
 import { PortfolioService } from '../../portfolios/services/portfolio.service';
 
 @Component({
-  selector: 'app-stock-transaction-add',
-  templateUrl: './stock-transaction-add.component.html',
-  styleUrls: ['./stock-transaction-add.component.css']
+    selector: 'app-stock-transaction-add',
+    templateUrl: './stock-transaction-add.component.html',
+    styleUrls: ['./stock-transaction-add.component.css'],
+    standalone: false
 })
 export class StockTransactionAddComponent implements OnInit{
   stockTransactionForm!: FormGroup;

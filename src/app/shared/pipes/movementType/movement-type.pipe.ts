@@ -1,7 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-  name: 'movementType'
+    name: 'movementType',
+    standalone: false
 })
 export class MovementTypePipe implements PipeTransform {
 

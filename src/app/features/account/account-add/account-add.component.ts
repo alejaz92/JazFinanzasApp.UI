@@ -5,9 +5,10 @@ import { AccountService } from '../services/account.service';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-account-add',
-  templateUrl: './account-add.component.html',
-  styleUrls: ['./account-add.component.css']
+    selector: 'app-account-add',
+    templateUrl: './account-add.component.html',
+    styleUrls: ['./account-add.component.css'],
+    standalone: false
 })
 export class AccountAddComponent implements OnDestroy {
 

@@ -7,9 +7,10 @@ import { PortfolioService } from '../../portfolios/services/portfolio.service';
 import { Portfolio } from '../../portfolios/models/portfolio.model';
 
 @Component({
-  selector: 'app-crypto-transaction-add',
-  templateUrl: './crypto-transaction-add.component.html',
-  styleUrls: ['./crypto-transaction-add.component.css']
+    selector: 'app-crypto-transaction-add',
+    templateUrl: './crypto-transaction-add.component.html',
+    styleUrls: ['./crypto-transaction-add.component.css'],
+    standalone: false
 })
 export class CryptoTransactionAddComponent implements OnInit {
   cryptoTransactionForm!: FormGroup;

@@ -1,7 +1,8 @@
 import { Directive, ElementRef, HostListener, AfterViewInit, OnDestroy } from '@angular/core';
 
 @Directive({
-  selector: '[appInvestmentInput]'
+    selector: '[appInvestmentInput]',
+    standalone: false
 })
 export class InvestmentInputDirective implements AfterViewInit, OnDestroy {
   private observer: MutationObserver | undefined;

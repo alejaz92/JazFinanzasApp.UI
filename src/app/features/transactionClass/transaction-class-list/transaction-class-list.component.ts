@@ -2,9 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { TransactionClassService} from '../services/transaction-class.service';
 
 @Component({
-  selector: 'app-transaction-class-list',
-  templateUrl: './transaction-class-list.component.html',
-  styleUrls: ['./transaction-class-list.component.css']
+    selector: 'app-transaction-class-list',
+    templateUrl: './transaction-class-list.component.html',
+    styleUrls: ['./transaction-class-list.component.css'],
+    standalone: false
 })
 export class TransactionClassListComponent implements OnInit {
   isLoading: boolean = true;

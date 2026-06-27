@@ -6,9 +6,10 @@ import { AuthService } from '../services/auth.service';
 import { last } from 'rxjs';
 
 @Component({
-  selector: 'app-register',
-  templateUrl: './register.component.html',
-  styleUrls: ['./register.component.css']
+    selector: 'app-register',
+    templateUrl: './register.component.html',
+    styleUrls: ['./register.component.css'],
+    standalone: false
 })
 
 export class RegisterComponent implements OnInit{

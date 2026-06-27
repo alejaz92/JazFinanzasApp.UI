@@ -16,9 +16,10 @@ import { SharedExpenseService } from '../../shared-expenses/services/shared-expe
 Chart.register(...registerables);
 
 @Component({
-  selector: 'app-home',
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.css']
+    selector: 'app-home',
+    templateUrl: './home.component.html',
+    styleUrls: ['./home.component.css'],
+    standalone: false
 })
 export class HomeComponent implements OnInit, AfterViewInit {
   isLoading: boolean = true;

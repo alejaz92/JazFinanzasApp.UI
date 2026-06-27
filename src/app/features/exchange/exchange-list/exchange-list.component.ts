@@ -2,9 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { ExchangeService } from '../services/exchange.service';
 
 @Component({
-  selector: 'app-exchange-list',
-  templateUrl: './exchange-list.component.html',
-  styleUrls: ['./exchange-list.component.css']
+    selector: 'app-exchange-list',
+    templateUrl: './exchange-list.component.html',
+    styleUrls: ['./exchange-list.component.css'],
+    standalone: false
 })
 export class ExchangeListComponent implements OnInit {
 

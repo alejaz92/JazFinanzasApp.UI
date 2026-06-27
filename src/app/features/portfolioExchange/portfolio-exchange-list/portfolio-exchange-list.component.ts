@@ -3,9 +3,10 @@ import { PortfolioExchangeService } from '../services/portfolio-exchange.service
 import { CurrencyExchange } from '../../CurrencyExchange/models/CurrencyExchange.model';
 
 @Component({
-  selector: 'app-portfolio-exchange-list',
-  templateUrl: './portfolio-exchange-list.component.html',
-  styleUrls: ['./portfolio-exchange-list.component.css']
+    selector: 'app-portfolio-exchange-list',
+    templateUrl: './portfolio-exchange-list.component.html',
+    styleUrls: ['./portfolio-exchange-list.component.css'],
+    standalone: false
 })
 export class PortfolioExchangeListComponent implements OnInit {
   isLoading: boolean = true;

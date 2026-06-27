@@ -6,9 +6,10 @@ import { Card } from '../models/card.model';
 import { CardUpdateRequest } from '../models/card-update-request.model';
 
 @Component({
-  selector: 'app-card-edit',
-  templateUrl: './card-edit.component.html',
-  styleUrls: ['./card-edit.component.css']
+    selector: 'app-card-edit',
+    templateUrl: './card-edit.component.html',
+    styleUrls: ['./card-edit.component.css'],
+    standalone: false
 })
 export class CardEditComponent implements OnInit, OnDestroy {
   isLoading: boolean = true;

@@ -5,8 +5,9 @@ import { PersonAddRequest } from '../models/person-add-request.model';
 import { PersonService } from '../services/person.service';
 
 @Component({
-  selector: 'app-people-add',
-  templateUrl: './people-add.component.html'
+    selector: 'app-people-add',
+    templateUrl: './people-add.component.html',
+    standalone: false
 })
 export class PeopleAddComponent implements OnDestroy {
   model: PersonAddRequest;

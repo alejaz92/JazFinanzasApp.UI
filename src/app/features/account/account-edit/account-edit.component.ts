@@ -6,9 +6,10 @@ import { AccountService } from '../services/account.service';
 import { AccountAddRequest } from '../models/account-add-request.model';
 
 @Component({
-  selector: 'app-account-edit',
-  templateUrl: './account-edit.component.html',
-  styleUrls: ['./account-edit.component.css']
+    selector: 'app-account-edit',
+    templateUrl: './account-edit.component.html',
+    styleUrls: ['./account-edit.component.css'],
+    standalone: false
 })
 export class AccountEditComponent implements OnInit, OnDestroy {
   isLoading: boolean = true;

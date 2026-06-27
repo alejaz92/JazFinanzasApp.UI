@@ -6,8 +6,9 @@ import { PersonAddRequest } from '../models/person-add-request.model';
 import { PersonService } from '../services/person.service';
 
 @Component({
-  selector: 'app-people-edit',
-  templateUrl: './people-edit.component.html'
+    selector: 'app-people-edit',
+    templateUrl: './people-edit.component.html',
+    standalone: false
 })
 export class PeopleEditComponent implements OnInit, OnDestroy {
   isLoading: boolean = true;

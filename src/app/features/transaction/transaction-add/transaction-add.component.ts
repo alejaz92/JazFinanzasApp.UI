@@ -12,9 +12,10 @@ import { of } from 'rxjs';
 
 
 @Component({
-  selector: 'app-transaction-add',
-  templateUrl: './transaction-add.component.html',
-  styleUrls: ['./transaction-add.component.css']
+    selector: 'app-transaction-add',
+    templateUrl: './transaction-add.component.html',
+    styleUrls: ['./transaction-add.component.css'],
+    standalone: false
 })
 export class TransactionAddComponent implements OnInit, OnDestroy {
   isLoading: boolean = true;

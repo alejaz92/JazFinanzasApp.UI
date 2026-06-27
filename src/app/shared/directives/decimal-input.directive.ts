@@ -1,7 +1,8 @@
 import { Directive, ElementRef, HostListener, Input, AfterViewInit } from '@angular/core';
 
 @Directive({
-  selector: '[appDecimalInput]'
+    selector: '[appDecimalInput]',
+    standalone: false
 })
 export class DecimalInputDirective implements AfterViewInit {
   @Input() maxDecimals: number = 10;

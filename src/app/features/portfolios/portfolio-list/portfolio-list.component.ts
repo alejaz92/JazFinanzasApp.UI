@@ -2,9 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { PortfolioService } from '../services/portfolio.service';
 
 @Component({
-  selector: 'app-portfolio-list',
-  templateUrl: './portfolio-list.component.html',
-  styleUrls: ['./portfolio-list.component.css']
+    selector: 'app-portfolio-list',
+    templateUrl: './portfolio-list.component.html',
+    styleUrls: ['./portfolio-list.component.css'],
+    standalone: false
 })
 export class PortfolioListComponent implements OnInit {
   isLoading: boolean = true;

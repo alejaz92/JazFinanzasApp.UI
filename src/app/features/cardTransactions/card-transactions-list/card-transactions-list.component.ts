@@ -5,9 +5,10 @@ import { CardTransactionDiscountService } from 'src/app/features/card-transactio
 import { CardTransactionDiscountDetail } from 'src/app/features/card-transaction-discount/models/card-transaction-discount.model';
 
 @Component({
-  selector: 'app-card-transactions-list',
-  templateUrl: './card-transactions-list.component.html',
-  styleUrls: ['./card-transactions-list.component.css']
+    selector: 'app-card-transactions-list',
+    templateUrl: './card-transactions-list.component.html',
+    styleUrls: ['./card-transactions-list.component.css'],
+    standalone: false
 })
 export class CardTransactionsListComponent implements OnInit {
   isLoading: boolean = true;

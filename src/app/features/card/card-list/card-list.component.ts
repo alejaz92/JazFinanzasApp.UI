@@ -4,9 +4,10 @@ import { Card } from '../models/card.model';
 import { Observable } from 'rxjs';
 
 @Component({
-  selector: 'app-card-list',
-  templateUrl: './card-list.component.html',
-  styleUrls: ['./card-list.component.css']
+    selector: 'app-card-list',
+    templateUrl: './card-list.component.html',
+    styleUrls: ['./card-list.component.css'],
+    standalone: false
 })
 export class CardListComponent implements OnInit {
   isLoading: boolean = true;

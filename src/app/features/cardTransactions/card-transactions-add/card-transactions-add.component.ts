@@ -13,9 +13,10 @@ import { BankPromotionFormData } from 'src/app/features/shared-expenses/bank-pro
 import { CardTransactionDiscountService } from 'src/app/features/card-transaction-discount/services/card-transaction-discount.service';
 
 @Component({
-  selector: 'app-card-transactions-add',
-  templateUrl: './card-transactions-add.component.html',
-  styleUrls: ['./card-transactions-add.component.css']
+    selector: 'app-card-transactions-add',
+    templateUrl: './card-transactions-add.component.html',
+    styleUrls: ['./card-transactions-add.component.css'],
+    standalone: false
 })
 export class CardTransactionsAddComponent implements OnInit {
   isLoading: boolean = true;

@@ -17,9 +17,10 @@ interface AllocationRow {
 }
 
 @Component({
-  selector: 'app-transaction-refund',
-  templateUrl: './transaction-refund.component.html',
-  styleUrls: ['./transaction-refund.component.css']
+    selector: 'app-transaction-refund',
+    templateUrl: './transaction-refund.component.html',
+    styleUrls: ['./transaction-refund.component.css'],
+    standalone: false
 })
 export class TransactionRefundComponent implements OnInit, OnDestroy {
   refundForm!: FormGroup;

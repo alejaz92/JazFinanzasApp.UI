@@ -3,9 +3,10 @@ import { CryptoTransactionService } from '../services/crypto-transaction.service
 import { CryptoTransaction } from '../models/CryptoTransaction.model';
 
 @Component({
-  selector: 'app-crypto-transaction-list',
-  templateUrl: './crypto-transaction-list.component.html',
-  styleUrls: ['./crypto-transaction-list.component.css']
+    selector: 'app-crypto-transaction-list',
+    templateUrl: './crypto-transaction-list.component.html',
+    styleUrls: ['./crypto-transaction-list.component.css'],
+    standalone: false
 })
 export class CryptoTransactionListComponent implements OnInit{
   isLoading: boolean = true;

@@ -3,9 +3,10 @@ import { StockTransaction } from '../models/stockTransaction.model';
 import { StockTranctionsService } from '../services/stock-tranctions.service';
 
 @Component({
-  selector: 'app-stock-transaction-list',
-  templateUrl: './stock-transaction-list.component.html',
-  styleUrls: ['./stock-transaction-list.component.css']
+    selector: 'app-stock-transaction-list',
+    templateUrl: './stock-transaction-list.component.html',
+    styleUrls: ['./stock-transaction-list.component.css'],
+    standalone: false
 })
 export class StockTransactionListComponent implements OnInit{
   isLoading: boolean = true;

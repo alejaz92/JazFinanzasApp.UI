@@ -9,9 +9,10 @@ export interface BankPromotionFormData {
 }
 
 @Component({
-  selector: 'app-bank-promotion-form',
-  templateUrl: './bank-promotion-form.component.html',
-  styleUrls: ['./bank-promotion-form.component.css']
+    selector: 'app-bank-promotion-form',
+    templateUrl: './bank-promotion-form.component.html',
+    styleUrls: ['./bank-promotion-form.component.css'],
+    standalone: false
 })
 export class BankPromotionFormComponent implements OnInit {
   @Output() formChange = new EventEmitter<BankPromotionFormData | null>();

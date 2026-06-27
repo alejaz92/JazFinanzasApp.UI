@@ -5,9 +5,10 @@ import { TransactionClassService } from '../services/transaction-class.service';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-transaction-class-add',
-  templateUrl: './transaction-class-add.component.html',
-  styleUrls: ['./transaction-class-add.component.css']
+    selector: 'app-transaction-class-add',
+    templateUrl: './transaction-class-add.component.html',
+    styleUrls: ['./transaction-class-add.component.css'],
+    standalone: false
 })
 export class TransactionClassAddComponent implements OnDestroy{
   model: TransactionClassAddRequest;
