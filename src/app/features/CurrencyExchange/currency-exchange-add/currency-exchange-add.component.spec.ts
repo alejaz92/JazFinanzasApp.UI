@@ -11,10 +11,9 @@ describe('CurrencyExchangeAddComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [CurrencyExchangeAddComponent],
-      imports: [HttpClientTestingModule, RouterTestingModule],
-      schemas: [NO_ERRORS_SCHEMA]
-    });
+    imports: [HttpClientTestingModule, RouterTestingModule, CurrencyExchangeAddComponent],
+    schemas: [NO_ERRORS_SCHEMA]
+});
     fixture = TestBed.createComponent(CurrencyExchangeAddComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

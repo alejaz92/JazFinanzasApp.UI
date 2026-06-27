@@ -6,10 +6,9 @@ import { AppComponent } from './app.component';
 
 describe('AppComponent', () => {
   beforeEach(() => TestBed.configureTestingModule({
-    imports: [RouterTestingModule, HttpClientTestingModule],
-    declarations: [AppComponent],
+    imports: [RouterTestingModule, HttpClientTestingModule, AppComponent],
     schemas: [NO_ERRORS_SCHEMA]
-  }));
+}));
 
   it('should create the app', () => {
     const fixture = TestBed.createComponent(AppComponent);

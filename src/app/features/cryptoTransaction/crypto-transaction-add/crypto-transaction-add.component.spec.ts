@@ -11,10 +11,9 @@ describe('CryptoTransactionAddComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [CryptoTransactionAddComponent],
-      imports: [HttpClientTestingModule, RouterTestingModule],
-      schemas: [NO_ERRORS_SCHEMA]
-    });
+    imports: [HttpClientTestingModule, RouterTestingModule, CryptoTransactionAddComponent],
+    schemas: [NO_ERRORS_SCHEMA]
+});
     fixture = TestBed.createComponent(CryptoTransactionAddComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

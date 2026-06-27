@@ -11,10 +11,9 @@ describe('CryptoTransactionListComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [CryptoTransactionListComponent],
-      imports: [HttpClientTestingModule, RouterTestingModule],
-      schemas: [NO_ERRORS_SCHEMA]
-    });
+    imports: [HttpClientTestingModule, RouterTestingModule, CryptoTransactionListComponent],
+    schemas: [NO_ERRORS_SCHEMA]
+});
     fixture = TestBed.createComponent(CryptoTransactionListComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

@@ -11,10 +11,9 @@ describe('ResetPasswordComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ResetPasswordComponent],
-      imports: [HttpClientTestingModule, RouterTestingModule],
-      schemas: [NO_ERRORS_SCHEMA]
-    });
+    imports: [HttpClientTestingModule, RouterTestingModule, ResetPasswordComponent],
+    schemas: [NO_ERRORS_SCHEMA]
+});
     fixture = TestBed.createComponent(ResetPasswordComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

@@ -4,12 +4,17 @@ import { AssetService } from '../../asset/services/asset.service';
 import { AssetTypeService } from '../../assetType/services/asset-type.service';
 import { Balance } from '../models/Balance.modelt';
 import { TotalBalance } from '../models/TotalBalance.model';
+import { LoadingComponent } from '../../../core/components/loading/loading.component';
+import { NgIf, NgFor, NgClass } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
+import { CurrencyInvestmentFormatPipe } from '../../../shared/pipes/currencyInvestmentFormat/currency-investment-format.pipe';
 
 @Component({
     selector: 'app-balance',
     templateUrl: './balance.component.html',
     styleUrls: ['./balance.component.css'],
-    standalone: false
+    imports: [LoadingComponent, NgIf, NgFor, NgClass, FormsModule, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe]
 })
 export class BalanceComponent implements OnInit {
   isLoading: boolean = true;

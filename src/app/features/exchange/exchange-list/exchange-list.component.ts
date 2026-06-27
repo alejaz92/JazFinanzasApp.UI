@@ -1,11 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { ExchangeService } from '../services/exchange.service';
+import { RouterLink } from '@angular/router';
+import { NgFor, DatePipe } from '@angular/common';
+import { NgxPaginationModule } from 'ngx-pagination';
+import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 
 @Component({
     selector: 'app-exchange-list',
     templateUrl: './exchange-list.component.html',
     styleUrls: ['./exchange-list.component.css'],
-    standalone: false
+    imports: [RouterLink, NgFor, NgxPaginationModule, DatePipe, CurrencyFiatFormatPipe]
 })
 export class ExchangeListComponent implements OnInit {
 

@@ -1,11 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { TransactionClassService} from '../services/transaction-class.service';
+import { LoadingComponent } from '../../../core/components/loading/loading.component';
+import { NgIf, NgFor } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 @Component({
     selector: 'app-transaction-class-list',
     templateUrl: './transaction-class-list.component.html',
     styleUrls: ['./transaction-class-list.component.css'],
-    standalone: false
+    imports: [LoadingComponent, NgIf, RouterLink, NgFor]
 })
 export class TransactionClassListComponent implements OnInit {
   isLoading: boolean = true;

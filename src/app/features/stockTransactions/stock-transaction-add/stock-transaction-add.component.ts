@@ -1,17 +1,20 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AccountService } from '../../account/services/account.service';
 import { StockTranctionsService } from '../services/stock-tranctions.service';
 import { AssetService } from '../../asset/services/asset.service';
 import { AssetTypeService } from '../../assetType/services/asset-type.service';
 import { Portfolio } from '../../portfolios/models/portfolio.model';
 import { PortfolioService } from '../../portfolios/services/portfolio.service';
+import { NgIf, NgFor } from '@angular/common';
+import { InvestmentInputDirective } from '../../../shared/directives/investment-input.directive';
+import { RouterLink } from '@angular/router';
 
 @Component({
     selector: 'app-stock-transaction-add',
     templateUrl: './stock-transaction-add.component.html',
     styleUrls: ['./stock-transaction-add.component.css'],
-    standalone: false
+    imports: [NgIf, FormsModule, ReactiveFormsModule, NgFor, InvestmentInputDirective, RouterLink]
 })
 export class StockTransactionAddComponent implements OnInit{
   stockTransactionForm!: FormGroup;

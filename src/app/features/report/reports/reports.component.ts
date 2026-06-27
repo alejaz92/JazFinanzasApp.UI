@@ -16,6 +16,13 @@ import { Asset } from '../../asset/models/asset.model';
 import { AssetService } from '../../asset/services/asset.service';
 import { CryptoStatsDTO, InvestmentTransactionsStatsDTO } from '../models/CryptoStats.model';
 import * as echarts from 'echarts';
+import { LoadingComponent } from '../../../core/components/loading/loading.component';
+import { NgIf, NgFor, DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
+import { CommerceTypePipe } from '../../../shared/pipes/commerceType/commerce-type.pipe';
+import { CurrencyInvestmentFormatPipe } from '../../../shared/pipes/currencyInvestmentFormat/currency-investment-format.pipe';
+import { MovementTypePipe } from '../../../shared/pipes/movementType/movement-type.pipe';
 
 
 
@@ -24,7 +31,7 @@ import * as echarts from 'echarts';
     selector: 'app-reports',
     templateUrl: './reports.component.html',
     styleUrls: ['./reports.component.css'],
-    standalone: false
+    imports: [LoadingComponent, NgIf, FormsModule, NgFor, DatePipe, CurrencyFiatFormatPipe, CommerceTypePipe, CurrencyInvestmentFormatPipe, MovementTypePipe]
 })
 export class ReportsComponent implements OnInit {
   isLoading: boolean = true;

@@ -1,12 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { Transaction } from '../models/transaction.model';
 import { TransactionService } from '../services/transaction.service';
+import { LoadingComponent } from '../../../core/components/loading/loading.component';
+import { NgIf, NgFor, NgClass, DatePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { NgxPaginationModule } from 'ngx-pagination';
+import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
+import { MovementTypePipe } from '../../../shared/pipes/movementType/movement-type.pipe';
 
 @Component({
     selector: 'app-transaction-list',
     templateUrl: './transaction-list.component.html',
     styleUrls: ['./transaction-list.component.css'],
-    standalone: false
+    imports: [LoadingComponent, NgIf, RouterLink, NgFor, NgClass, NgxPaginationModule, DatePipe, CurrencyFiatFormatPipe, MovementTypePipe]
 })
 export class TransactionListComponent implements OnInit {
   isLoading: boolean = true;

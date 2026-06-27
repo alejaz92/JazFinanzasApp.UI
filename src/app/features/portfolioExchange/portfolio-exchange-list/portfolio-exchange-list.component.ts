@@ -1,12 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { PortfolioExchangeService } from '../services/portfolio-exchange.service';
 import { CurrencyExchange } from '../../CurrencyExchange/models/CurrencyExchange.model';
+import { LoadingComponent } from '../../../core/components/loading/loading.component';
+import { NgIf, NgFor, DatePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { NgxPaginationModule } from 'ngx-pagination';
 
 @Component({
     selector: 'app-portfolio-exchange-list',
     templateUrl: './portfolio-exchange-list.component.html',
     styleUrls: ['./portfolio-exchange-list.component.css'],
-    standalone: false
+    imports: [LoadingComponent, NgIf, RouterLink, NgFor, NgxPaginationModule, DatePipe]
 })
 export class PortfolioExchangeListComponent implements OnInit {
   isLoading: boolean = true;

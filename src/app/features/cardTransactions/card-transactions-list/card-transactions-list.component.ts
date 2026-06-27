@@ -3,12 +3,16 @@ import { CardTransactionPending } from '../models/cardTransactions-pending.model
 import { CardTransactionsService } from '../services/card-transactions.service';
 import { CardTransactionDiscountService } from 'src/app/features/card-transaction-discount/services/card-transaction-discount.service';
 import { CardTransactionDiscountDetail } from 'src/app/features/card-transaction-discount/models/card-transaction-discount.model';
+import { LoadingComponent } from '../../../core/components/loading/loading.component';
+import { NgIf, NgFor, DatePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 
 @Component({
     selector: 'app-card-transactions-list',
     templateUrl: './card-transactions-list.component.html',
     styleUrls: ['./card-transactions-list.component.css'],
-    standalone: false
+    imports: [LoadingComponent, NgIf, RouterLink, NgFor, DatePipe, CurrencyFiatFormatPipe]
 })
 export class CardTransactionsListComponent implements OnInit {
   isLoading: boolean = true;

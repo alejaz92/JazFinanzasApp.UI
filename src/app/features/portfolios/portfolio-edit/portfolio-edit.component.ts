@@ -1,15 +1,18 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { PortfolioAddRequest } from '../models/portfolio-add-request.model';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PortfolioService } from '../services/portfolio.service';
 import { Subscription } from 'rxjs';
 import { Portfolio } from '../models/portfolio.model';
+import { LoadingComponent } from '../../../core/components/loading/loading.component';
+import { NgIf } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-portfolio-edit',
     templateUrl: './portfolio-edit.component.html',
     styleUrls: ['./portfolio-edit.component.css'],
-    standalone: false
+    imports: [LoadingComponent, NgIf, FormsModule, RouterLink]
 })
 export class PortfolioEditComponent implements OnInit, OnDestroy {
   isLoading: boolean = true;

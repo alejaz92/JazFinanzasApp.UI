@@ -2,13 +2,14 @@ import { Component, OnDestroy } from '@angular/core';
 import { TransactionClassAddRequest } from '../models/transactionClass-addRequest.model';
 import { Subscription } from 'rxjs';
 import { TransactionClassService } from '../services/transaction-class.service';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-transaction-class-add',
     templateUrl: './transaction-class-add.component.html',
     styleUrls: ['./transaction-class-add.component.css'],
-    standalone: false
+    imports: [FormsModule, RouterLink]
 })
 export class TransactionClassAddComponent implements OnDestroy{
   model: TransactionClassAddRequest;

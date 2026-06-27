@@ -1,11 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { PortfolioService } from '../services/portfolio.service';
+import { LoadingComponent } from '../../../core/components/loading/loading.component';
+import { NgIf, NgFor } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 @Component({
     selector: 'app-portfolio-list',
     templateUrl: './portfolio-list.component.html',
     styleUrls: ['./portfolio-list.component.css'],
-    standalone: false
+    imports: [LoadingComponent, NgIf, RouterLink, NgFor]
 })
 export class PortfolioListComponent implements OnInit {
   isLoading: boolean = true;

@@ -11,10 +11,9 @@ describe('TransactionAddComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [TransactionAddComponent],
-      imports: [HttpClientTestingModule, RouterTestingModule],
-      schemas: [NO_ERRORS_SCHEMA]
-    });
+    imports: [HttpClientTestingModule, RouterTestingModule, TransactionAddComponent],
+    schemas: [NO_ERRORS_SCHEMA]
+});
     fixture = TestBed.createComponent(TransactionAddComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

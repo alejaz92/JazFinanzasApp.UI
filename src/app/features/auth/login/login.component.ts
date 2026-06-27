@@ -1,6 +1,9 @@
 import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { AuthService } from '../services/auth.service';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { LoadingComponent } from '../../../core/components/loading/loading.component';
+import { NgIf } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 declare var bootstrap: any;
 
 
@@ -9,7 +12,7 @@ declare var bootstrap: any;
     selector: 'app-login',
     templateUrl: './login.component.html',
     styleUrls: ['./login.component.css'],
-    standalone: false
+    imports: [LoadingComponent, NgIf, FormsModule, RouterLink]
 })
 export class LoginComponent implements AfterViewInit{
   isLoading: boolean = false;

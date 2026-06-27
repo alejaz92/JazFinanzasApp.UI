@@ -11,10 +11,9 @@ describe('CardTransactionsEditRecurrentComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [CardTransactionsEditRecurrentComponent],
-      imports: [HttpClientTestingModule, RouterTestingModule],
-      schemas: [NO_ERRORS_SCHEMA]
-    });
+    imports: [HttpClientTestingModule, RouterTestingModule, CardTransactionsEditRecurrentComponent],
+    schemas: [NO_ERRORS_SCHEMA]
+});
     fixture = TestBed.createComponent(CardTransactionsEditRecurrentComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

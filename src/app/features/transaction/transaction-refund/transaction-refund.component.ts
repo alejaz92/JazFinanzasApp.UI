@@ -1,13 +1,17 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { TransactionRefund } from '../models/transaction-refund.model';
 import { Transaction } from '../models/transaction.model';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TransactionService } from '../services/transaction.service';
 import { AccountService } from '../../account/services/account.service';
 import { SharedExpenseService } from '../../shared-expenses/services/shared-expense.service';
 import { SharedExpenseDetail, SharedExpenseSplit } from '../../shared-expenses/models/shared-expense.model';
+import { LoadingComponent } from '../../../core/components/loading/loading.component';
+import { NgIf, NgFor, NgClass, DecimalPipe, DatePipe } from '@angular/common';
+import { CurrencyInputDirective } from '../../../shared/directives/currency-input.directive';
+import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 
 interface AllocationRow {
   splitId: number;
@@ -20,7 +24,7 @@ interface AllocationRow {
     selector: 'app-transaction-refund',
     templateUrl: './transaction-refund.component.html',
     styleUrls: ['./transaction-refund.component.css'],
-    standalone: false
+    imports: [LoadingComponent, NgIf, NgFor, FormsModule, ReactiveFormsModule, CurrencyInputDirective, NgClass, RouterLink, DecimalPipe, DatePipe, CurrencyFiatFormatPipe]
 })
 export class TransactionRefundComponent implements OnInit, OnDestroy {
   refundForm!: FormGroup;

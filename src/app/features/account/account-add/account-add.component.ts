@@ -2,13 +2,14 @@ import { Component, OnDestroy } from '@angular/core';
 import { AccountAddRequest } from '../models/account-add-request.model';
 import { Subscription } from 'rxjs';
 import { AccountService } from '../services/account.service';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-account-add',
     templateUrl: './account-add.component.html',
     styleUrls: ['./account-add.component.css'],
-    standalone: false
+    imports: [FormsModule, RouterLink]
 })
 export class AccountAddComponent implements OnDestroy {
 

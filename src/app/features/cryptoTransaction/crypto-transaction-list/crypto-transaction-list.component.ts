@@ -1,12 +1,19 @@
 import { Component, OnInit } from '@angular/core';
 import { CryptoTransactionService } from '../services/crypto-transaction.service';
 import { CryptoTransaction } from '../models/CryptoTransaction.model';
+import { LoadingComponent } from '../../../core/components/loading/loading.component';
+import { NgIf, NgFor, DatePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { NgxPaginationModule } from 'ngx-pagination';
+import { CommerceTypePipe } from '../../../shared/pipes/commerceType/commerce-type.pipe';
+import { CurrencyInvestmentFormatPipe } from '../../../shared/pipes/currencyInvestmentFormat/currency-investment-format.pipe';
+import { MovementTypePipe } from '../../../shared/pipes/movementType/movement-type.pipe';
 
 @Component({
     selector: 'app-crypto-transaction-list',
     templateUrl: './crypto-transaction-list.component.html',
     styleUrls: ['./crypto-transaction-list.component.css'],
-    standalone: false
+    imports: [LoadingComponent, NgIf, RouterLink, NgFor, NgxPaginationModule, DatePipe, CommerceTypePipe, CurrencyInvestmentFormatPipe, MovementTypePipe]
 })
 export class CryptoTransactionListComponent implements OnInit{
   isLoading: boolean = true;

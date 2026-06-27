@@ -1,11 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { CurrencyExchangeService } from '../services/currency-exchange.service';
+import { RouterLink } from '@angular/router';
+import { NgFor, DatePipe } from '@angular/common';
+import { NgxPaginationModule } from 'ngx-pagination';
+import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 
 @Component({
     selector: 'app-currency-exchange-list',
     templateUrl: './currency-exchange-list.component.html',
     styleUrls: ['./currency-exchange-list.component.css'],
-    standalone: false
+    imports: [RouterLink, NgFor, NgxPaginationModule, DatePipe, CurrencyFiatFormatPipe]
 })
 export class CurrencyExchangeListComponent implements OnInit{
   currencyExchanges: any[] = [];

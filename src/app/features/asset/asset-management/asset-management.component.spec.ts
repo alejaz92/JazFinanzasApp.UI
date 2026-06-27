@@ -11,10 +11,9 @@ describe('AssetManagementComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [AssetManagementComponent],
-      imports: [HttpClientTestingModule, RouterTestingModule],
-      schemas: [NO_ERRORS_SCHEMA]
-    });
+    imports: [HttpClientTestingModule, RouterTestingModule, AssetManagementComponent],
+    schemas: [NO_ERRORS_SCHEMA]
+});
     fixture = TestBed.createComponent(AssetManagementComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

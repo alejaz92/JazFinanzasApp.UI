@@ -1,13 +1,14 @@
 import { Component, OnDestroy } from '@angular/core';
 import { PortfolioAddRequest } from '../models/portfolio-add-request.model';
 import { PortfolioService } from '../services/portfolio.service';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-portfolio-add',
     templateUrl: './portfolio-add.component.html',
     styleUrls: ['./portfolio-add.component.css'],
-    standalone: false
+    imports: [FormsModule, RouterLink]
 })
 export class PortfolioAddComponent implements OnDestroy {
 

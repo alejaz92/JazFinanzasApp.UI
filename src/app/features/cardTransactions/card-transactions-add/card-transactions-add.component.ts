@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CardTransactionsService } from '../services/card-transactions.service';
 import { HttpClient } from '@angular/common/http';
 import { Transaction } from 'src/app/features/transaction/models/transaction.model';
@@ -11,12 +11,18 @@ import { SharedExpenseService } from 'src/app/features/shared-expenses/services/
 import { SharedExpenseFormData, SplitInput } from 'src/app/features/shared-expenses/models/shared-expense.model';
 import { BankPromotionFormData } from 'src/app/features/shared-expenses/bank-promotion-form/bank-promotion-form.component';
 import { CardTransactionDiscountService } from 'src/app/features/card-transaction-discount/services/card-transaction-discount.service';
+import { LoadingComponent } from '../../../core/components/loading/loading.component';
+import { NgIf, NgFor, DecimalPipe } from '@angular/common';
+import { CurrencyInputDirective } from '../../../shared/directives/currency-input.directive';
+import { BankPromotionFormComponent } from '../../shared-expenses/bank-promotion-form/bank-promotion-form.component';
+import { SharedExpenseFormComponent } from '../../shared-expenses/shared-expense-form/shared-expense-form.component';
+import { RouterLink } from '@angular/router';
 
 @Component({
     selector: 'app-card-transactions-add',
     templateUrl: './card-transactions-add.component.html',
     styleUrls: ['./card-transactions-add.component.css'],
-    standalone: false
+    imports: [LoadingComponent, NgIf, FormsModule, ReactiveFormsModule, NgFor, CurrencyInputDirective, BankPromotionFormComponent, SharedExpenseFormComponent, RouterLink, DecimalPipe]
 })
 export class CardTransactionsAddComponent implements OnInit {
   isLoading: boolean = true;
