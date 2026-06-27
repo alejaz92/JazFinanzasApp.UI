@@ -1,13 +1,14 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { UserService } from '../services/user.service';
 import { first } from 'rxjs/operators';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { NgClass, NgIf } from '@angular/common';
 
 @Component({
     selector: 'app-change-password',
     templateUrl: './change-password.component.html',
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, NgClass, NgIf, RouterLink]
 })
 export class ChangePasswordComponent implements OnInit {
   changePasswordForm!: FormGroup;

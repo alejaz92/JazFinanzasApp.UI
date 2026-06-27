@@ -1,15 +1,17 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
+import { FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { PortfolioExchangeService } from '../services/portfolio-exchange.service';
 import { AccountService } from '../../account/services/account.service';
 import { AssetService } from '../../asset/services/asset.service';
 import { PortfolioService } from '../../portfolios/services/portfolio.service';
+import { NgIf, NgFor } from '@angular/common';
+import { InvestmentInputDirective } from '../../../shared/directives/investment-input.directive';
 
 @Component({
     selector: 'app-portfolio-exchange-add',
     templateUrl: './portfolio-exchange-add.component.html',
     styleUrls: ['./portfolio-exchange-add.component.css'],
-    standalone: false
+    imports: [NgIf, FormsModule, ReactiveFormsModule, NgFor, InvestmentInputDirective]
 })
 export class PortfolioExchangeAddComponent implements  OnInit {
   portfolioExchangeForm: any;

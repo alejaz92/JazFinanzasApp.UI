@@ -11,10 +11,9 @@ describe('AccountAssettypeComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [AccountAssetTypeComponent],
-      imports: [HttpClientTestingModule, RouterTestingModule],
-      schemas: [NO_ERRORS_SCHEMA]
-    });
+    imports: [HttpClientTestingModule, RouterTestingModule, AccountAssetTypeComponent],
+    schemas: [NO_ERRORS_SCHEMA]
+});
     fixture = TestBed.createComponent(AccountAssetTypeComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

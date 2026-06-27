@@ -1,13 +1,15 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { first } from 'rxjs';
 import { UserService } from '../services/user.service';
+import { NgClass, NgIf } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 @Component({
     selector: 'app-profile',
     templateUrl: './profile.component.html',
     styleUrls: ['./profile.component.css'],
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, NgClass, NgIf, RouterLink]
 })
 export class ProfileComponent implements OnInit {
   profileForm!: FormGroup;

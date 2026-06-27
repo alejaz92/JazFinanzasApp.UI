@@ -1,14 +1,17 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { Person } from '../models/person.model';
 import { PersonAddRequest } from '../models/person-add-request.model';
 import { PersonService } from '../services/person.service';
+import { LoadingComponent } from '../../../core/components/loading/loading.component';
+import { NgIf } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-people-edit',
     templateUrl: './people-edit.component.html',
-    standalone: false
+    imports: [LoadingComponent, NgIf, FormsModule, RouterLink]
 })
 export class PeopleEditComponent implements OnInit, OnDestroy {
   isLoading: boolean = true;

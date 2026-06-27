@@ -11,10 +11,9 @@ describe('StockTransactionListComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [StockTransactionListComponent],
-      imports: [HttpClientTestingModule, RouterTestingModule],
-      schemas: [NO_ERRORS_SCHEMA]
-    });
+    imports: [HttpClientTestingModule, RouterTestingModule, StockTransactionListComponent],
+    schemas: [NO_ERRORS_SCHEMA]
+});
     fixture = TestBed.createComponent(StockTransactionListComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

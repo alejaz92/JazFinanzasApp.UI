@@ -2,12 +2,15 @@ import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Account } from '../models/account.model';
 import { AccountService } from '../services/account.service';
+import { LoadingComponent } from '../../../core/components/loading/loading.component';
+import { NgIf, NgFor } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 @Component({
     selector: 'app-account-list',
     templateUrl: './account-list.component.html',
     styleUrls: ['./account-list.component.css'],
-    standalone: false
+    imports: [LoadingComponent, NgIf, RouterLink, NgFor]
 })
 export class AccountListComponent implements OnInit {
   isLoading: boolean = true;

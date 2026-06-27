@@ -1,20 +1,24 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TransactionService } from '../services/transaction.service';
 import { Subscription } from 'rxjs';
 import { Transaction } from '../models/transaction.model';
-import { FormGroup } from '@angular/forms';
+import { FormGroup, FormsModule } from '@angular/forms';
 import { AssetService } from '../../asset/services/asset.service';
 import { AccountService } from '../../account/services/account.service';
 import { TransactionClassService } from '../../transactionClass/services/transaction-class.service';
 import { SharedExpenseService } from '../../shared-expenses/services/shared-expense.service';
 import { SharedExpenseDetail, SharedExpenseFormData } from '../../shared-expenses/models/shared-expense.model';
+import { LoadingComponent } from '../../../core/components/loading/loading.component';
+import { NgIf, NgFor, DecimalPipe, DatePipe } from '@angular/common';
+import { CurrencyInputDirective } from '../../../shared/directives/currency-input.directive';
+import { SharedExpenseFormComponent } from '../../shared-expenses/shared-expense-form/shared-expense-form.component';
 
 @Component({
     selector: 'app-transaction-edit',
     templateUrl: './transaction-edit.component.html',
     styleUrls: ['./transaction-edit.component.css'],
-    standalone: false
+    imports: [LoadingComponent, NgIf, FormsModule, NgFor, CurrencyInputDirective, RouterLink, SharedExpenseFormComponent, DecimalPipe, DatePipe]
 })
 export class TransactionEditComponent implements OnInit, OnDestroy {
   transactionForm!: FormGroup;

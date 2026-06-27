@@ -2,6 +2,9 @@ import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChange
 import { SharedExpenseFormData, SplitInput } from '../models/shared-expense.model';
 import { PersonService } from '../../people/services/person.service';
 import { Person } from '../../people/models/person.model';
+import { FormsModule } from '@angular/forms';
+import { NgFor, NgIf, NgClass, DecimalPipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 interface SplitRow {
   personId: number;
@@ -14,7 +17,7 @@ interface SplitRow {
     selector: 'app-shared-expense-form',
     templateUrl: './shared-expense-form.component.html',
     styleUrls: ['./shared-expense-form.component.css'],
-    standalone: false
+    imports: [FormsModule, NgFor, NgIf, RouterLink, NgClass, DecimalPipe]
 })
 export class SharedExpenseFormComponent implements OnInit, OnChanges {
   @Input() totalAmount: number = 0;

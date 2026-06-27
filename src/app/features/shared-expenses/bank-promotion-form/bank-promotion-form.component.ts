@@ -1,5 +1,7 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { AccountService } from '../../account/services/account.service';
+import { FormsModule } from '@angular/forms';
+import { NgFor } from '@angular/common';
 
 export interface BankPromotionFormData {
   amount: number;
@@ -12,7 +14,7 @@ export interface BankPromotionFormData {
     selector: 'app-bank-promotion-form',
     templateUrl: './bank-promotion-form.component.html',
     styleUrls: ['./bank-promotion-form.component.css'],
-    standalone: false
+    imports: [FormsModule, NgFor]
 })
 export class BankPromotionFormComponent implements OnInit {
   @Output() formChange = new EventEmitter<BankPromotionFormData | null>();

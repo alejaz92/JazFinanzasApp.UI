@@ -1,12 +1,19 @@
 import { Component, OnInit } from '@angular/core';
 import { StockTransaction } from '../models/stockTransaction.model';
 import { StockTranctionsService } from '../services/stock-tranctions.service';
+import { LoadingComponent } from '../../../core/components/loading/loading.component';
+import { NgIf, NgFor, DatePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { NgxPaginationModule } from 'ngx-pagination';
+import { CommerceTypePipe } from '../../../shared/pipes/commerceType/commerce-type.pipe';
+import { CurrencyInvestmentFormatPipe } from '../../../shared/pipes/currencyInvestmentFormat/currency-investment-format.pipe';
+import { MovementTypePipe } from '../../../shared/pipes/movementType/movement-type.pipe';
 
 @Component({
     selector: 'app-stock-transaction-list',
     templateUrl: './stock-transaction-list.component.html',
     styleUrls: ['./stock-transaction-list.component.css'],
-    standalone: false
+    imports: [LoadingComponent, NgIf, RouterLink, NgFor, NgxPaginationModule, DatePipe, CommerceTypePipe, CurrencyInvestmentFormatPipe, MovementTypePipe]
 })
 export class StockTransactionListComponent implements OnInit{
   isLoading: boolean = true;

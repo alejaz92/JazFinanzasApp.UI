@@ -1,9 +1,6 @@
 import { Directive, ElementRef, HostListener, AfterViewInit, OnDestroy } from '@angular/core';
 
-@Directive({
-    selector: '[appCurrencyInput]',
-    standalone: false
-})
+@Directive({ selector: '[appCurrencyInput]' })
 export class CurrencyInputDirective implements AfterViewInit, OnDestroy {
   private observer: MutationObserver | undefined;
 

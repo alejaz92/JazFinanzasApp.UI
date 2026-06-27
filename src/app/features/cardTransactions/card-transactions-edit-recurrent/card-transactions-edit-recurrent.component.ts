@@ -1,17 +1,18 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CardTransactionsService } from '../services/card-transactions.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { first, Subscription } from 'rxjs';
 import { RecurrentCardTransactionPut } from '../models/CardTransaction-recurrent.model';
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgIf } from '@angular/common';
+import { CurrencyInputDirective } from '../../../shared/directives/currency-input.directive';
 
 @Component({
     selector: 'app-card-transactions-edit-recurrent',
     templateUrl: './card-transactions-edit-recurrent.component.html',
     styleUrls: ['./card-transactions-edit-recurrent.component.css'],
     providers: [DatePipe],
-    standalone: false
+    imports: [NgIf, FormsModule, ReactiveFormsModule, CurrencyInputDirective, RouterLink]
 })
 export class CardTransactionsEditRecurrentComponent implements OnInit{
   successMessage: string = '';

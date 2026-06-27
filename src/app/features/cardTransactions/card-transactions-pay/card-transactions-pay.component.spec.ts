@@ -11,10 +11,9 @@ describe('CardTransactionsPayComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [CardTransactionsPayComponent],
-      imports: [HttpClientTestingModule, RouterTestingModule],
-      schemas: [NO_ERRORS_SCHEMA]
-    });
+    imports: [HttpClientTestingModule, RouterTestingModule, CardTransactionsPayComponent],
+    schemas: [NO_ERRORS_SCHEMA]
+});
     fixture = TestBed.createComponent(CardTransactionsPayComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

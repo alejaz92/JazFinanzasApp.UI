@@ -12,10 +12,9 @@ describe('CurrencyExchangeListComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [CurrencyExchangeListComponent],
-      imports: [HttpClientTestingModule, RouterTestingModule, NgxPaginationModule],
-      schemas: [NO_ERRORS_SCHEMA]
-    });
+    imports: [HttpClientTestingModule, RouterTestingModule, NgxPaginationModule, CurrencyExchangeListComponent],
+    schemas: [NO_ERRORS_SCHEMA]
+});
     fixture = TestBed.createComponent(CurrencyExchangeListComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

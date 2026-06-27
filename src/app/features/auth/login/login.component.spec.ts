@@ -15,10 +15,9 @@ describe('LoginComponent', () => {
     (window as any).bootstrap = { Tooltip: class {} };
 
     TestBed.configureTestingModule({
-      declarations: [LoginComponent],
-      imports: [HttpClientTestingModule, RouterTestingModule],
-      schemas: [NO_ERRORS_SCHEMA]
-    });
+    imports: [HttpClientTestingModule, RouterTestingModule, LoginComponent],
+    schemas: [NO_ERRORS_SCHEMA]
+});
     fixture = TestBed.createComponent(LoginComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

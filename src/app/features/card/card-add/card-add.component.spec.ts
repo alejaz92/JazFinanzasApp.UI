@@ -12,10 +12,9 @@ describe('CardAddComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [CardAddComponent],
-      imports: [HttpClientTestingModule, RouterTestingModule, FormsModule],
-      schemas: [NO_ERRORS_SCHEMA]
-    });
+    imports: [HttpClientTestingModule, RouterTestingModule, FormsModule, CardAddComponent],
+    schemas: [NO_ERRORS_SCHEMA]
+});
     fixture = TestBed.createComponent(CardAddComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

@@ -2,13 +2,14 @@ import { Component, OnDestroy } from '@angular/core';
 import { CardAddRequest } from '../models/card-add-request.model';
 import { CardService } from '../services/card.service';
 import { Subscription } from 'rxjs';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-card-add',
     templateUrl: './card-add.component.html',
     styleUrls: ['./card-add.component.css'],
-    standalone: false
+    imports: [FormsModule, RouterLink]
 })
 export class CardAddComponent implements OnDestroy {
 

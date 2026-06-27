@@ -1,13 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { AssetType } from '../models/assetType.model';
 import { AccountService } from '../services/account.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { LoadingComponent } from '../../../core/components/loading/loading.component';
+import { NgIf, NgFor } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-account-assettype',
     templateUrl: './account-assettype.component.html',
     styleUrls: ['./account-assettype.component.css'],
-    standalone: false
+    imports: [LoadingComponent, NgIf, NgFor, FormsModule, RouterLink]
 })
 export class AccountAssetTypeComponent  implements OnInit {
   isLoading: boolean = true;

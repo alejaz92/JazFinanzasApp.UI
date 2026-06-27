@@ -2,12 +2,15 @@ import { Component, OnInit } from '@angular/core';
 import { CardService } from '../services/card.service';
 import { Card } from '../models/card.model';
 import { Observable } from 'rxjs';
+import { LoadingComponent } from '../../../core/components/loading/loading.component';
+import { NgIf, NgFor } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 @Component({
     selector: 'app-card-list',
     templateUrl: './card-list.component.html',
     styleUrls: ['./card-list.component.css'],
-    standalone: false
+    imports: [LoadingComponent, NgIf, RouterLink, NgFor]
 })
 export class CardListComponent implements OnInit {
   isLoading: boolean = true;

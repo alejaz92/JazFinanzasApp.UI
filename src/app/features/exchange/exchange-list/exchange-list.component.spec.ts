@@ -12,10 +12,9 @@ describe('ExchangeListComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ExchangeListComponent],
-      imports: [HttpClientTestingModule, RouterTestingModule, NgxPaginationModule],
-      schemas: [NO_ERRORS_SCHEMA]
-    });
+    imports: [HttpClientTestingModule, RouterTestingModule, NgxPaginationModule, ExchangeListComponent],
+    schemas: [NO_ERRORS_SCHEMA]
+});
     fixture = TestBed.createComponent(ExchangeListComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

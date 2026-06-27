@@ -1,15 +1,17 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AssetSplitEvent, AssetSplitEventAdd } from '../models/assetSplitEvent.model';
 import { AssetSplitEventService } from '../services/asset-split-event.service';
 import { AssetTypeService } from '../../assetType/services/asset-type.service';
 import { AssetService } from '../../asset/services/asset.service';
+import { RouterLink } from '@angular/router';
+import { NgFor, NgIf, DatePipe } from '@angular/common';
 
 @Component({
     selector: 'app-split-event',
     templateUrl: './split-event.component.html',
     styleUrls: ['./split-event.component.css'],
-    standalone: false
+    imports: [RouterLink, FormsModule, NgFor, NgIf, ReactiveFormsModule, DatePipe]
 })
 export class SplitEventComponent implements OnInit {
   splitForm!: FormGroup;

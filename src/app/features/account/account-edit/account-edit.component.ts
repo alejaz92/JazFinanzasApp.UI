@@ -1,15 +1,18 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Account } from '../models/account.model';
 import { Subscription } from 'rxjs';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AccountService } from '../services/account.service';
 import { AccountAddRequest } from '../models/account-add-request.model';
+import { LoadingComponent } from '../../../core/components/loading/loading.component';
+import { NgIf } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-account-edit',
     templateUrl: './account-edit.component.html',
     styleUrls: ['./account-edit.component.css'],
-    standalone: false
+    imports: [LoadingComponent, NgIf, FormsModule, RouterLink]
 })
 export class AccountEditComponent implements OnInit, OnDestroy {
   isLoading: boolean = true;

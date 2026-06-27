@@ -1,13 +1,16 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { PersonDebtSplit, PersonDebtSummary } from '../models/shared-expense.model';
 import { SharedExpenseService } from '../services/shared-expense.service';
 import { AccountService } from '../../account/services/account.service';
+import { LoadingComponent } from '../../../core/components/loading/loading.component';
+import { NgIf, NgClass, NgFor } from '@angular/common';
+import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 
 @Component({
     selector: 'app-shared-expense-dashboard',
     templateUrl: './shared-expense-dashboard.component.html',
-    standalone: false
+    imports: [LoadingComponent, NgIf, NgClass, NgFor, FormsModule, ReactiveFormsModule, CurrencyFiatFormatPipe]
 })
 export class SharedExpenseDashboardComponent implements OnInit {
   isLoading = true;

@@ -1,14 +1,17 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { TransactionClass } from '../models/transactionClass.model';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TransactionClassService } from '../services/transaction-class.service';
+import { LoadingComponent } from '../../../core/components/loading/loading.component';
+import { NgIf } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-transaction-class-edit',
     templateUrl: './transaction-class-edit.component.html',
     styleUrls: ['./transaction-class-edit.component.css'],
-    standalone: false
+    imports: [LoadingComponent, NgIf, FormsModule, RouterLink]
 })
 export class TransactionClassEditComponent implements OnInit, OnDestroy{
   isLoading: boolean = true;

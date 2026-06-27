@@ -1,15 +1,18 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { CardService } from '../services/card.service';
 import { Card } from '../models/card.model';
 import { CardUpdateRequest } from '../models/card-update-request.model';
+import { LoadingComponent } from '../../../core/components/loading/loading.component';
+import { NgIf } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-card-edit',
     templateUrl: './card-edit.component.html',
     styleUrls: ['./card-edit.component.css'],
-    standalone: false
+    imports: [LoadingComponent, NgIf, FormsModule, RouterLink]
 })
 export class CardEditComponent implements OnInit, OnDestroy {
   isLoading: boolean = true;

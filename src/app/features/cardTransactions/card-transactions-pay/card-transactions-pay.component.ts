@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AccountService } from 'src/app/features/account/services/account.service';
 import { CardService } from 'src/app/features/card/services/card.service';
 import { CardTransactionsService } from '../services/card-transactions.service';
@@ -10,12 +10,17 @@ import { TmplAstVariable } from '@angular/compiler';
 import { SharedExpenseService } from 'src/app/features/shared-expenses/services/shared-expense.service';
 import { CardTransactionDiscountService } from 'src/app/features/card-transaction-discount/services/card-transaction-discount.service';
 import { catchError, merge, of, switchMap } from 'rxjs';
+import { LoadingComponent } from '../../../core/components/loading/loading.component';
+import { NgIf, NgFor, DatePipe } from '@angular/common';
+import { CurrencyInputDirective } from '../../../shared/directives/currency-input.directive';
+import { RouterLink } from '@angular/router';
+import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 
 @Component({
     selector: 'app-card-transactions-pay',
     templateUrl: './card-transactions-pay.component.html',
     styleUrls: ['./card-transactions-pay.component.css'],
-    standalone: false
+    imports: [LoadingComponent, NgIf, FormsModule, ReactiveFormsModule, NgFor, CurrencyInputDirective, RouterLink, DatePipe, CurrencyFiatFormatPipe]
 })
 export class CardTransactionsPayComponent implements OnInit {
   isLoading: boolean = true;

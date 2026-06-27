@@ -12,6 +12,10 @@ import { CardTransactionPending } from '../../cardTransactions/models/cardTransa
 import { AssetService } from '../../asset/services/asset.service';
 import { Asset } from '../../asset/models/asset.model';
 import { SharedExpenseService } from '../../shared-expenses/services/shared-expense.service';
+import { LoadingComponent } from '../../../core/components/loading/loading.component';
+import { NgIf, NgFor, NgClass, SlicePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 
 Chart.register(...registerables);
 
@@ -19,7 +23,7 @@ Chart.register(...registerables);
     selector: 'app-home',
     templateUrl: './home.component.html',
     styleUrls: ['./home.component.css'],
-    standalone: false
+    imports: [LoadingComponent, NgIf, RouterLink, NgFor, NgClass, SlicePipe, CurrencyFiatFormatPipe]
 })
 export class HomeComponent implements OnInit, AfterViewInit {
   isLoading: boolean = true;

@@ -1,11 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { Person } from '../models/person.model';
 import { PersonService } from '../services/person.service';
+import { LoadingComponent } from '../../../core/components/loading/loading.component';
+import { NgIf, NgFor } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 @Component({
     selector: 'app-people-list',
     templateUrl: './people-list.component.html',
-    standalone: false
+    imports: [LoadingComponent, NgIf, RouterLink, NgFor]
 })
 export class PeopleListComponent implements OnInit {
   isLoading: boolean = true;

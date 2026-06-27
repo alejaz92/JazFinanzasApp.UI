@@ -1,12 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { Asset } from '../models/asset.model';
 import { AssetService } from '../services/asset.service';
+import { NgIf, NgFor } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-asset-management',
     templateUrl: './asset-management.component.html',
     styleUrls: ['./asset-management.component.css'],
-    standalone: false
+    imports: [NgIf, FormsModule, NgFor]
 })
 export class AssetManagementComponent implements OnInit {
   isLoading: boolean = true;

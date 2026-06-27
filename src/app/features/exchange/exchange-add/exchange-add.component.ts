@@ -1,14 +1,17 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TransactionService } from '../../transaction/services/transaction.service';
 import { AccountService } from '../../account/services/account.service';
 import { AssetService } from '../../asset/services/asset.service';
+import { NgIf, NgFor } from '@angular/common';
+import { CurrencyInputDirective } from '../../../shared/directives/currency-input.directive';
+import { RouterLink } from '@angular/router';
 
 @Component({
     selector: 'app-exchange-add',
     templateUrl: './exchange-add.component.html',
     styleUrls: ['./exchange-add.component.css'],
-    standalone: false
+    imports: [NgIf, FormsModule, ReactiveFormsModule, NgFor, CurrencyInputDirective, RouterLink]
 })
 export class ExchangeAddComponent implements OnInit {
   transactionForm!: FormGroup;

@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TransactionService } from '../services/transaction.service';
 import { AccountService } from '../../account/services/account.service';
 import { AssetService } from '../../asset/services/asset.service';
@@ -9,13 +9,18 @@ import { SharedExpenseFormData } from '../../shared-expenses/models/shared-expen
 import { Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
+import { LoadingComponent } from '../../../core/components/loading/loading.component';
+import { NgIf, NgFor } from '@angular/common';
+import { CurrencyInputDirective } from '../../../shared/directives/currency-input.directive';
+import { SharedExpenseFormComponent } from '../../shared-expenses/shared-expense-form/shared-expense-form.component';
+import { RouterLink } from '@angular/router';
 
 
 @Component({
     selector: 'app-transaction-add',
     templateUrl: './transaction-add.component.html',
     styleUrls: ['./transaction-add.component.css'],
-    standalone: false
+    imports: [LoadingComponent, NgIf, FormsModule, ReactiveFormsModule, NgFor, CurrencyInputDirective, SharedExpenseFormComponent, RouterLink]
 })
 export class TransactionAddComponent implements OnInit, OnDestroy {
   isLoading: boolean = true;

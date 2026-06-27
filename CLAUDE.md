@@ -21,9 +21,13 @@ npm test
 npm run watch
 ```
 
-## Arquitectura — Angular 19, NgModules
+## Arquitectura — Angular 19, standalone components
 
-Migrado de Angular 16 a 19 (ver `docs/plans/migracion-angular.md`). A diferencia de proyectos Angular más nuevos creados desde cero, esta app usa **NgModules** (no standalone components): `AppModule` raíz con `app-routing.module.ts`, y `SharedModule` para lo reutilizable. Esto es una decisión deliberada, no una limitación de versión — `angular.json` fija `standalone: false` como default de los schematics (`ng generate component/directive/pipe`). Al crear un componente/pipe/directiva nuevo, declararlo en el módulo correspondiente (el del feature, o `SharedModule` si es genérico) — no asumir standalone por default.
+Migrado de Angular 16 a 19 (ver `docs/plans/migracion-angular.md`) y luego de NgModules a standalone components con lazy loading por ruta (ver `docs/plans/migracion-standalone-components.md`). No hay `AppModule`/`SharedModule` — cada componente, pipe y directiva es standalone y declara sus propios `imports`. El bootstrap vive en `main.ts` (`bootstrapApplication(AppComponent, { providers: [...] })`), las rutas en `src/app/app.routes.ts`. Al crear un componente/pipe/directiva nuevo, el default de los schematics (`ng generate component/directive/pipe`) ya es `standalone: true` — no hace falta declararlo en ningún módulo.
+
+### Routing y lazy loading
+
+`app.routes.ts` define las rutas con `loadComponent: () => import('./...').then(m => m.XComponent)` — cada componente de ruta es su propio chunk, no hay carga eager. Al agregar una ruta nueva, seguir el mismo patrón `loadComponent` en vez de importar el componente al tope del archivo (eso volvería a meterlo en el bundle inicial).
 
 ### Estructura de `src/app/`
 
@@ -51,11 +55,11 @@ app/
 │   ├── shared-expenses/   # feature en desarrollo, ver docs/plans/gastos-compartidos.md
 │   ├── report/
 │   └── user/
+├── app.routes.ts     # rutas con loadComponent (lazy)
 └── shared/
     ├── directives/
     ├── pipes/        # commerceType, currencyFiatFormat, currencyFiatInputFormat, currencyInvestmentFormat, movementType
-    ├── services/
-    └── shared.module.ts
+    └── services/
 ```
 
 ### Comunicación con la API

@@ -1,16 +1,19 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CryptoTransactionService } from '../services/crypto-transaction.service';
 import { AccountService } from '../../account/services/account.service';
 import { AssetService } from '../../asset/services/asset.service';
 import { PortfolioService } from '../../portfolios/services/portfolio.service';
 import { Portfolio } from '../../portfolios/models/portfolio.model';
+import { NgIf, NgFor } from '@angular/common';
+import { InvestmentInputDirective } from '../../../shared/directives/investment-input.directive';
+import { RouterLink } from '@angular/router';
 
 @Component({
     selector: 'app-crypto-transaction-add',
     templateUrl: './crypto-transaction-add.component.html',
     styleUrls: ['./crypto-transaction-add.component.css'],
-    standalone: false
+    imports: [NgIf, FormsModule, ReactiveFormsModule, NgFor, InvestmentInputDirective, RouterLink]
 })
 export class CryptoTransactionAddComponent implements OnInit {
   cryptoTransactionForm!: FormGroup;
