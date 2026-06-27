@@ -7,7 +7,7 @@ import { NavbarComponent } from './core/components/navbar/navbar.component';
 import { CardListComponent } from './features/card/card-list/card-list.component';
 import { CardAddComponent } from './features/card/card-add/card-add.component';
 import { FormsModule } from '@angular/forms';
-import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { CardEditComponent } from './features/card/card-edit/card-edit.component';
 import { LoginComponent } from './features/auth/login/login.component';
 import { JwtInterceptor } from './core/interceptors/jwt';
@@ -68,83 +68,76 @@ import { BankPromotionFormComponent } from './features/shared-expenses/bank-prom
 
 
 
-@NgModule({
-  declarations: [
-    AppComponent,
-    NavbarComponent,
-    CardListComponent,
-    CardAddComponent,
-    CardEditComponent,
-    LoginComponent,
-    HomeComponent,
-    AccountListComponent,
-    AccountAddComponent,
-    AccountEditComponent,
-    RegisterComponent,
-    ProfileComponent,
-    ChangePasswordComponent,
-    AccountAssetTypeComponent,
-    TransactionClassListComponent,
-    TransactionClassAddComponent,
-    TransactionClassEditComponent,
-    AssetManagementComponent,
-    TransactionListComponent,
-    MovementTypePipe,
-    TransactionAddComponent,
-    TransactionEditComponent,
-    TransactionRefundComponent,
-    CardTransactionsListComponent,
-    CardTransactionsAddComponent,
-    CardTransactionsPayComponent,
-    CardTransactionsEditRecurrentComponent,
-    CryptoTransactionListComponent,
-    CryptoTransactionAddComponent,
-    StockTransactionListComponent,
-    StockTransactionAddComponent,
-    CurrencyExchangeListComponent,
-    CurrencyExchangeAddComponent,
-    ExchangeListComponent,
-    ExchangeAddComponent,
-    BalanceComponent,
-    ReportsComponent,
-    LoadingComponent,
-    ResetPasswordComponent,
-    FooterComponent,
-    PortfolioListComponent,
-    PortfolioAddComponent,
-    PortfolioEditComponent,
-    PortfolioExchangeListComponent,
-    PortfolioExchangeAddComponent,
-    SplitEventComponent,
-    PeopleListComponent,
-    PeopleAddComponent,
-    PeopleEditComponent,
-    SharedExpenseFormComponent,
-    SharedExpenseDashboardComponent,
-    BankPromotionFormComponent
-  ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    FormsModule,
-    HttpClientModule,
-    ReactiveFormsModule,
-    NgxPaginationModule,
-    CommonModule,
-    SharedModule,
-    NgxSpinnerModule.forRoot({ type: 'ball-spin-clockwise-fade-rotating' }),
-    ServiceWorkerModule.register('ngsw-worker.js', {
-      enabled: !isDevMode(),
-      // Register the ServiceWorker as soon as the application is stable
-      // or after 30 seconds (whichever comes first).
-      registrationStrategy: 'registerWhenStable:30000'
-    })    
-  ],
-  providers: [ {
-    provide: HTTP_INTERCEPTORS,
-    useClass: JwtInterceptor,
-    multi: true
-  }],
-  bootstrap: [AppComponent]
-})
+@NgModule({ declarations: [
+        AppComponent,
+        NavbarComponent,
+        CardListComponent,
+        CardAddComponent,
+        CardEditComponent,
+        LoginComponent,
+        HomeComponent,
+        AccountListComponent,
+        AccountAddComponent,
+        AccountEditComponent,
+        RegisterComponent,
+        ProfileComponent,
+        ChangePasswordComponent,
+        AccountAssetTypeComponent,
+        TransactionClassListComponent,
+        TransactionClassAddComponent,
+        TransactionClassEditComponent,
+        AssetManagementComponent,
+        TransactionListComponent,
+        MovementTypePipe,
+        TransactionAddComponent,
+        TransactionEditComponent,
+        TransactionRefundComponent,
+        CardTransactionsListComponent,
+        CardTransactionsAddComponent,
+        CardTransactionsPayComponent,
+        CardTransactionsEditRecurrentComponent,
+        CryptoTransactionListComponent,
+        CryptoTransactionAddComponent,
+        StockTransactionListComponent,
+        StockTransactionAddComponent,
+        CurrencyExchangeListComponent,
+        CurrencyExchangeAddComponent,
+        ExchangeListComponent,
+        ExchangeAddComponent,
+        BalanceComponent,
+        ReportsComponent,
+        LoadingComponent,
+        ResetPasswordComponent,
+        FooterComponent,
+        PortfolioListComponent,
+        PortfolioAddComponent,
+        PortfolioEditComponent,
+        PortfolioExchangeListComponent,
+        PortfolioExchangeAddComponent,
+        SplitEventComponent,
+        PeopleListComponent,
+        PeopleAddComponent,
+        PeopleEditComponent,
+        SharedExpenseFormComponent,
+        SharedExpenseDashboardComponent,
+        BankPromotionFormComponent
+    ],
+    bootstrap: [AppComponent], imports: [BrowserModule,
+        AppRoutingModule,
+        FormsModule,
+        ReactiveFormsModule,
+        NgxPaginationModule,
+        CommonModule,
+        SharedModule,
+        NgxSpinnerModule.forRoot({ type: 'ball-spin-clockwise-fade-rotating' }),
+        ServiceWorkerModule.register('ngsw-worker.js', {
+            enabled: !isDevMode(),
+            // Register the ServiceWorker as soon as the application is stable
+            // or after 30 seconds (whichever comes first).
+            registrationStrategy: 'registerWhenStable:30000'
+        })], providers: [{
+            provide: HTTP_INTERCEPTORS,
+            useClass: JwtInterceptor,
+            multi: true
+        }, provideHttpClient(withInterceptorsFromDi())] })
 export class AppModule { }
