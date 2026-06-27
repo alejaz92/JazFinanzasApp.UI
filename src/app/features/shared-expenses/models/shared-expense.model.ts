@@ -1,17 +1,7 @@
-export const SharedExpenseSplitType = {
-  Person: 0,
-  BankPromotion: 1
-} as const;
-
 export interface SplitInput {
-  personId?: number;
-  splitType?: number; // 0=Person, 1=BankPromotion (ver SharedExpenseSplitType)
+  personId: number;
   amount: number;
   notes?: string;
-  // Solo para splitType = BankPromotion
-  accountId?: number;
-  date?: string;
-  transactionClassId?: number;
 }
 
 export interface SharedExpenseFormData {
@@ -21,9 +11,8 @@ export interface SharedExpenseFormData {
 
 export interface SharedExpenseSplit {
   id: number;
-  personId?: number;
+  personId: number;
   personName: string;
-  splitType?: number; // 0=Person, 1=BankPromotion
   amount: number;
   amountReimbursed: number;
   amountApplied?: number;

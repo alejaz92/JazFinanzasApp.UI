@@ -7,10 +7,10 @@ import { TransactionClassService } from 'src/app/features/transactionClass/servi
 import { AssetService } from 'src/app/features/asset/services/asset.service';
 import { CardService } from 'src/app/features/card/services/card.service';
 import { CardTransactionsAdd } from '../models/cardTransactions-add.model';
-import { first, of, switchMap } from 'rxjs';
 import { SharedExpenseService } from 'src/app/features/shared-expenses/services/shared-expense.service';
-import { SharedExpenseFormData, SharedExpenseSplitType, SplitInput } from 'src/app/features/shared-expenses/models/shared-expense.model';
+import { SharedExpenseFormData, SplitInput } from 'src/app/features/shared-expenses/models/shared-expense.model';
 import { BankPromotionFormData } from 'src/app/features/shared-expenses/bank-promotion-form/bank-promotion-form.component';
+import { CardTransactionDiscountService } from 'src/app/features/card-transaction-discount/services/card-transaction-discount.service';
 
 @Component({
   selector: 'app-card-transactions-add',
@@ -41,6 +41,7 @@ export class CardTransactionsAddComponent implements OnInit {
     private assetService: AssetService,
     private cardService: CardService,
     private sharedExpenseService: SharedExpenseService,
+    private cardTransactionDiscountService: CardTransactionDiscountService,
     private http: HttpClient
   ) {}
 
@@ -197,33 +198,43 @@ export class CardTransactionsAddComponent implements OnInit {
       return;
     }
 
-    const splits: SplitInput[] = [
-      ...(this.sharedExpenseData?.splits ?? []),
-      ...(this.bankPromotionActive && this.bankPromotionData ? [{
-        splitType: SharedExpenseSplitType.BankPromotion,
-        amount: this.bankPromotionData.amount,
-        accountId: this.bankPromotionData.accountId,
-        date: this.bankPromotionData.date,
-        transactionClassId: this.bankPromotionData.transactionClassId,
-        notes: this.bankPromotionData.notes
-      } as SplitInput] : [])
-    ];
+    const splits: SplitInput[] = this.sharedExpenseData?.splits ?? [];
+    const createSharedExpense = splits.length > 0;
+    const createDiscount = this.bankPromotionActive && !!this.bankPromotionData;
+    const sharedExpenseNotes = this.sharedExpenseData?.notes ?? '';
+    const bankPromotionData = this.bankPromotionData;
 
-    const createAndLinkSharedExpense = splits.length > 0;
-
-    this.cardTransactionService.addCardTransaction(cardTransactionAdd).pipe(
-      switchMap(response => {
-        if (createAndLinkSharedExpense) {
-          return this.sharedExpenseService.createSharedExpenseCard({
+    this.cardTransactionService.addCardTransaction(cardTransactionAdd).subscribe({
+      next: (response) => {
+        // Gasto compartido con personas y promoción bancaria son recursos independientes:
+        // cada uno se crea contra su propio endpoint y reporta su propio error sin bloquear al otro.
+        if (createSharedExpense) {
+          this.sharedExpenseService.createSharedExpenseCard({
             cardTransactionId: response.id,
-            notes: this.sharedExpenseData?.notes ?? '',
+            notes: sharedExpenseNotes,
             splits
+          }).subscribe({
+            error: (err) => {
+              this.sharedExpenseError = err?.error?.message || 'Error al guardar el gasto compartido.';
+            }
           });
         }
-        return of(null);
-      })
-    ).subscribe({
-      next: () => {
+
+        if (createDiscount && bankPromotionData) {
+          this.cardTransactionDiscountService.create({
+            cardTransactionId: response.id,
+            amount: bankPromotionData.amount,
+            accountId: bankPromotionData.accountId,
+            date: bankPromotionData.date,
+            transactionClassId: bankPromotionData.transactionClassId,
+            notes: bankPromotionData.notes
+          }).subscribe({
+            error: (err) => {
+              this.bankPromotionError = err?.error?.message || 'Error al guardar la promoción bancaria.';
+            }
+          });
+        }
+
         this.cardTransactionForm.reset();
         this.cardTransactionForm.controls['totalAmount'].setValue(0);
         this.cardTransactionForm.controls['installments'].setValue(1);
@@ -240,7 +251,7 @@ export class CardTransactionsAddComponent implements OnInit {
         }, 3000);
       },
       error: (err) => {
-        const msg = err?.error?.message || 'Error al guardar el gasto compartido.';
+        const msg = err?.error?.message || 'Error al guardar el gasto de tarjeta.';
         this.sharedExpenseError = msg;
       }
     });

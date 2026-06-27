@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
-import { SharedExpenseFormData, SharedExpenseSplitType, SplitInput } from '../models/shared-expense.model';
+import { SharedExpenseFormData, SplitInput } from '../models/shared-expense.model';
 import { PersonService } from '../../people/services/person.service';
 import { Person } from '../../people/models/person.model';
 
@@ -137,7 +137,6 @@ export class SharedExpenseFormComponent implements OnInit, OnChanges {
 
     const splits: SplitInput[] = this.rows.map(r => ({
       personId: r.personId,
-      splitType: SharedExpenseSplitType.Person,
       amount: r.amount
     }));
 

@@ -8,6 +8,7 @@ import { TransactionClassService } from 'src/app/features/transactionClass/servi
 import { AssetService } from 'src/app/features/asset/services/asset.service';
 import { TmplAstVariable } from '@angular/compiler';
 import { SharedExpenseService } from 'src/app/features/shared-expenses/services/shared-expense.service';
+import { catchError, merge, of, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-card-transactions-pay',
@@ -66,8 +67,38 @@ export class CardTransactionsPayComponent implements OnInit {
     this.loadTransactionClasses();
     
 
-    this.cardPaymentForm.get('card')?.valueChanges.subscribe(() =>  this.loadTable());
-    this.cardPaymentForm.get('paymentMonth')?.valueChanges.subscribe(() => this.loadTable());
+    // switchMap cancela la consulta anterior si card/paymentMonth cambian antes de que responda,
+    // evitando que una respuesta vieja pise la tabla con datos de otra cuota/mes.
+    merge(
+      this.cardPaymentForm.get('card')!.valueChanges,
+      this.cardPaymentForm.get('paymentMonth')!.valueChanges
+    ).pipe(
+      switchMap(() => {
+        const card = this.cardPaymentForm.get('card')?.value;
+        const paymentMonth = this.cardPaymentForm.get('paymentMonth')?.value;
+
+        this.cardTransactionsArray.clear();
+
+        return card && paymentMonth
+          ? this.cardTransactionService.getPaymentCardTransactions(card, paymentMonth).pipe(
+              catchError(() => of(null))
+            )
+          : of(null);
+      })
+    ).subscribe((data) => {
+      if (!data) return;
+
+      this.cardTransactions = data;
+      this.originalTableLength = this.tableLength = this.cardTransactions.length;
+      this.populateCardTransactionsArray(this.cardTransactions);
+
+      if (this.selectedPaymentAssets) {
+        this.updateEditOptions();
+      }
+
+      this.loadReimbursementsPreview(this.cardTransactions);
+    });
+
     this.cardPaymentForm.get('paymentAssets')?.valueChanges.subscribe((value) => {
       this.selectedPaymentAssets = value;
       this.updateEditOptions();
@@ -101,34 +132,6 @@ export class CardTransactionsPayComponent implements OnInit {
     this.accountService.getAccountByTypeName("Moneda").subscribe((data: any) => {
       this.accounts = data;
     });
-  }
-
-  loadTable() {
-    const card = this.cardPaymentForm.get('card')?.value;
-    const paymentMonth = this.cardPaymentForm.get('paymentMonth')?.value;
-
-    this.cardTransactionsArray.clear();
-    
-
-    if (card && paymentMonth) {
-      this.cardTransactionService.getPaymentCardTransactions(card, paymentMonth).subscribe((data: CardTransactionPaymentList[]) => {
-
-
-
-        this.cardTransactions = data;
-
-        this.originalTableLength = this.tableLength = this.cardTransactions.length;
-
-        this.populateCardTransactionsArray(this.cardTransactions);
-
-        if (this.selectedPaymentAssets) {
-          this.updateEditOptions();
-        }
-
-        this.loadReimbursementsPreview(this.cardTransactions);
-
-      });
-    }
   }
 
   private loadReimbursementsPreview(transactions: CardTransactionPaymentList[]): void {
