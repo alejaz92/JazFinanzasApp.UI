@@ -1,4 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { RouterTestingModule } from '@angular/router/testing';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 import { TransactionEditComponent } from './transaction-edit.component';
 
@@ -8,7 +11,9 @@ describe('TransactionEditComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [TransactionEditComponent]
+      declarations: [TransactionEditComponent],
+      imports: [HttpClientTestingModule, RouterTestingModule],
+      schemas: [NO_ERRORS_SCHEMA]
     });
     fixture = TestBed.createComponent(TransactionEditComponent);
     component = fixture.componentInstance;

@@ -1,4 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { RouterTestingModule } from '@angular/router/testing';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 import { CardTransactionsAddComponent } from './card-transactions-add.component';
 
@@ -8,7 +11,9 @@ describe('CardTransactionsAddComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [CardTransactionsAddComponent]
+      declarations: [CardTransactionsAddComponent],
+      imports: [HttpClientTestingModule, RouterTestingModule],
+      schemas: [NO_ERRORS_SCHEMA]
     });
     fixture = TestBed.createComponent(CardTransactionsAddComponent);
     component = fixture.componentInstance;
