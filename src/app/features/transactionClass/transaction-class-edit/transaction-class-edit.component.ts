@@ -5,9 +5,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TransactionClassService } from '../services/transaction-class.service';
 
 @Component({
-  selector: 'app-transaction-class-edit',
-  templateUrl: './transaction-class-edit.component.html',
-  styleUrls: ['./transaction-class-edit.component.css']
+    selector: 'app-transaction-class-edit',
+    templateUrl: './transaction-class-edit.component.html',
+    styleUrls: ['./transaction-class-edit.component.css'],
+    standalone: false
 })
 export class TransactionClassEditComponent implements OnInit, OnDestroy{
   isLoading: boolean = true;

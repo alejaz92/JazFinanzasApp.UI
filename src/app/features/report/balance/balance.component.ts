@@ -6,9 +6,10 @@ import { Balance } from '../models/Balance.modelt';
 import { TotalBalance } from '../models/TotalBalance.model';
 
 @Component({
-  selector: 'app-balance',
-  templateUrl: './balance.component.html',
-  styleUrls: ['./balance.component.css']
+    selector: 'app-balance',
+    templateUrl: './balance.component.html',
+    styleUrls: ['./balance.component.css'],
+    standalone: false
 })
 export class BalanceComponent implements OnInit {
   isLoading: boolean = true;

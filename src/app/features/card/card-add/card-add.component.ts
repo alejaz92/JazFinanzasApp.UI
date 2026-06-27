@@ -5,9 +5,10 @@ import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-card-add',
-  templateUrl: './card-add.component.html',
-  styleUrls: ['./card-add.component.css']
+    selector: 'app-card-add',
+    templateUrl: './card-add.component.html',
+    styleUrls: ['./card-add.component.css'],
+    standalone: false
 })
 export class CardAddComponent implements OnDestroy {
 

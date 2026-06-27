@@ -11,9 +11,10 @@ interface SplitRow {
 }
 
 @Component({
-  selector: 'app-shared-expense-form',
-  templateUrl: './shared-expense-form.component.html',
-  styleUrls: ['./shared-expense-form.component.css']
+    selector: 'app-shared-expense-form',
+    templateUrl: './shared-expense-form.component.html',
+    styleUrls: ['./shared-expense-form.component.css'],
+    standalone: false
 })
 export class SharedExpenseFormComponent implements OnInit, OnChanges {
   @Input() totalAmount: number = 0;

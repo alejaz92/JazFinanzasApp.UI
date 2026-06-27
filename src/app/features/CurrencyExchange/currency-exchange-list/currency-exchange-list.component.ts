@@ -2,9 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { CurrencyExchangeService } from '../services/currency-exchange.service';
 
 @Component({
-  selector: 'app-currency-exchange-list',
-  templateUrl: './currency-exchange-list.component.html',
-  styleUrls: ['./currency-exchange-list.component.css']
+    selector: 'app-currency-exchange-list',
+    templateUrl: './currency-exchange-list.component.html',
+    styleUrls: ['./currency-exchange-list.component.css'],
+    standalone: false
 })
 export class CurrencyExchangeListComponent implements OnInit{
   currencyExchanges: any[] = [];

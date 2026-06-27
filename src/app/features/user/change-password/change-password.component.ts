@@ -5,8 +5,9 @@ import { first } from 'rxjs/operators';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-change-password',
-  templateUrl: './change-password.component.html',
+    selector: 'app-change-password',
+    templateUrl: './change-password.component.html',
+    standalone: false
 })
 export class ChangePasswordComponent implements OnInit {
   changePasswordForm!: FormGroup;

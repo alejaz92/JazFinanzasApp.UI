@@ -6,9 +6,10 @@ import { AssetTypeService } from '../../assetType/services/asset-type.service';
 import { AssetService } from '../../asset/services/asset.service';
 
 @Component({
-  selector: 'app-split-event',
-  templateUrl: './split-event.component.html',
-  styleUrls: ['./split-event.component.css']
+    selector: 'app-split-event',
+    templateUrl: './split-event.component.html',
+    styleUrls: ['./split-event.component.css'],
+    standalone: false
 })
 export class SplitEventComponent implements OnInit {
   splitForm!: FormGroup;

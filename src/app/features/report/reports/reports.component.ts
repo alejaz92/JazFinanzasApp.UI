@@ -21,9 +21,10 @@ import * as echarts from 'echarts';
 
 
 @Component({
-  selector: 'app-reports',
-  templateUrl: './reports.component.html',
-  styleUrls: ['./reports.component.css']
+    selector: 'app-reports',
+    templateUrl: './reports.component.html',
+    styleUrls: ['./reports.component.css'],
+    standalone: false
 })
 export class ReportsComponent implements OnInit {
   isLoading: boolean = true;

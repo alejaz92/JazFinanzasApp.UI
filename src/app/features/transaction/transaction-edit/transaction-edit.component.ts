@@ -11,9 +11,10 @@ import { SharedExpenseService } from '../../shared-expenses/services/shared-expe
 import { SharedExpenseDetail, SharedExpenseFormData } from '../../shared-expenses/models/shared-expense.model';
 
 @Component({
-  selector: 'app-transaction-edit',
-  templateUrl: './transaction-edit.component.html',
-  styleUrls: ['./transaction-edit.component.css']
+    selector: 'app-transaction-edit',
+    templateUrl: './transaction-edit.component.html',
+    styleUrls: ['./transaction-edit.component.css'],
+    standalone: false
 })
 export class TransactionEditComponent implements OnInit, OnDestroy {
   transactionForm!: FormGroup;

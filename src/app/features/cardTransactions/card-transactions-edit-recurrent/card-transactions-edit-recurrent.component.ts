@@ -7,10 +7,11 @@ import { RecurrentCardTransactionPut } from '../models/CardTransaction-recurrent
 import { DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'app-card-transactions-edit-recurrent',
-  templateUrl: './card-transactions-edit-recurrent.component.html',
-  styleUrls: ['./card-transactions-edit-recurrent.component.css'],
-  providers: [DatePipe]
+    selector: 'app-card-transactions-edit-recurrent',
+    templateUrl: './card-transactions-edit-recurrent.component.html',
+    styleUrls: ['./card-transactions-edit-recurrent.component.css'],
+    providers: [DatePipe],
+    standalone: false
 })
 export class CardTransactionsEditRecurrentComponent implements OnInit{
   successMessage: string = '';

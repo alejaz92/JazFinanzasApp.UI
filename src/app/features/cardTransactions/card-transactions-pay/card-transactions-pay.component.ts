@@ -12,9 +12,10 @@ import { CardTransactionDiscountService } from 'src/app/features/card-transactio
 import { catchError, merge, of, switchMap } from 'rxjs';
 
 @Component({
-  selector: 'app-card-transactions-pay',
-  templateUrl: './card-transactions-pay.component.html',
-  styleUrls: ['./card-transactions-pay.component.css']
+    selector: 'app-card-transactions-pay',
+    templateUrl: './card-transactions-pay.component.html',
+    styleUrls: ['./card-transactions-pay.component.css'],
+    standalone: false
 })
 export class CardTransactionsPayComponent implements OnInit {
   isLoading: boolean = true;

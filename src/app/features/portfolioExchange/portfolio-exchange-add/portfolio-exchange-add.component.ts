@@ -6,9 +6,10 @@ import { AssetService } from '../../asset/services/asset.service';
 import { PortfolioService } from '../../portfolios/services/portfolio.service';
 
 @Component({
-  selector: 'app-portfolio-exchange-add',
-  templateUrl: './portfolio-exchange-add.component.html',
-  styleUrls: ['./portfolio-exchange-add.component.css']
+    selector: 'app-portfolio-exchange-add',
+    templateUrl: './portfolio-exchange-add.component.html',
+    styleUrls: ['./portfolio-exchange-add.component.css'],
+    standalone: false
 })
 export class PortfolioExchangeAddComponent implements  OnInit {
   portfolioExchangeForm: any;

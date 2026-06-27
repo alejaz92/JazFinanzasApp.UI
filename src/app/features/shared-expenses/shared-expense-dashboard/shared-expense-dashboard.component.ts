@@ -5,8 +5,9 @@ import { SharedExpenseService } from '../services/shared-expense.service';
 import { AccountService } from '../../account/services/account.service';
 
 @Component({
-  selector: 'app-shared-expense-dashboard',
-  templateUrl: './shared-expense-dashboard.component.html'
+    selector: 'app-shared-expense-dashboard',
+    templateUrl: './shared-expense-dashboard.component.html',
+    standalone: false
 })
 export class SharedExpenseDashboardComponent implements OnInit {
   isLoading = true;

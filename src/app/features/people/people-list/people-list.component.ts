@@ -3,8 +3,9 @@ import { Person } from '../models/person.model';
 import { PersonService } from '../services/person.service';
 
 @Component({
-  selector: 'app-people-list',
-  templateUrl: './people-list.component.html'
+    selector: 'app-people-list',
+    templateUrl: './people-list.component.html',
+    standalone: false
 })
 export class PeopleListComponent implements OnInit {
   isLoading: boolean = true;

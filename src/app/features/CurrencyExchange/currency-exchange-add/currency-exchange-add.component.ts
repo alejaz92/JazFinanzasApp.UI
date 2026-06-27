@@ -5,9 +5,10 @@ import { AccountService } from '../../account/services/account.service';
 import { AssetService } from '../../asset/services/asset.service';
 
 @Component({
-  selector: 'app-currency-exchange-add',
-  templateUrl: './currency-exchange-add.component.html',
-  styleUrls: ['./currency-exchange-add.component.css']
+    selector: 'app-currency-exchange-add',
+    templateUrl: './currency-exchange-add.component.html',
+    styleUrls: ['./currency-exchange-add.component.css'],
+    standalone: false
 })
 export class CurrencyExchangeAddComponent implements OnInit {
   currencyExchangeForm!: FormGroup;

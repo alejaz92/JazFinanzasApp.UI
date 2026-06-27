@@ -5,7 +5,17 @@
   "projects": {
     "JazFinanzasApp.UI": {
       "projectType": "application",
-      "schematics": {},
+      "schematics": {
+        "@schematics/angular:component": {
+          "standalone": false
+        },
+        "@schematics/angular:directive": {
+          "standalone": false
+        },
+        "@schematics/angular:pipe": {
+          "standalone": false
+        }
+      },
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
@@ -69,10 +79,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "JazFinanzasApp.UI:build:production"
+              "buildTarget": "JazFinanzasApp.UI:build:production"
             },
             "development": {
-              "browserTarget": "JazFinanzasApp.UI:build:development"
+              "buildTarget": "JazFinanzasApp.UI:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -80,7 +90,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "JazFinanzasApp.UI:build"
+            "buildTarget": "JazFinanzasApp.UI:build"
           }
         },
         "test": {

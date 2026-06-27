@@ -3,9 +3,10 @@ import { Transaction } from '../models/transaction.model';
 import { TransactionService } from '../services/transaction.service';
 
 @Component({
-  selector: 'app-transaction-list',
-  templateUrl: './transaction-list.component.html',
-  styleUrls: ['./transaction-list.component.css']
+    selector: 'app-transaction-list',
+    templateUrl: './transaction-list.component.html',
+    styleUrls: ['./transaction-list.component.css'],
+    standalone: false
 })
 export class TransactionListComponent implements OnInit {
   isLoading: boolean = true;

@@ -6,9 +6,10 @@ import { Subscription } from 'rxjs';
 import { Portfolio } from '../models/portfolio.model';
 
 @Component({
-  selector: 'app-portfolio-edit',
-  templateUrl: './portfolio-edit.component.html',
-  styleUrls: ['./portfolio-edit.component.css']
+    selector: 'app-portfolio-edit',
+    templateUrl: './portfolio-edit.component.html',
+    styleUrls: ['./portfolio-edit.component.css'],
+    standalone: false
 })
 export class PortfolioEditComponent implements OnInit, OnDestroy {
   isLoading: boolean = true;

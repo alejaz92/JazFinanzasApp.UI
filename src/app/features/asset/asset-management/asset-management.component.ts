@@ -3,9 +3,10 @@ import { Asset } from '../models/asset.model';
 import { AssetService } from '../services/asset.service';
 
 @Component({
-  selector: 'app-asset-management',
-  templateUrl: './asset-management.component.html',
-  styleUrls: ['./asset-management.component.css']
+    selector: 'app-asset-management',
+    templateUrl: './asset-management.component.html',
+    styleUrls: ['./asset-management.component.css'],
+    standalone: false
 })
 export class AssetManagementComponent implements OnInit {
   isLoading: boolean = true;

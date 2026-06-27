@@ -4,9 +4,10 @@ import { AccountService } from '../services/account.service';
 import { ActivatedRoute } from '@angular/router';
 
 @Component({
-  selector: 'app-account-assettype',
-  templateUrl: './account-assettype.component.html',
-  styleUrls: ['./account-assettype.component.css']
+    selector: 'app-account-assettype',
+    templateUrl: './account-assettype.component.html',
+    styleUrls: ['./account-assettype.component.css'],
+    standalone: false
 })
 export class AccountAssetTypeComponent  implements OnInit {
   isLoading: boolean = true;
