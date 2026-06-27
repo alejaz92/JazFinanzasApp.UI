@@ -21,9 +21,9 @@ npm test
 npm run watch
 ```
 
-## Arquitectura — Angular 16, NgModules
+## Arquitectura — Angular 19, NgModules
 
-A diferencia de proyectos Angular más nuevos, esta app usa **NgModules** (no standalone components): `AppModule` raíz con `app-routing.module.ts`, y `SharedModule` para lo reutilizable. Al crear un componente/pipe/directiva nuevo, declararlo en el módulo correspondiente (el del feature, o `SharedModule` si es genérico) — no asumir standalone por default.
+Migrado de Angular 16 a 19 (ver `docs/plans/migracion-angular.md`). A diferencia de proyectos Angular más nuevos creados desde cero, esta app usa **NgModules** (no standalone components): `AppModule` raíz con `app-routing.module.ts`, y `SharedModule` para lo reutilizable. Esto es una decisión deliberada, no una limitación de versión — `angular.json` fija `standalone: false` como default de los schematics (`ng generate component/directive/pipe`). Al crear un componente/pipe/directiva nuevo, declararlo en el módulo correspondiente (el del feature, o `SharedModule` si es genérico) — no asumir standalone por default.
 
 ### Estructura de `src/app/`
 
@@ -86,5 +86,7 @@ Azure Static Web Apps vía GitHub Actions (`azure-static-web-apps-*.yml`, trigge
 
 ```bash
 npm run build
-npx --yes @azure/static-web-apps-cli deploy ./dist/jaz-finanzas-app.ui --deployment-token "<token>" --env production
+npx --yes @azure/static-web-apps-cli deploy ./dist/jaz-finanzas-app.ui/browser --deployment-token "<token>" --env production
 ```
+
+Nota: desde la migración al builder `application` (esbuild/Vite, ver `docs/plans/migracion-angular.md`), el output queda en una subcarpeta `browser/` dentro de `outputPath` (`dist/jaz-finanzas-app.ui/browser/`), no en la raíz como con el builder clásico — tenerlo en cuenta en cualquier script o configuración que referencie la carpeta de build.
