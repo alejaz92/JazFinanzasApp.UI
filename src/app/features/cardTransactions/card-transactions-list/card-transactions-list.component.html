@@ -23,6 +23,7 @@
                     <th>Primer Cuota</th>
                     <th>Ultima Cuota</th>
                     <th class="text-end">Monto Cuota</th>
+                    <th>Descuento</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -38,6 +39,13 @@
                     <td class="align-middle">{{cardTransaction.firstInstallment | date: 'MM/yyyy'}}</td>
                     <td class="align-middle">{{cardTransaction.lastInstallment}}</td>
                     <td class="align-middle text-end">{{cardTransaction.installmentAmount | currencyFiatFormat}}</td>
+                    <td class="align-middle">
+                        <span *ngIf="getDiscount(cardTransaction.id) as discount"
+                              class="badge bg-info-subtle text-info-emphasis"
+                              title="Restan {{ discount.amount - discount.amountApplied | currencyFiatFormat }} de {{ discount.amount | currencyFiatFormat }} por aplicar">
+                            <i class="bi-tag-fill"></i> {{ discount.amount - discount.amountApplied | currencyFiatFormat }}
+                        </span>
+                    </td>
                     <td class="align-middle">
                         <div class="justify-content-around">
                             <button 

@@ -19,6 +19,10 @@ export class CardTransactionDiscountService {
     return this.http.get<CardTransactionDiscountDetail>(`${environment.apiBaseURL}/api/card-transaction-discount/card-transaction/${cardTransactionId}`);
   }
 
+  getActive(): Observable<CardTransactionDiscountDetail[]> {
+    return this.http.get<CardTransactionDiscountDetail[]>(`${environment.apiBaseURL}/api/card-transaction-discount/active`);
+  }
+
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${environment.apiBaseURL}/api/card-transaction-discount/${id}`);
   }
