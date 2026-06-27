@@ -46,7 +46,6 @@ export interface RegisterReimbursementDTO {
   amount: number;
   date: string;
   accountId: number;
-  transactionClassId: number;
 }
 
 export interface PersonDebtSplit {

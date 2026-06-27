@@ -226,7 +226,6 @@ export class CardTransactionsAddComponent implements OnInit {
             amount: bankPromotionData.amount,
             accountId: bankPromotionData.accountId,
             date: bankPromotionData.date,
-            transactionClassId: bankPromotionData.transactionClassId,
             notes: bankPromotionData.notes
           }).subscribe({
             error: (err) => {

@@ -3,7 +3,6 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PersonDebtSplit, PersonDebtSummary } from '../models/shared-expense.model';
 import { SharedExpenseService } from '../services/shared-expense.service';
 import { AccountService } from '../../account/services/account.service';
-import { TransactionClassService } from '../../transactionClass/services/transaction-class.service';
 
 @Component({
   selector: 'app-shared-expense-dashboard',
@@ -16,7 +15,6 @@ export class SharedExpenseDashboardComponent implements OnInit {
   expandedPersonId: number | null = null;
 
   accounts: any[] = [];
-  incomeClasses: any[] = [];
 
   reimbursementForm!: FormGroup;
   selectedSplit: PersonDebtSplit | null = null;
@@ -26,21 +24,18 @@ export class SharedExpenseDashboardComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private sharedExpenseService: SharedExpenseService,
-    private accountService: AccountService,
-    private transactionClassService: TransactionClassService
+    private accountService: AccountService
   ) {}
 
   ngOnInit(): void {
     this.reimbursementForm = this.fb.group({
       amount: [0, [Validators.required, Validators.min(0.01)]],
       date: ['', Validators.required],
-      accountId: ['', Validators.required],
-      transactionClassId: ['', Validators.required]
+      accountId: ['', Validators.required]
     });
 
     this.load();
     this.loadAccounts();
-    this.loadIncomeClasses();
   }
 
   load(): void {
@@ -59,12 +54,6 @@ export class SharedExpenseDashboardComponent implements OnInit {
   loadAccounts(): void {
     this.accountService.getAccountByTypeName('Moneda').subscribe((data: any) => {
       this.accounts = data;
-    });
-  }
-
-  loadIncomeClasses(): void {
-    this.transactionClassService.getAllTransactionClasses().subscribe((data: any) => {
-      this.incomeClasses = data.filter((c: any) => c.incExp === 'I');
     });
   }
 
@@ -95,8 +84,7 @@ export class SharedExpenseDashboardComponent implements OnInit {
     this.reimbursementForm.reset({
       amount: split.pending,
       date: new Date().toISOString().split('T')[0],
-      accountId: '',
-      transactionClassId: ''
+      accountId: ''
     });
   }
 
@@ -120,8 +108,7 @@ export class SharedExpenseDashboardComponent implements OnInit {
       splitId: this.selectedSplit.splitId,
       amount: Number(formValues.amount),
       date: formValues.date,
-      accountId: parseInt(formValues.accountId, 10),
-      transactionClassId: parseInt(formValues.transactionClassId, 10)
+      accountId: parseInt(formValues.accountId, 10)
     }).subscribe({
       next: () => {
         this.closeReimbursementModal();

@@ -3,7 +3,6 @@ export interface CardTransactionDiscountAdd {
   amount: number;
   accountId: number;
   date: string;
-  transactionClassId: number;
   notes?: string;
 }
 

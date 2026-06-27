@@ -147,14 +147,6 @@
                             <option *ngFor="let account of accounts" [value]="account.id">{{ account.name }}</option>
                         </select>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Categoría</label>
-                        <select class="form-select" formControlName="transactionClassId">
-                            <option value="" disabled selected>Seleccione</option>
-                            <option *ngFor="let c of incomeClasses" [value]="c.id">{{ c.description }}</option>
-                        </select>
-                    </div>
-
                     <div *ngIf="reimbursementError" class="alert alert-danger">
                         {{ reimbursementError }}
                     </div>

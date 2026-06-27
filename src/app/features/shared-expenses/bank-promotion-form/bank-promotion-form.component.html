@@ -24,14 +24,6 @@
         <option *ngFor="let a of accounts" [value]="a.id">{{ a.name }}</option>
       </select>
     </div>
-    <div class="col-md-6">
-      <label class="form-label">Categoría</label>
-      <select class="form-select form-select-sm" name="bankPromotionClass"
-              [(ngModel)]="transactionClassId" (ngModelChange)="onChange()">
-        <option value="" disabled selected>Seleccione</option>
-        <option *ngFor="let c of incomeClasses" [value]="c.id">{{ c.description }}</option>
-      </select>
-    </div>
   </div>
   <small class="text-muted">
     El banco acreditó este monto al momento de la compra; se descontará de las próximas cuotas hasta agotarse.
