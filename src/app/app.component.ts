@@ -3,6 +3,7 @@ import { AppInitializerService } from './shared/services/app-initializer.service
 import { NavbarComponent } from './core/components/navbar/navbar.component';
 import { RouterOutlet } from '@angular/router';
 import { FooterComponent } from './core/components/footer/footer.component';
+import { ThemeService } from './core/services/theme.service';
 
 @Component({
     selector: 'app-root',
@@ -13,9 +14,7 @@ import { FooterComponent } from './core/components/footer/footer.component';
 export class AppComponent {
   title = 'JazFinanzasApp';
 
-  constructor() {
-    
-  
-
+  constructor(themeService: ThemeService) {
+    themeService.init();
   }
 }

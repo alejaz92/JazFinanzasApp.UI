@@ -89,7 +89,7 @@
 
     <!-- Resumen de la parte del usuario -->
     <div class="d-flex justify-content-between align-items-center px-2 py-1 rounded"
-         [ngClass]="userShare >= 0 ? 'bg-light' : 'bg-danger text-white'">
+         [ngClass]="userShare >= 0 ? 'bg-body-tertiary' : 'bg-danger text-white'">
       <span><strong>Tu parte:</strong></span>
       <span class="fw-bold">$ {{ userShare | number:'1.2-2' }}</span>
     </div>

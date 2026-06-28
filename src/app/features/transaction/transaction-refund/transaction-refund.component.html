@@ -149,7 +149,7 @@
 
                                 <!-- Contador asignado / total -->
                                 <div class="d-flex justify-content-between px-1 py-1 rounded"
-                                     [ngClass]="hasAnyAllocation && !allocationsValid ? 'bg-danger text-white' : 'bg-light'">
+                                     [ngClass]="hasAnyAllocation && !allocationsValid ? 'bg-danger text-white' : 'bg-body-tertiary'">
                                     <span class="small">Asignado:</span>
                                     <span class="small fw-bold">
                                         $ {{ allocationSum | number:'1.2-2' }} / $ {{ refundAmountValue | number:'1.2-2' }}

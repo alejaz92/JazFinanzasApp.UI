@@ -1,0 +1,105 @@
+@import 'styles/brand';             // 1. Variables de marca (PRIMERO — deben preceder a Bootstrap)
+@import 'bootstrap/scss/bootstrap'; // 2. Bootstrap SCSS (compila usando las variables de arriba)
+
+/* You can add global styles to this file, and also import other style files */
+body {
+    margin-bottom: 30px; /* Ajusta este valor según la altura del footer */
+  }
+  footer {
+    height: 30px; /* Asegúrate de que coincida con este valor */
+  }
+
+// ─── Dark mode: paleta violeta/índigo + overrides de componentes ──────────────
+// Va DESPUÉS del import de Bootstrap: Bootstrap también define su propio bloque
+// [data-bs-theme="dark"] (grises por defecto) y, al tener la misma especificidad,
+// gana el que aparece último en la hoja compilada.
+[data-bs-theme="dark"] {
+  $jf-violet-dark-mode:       #8B72E8;   // primary en oscuro
+  $jf-violet-light-dark-mode: #A892F0;   // acento/hover en oscuro
+  $jf-bg-dark-mode:           #1B1730;   // fondo de página
+  $jf-surface-dark-mode:      #26213F;   // cards/navbar/inputs
+  $jf-tertiary-dark-mode:     #312B52;   // filas de tabla, hover, anidados
+  $jf-border-dark-mode:       #3D3660;
+  $jf-text-dark-mode:         #E4E1F2;   // texto general
+
+  // ── Reemplaza los grises de Bootstrap con tonos violeta ─────────────────────
+  --bs-body-bg:                  #{$jf-bg-dark-mode};
+  --bs-body-bg-rgb:               27, 23, 48;
+  --bs-body-color:               #{$jf-text-dark-mode};
+  --bs-body-color-rgb:           228, 225, 242;
+  --bs-emphasis-color:           #ffffff;
+  --bs-emphasis-color-rgb:       255, 255, 255;
+  --bs-secondary-color:          rgba(228, 225, 242, 0.75);
+  --bs-secondary-color-rgb:      228, 225, 242;
+  --bs-secondary-bg:             #{$jf-surface-dark-mode};
+  --bs-secondary-bg-rgb:          38, 33, 63;
+  --bs-tertiary-color:           rgba(228, 225, 242, 0.5);
+  --bs-tertiary-color-rgb:       228, 225, 242;
+  --bs-tertiary-bg:              #{$jf-tertiary-dark-mode};
+  --bs-tertiary-bg-rgb:           49, 43, 82;
+  --bs-border-color:             #{$jf-border-dark-mode};
+  --bs-border-color-translucent: rgba(255, 255, 255, 0.15);
+  --bs-heading-color:            #ffffff;
+  --bs-primary:                  #{$jf-violet-dark-mode};
+  --bs-primary-rgb:              139, 114, 232;
+  --bs-link-color:               #{$jf-violet-light-dark-mode};
+  --bs-link-color-rgb:           168, 146, 240;
+  --bs-link-hover-color:         #C4B4F7;
+  --bs-link-hover-color-rgb:     196, 180, 247;
+
+  // ── Cards: un tono más claro que la página para dar profundidad ────────────
+  .card {
+    --bs-card-bg:           var(--bs-secondary-bg);
+    --bs-card-border-color: var(--bs-border-color);
+  }
+
+  // ── Dropdowns: igual que cards ─────────────────────────────────────────────
+  .dropdown-menu {
+    --bs-dropdown-bg:            var(--bs-secondary-bg);
+    --bs-dropdown-border-color:  var(--bs-border-color);
+    --bs-dropdown-link-hover-bg: var(--bs-tertiary-bg);
+  }
+
+  // ── Modales ────────────────────────────────────────────────────────────────
+  .modal-content {
+    --bs-modal-bg: var(--bs-secondary-bg);
+    background-color: var(--bs-secondary-bg);
+    border-color: var(--bs-border-color);
+  }
+
+  // ── table-secondary (tfoot de totales) no adapta bien en dark mode ─────────
+  .table-secondary {
+    --bs-table-bg:            var(--bs-secondary-bg);
+    --bs-table-striped-bg:    var(--bs-secondary-bg);
+    --bs-table-hover-bg:      var(--bs-tertiary-bg);
+    --bs-table-border-color:  var(--bs-border-color);
+    --bs-table-color:         var(--bs-body-color);
+  }
+
+  // ── table-danger / table-success: Bootstrap las define con colores fijos
+  //    (no variables), así que nunca adaptan a dark mode por sí solas.
+  //    Se reconstruyen con los tokens *-subtle/-text-emphasis que Bootstrap
+  //    sí adapta correctamente en su propio bloque dark.
+  // Nota: el color de texto de cada celda resuelve la cadena de fallback
+  // --bs-table-color-state → --bs-table-color-type → --bs-table-color, y
+  // .table-striped fuerza --bs-table-color-type a --bs-table-striped-color
+  // en filas impares — por eso hay que fijar también --bs-table-striped-color
+  // (no solo --bs-table-color) para que el texto no cambie fila por medio.
+  .table-danger {
+    --bs-table-bg:            var(--bs-danger-bg-subtle);
+    --bs-table-striped-bg:    var(--bs-danger-bg-subtle);
+    --bs-table-striped-color: var(--bs-danger-text-emphasis);
+    --bs-table-hover-bg:      var(--bs-danger-border-subtle);
+    --bs-table-border-color:  var(--bs-danger-border-subtle);
+    --bs-table-color:         var(--bs-danger-text-emphasis);
+  }
+
+  .table-success {
+    --bs-table-bg:            var(--bs-success-bg-subtle);
+    --bs-table-striped-bg:    var(--bs-success-bg-subtle);
+    --bs-table-striped-color: var(--bs-success-text-emphasis);
+    --bs-table-hover-bg:      var(--bs-success-border-subtle);
+    --bs-table-border-color:  var(--bs-success-border-subtle);
+    --bs-table-color:         var(--bs-success-text-emphasis);
+  }
+}

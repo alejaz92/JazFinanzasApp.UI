@@ -1,0 +1,43 @@
+// ─── Paleta JazFinanzasApp (claro) ─────────────────────────────
+$jf-violet:       #5B3DD9;   // Color principal — navbar, botones, links
+$jf-violet-light: #8B72E8;   // Acento — hover, badges, highlights
+$jf-violet-dark:  #3A1F9E;   // Contraste — texto sobre fondo claro
+$jf-bg:           #F6F5FC;   // Fondo de página y cards
+$jf-surface:      #FFFFFF;   // Cards/navbar
+$jf-text:         #332E4D;   // Texto general y tablas
+
+// ─── Sobreescrituras Bootstrap ──────────────────────────────────
+$primary:                $jf-violet;
+$body-color:             $jf-text;
+$body-bg:                $jf-bg;
+$font-family-sans-serif: 'Inter', system-ui, -apple-system, sans-serif;
+
+// ─── Fuente Inter (self-hosted) ──────────────────────────────────
+@font-face {
+  font-family: 'Inter';
+  src: url('/assets/fonts/Inter-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('/assets/fonts/Inter-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('/assets/fonts/Inter-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('/assets/fonts/Inter-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}

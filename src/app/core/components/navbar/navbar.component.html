@@ -58,6 +58,14 @@
         </ul>
         <ul class="navbar-nav ms-auto"> <!-- Alineado a la derecha con ms-auto -->
 
+          <li class="nav-item d-flex align-items-center me-2">
+            <button class="btn btn-outline-primary btn-sm"
+                    (click)="themeService.toggle()"
+                    [title]="themeService.isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'">
+              <i [class]="themeService.isDark ? 'bi bi-sun-fill' : 'bi bi-moon-fill'"></i>
+            </button>
+          </li>
+
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
              {{ username }}

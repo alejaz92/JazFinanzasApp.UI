@@ -4,6 +4,7 @@ import { filter } from 'rxjs';
 import { AuthService } from 'src/app/features/auth/services/auth.service';
 import { UserService } from 'src/app/features/user/services/user.service';
 import { NgIf } from '@angular/common';
+import { ThemeService } from '../../services/theme.service';
 
 @Component({
     selector: 'app-navbar',
@@ -16,9 +17,10 @@ export class NavbarComponent implements OnInit {
   isAdmin: boolean = false;
 
   constructor(
-    public router: Router, 
-    private authService: AuthService, 
-    private userService: UserService) { }
+    public router: Router,
+    private authService: AuthService,
+    private userService: UserService,
+    public themeService: ThemeService) { }
 
 
   ngOnInit(): void {
