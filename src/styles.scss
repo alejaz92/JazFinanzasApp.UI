@@ -1,5 +1,6 @@
 @import 'styles/brand';             // 1. Variables de marca (PRIMERO — deben preceder a Bootstrap)
 @import 'bootstrap/scss/bootstrap'; // 2. Bootstrap SCSS (compila usando las variables de arriba)
+@import 'ngx-toastr/toastr';        // 3. Resto de dependencias
 
 /* You can add global styles to this file, and also import other style files */
 body {
@@ -8,6 +9,38 @@ body {
   footer {
     height: 30px; /* Asegúrate de que coincida con este valor */
   }
+
+// ─── Convención de tablas de REPORTES (Fase 13, no listados CRUD) ─────────
+// Equivalente propio del `table-dark` que JazSIGE usa en sus tablas de
+// reportes (read-only, con fila de totales). Los listados CRUD (account-list,
+// etc.) NO usan esto — esos siguen el patrón `table-striped table-bordered`
+// con thead plano, igual que los catálogos de JazSIGE (unit-list, customer-list).
+// Usa las custom properties de Bootstrap (mismo mecanismo que .table-dark/
+// .table-light) para heredar el primary de cada tema sin override aparte en oscuro.
+.table-header-brand {
+  --bs-table-bg:           var(--bs-primary);
+  --bs-table-color:        #fff;
+  --bs-table-border-color: var(--bs-primary);
+}
+
+// ─── Convención de botones de fila: ícono circular (puerto de JazSIGE) ─────
+// Botones rectangulares con texto/ícono quedan demasiado anchos y descentrados
+// en filas de tabla — JazSIGE usa un círculo de ícono fijo en su lugar.
+.btn-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+}
+
+.btn-icon i {
+  font-size: 1.2rem;
+  color: #fff;
+}
 
 // ─── Dark mode: paleta violeta/índigo + overrides de componentes ──────────────
 // Va DESPUÉS del import de Bootstrap: Bootstrap también define su propio bloque

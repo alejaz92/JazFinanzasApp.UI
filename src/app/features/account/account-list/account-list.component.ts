@@ -5,30 +5,39 @@ import { AccountService } from '../services/account.service';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { NgIf, NgFor } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-account-list',
     templateUrl: './account-list.component.html',
     styleUrls: ['./account-list.component.css'],
-    imports: [LoadingComponent, NgIf, RouterLink, NgFor]
+    imports: [LoadingComponent, NgIf, RouterLink, NgFor, FormsModule]
 })
 export class AccountListComponent implements OnInit {
   isLoading: boolean = true;
   accounts: any[] | null = null;
+  searchTerm: string = '';
   constructor(private AccountService: AccountService) {
 
    }
 
   ngOnInit(): void {
 
-   
+
     this.AccountService.getAllAccounts().subscribe((response) => {
       this.accounts = response;
 
       this.isLoading = false;
     });
 
-    
+
+  }
+
+  get filteredAccounts(): any[] {
+    if (!this.accounts) return [];
+    const term = this.searchTerm.trim().toLowerCase();
+    if (!term) return this.accounts;
+    return this.accounts.filter(account => account.name.toLowerCase().includes(term));
   }
   
   onDelete(accountId: number): void {

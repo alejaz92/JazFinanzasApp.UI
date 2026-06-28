@@ -16,6 +16,7 @@ import { LoadingComponent } from '../../../core/components/loading/loading.compo
 import { NgIf, NgFor, NgClass, SlicePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
+import { ToastService } from '../../../core/services/toast.service';
 
 Chart.register(...registerables);
 
@@ -41,7 +42,8 @@ export class HomeComponent implements OnInit, AfterViewInit {
     private cardTransactioneService: CardTransactionsService,
     private reportService: ReportService,
     private assetService: AssetService,
-    private sharedExpenseService: SharedExpenseService
+    private sharedExpenseService: SharedExpenseService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -75,6 +77,8 @@ export class HomeComponent implements OnInit, AfterViewInit {
       },
       error: (err) => {
         console.error('Error al cargar los datos:', err);
+        this.isLoading = false;
+        this.toastService.error('Error al cargar los datos del inicio');
       }
     });
   }

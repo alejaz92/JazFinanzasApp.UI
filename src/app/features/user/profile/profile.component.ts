@@ -3,24 +3,24 @@ import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } 
 import { first } from 'rxjs';
 import { UserService } from '../services/user.service';
 import { NgClass, NgIf } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { ToastService } from '../../../core/services/toast.service';
+import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 
 @Component({
     selector: 'app-profile',
     templateUrl: './profile.component.html',
     styleUrls: ['./profile.component.css'],
-    imports: [FormsModule, ReactiveFormsModule, NgClass, NgIf, RouterLink]
+    imports: [FormsModule, ReactiveFormsModule, NgClass, NgIf, BackButtonComponent]
 })
 export class ProfileComponent implements OnInit {
   profileForm!: FormGroup;
   loading = false;
   submitted = false;
-  errorMessage = '';
-  succesMessage = '';
 
   constructor(
     private formBuilder: FormBuilder,
-    private userService: UserService
+    private userService: UserService,
+    private toastService: ToastService
   ) { }
 
   ngOnInit() {
@@ -30,8 +30,8 @@ export class ProfileComponent implements OnInit {
       email: ['', [Validators.required, Validators.email]]
     });
 
-    
-   
+
+
     this.userService.getUserData().pipe(first()).subscribe(
       data => {
         this.profileForm.patchValue({
@@ -41,7 +41,7 @@ export class ProfileComponent implements OnInit {
         });
         },
       error => {
-        this.errorMessage = 'Erorr al cargar los datos del usuario';
+        this.toastService.error('Error al cargar los datos del usuario');
       }
     );
   }
@@ -50,7 +50,6 @@ export class ProfileComponent implements OnInit {
 
   onSubmit() {
     this.submitted = true;
-    this.errorMessage = '';
     if (this.profileForm.invalid) {
       return;
     }
@@ -59,10 +58,10 @@ export class ProfileComponent implements OnInit {
     this.userService.updateUserData(this.profileForm.value).pipe(first()).subscribe(
       (data: any) => {
         this.loading = false;
-        this.succesMessage = 'Datos actualizados correctamente';
+        this.toastService.success('Datos actualizados correctamente');
       },
       (error: any) => {
-        this.errorMessage = 'Error al actualizar los datos';
+        this.toastService.error('Error al actualizar los datos');
         this.loading = false;
       }
     );

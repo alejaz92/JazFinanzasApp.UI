@@ -2,25 +2,26 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { UserService } from '../services/user.service';
 import { first } from 'rxjs/operators';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { NgClass, NgIf } from '@angular/common';
+import { ToastService } from '../../../core/services/toast.service';
+import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 
 @Component({
     selector: 'app-change-password',
     templateUrl: './change-password.component.html',
-    imports: [FormsModule, ReactiveFormsModule, NgClass, NgIf, RouterLink]
+    imports: [FormsModule, ReactiveFormsModule, NgClass, NgIf, BackButtonComponent]
 })
 export class ChangePasswordComponent implements OnInit {
   changePasswordForm!: FormGroup;
   loading = false;
   submitted = false;
-  errorMessage = '';
-  successMessage = '';
 
   constructor(
     private formBuilder: FormBuilder,
     private userService: UserService,
-    private router: Router
+    private router: Router,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -84,15 +85,11 @@ export class ChangePasswordComponent implements OnInit {
       .subscribe(
         data => {
           this.loading = false;
-          this.successMessage = 'La contraseña ha sido actualizada correctamente.';
-          this.errorMessage = '';
-          setTimeout(() => {
-            this.router.navigate(['/home']);
-          }, 3000);
+          this.toastService.success('La contraseña ha sido actualizada correctamente.');
+          this.router.navigate(['/home']);
         },
         error => {
-          this.errorMessage = 'Error al cambiar la contraseña. Intente nuevamente.';
-          this.successMessage = '';
+          this.toastService.error('Error al cambiar la contraseña. Intente nuevamente.');
           this.loading = false;
         }
       );

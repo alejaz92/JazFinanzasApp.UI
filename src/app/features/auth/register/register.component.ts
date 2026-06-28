@@ -5,23 +5,25 @@ import { AuthService } from '../services/auth.service';
 
 import { last } from 'rxjs';
 import { NgIf, NgClass } from '@angular/common';
+import { ToastService } from '../../../core/services/toast.service';
+import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 
 @Component({
     selector: 'app-register',
     templateUrl: './register.component.html',
     styleUrls: ['./register.component.css'],
-    imports: [NgIf, FormsModule, ReactiveFormsModule, NgClass]
+    imports: [NgIf, FormsModule, ReactiveFormsModule, NgClass, BackButtonComponent]
 })
 
 export class RegisterComponent implements OnInit{
   registerForm!: FormGroup;
   submitted = false;
-  errorMessage = '';
 
   constructor(
     private formBuilder: FormBuilder,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private toastService: ToastService
   ) { }
   
 
@@ -69,11 +71,12 @@ export class RegisterComponent implements OnInit{
 
     this.authService.register(registerData).subscribe({
       next: (response) => {
+        this.toastService.success('Usuario registrado correctamente');
         this.router.navigate(['/login']);
       },
       error: (err) => {
         console.error('Error al registrar el usuario', err);
-        this.errorMessage = 'Error al registrar el usuario. Intente nuevamente';	
+        this.toastService.error('Error al registrar el usuario. Intente nuevamente');
       }
     });
   }

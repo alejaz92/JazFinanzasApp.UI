@@ -4,23 +4,23 @@ import { UserService } from '../services/user.service';
 import { first } from 'rxjs';
 import {  ResetPasswordDTO } from '../models/ResetPasswordDTO';
 import { NgClass, NgIf } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { ToastService } from '../../../core/services/toast.service';
+import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 
 @Component({
     selector: 'app-reset-password',
     templateUrl: './reset-password.component.html',
     styleUrls: ['./reset-password.component.css'],
-    imports: [FormsModule, ReactiveFormsModule, NgClass, NgIf, RouterLink]
+    imports: [FormsModule, ReactiveFormsModule, NgClass, NgIf, BackButtonComponent]
 })
 export class ResetPasswordComponent implements OnInit{
   resetPasswordForm!: FormGroup;
   submitted = false;
-  errorMessage = '';
-  succesMessage = '';
 
   constructor(
     private formBuilder: FormBuilder,
-    private userService: UserService
+    private userService: UserService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit() {
@@ -30,8 +30,6 @@ export class ResetPasswordComponent implements OnInit{
   }
 
   onSubmit() {
-    
-    this.errorMessage = '';
 
     if (this.resetPasswordForm.invalid) {
       this.submitted = true;
@@ -47,10 +45,10 @@ export class ResetPasswordComponent implements OnInit{
 
     this.userService.resetPassword(resetPasswordDTO).pipe(first()).subscribe(
       (data: any) => {
-        this.succesMessage = 'Contraseña reseteada correctamente a: ' + this.resetPasswordForm.value.username + '123456';
+        this.toastService.success('Contraseña reseteada correctamente a: ' + this.resetPasswordForm.value.username + '123456');
       },
       error => {
-        this.errorMessage = 'Error al resetear contraseña';
+        this.toastService.error('Error al resetear contraseña');
       }
     );
 

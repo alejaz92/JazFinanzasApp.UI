@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ToastService } from '../../../core/services/toast.service';
 declare var bootstrap: any;
 
 
@@ -18,10 +19,9 @@ export class LoginComponent implements AfterViewInit{
   isLoading: boolean = false;
   username: string = '';
   password: string = '';
-  errorMessages: string = '';
 
-  constructor(private authService: AuthService, private router: Router) { }
-  
+  constructor(private authService: AuthService, private router: Router, private toastService: ToastService) { }
+
 
 
   login(): void {
@@ -32,7 +32,7 @@ export class LoginComponent implements AfterViewInit{
       },
       error: (error) => {
         this.isLoading = false;
-        this.errorMessages = 'Usuario y/o contraseña incorrectos';
+        this.toastService.error('Usuario y/o contraseña incorrectos');
       }
     });
   }
