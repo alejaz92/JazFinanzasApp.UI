@@ -5,28 +5,29 @@ import { AccountService } from '../../account/services/account.service';
 import { AssetService } from '../../asset/services/asset.service';
 import { NgIf, NgFor } from '@angular/common';
 import { CurrencyInputDirective } from '../../../shared/directives/currency-input.directive';
-import { RouterLink } from '@angular/router';
+import { ToastService } from '../../../core/services/toast.service';
+import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 
 @Component({
     selector: 'app-exchange-add',
     templateUrl: './exchange-add.component.html',
     styleUrls: ['./exchange-add.component.css'],
-    imports: [NgIf, FormsModule, ReactiveFormsModule, NgFor, CurrencyInputDirective, RouterLink]
+    imports: [NgIf, FormsModule, ReactiveFormsModule, NgFor, CurrencyInputDirective, BackButtonComponent]
 })
 export class ExchangeAddComponent implements OnInit {
   transactionForm!: FormGroup;
   accounts: any[] = [];
   assets: any[] = [];
   formattedAmount: string = '';
-  successMessage: string = '';
   errorMessage: string = '';
 
 
   constructor(
     private fb: FormBuilder,
-    private transactionService: TransactionService, 
+    private transactionService: TransactionService,
     private accountService: AccountService,
-    private assetService: AssetService
+    private assetService: AssetService,
+    private toastService: ToastService
   ) { }
 
   ngOnInit(): void {
@@ -107,15 +108,14 @@ export class ExchangeAddComponent implements OnInit {
       return;
     }
 
-    this.transactionService.createTransaction(transactionAdd).subscribe(() => {
-      this.transactionForm.reset();
-      this.successMessage = 'Intercambio creado con éxito';
-      
-
-      setTimeout(() => {
-        this.successMessage = '';
-
-      }, 3000);
+    this.transactionService.createTransaction(transactionAdd).subscribe({
+      next: () => {
+        this.transactionForm.reset();
+        this.toastService.success('Intercambio creado con éxito');
+      },
+      error: () => {
+        this.toastService.error('Error al crear el intercambio');
+      }
     });
 
   }

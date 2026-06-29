@@ -5,20 +5,20 @@ import { AccountService } from '../../account/services/account.service';
 import { AssetService } from '../../asset/services/asset.service';
 import { NgIf, NgFor } from '@angular/common';
 import { CurrencyInputDirective } from '../../../shared/directives/currency-input.directive';
-import { RouterLink } from '@angular/router';
+import { ToastService } from '../../../core/services/toast.service';
+import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 
 @Component({
     selector: 'app-currency-exchange-add',
     templateUrl: './currency-exchange-add.component.html',
     styleUrls: ['./currency-exchange-add.component.css'],
-    imports: [NgIf, FormsModule, ReactiveFormsModule, NgFor, CurrencyInputDirective, RouterLink]
+    imports: [NgIf, FormsModule, ReactiveFormsModule, NgFor, CurrencyInputDirective, BackButtonComponent]
 })
 export class CurrencyExchangeAddComponent implements OnInit {
   currencyExchangeForm!: FormGroup;
   accounts: any[] = [];
   assets: any[] = [];
   formattedAmount: string = '';
-  successMessage: string = '';
   errorMessage: string = '';
 
 
@@ -26,7 +26,8 @@ export class CurrencyExchangeAddComponent implements OnInit {
     private fb: FormBuilder,
     private currencyExchangeService: CurrencyExchangeService,
     private accountService: AccountService,
-    private assetService: AssetService
+    private assetService: AssetService,
+    private toastService: ToastService
   ) { }
 
   ngOnInit(): void {
@@ -126,13 +127,14 @@ export class CurrencyExchangeAddComponent implements OnInit {
     }
 
     this.currencyExchangeService.createCurrencyExchange(currencyExchange)
-      .subscribe(() => {
-        this.successMessage = 'Intercambio de moneda creado correctamente';
-        this.currencyExchangeForm.reset();
-
-        setTimeout(() => {
-          this.successMessage = '';
-        }, 3000);
+      .subscribe({
+        next: () => {
+          this.toastService.success('Intercambio de moneda creado correctamente');
+          this.currencyExchangeForm.reset();
+        },
+        error: () => {
+          this.toastService.error('Error al crear el intercambio de moneda');
+        }
       });
   }
 

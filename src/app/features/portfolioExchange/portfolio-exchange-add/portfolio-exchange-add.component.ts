@@ -6,12 +6,14 @@ import { AssetService } from '../../asset/services/asset.service';
 import { PortfolioService } from '../../portfolios/services/portfolio.service';
 import { NgIf, NgFor } from '@angular/common';
 import { InvestmentInputDirective } from '../../../shared/directives/investment-input.directive';
+import { ToastService } from '../../../core/services/toast.service';
+import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 
 @Component({
     selector: 'app-portfolio-exchange-add',
     templateUrl: './portfolio-exchange-add.component.html',
     styleUrls: ['./portfolio-exchange-add.component.css'],
-    imports: [NgIf, FormsModule, ReactiveFormsModule, NgFor, InvestmentInputDirective]
+    imports: [NgIf, FormsModule, ReactiveFormsModule, NgFor, InvestmentInputDirective, BackButtonComponent]
 })
 export class PortfolioExchangeAddComponent implements  OnInit {
   portfolioExchangeForm: any;
@@ -20,16 +22,15 @@ export class PortfolioExchangeAddComponent implements  OnInit {
   assetTypes: any[] = [];
   portfolios: any[] = [];
   formattedAmount: string = '';
-  successMessage: string = '';
-  errorMessage: string = '';
   selectedAssetType: string = '';
-  
+
   constructor(
     private fb: FormBuilder,
     private portfolioExchangeService: PortfolioExchangeService,
     private accountService: AccountService,
     private assetService: AssetService,
-    private portfolioService: PortfolioService
+    private portfolioService: PortfolioService,
+    private toastService: ToastService
   ) { }
   
   ngOnInit(): void {
@@ -97,22 +98,15 @@ export class PortfolioExchangeAddComponent implements  OnInit {
 
       this.portfolioExchangeService.createCurrencyExchange(portfolioExchange).subscribe(
         (response) => {
-          this.successMessage = 'Intercambio creado exitosamente';
-          this.errorMessage = '';
+          this.toastService.success('Intercambio creado exitosamente');
           this.portfolioExchangeForm.reset();
         },
         (error) => {
-          this.errorMessage = 'Error al crear el intercambio';
-          this.successMessage = '';
+          this.toastService.error('Error al crear el intercambio');
         }
       );
     } else {
-      this.errorMessage = 'Por favor, completa todos los campos requeridos.';
-    } 
-  }
-  
-  onCancel() {
-    //return to portfolio exchange list
-    window.history.back();
+      this.toastService.error('Por favor, completa todos los campos requeridos.');
+    }
   }
 }
