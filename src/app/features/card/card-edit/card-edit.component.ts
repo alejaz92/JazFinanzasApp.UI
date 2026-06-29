@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { CardService } from '../services/card.service';
 import { Card } from '../models/card.model';
@@ -7,12 +7,14 @@ import { CardUpdateRequest } from '../models/card-update-request.model';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ToastService } from '../../../core/services/toast.service';
+import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 
 @Component({
     selector: 'app-card-edit',
     templateUrl: './card-edit.component.html',
     styleUrls: ['./card-edit.component.css'],
-    imports: [LoadingComponent, NgIf, FormsModule, RouterLink]
+    imports: [LoadingComponent, NgIf, FormsModule, BackButtonComponent]
 })
 export class CardEditComponent implements OnInit, OnDestroy {
   isLoading: boolean = true;
@@ -21,7 +23,7 @@ export class CardEditComponent implements OnInit, OnDestroy {
   editCardSubscription?: Subscription;
   card?: Card;
 
-  constructor(private route: ActivatedRoute, private cardService: CardService, private router: Router) {  }
+  constructor(private route: ActivatedRoute, private cardService: CardService, private router: Router, private toastService: ToastService) {  }
 
   ngOnInit(): void {
     this.paramsSubcription = this.route.paramMap.subscribe({
@@ -34,9 +36,13 @@ export class CardEditComponent implements OnInit, OnDestroy {
             next: (response) => {
               this.card = response;
               this.isLoading = false;
+            },
+            error: (error) => {
+              this.toastService.error('Error al cargar la tarjeta');
+              this.isLoading = false;
             }
           });
-        } 
+        }
       }
     });
   }
@@ -50,13 +56,17 @@ export class CardEditComponent implements OnInit, OnDestroy {
     if (this.id) {
       this.editCardSubscription = this.cardService.updateCard(Number(this.id), cardUpdateRequest).subscribe({
         next: (response) => {
+          this.toastService.success('Tarjeta actualizada correctamente');
           this.router.navigateByUrl('/management/card');
+        },
+        error: (error) => {
+          this.toastService.error('Error al actualizar la tarjeta');
         }
       });
     }
-      
-    
-  } 
+
+
+  }
 
 
   ngOnDestroy(): void {
