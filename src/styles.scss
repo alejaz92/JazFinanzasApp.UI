@@ -42,14 +42,22 @@ body {
   color: #fff;
 }
 
-// ─── Alto de fila uniforme en tablas CRUD ──────────────────────────────────
-// Sin esto, las filas sin botones de acción (ej. clases de movimiento del
-// sistema, sin permiso de editar/eliminar) quedan más bajas que las filas
+// ─── Alto de fila uniforme + centrado vertical en tablas CRUD ──────────────
+// Alto: sin esto, las filas sin botones de acción (ej. clases de movimiento
+// del sistema, sin permiso de editar/eliminar) quedan más bajas que las filas
 // con el ícono circular .btn-icon (2.25rem + padding de celda) — el alto de
 // fila en HTML depende del contenido de cada fila individualmente.
+// Centrado: Bootstrap 5 define `vertical-align: top` por defecto en
+// `.table > * > * > *`, por lo que cualquier celda sin la clase `align-middle`
+// queda con el texto pegado arriba — más notorio todavía con el alto fijo de
+// arriba. Antes de este fix había que acordarse de poner `align-middle` en
+// cada `<td>` de cada tabla nueva (se olvidó en `crypto-transaction-list`/
+// `stock-transaction-list`, Fase 9) — ahora es automático, ya no hace falta
+// agregar `align-middle` manualmente en tablas nuevas.
 // No aplica a tablas de reportes (table-sm), que buscan ser compactas.
 .table:not(.table-sm) td {
   height: 3.25rem;
+  vertical-align: middle;
 }
 
 // ─── ngx-pagination: alinear con la paleta de marca ────────────────────────

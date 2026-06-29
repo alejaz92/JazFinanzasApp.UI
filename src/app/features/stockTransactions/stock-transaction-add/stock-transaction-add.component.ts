@@ -8,13 +8,14 @@ import { Portfolio } from '../../portfolios/models/portfolio.model';
 import { PortfolioService } from '../../portfolios/services/portfolio.service';
 import { NgIf, NgFor } from '@angular/common';
 import { InvestmentInputDirective } from '../../../shared/directives/investment-input.directive';
-import { RouterLink } from '@angular/router';
+import { ToastService } from '../../../core/services/toast.service';
+import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 
 @Component({
     selector: 'app-stock-transaction-add',
     templateUrl: './stock-transaction-add.component.html',
     styleUrls: ['./stock-transaction-add.component.css'],
-    imports: [NgIf, FormsModule, ReactiveFormsModule, NgFor, InvestmentInputDirective, RouterLink]
+    imports: [NgIf, FormsModule, ReactiveFormsModule, NgFor, InvestmentInputDirective, BackButtonComponent]
 })
 export class StockTransactionAddComponent implements OnInit{
   stockTransactionForm!: FormGroup;
@@ -33,8 +34,6 @@ export class StockTransactionAddComponent implements OnInit{
   expenseAssets: any[] = [];
   fiatAssets: any[] = [];
   formattedAmount: string = '';
-  successMessage: string = '';  
-
 
   constructor(
     private fb: FormBuilder,
@@ -42,7 +41,8 @@ export class StockTransactionAddComponent implements OnInit{
     private accountService: AccountService,
     private assetService: AssetService,
     private assetTypeService: AssetTypeService,
-    private portfolioService: PortfolioService
+    private portfolioService: PortfolioService,
+    private toastService: ToastService
   ) { }
 
   ngOnInit(): void {
@@ -304,13 +304,14 @@ export class StockTransactionAddComponent implements OnInit{
       environment: 'Stock'
     };
 
-    this.stockTransactionService.createStockTransaction(stockTransactionAdd).subscribe(() => {
-      this.successMessage = 'Movimiento agregado correctamente';
-      this.stockTransactionForm.reset();
-
-      setTimeout(() => {
-        this.successMessage = '';
-      }, 3000);
+    this.stockTransactionService.createStockTransaction(stockTransactionAdd).subscribe({
+      next: () => {
+        this.toastService.success('Movimiento agregado correctamente');
+        this.stockTransactionForm.reset();
+      },
+      error: () => {
+        this.toastService.error('Error al agregar el movimiento');
+      }
     });
   }
 

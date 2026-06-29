@@ -1,14 +1,19 @@
 <app-loading [isLoading]="isLoading"></app-loading>
 
-<div class="container mt-4" *ngIf="!isLoading">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1>Movimientos Crypto</h1>
-        <a class="btn btn-primary" [routerLink]="['/cryptoTransactions/add']">Nuevo <i class="bi-plus-lg"></i></a>
+<div class="container-fluid mt-4" *ngIf="!isLoading">
+    <div class="d-flex align-items-center gap-2 mb-3">
+        <h1 class="mb-0">Movimientos Crypto</h1>
+        <a class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center"
+           [routerLink]="['/cryptoTransactions/add']"
+           title="Nuevo Movimiento"
+           style="width: 44px; height: 44px; font-size: 1.2rem;">
+            <i class="bi-plus-lg text-white"></i>
+        </a>
     </div>
 
     <!-- tabla de movimientos-->
     <div class="table-responsive">
-        <table class="table table-striped">
+        <table class="table table-striped table-bordered">
             <thead>
                 <tr>
                     <th rowspan="2">Fecha</th>
@@ -16,7 +21,7 @@
                     <th rowspan="2">Tipo Comercio</th>
                     <th colspan="5" class="text-center table-danger">Egreso</th>
                     <th colspan="5" class="text-center table-success">Ingreso</th>
-                    <th rowspan="2">Acciones</th>
+                    <th rowspan="2" class="text-nowrap" style="width: 80px;">Acciones</th>
                 </tr>
                 <tr>
                     <th class="table-danger">Activo</th>
@@ -54,10 +59,10 @@
                     <td class="text-end table-success">
                         {{ transaction.incomeQuote != null ? (transaction.incomeQuote | currencyInvestmentFormat) : ''  }}
                     </td>
-                    <td>
-                        <div class="justify-content-around">
-                            <button class="btn btn-sm btn-danger m-1" title="Eliminar" (click)="onDeleteTransaction(transaction)"><i class="bi-trash-fill"></i></button>
-                        </div>
+                    <td class="align-middle text-center">
+                        <button title="Eliminar" class="btn-icon bg-danger" (click)="onDeleteTransaction(transaction)">
+                            <i class="bi-trash"></i>
+                        </button>
                     </td>
                 </tr>
             </tbody>
@@ -66,7 +71,7 @@
 
     <!-- Paginacion-->
     <div class="d-flex justify-content-center">
-        <pagination-controls 
+        <pagination-controls
         (pageChange)="onPageChange($event)"
         [responsive]="true"
         [previousLabel]="'Anterior'"
@@ -74,3 +79,10 @@
     </pagination-controls>
     </div>
 </div>
+
+<app-confirm-modal #deleteModal
+    title="Eliminar Movimiento"
+    message="¿Estás seguro de eliminar el movimiento?"
+    confirmLabel="Eliminar"
+    (confirmed)="onDeleteConfirmed()">
+</app-confirm-modal>

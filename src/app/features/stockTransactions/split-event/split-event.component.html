@@ -1,9 +1,7 @@
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Splits de Acciones</h1>
-        <a class="btn btn-outline-secondary" [routerLink]="['/stockTransactions']">
-            <i class="bi-arrow-left"></i> Volver
-        </a>
+        <h1 class="mb-0">Splits de Acciones</h1>
+        <app-back-button [defaultUrl]="['/stockTransactions']"></app-back-button>
     </div>
 
     <!-- Selectores de activo -->
@@ -45,20 +43,20 @@
                     No hay splits registrados para este activo.
                 </p>
                 <div class="table-responsive" *ngIf="!isLoadingSplits && splits.length > 0">
-                    <table class="table table-striped mb-0">
+                    <table class="table table-striped table-bordered mb-0">
                         <thead>
                             <tr>
                                 <th>Fecha</th>
                                 <th>Ratio</th>
                                 <th>Tipo</th>
-                                <th>Acciones</th>
+                                <th class="text-nowrap" style="width: 80px;">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr *ngFor="let split of splits">
-                                <td>{{ split.date | date: 'dd/MM/yyyy' }}</td>
-                                <td>{{ split.splitRatio }}</td>
-                                <td>
+                                <td class="align-middle">{{ split.date | date: 'dd/MM/yyyy' }}</td>
+                                <td class="align-middle">{{ split.splitRatio }}</td>
+                                <td class="align-middle">
                                     <span *ngIf="split.splitRatio > 1" class="badge bg-success">
                                         Split {{ split.splitRatio }}:1
                                     </span>
@@ -66,9 +64,9 @@
                                         Reverse split {{ (1 / split.splitRatio).toFixed(0) }}:1
                                     </span>
                                 </td>
-                                <td>
-                                    <button class="btn btn-sm btn-danger" (click)="onDelete(split)" title="Eliminar">
-                                        <i class="bi-trash-fill"></i>
+                                <td class="align-middle text-center">
+                                    <button class="btn-icon bg-danger" (click)="onDelete(split)" title="Eliminar">
+                                        <i class="bi-trash"></i>
                                     </button>
                                 </td>
                             </tr>
@@ -84,9 +82,6 @@
                 <h5 class="mb-0">Registrar nuevo split</h5>
             </div>
             <div class="card-body">
-                <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
-                <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
-
                 <form [formGroup]="splitForm" (ngSubmit)="onSubmit()">
                     <div class="row g-3 align-items-end">
                         <div class="col-md-5">
@@ -125,3 +120,10 @@
 
     </div>
 </div>
+
+<app-confirm-modal #deleteModal
+    title="Eliminar Split"
+    [message]="deleteModalMessage"
+    confirmLabel="Eliminar"
+    (confirmed)="onDeleteConfirmed()">
+</app-confirm-modal>
