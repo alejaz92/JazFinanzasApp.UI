@@ -42,6 +42,41 @@ body {
   color: #fff;
 }
 
+// ─── Alto de fila uniforme en tablas CRUD ──────────────────────────────────
+// Sin esto, las filas sin botones de acción (ej. clases de movimiento del
+// sistema, sin permiso de editar/eliminar) quedan más bajas que las filas
+// con el ícono circular .btn-icon (2.25rem + padding de celda) — el alto de
+// fila en HTML depende del contenido de cada fila individualmente.
+// No aplica a tablas de reportes (table-sm), que buscan ser compactas.
+.table:not(.table-sm) td {
+  height: 3.25rem;
+}
+
+// ─── ngx-pagination: alinear con la paleta de marca ────────────────────────
+// La librería no trae soporte de temas — sus estilos por defecto fijan
+// colores hardcodeados (texto casi negro, página activa en azul genérico)
+// que no se adaptan a dark mode ni a la identidad violeta/índigo. Se
+// sobreescriben con las custom properties de Bootstrap, que ya resuelven al
+// tono correcto en cada tema.
+.ngx-pagination a,
+.ngx-pagination button {
+  color: var(--bs-body-color) !important;
+}
+
+.ngx-pagination a:hover,
+.ngx-pagination button:hover {
+  background: var(--bs-tertiary-bg) !important;
+}
+
+.ngx-pagination .current {
+  background: var(--bs-primary) !important;
+  color: #fff !important;
+}
+
+.ngx-pagination .disabled {
+  color: var(--bs-secondary-color) !important;
+}
+
 // ─── Dark mode: paleta violeta/índigo + overrides de componentes ──────────────
 // Va DESPUÉS del import de Bootstrap: Bootstrap también define su propio bloque
 // [data-bs-theme="dark"] (grises por defecto) y, al tener la misma especificidad,

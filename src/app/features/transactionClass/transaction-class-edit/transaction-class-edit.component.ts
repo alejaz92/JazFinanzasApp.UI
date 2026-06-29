@@ -1,17 +1,19 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { TransactionClass } from '../models/transactionClass.model';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TransactionClassService } from '../services/transaction-class.service';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ToastService } from '../../../core/services/toast.service';
+import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 
 @Component({
     selector: 'app-transaction-class-edit',
     templateUrl: './transaction-class-edit.component.html',
     styleUrls: ['./transaction-class-edit.component.css'],
-    imports: [LoadingComponent, NgIf, FormsModule, RouterLink]
+    imports: [LoadingComponent, NgIf, FormsModule, BackButtonComponent]
 })
 export class TransactionClassEditComponent implements OnInit, OnDestroy{
   isLoading: boolean = true;
@@ -20,7 +22,12 @@ export class TransactionClassEditComponent implements OnInit, OnDestroy{
   editTransactionClassSubscription?: Subscription;
   transactionClass?: TransactionClass;
 
-  constructor(private route: ActivatedRoute, private transactionClassService: TransactionClassService, private router: Router) {  }
+  constructor(
+    private route: ActivatedRoute,
+    private transactionClassService: TransactionClassService,
+    private router: Router,
+    private toastService: ToastService
+  ) {  }
 
   ngOnInit(): void {
     this.paramsSubcription = this.route.paramMap.subscribe({
@@ -34,9 +41,12 @@ export class TransactionClassEditComponent implements OnInit, OnDestroy{
               this.transactionClass = response;
 
               this.isLoading = false;
+            },
+            error: () => {
+              this.isLoading = false;
             }
           });
-        } 
+        }
       }
     });
   }
@@ -51,7 +61,11 @@ export class TransactionClassEditComponent implements OnInit, OnDestroy{
     if (this.id) {
       this.editTransactionClassSubscription = this.transactionClassService.updateTransactionClass(Number(this.id), transactionClassUpdateRequest).subscribe({
         next: (response) => {
+          this.toastService.success('Clase de movimiento actualizada correctamente');
           this.router.navigateByUrl('/management/transactionClass');
+        },
+        error: () => {
+          this.toastService.error('Error al actualizar la clase de movimiento');
         }
       });
     }

@@ -13,14 +13,15 @@ import { LoadingComponent } from '../../../core/components/loading/loading.compo
 import { NgIf, NgFor } from '@angular/common';
 import { CurrencyInputDirective } from '../../../shared/directives/currency-input.directive';
 import { SharedExpenseFormComponent } from '../../shared-expenses/shared-expense-form/shared-expense-form.component';
-import { RouterLink } from '@angular/router';
+import { ToastService } from '../../../core/services/toast.service';
+import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 
 
 @Component({
     selector: 'app-transaction-add',
     templateUrl: './transaction-add.component.html',
     styleUrls: ['./transaction-add.component.css'],
-    imports: [LoadingComponent, NgIf, FormsModule, ReactiveFormsModule, NgFor, CurrencyInputDirective, SharedExpenseFormComponent, RouterLink]
+    imports: [LoadingComponent, NgIf, FormsModule, ReactiveFormsModule, NgFor, CurrencyInputDirective, SharedExpenseFormComponent, BackButtonComponent]
 })
 export class TransactionAddComponent implements OnInit, OnDestroy {
   isLoading: boolean = true;
@@ -30,7 +31,6 @@ export class TransactionAddComponent implements OnInit, OnDestroy {
   incomeClasses: any[] = [];
   expenseClasses: any[] = [];
   assets: any[] = [];
-  successMessage: string = '';
 
   sharedExpenseActive: boolean = false;
   sharedExpenseData: SharedExpenseFormData | null = null;
@@ -45,7 +45,8 @@ export class TransactionAddComponent implements OnInit, OnDestroy {
     private accountService: AccountService,
     private assetService: AssetService,
     private transactionClasses: TransactionClassService,
-    private sharedExpenseService: SharedExpenseService
+    private sharedExpenseService: SharedExpenseService,
+    private toastService: ToastService
   ) { }
 
   ngOnInit(): void {
@@ -221,12 +222,12 @@ export class TransactionAddComponent implements OnInit, OnDestroy {
         this.sharedExpenseData = null;
         this.sharedExpenseError = '';
         this.transactionAmountForForm = 0;
-        this.successMessage = 'Movimiento creado con éxito';
-        setTimeout(() => { this.successMessage = ''; }, 3000);
+        this.toastService.success('Movimiento creado con éxito');
       },
       error: (err) => {
         const msg = err?.error?.message || 'Error al guardar el gasto compartido.';
         this.sharedExpenseError = msg;
+        this.toastService.error(msg);
       }
     });
   }
