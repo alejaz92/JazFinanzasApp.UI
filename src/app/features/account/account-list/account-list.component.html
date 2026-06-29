@@ -85,3 +85,10 @@
         </div>
     </ng-container>
 </div>
+
+<app-confirm-modal #deleteModal
+    title="Eliminar Cuenta"
+    message="¿Está seguro de eliminar esta cuenta?"
+    confirmLabel="Eliminar"
+    (confirmed)="onDeleteConfirmed()">
+</app-confirm-modal>

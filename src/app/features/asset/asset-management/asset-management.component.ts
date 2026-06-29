@@ -3,12 +3,14 @@ import { Asset } from '../models/asset.model';
 import { AssetService } from '../services/asset.service';
 import { NgIf, NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ToastService } from '../../../core/services/toast.service';
+import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 
 @Component({
     selector: 'app-asset-management',
     templateUrl: './asset-management.component.html',
     styleUrls: ['./asset-management.component.css'],
-    imports: [NgIf, FormsModule, NgFor]
+    imports: [NgIf, FormsModule, NgFor, BackButtonComponent]
 })
 export class AssetManagementComponent implements OnInit {
   isLoading: boolean = true;
@@ -17,7 +19,7 @@ export class AssetManagementComponent implements OnInit {
   availableAssets: Asset[] = [];
   assignedAssets: Asset[] = [];
 
-  constructor(private assetService: AssetService) { }
+  constructor(private assetService: AssetService, private toastService: ToastService) { }
 
   ngOnInit(): void {
     this.assetService.getAssetTypes().subscribe(types => {
@@ -67,11 +69,11 @@ export class AssetManagementComponent implements OnInit {
       },
         error => {
           if (error.error === 'Asset is used in transactions') {
-            alert('No se puede desasignar un activo que está siendo utilizado en una transacción');
+            this.toastService.error('No se puede desasignar un activo que está siendo utilizado en una transacción');
           } else {
-            alert(error.error);
+            this.toastService.error(error.error);
           }
-          
+
         }
     );
   }
@@ -89,7 +91,7 @@ export class AssetManagementComponent implements OnInit {
       error => {
 
         if (error.error === 'Only 3 reference assets allowed') {
-          alert('No puede elegir más de 3 activos de referencia');
+          this.toastService.error('No puede elegir más de 3 activos de referencia');
 
           //update de checkbox
           asset.isReference = false;
@@ -112,7 +114,7 @@ export class AssetManagementComponent implements OnInit {
       },
       error => {
         if (error.error === 'Only 1 main reference asset allowed') {
-          alert('No puede elegir más de 1 activo de referencia principal');
+          this.toastService.error('No puede elegir más de 1 activo de referencia principal');
 
           //update de checkbox
           asset.isMainReference = false;
