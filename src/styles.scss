@@ -42,6 +42,15 @@ body {
   color: #fff;
 }
 
+// ─── Tamaño de fuente para tablas compactas de reportes (Fase 13) ────────────
+// Los reportes usan `table-sm` para densidad visual. El font-size base de
+// Bootstrap (1rem) queda grande para tablas de datos — se reduce a 0.8rem
+// igual que hacía el override puntual que tenía reports.component.css antes.
+// Centralizado acá para no repetirlo por componente.
+.table-sm {
+  font-size: 0.8rem;
+}
+
 // ─── Alto de fila uniforme + centrado vertical en tablas CRUD ──────────────
 // Alto: sin esto, las filas sin botones de acción (ej. clases de movimiento
 // del sistema, sin permiso de editar/eliminar) quedan más bajas que las filas

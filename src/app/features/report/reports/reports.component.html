@@ -1,8 +1,8 @@
 <app-loading [isLoading]="isLoading"></app-loading>
 
-<div class="container mt-4" *ngIf="!isLoading">
+<div class="container-fluid mt-4" *ngIf="!isLoading">
 
-    <h1>Reportes y Estadisticas</h1>
+    <h1 class="mt-3 mb-3">Reportes y Estadísticas</h1>
     <!-- Navegación de Tabs -->
     <ul class="nav nav-tabs" id="dashboardTabs" role="tablist">
       <li class="nav-item" role="presentation" (click)="onTabChange('incExp-tab')">
@@ -146,8 +146,8 @@
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
-                                <table class="table table-bordered table-hover">
-                                    <thead>
+                                <table class="table table-hover table-sm">
+                                    <thead class="table-header-brand">
                                         <tr>
                                             <th>Tarjeta</th>
                                             <th>Moneda</th>
@@ -155,8 +155,8 @@
                                             <th>Tipo Movimiento</th>
                                             <th>Detalle</th>
                                             <th>Cuota</th>
-                                            <th>Monto Cuota</th>
-                                            <th>Valor Pesos</th>
+                                            <th class="text-end">Monto Cuota</th>
+                                            <th class="text-end">Valor Pesos</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -167,8 +167,8 @@
                                             <td>{{ transaction.transactionClass }}</td>
                                             <td>{{ transaction.detail }}</td>
                                             <td>{{ transaction.installment }}</td>
-                                            <td>{{ transaction.installmentAmount | currencyFiatFormat}}</td>
-                                            <td>{{ transaction.valueInPesos | currencyFiatFormat}}</td>
+                                            <td class="text-end">{{ transaction.installmentAmount | currencyFiatFormat}}</td>
+                                            <td class="text-end">{{ transaction.valueInPesos | currencyFiatFormat}}</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -241,25 +241,25 @@
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
-                                    <table class="table table-bordered table-hover">
-                                        <thead>
+                                    <table class="table table-hover table-sm">
+                                        <thead class="table-header-brand">
                                             <tr>
                                                 <th>Ticker</th>
                                                 <!-- <th>Nombre</th> -->
-                                                <th>Cantidad</th>
-                                                <th>Valor Origen Promedio</th>
-                                                <th>Valor Actual</th>    
-                                                <th>%</th>                                        
+                                                <th class="text-end">Cantidad</th>
+                                                <th class="text-end">Valor Origen Promedio</th>
+                                                <th class="text-end">Valor Actual</th>
+                                                <th class="text-end">%</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr *ngFor="let stock of stocksStatsDTO">
-                                                <td>{{ stock.symbol  }}</td>
+                                                <td>{{ stock.symbol }}</td>
                                                 <!-- <td>{{ stock.assetName }}</td> -->
-                                                <td>{{ stock.quantity }}</td>
-                                                <td>{{ stock.originalValue | currencyFiatFormat }}</td>
-                                                <td>{{ stock.actualValue | currencyFiatFormat }}</td>
-                                                <td>{{ (stock.actualValue / stock.originalValue * 100) -100 | currencyInvestmentFormat }} %</td>
+                                                <td class="text-end">{{ stock.quantity }}</td>
+                                                <td class="text-end">{{ stock.originalValue | currencyFiatFormat }}</td>
+                                                <td class="text-end">{{ stock.actualValue | currencyFiatFormat }}</td>
+                                                <td class="text-end">{{ (stock.actualValue / stock.originalValue * 100) -100 | currencyInvestmentFormat }} %</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -336,25 +336,25 @@
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
-                                <table class="table table-bordered- table-hover">
-                                    <thead>
+                                <table class="table table-hover table-sm">
+                                    <thead class="table-header-brand">
                                         <tr>
                                             <th>Crypto</th>
                                             <th>Nombre</th>
-                                            <th>Cantidad</th>
-                                            <th>Valor Origen Promedio</th>
-                                            <th>Valor Actual</th>    
-                                            <th>%</th>                                        
+                                            <th class="text-end">Cantidad</th>
+                                            <th class="text-end">Valor Origen Promedio</th>
+                                            <th class="text-end">Valor Actual</th>
+                                            <th class="text-end">%</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr *ngFor="let stock of cryptoGralStatsDTO">
-                                            <td>{{ stock.symbol  }}</td>
+                                            <td>{{ stock.symbol }}</td>
                                             <td>{{ stock.assetName }}</td>
-                                            <td>{{ stock.quantity }}</td>
-                                            <td>{{ stock.originalValue | currencyFiatFormat }}</td>
-                                            <td>{{ stock.actualValue | currencyFiatFormat }}</td>
-                                            <td>{{ (stock.actualValue / stock.originalValue * 100) -100 | currencyInvestmentFormat }} %</td>
+                                            <td class="text-end">{{ stock.quantity }}</td>
+                                            <td class="text-end">{{ stock.originalValue | currencyFiatFormat }}</td>
+                                            <td class="text-end">{{ stock.actualValue | currencyFiatFormat }}</td>
+                                            <td class="text-end">{{ (stock.actualValue / stock.originalValue * 100) -100 | currencyInvestmentFormat }} %</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -436,16 +436,16 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="table-responsive">
-                                        <table class="table table-bordered table-hover">
-                                            <thead>
+                                        <table class="table table-hover table-sm">
+                                            <thead class="table-header-brand">
                                                 <tr>
                                                     <th>Fecha</th>
                                                     <th>Cuenta</th>
                                                     <th>Tipo Movimiento</th>
                                                     <th>Tipo Comercio</th>
-                                                    <th>Cantidad</th>
-                                                    <th>Cotización</th>
-                                                    <th>Total</th>
+                                                    <th class="text-end">Cantidad</th>
+                                                    <th class="text-end">Cotización</th>
+                                                    <th class="text-end">Total</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -454,9 +454,9 @@
                                                     <td>{{ transaction.account }}</td>
                                                     <td>{{ transaction.movementType | movementType }}</td>
                                                     <td>{{ transaction.commerceType | commerceType}}</td>
-                                                    <td>{{ transaction.quantity }}</td>
-                                                    <td>{{ transaction.quotePrice | currencyFiatFormat}}</td>
-                                                    <td>{{ transaction.total | currencyFiatFormat}}</td>
+                                                    <td class="text-end">{{ transaction.quantity }}</td>
+                                                    <td class="text-end">{{ transaction.quotePrice | currencyFiatFormat}}</td>
+                                                    <td class="text-end">{{ transaction.total | currencyFiatFormat}}</td>
                                                 </tr>
                                             </tbody>
                                         </table>
