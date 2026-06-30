@@ -1,0 +1,121 @@
+$sidebar-width: 220px;
+$navbar-height: 57px;
+$sidebar-bg-top: #2a1a5e;
+$sidebar-bg-bottom: #1b0f44;
+
+// -- Mobile bar ----------------------------------------------------------------
+
+.reports-mobile-bar {
+    background: $sidebar-bg-bottom;
+}
+
+// -- Sidebar -------------------------------------------------------------------
+
+.reports-sidebar {
+    position: fixed;
+    top: $navbar-height;
+    left: 0;
+    width: $sidebar-width;
+    height: calc(100vh - #{$navbar-height});
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    &::-webkit-scrollbar { display: none; }
+    background: linear-gradient(175deg, $sidebar-bg-top 0%, $sidebar-bg-bottom 100%);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.22);
+    z-index: 100;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #5B3DD9 0%, #8B72E8 100%);
+        z-index: 1;
+    }
+
+    @media (max-width: 991.98px) {
+        top: 0;
+        height: 100vh;
+        z-index: 1045;
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+
+        &.open {
+            transform: translateX(0);
+        }
+    }
+}
+
+.sidebar-header {
+    background: rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+// -- Nav links -----------------------------------------------------------------
+
+.sidebar-link {
+    border-left: 3px solid transparent;
+    border-radius: 0.375rem;
+    margin: 1px 8px;
+    transition: background-color 0.15s, color 0.15s, border-left-color 0.15s;
+
+    &:hover {
+        background-color: rgba(255, 255, 255, 0.08);
+        color: #fff !important;
+        text-decoration: none;
+    }
+
+    &.active {
+        background-color: rgba(91, 61, 217, 0.35);
+        border-left-color: #8B72E8;
+        color: #fff !important;
+        font-weight: 600;
+    }
+}
+
+// -- Content -------------------------------------------------------------------
+
+.reports-content {
+    margin-left: $sidebar-width;
+    min-height: calc(100vh - #{$navbar-height});
+
+    @media (max-width: 991.98px) {
+        margin-left: 0;
+    }
+}
+
+// -- Dark mode overrides -------------------------------------------------------
+
+:host-context([data-bs-theme="dark"]) {
+    .reports-mobile-bar {
+        background: var(--bs-secondary-bg);
+        border-bottom: 1px solid var(--bs-border-color);
+    }
+
+    .reports-sidebar {
+        background: var(--bs-secondary-bg);
+        box-shadow: 2px 0 12px rgba(0, 0, 0, 0.4);
+        border-right: 1px solid var(--bs-border-color);
+
+        &::before {
+            background: linear-gradient(90deg, var(--bs-primary) 0%, #A892F0 100%);
+        }
+    }
+
+    .sidebar-header {
+        background: transparent;
+        border-bottom: 1px solid var(--bs-border-color);
+    }
+}
+
+// -- Mobile overlay ------------------------------------------------------------
+
+.sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1040;
+}

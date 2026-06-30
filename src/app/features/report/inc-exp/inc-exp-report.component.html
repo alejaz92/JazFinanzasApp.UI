@@ -1,0 +1,61 @@
+<app-loading [isLoading]="isLoading"></app-loading>
+
+<div *ngIf="!isLoading">
+    <h2 class="mb-3">Ingresos y Egresos</h2>
+
+    <div class="row mt-1">
+        <div class="col-md-6">
+            <label for="asset">Moneda a Visualizar</label>
+            <select class="form-select" id="asset" [(ngModel)]="selectedAssetIdDB1" (change)="loadIncExpStats()">
+                <option value="0" selected disabled>Seleccione</option>
+                <option *ngFor="let asset of assetsDB1" [value]="asset.id">{{ asset.name }}</option>
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label for="MonthDB1">Mes</label>
+            <input class="form-control" type="month" id="MonthDB1" [(ngModel)]="selectedMonthDB1" (change)="loadIncExpStats()"/>
+        </div>
+    </div>
+
+    <app-loading [isLoading]="isLoadingGraph"></app-loading>
+
+    <div *ngIf="viewAux && !isLoadingGraph">
+        <div class="row mt-4">
+            <div class="col-md-6 mt-1">
+                <div class="card">
+                    <div class="card-header">Ingresos por Clase</div>
+                    <div class="card-body">
+                        <canvas id="incomeByClassChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mt-1">
+                <div class="card">
+                    <div class="card-header">Egresos por Clase</div>
+                    <div class="card-body">
+                        <canvas id="expenseByClassChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6 mt-1">
+                <div class="card">
+                    <div class="card-header">Ingresos por Mes</div>
+                    <div class="card-body">
+                        <canvas id="incomeLast6MonthsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mt-1">
+                <div class="card">
+                    <div class="card-header">Egresos por Mes</div>
+                    <div class="card-body">
+                        <canvas id="expenseLast6MonthsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

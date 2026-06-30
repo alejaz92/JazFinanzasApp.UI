@@ -1,0 +1,80 @@
+<app-loading [isLoading]="isLoading"></app-loading>
+
+<div *ngIf="!isLoading">
+    <h2 class="mb-3">Inversiones en Bolsa</h2>
+
+    <div class="row">
+        <div class="col-md-6">
+            <label for="assetType">Tipo de Activo</label>
+            <select id="assetType" class="form-select" [(ngModel)]="selectedAssetTypeDB4" (change)="loadStockStats()">
+                <option value="0" selected disabled>Seleccione</option>
+                <option *ngFor="let assetType of assetTypes" [value]="assetType.id">{{ assetType.name }}</option>
+            </select>
+        </div>
+    </div>
+
+    <app-loading [isLoading]="isLoadingGraph"></app-loading>
+
+    <div *ngIf="viewAux && !isLoadingGraph">
+        <div class="row mt-4">
+            <div class="col-md-6 mt-1">
+                <div class="card">
+                    <div class="card-header">Distribución por Tipo de Activo (En {{ mainReference?.symbol }})</div>
+                    <div class="card-body">
+                        <canvas id="stocksGralChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mt-1">
+                <div class="card">
+                    <div class="card-header">Distribución por Ticker (En {{ mainReference?.symbol }})</div>
+                    <div class="card-body">
+                        <canvas id="percentajeByTickerChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6 mt-1">
+                <div class="card">
+                    <div class="card-header">Valores Originales Promedio vs Valores Actuales (En {{ mainReference?.symbol }})</div>
+                    <div class="card-body">
+                        <canvas id="origVsActualChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mt-1" *ngIf="stocksStatsDTO.length > 0">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Tenencias Actuales (En {{ mainReference?.name }})</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm">
+                                <thead class="table-header-brand">
+                                    <tr>
+                                        <th>Ticker</th>
+                                        <th class="text-end">Cantidad</th>
+                                        <th class="text-end">Valor Origen Promedio</th>
+                                        <th class="text-end">Valor Actual</th>
+                                        <th class="text-end">%</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let stock of stocksStatsDTO">
+                                        <td>{{ stock.symbol }}</td>
+                                        <td class="text-end">{{ stock.quantity }}</td>
+                                        <td class="text-end">{{ stock.originalValue | currencyFiatFormat }}</td>
+                                        <td class="text-end">{{ stock.actualValue | currencyFiatFormat }}</td>
+                                        <td class="text-end">{{ (stock.actualValue / stock.originalValue * 100) - 100 | currencyInvestmentFormat }} %</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
