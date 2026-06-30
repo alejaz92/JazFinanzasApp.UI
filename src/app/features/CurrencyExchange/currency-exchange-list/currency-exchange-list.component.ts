@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { CurrencyExchangeService } from '../services/currency-exchange.service';
 import { RouterLink } from '@angular/router';
-import { NgFor, DatePipe } from '@angular/common';
+import { NgFor, NgIf, DatePipe } from '@angular/common';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { ToastService } from '../../../core/services/toast.service';
@@ -11,7 +11,7 @@ import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/
     selector: 'app-currency-exchange-list',
     templateUrl: './currency-exchange-list.component.html',
     styleUrls: ['./currency-exchange-list.component.css'],
-    imports: [RouterLink, NgFor, NgxPaginationModule, DatePipe, CurrencyFiatFormatPipe, ConfirmModalComponent]
+    imports: [RouterLink, NgFor, NgIf, NgxPaginationModule, DatePipe, CurrencyFiatFormatPipe, ConfirmModalComponent]
 })
 export class CurrencyExchangeListComponent implements OnInit{
   currencyExchanges: any[] = [];
