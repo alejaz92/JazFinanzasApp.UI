@@ -6,6 +6,7 @@ import { AccountService } from '../../account/services/account.service';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { NgIf, NgClass, NgFor } from '@angular/common';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
     selector: 'app-shared-expense-dashboard',
@@ -23,12 +24,12 @@ export class SharedExpenseDashboardComponent implements OnInit {
   reimbursementForm!: FormGroup;
   selectedSplit: PersonDebtSplit | null = null;
   reimbursementError: string = '';
-  reimbursementSuccess: string = '';
 
   constructor(
     private fb: FormBuilder,
     private sharedExpenseService: SharedExpenseService,
-    private accountService: AccountService
+    private accountService: AccountService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -50,6 +51,7 @@ export class SharedExpenseDashboardComponent implements OnInit {
         this.isLoading = false;
       },
       error: () => {
+        this.toastService.error('Error al cargar los gastos compartidos');
         this.isLoading = false;
       }
     });
@@ -116,9 +118,8 @@ export class SharedExpenseDashboardComponent implements OnInit {
     }).subscribe({
       next: () => {
         this.closeReimbursementModal();
-        this.reimbursementSuccess = 'Reintegro registrado con éxito';
+        this.toastService.success('Reintegro registrado con éxito');
         this.load();
-        setTimeout(() => { this.reimbursementSuccess = ''; }, 3000);
       },
       error: (err) => {
         this.reimbursementError = err?.error?.message || 'Error al registrar el reintegro.';
