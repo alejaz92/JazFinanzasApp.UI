@@ -1,3 +1,8 @@
+// ─── Breakpoint único de colapso ────────────────────────────────
+// Mismo valor que Bootstrap `lg` (991.98px) y que navbar-expand-lg.
+// Usar este valor en cualquier @media (max-width: ...) de layout propio.
+$jf-breakpoint-collapse: 991.98px;
+
 // ─── Paleta JazFinanzasApp (claro) ─────────────────────────────
 $jf-violet:       #5B3DD9;   // Color principal — navbar, botones, links
 $jf-violet-light: #8B72E8;   // Acento — hover, badges, highlights
