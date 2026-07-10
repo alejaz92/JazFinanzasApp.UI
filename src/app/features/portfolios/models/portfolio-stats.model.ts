@@ -23,3 +23,8 @@ export interface PortfolioDetailStatsDTO {
     actualValue: number;
     holdings: PortfolioHoldingDTO[];
 }
+
+export interface PortfolioValueByDateDTO {
+    date: Date;
+    value: number;
+}

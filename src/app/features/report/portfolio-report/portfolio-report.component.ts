@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { NgIf, NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { Chart, ChartConfiguration, registerables } from 'chart.js';
 Chart.register(...registerables);
 import ChartDataLabels from 'chartjs-plugin-datalabels';
@@ -8,7 +10,7 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { PortfolioService } from '../../portfolios/services/portfolio.service';
 import { AssetService } from '../../asset/services/asset.service';
 import { Asset } from '../../asset/models/asset.model';
-import { PortfolioStatsDTO, PortfolioDetailStatsDTO, PortfolioHoldingDTO } from '../../portfolios/models/portfolio-stats.model';
+import { PortfolioStatsDTO, PortfolioDetailStatsDTO, PortfolioHoldingDTO, PortfolioValueByDateDTO } from '../../portfolios/models/portfolio-stats.model';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { CurrencyInvestmentFormatPipe } from '../../../shared/pipes/currencyInvestmentFormat/currency-investment-format.pipe';
@@ -34,6 +36,7 @@ export class PortfolioReportComponent implements OnInit {
     displayedHoldings: PortfolioHoldingDTO[] = [];
 
     private compositionChart: Chart | undefined;
+    private evolutionChart: Chart | undefined;
 
     constructor(
         private portfolioService: PortfolioService,
@@ -67,13 +70,26 @@ export class PortfolioReportComponent implements OnInit {
         this.viewAux = false;
         this.isLoadingDetail = true;
 
-        this.portfolioService.getPortfolioDetailStats(this.selectedPortfolioId).subscribe(response => {
+        // Combinados: si cada uno renderizara su gráfico desde su propio subscribe con un setTimeout
+        // independiente, el de evolución podía correr antes de que "viewAux" pasara a true (todavía no
+        // hay <canvas> en el DOM) si esa respuesta llegaba primero — quedaba con la tarjeta vacía sin
+        // ningún reintento. Con forkJoin ambos gráficos se renderizan recién cuando los dos datos están
+        // listos, en el mismo ciclo que "viewAux".
+        forkJoin({
+            detail: this.portfolioService.getPortfolioDetailStats(this.selectedPortfolioId),
+            // si el historial falla (ej. deploy del endpoint todavía no propagado), no debe tirar abajo
+            // el resto de la pestaña -- se degrada a "sin evolución" en vez de romper todo.
+            history: this.portfolioService.getPortfolioValueHistory(this.selectedPortfolioId).pipe(
+                catchError(() => of([] as PortfolioValueByDateDTO[]))
+            )
+        }).subscribe(({ detail, history }) => {
             this.isLoadingDetail = false;
             this.viewAux = true;
-            this.detail = response;
+            this.detail = detail;
             this.updateDisplayedHoldings();
             setTimeout(() => {
-                this.renderCompositionChart(response.holdings);
+                this.renderCompositionChart(detail.holdings);
+                this.renderEvolutionChart(history);
             }, 0);
         });
     }
@@ -149,6 +165,41 @@ export class PortfolioReportComponent implements OnInit {
                 }
             } as ChartConfiguration['options'],
             plugins: [ChartDataLabels]
+        });
+    }
+
+    private renderEvolutionChart(history: PortfolioValueByDateDTO[]): void {
+        const ctx = document.getElementById('portfolioEvolutionChart') as HTMLCanvasElement;
+        if (!ctx) return;
+        this.evolutionChart?.destroy();
+
+        const labels = history.map(h => new Date(h.date).toLocaleDateString('es-AR', { month: 'short', year: 'numeric' }));
+        const values = history.map(h => h.value);
+
+        this.evolutionChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [{
+                    label: 'Valor de la cartera',
+                    data: values,
+                    borderColor: 'rgba(91, 61, 217, 1)',
+                    backgroundColor: 'rgba(91, 61, 217, 0.15)',
+                    fill: true,
+                    tension: 0.2
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (tooltipItem) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(tooltipItem.raw))
+                        }
+                    }
+                },
+                scales: { y: { beginAtZero: true, ticks: { callback: (v) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(v)) } } }
+            }
         });
     }
 

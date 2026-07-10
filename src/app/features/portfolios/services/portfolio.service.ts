@@ -4,7 +4,7 @@ import { Portfolio } from '../models/portfolio.model';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment.development';
 import { PortfolioAddRequest } from '../models/portfolio-add-request.model';
-import { PortfolioStatsDTO, PortfolioDetailStatsDTO } from '../models/portfolio-stats.model';
+import { PortfolioStatsDTO, PortfolioDetailStatsDTO, PortfolioValueByDateDTO } from '../models/portfolio-stats.model';
 
 @Injectable({
   providedIn: 'root'
@@ -43,5 +43,10 @@ export class PortfolioService {
     // composición y holdings (desagregados por cuenta) de una cartera puntual
     getPortfolioDetailStats(portfolioId: number): Observable<PortfolioDetailStatsDTO> {
       return this.http.get<PortfolioDetailStatsDTO>(`${environment.apiBaseURL}/api/report/PortfolioStats/${portfolioId}`);
+    }
+
+    // evolución mensual del valor de una cartera (últimos 12 meses)
+    getPortfolioValueHistory(portfolioId: number): Observable<PortfolioValueByDateDTO[]> {
+      return this.http.get<PortfolioValueByDateDTO[]>(`${environment.apiBaseURL}/api/report/PortfolioStats/${portfolioId}/history`);
     }
 }
