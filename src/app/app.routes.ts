@@ -223,6 +223,21 @@ export const routes: Routes = [
     canActivate: [AuthGuard]
   },
   {
+    path: 'management/trips',
+    loadComponent: () => import('./features/trips/trip-list/trip-list.component').then(m => m.TripListComponent),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'management/trips/add',
+    loadComponent: () => import('./features/trips/trip-add/trip-add.component').then(m => m.TripAddComponent),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'management/trips/:id',
+    loadComponent: () => import('./features/trips/trip-edit/trip-edit.component').then(m => m.TripEditComponent),
+    canActivate: [AuthGuard]
+  },
+  {
     path: 'shared-expenses',
     loadComponent: () => import('./features/shared-expenses/shared-expense-dashboard/shared-expense-dashboard.component').then(m => m.SharedExpenseDashboardComponent),
     canActivate: [AuthGuard]
