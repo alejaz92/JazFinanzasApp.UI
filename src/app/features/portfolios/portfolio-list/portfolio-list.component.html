@@ -13,27 +13,29 @@
             <thead>
                 <tr>
                     <th>Nombre</th>
+                    <th class="text-end">Valor actual ({{ mainReference?.symbol }})</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
 
             <tbody>
                 <tr *ngFor="let portfolio of portfolios">
-                    <td>{{ portfolio.name }}</td>
+                    <td>{{ portfolio.portfolioName }}</td>
+                    <td class="text-end">{{ portfolio.actualValue | currencyFiatFormat }}</td>
 
                     <td>
-                        <a 
-                            title="Editar" 
-                            class="btn btn-primary ms-2" 
-                            [routerLink]="['/management/portfolio', portfolio.id]"
+                        <a
+                            title="Editar"
+                            class="btn btn-primary ms-2"
+                            [routerLink]="['/management/portfolio', portfolio.portfolioId]"
                         >
                             <i class="bi-pencil-fill"></i>
                         </a>
-                        <button 
-                            title="Eliminar" 
-                            class="btn btn-danger ms-2" 
-                            (click)="onDelete(portfolio.id)"
-                            *ngIf="!portfolio.isDefault"
+                        <button
+                            title="Eliminar"
+                            class="btn btn-danger ms-2"
+                            (click)="onDelete(portfolio.portfolioId)"
+                            *ngIf="!portfolio.isDefault && portfolio.actualValue === 0"
                         >
                             <i class="bi-trash-fill"></i>
                         </button>

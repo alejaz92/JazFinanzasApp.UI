@@ -4,6 +4,7 @@ import { Portfolio } from '../models/portfolio.model';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment.development';
 import { PortfolioAddRequest } from '../models/portfolio-add-request.model';
+import { PortfolioStatsDTO } from '../models/portfolio-stats.model';
 
 @Injectable({
   providedIn: 'root'
@@ -32,5 +33,10 @@ export class PortfolioService {
     // get default portfolio
     getDefaultPortfolio(): Observable<Portfolio> {
       return this.http.get<Portfolio>(`${environment.apiBaseURL}/api/Portfolio/default`);
+    }
+
+    // valor actual/original de cada cartera del usuario (docs/plans/activos/portfolios-estadisticas.md)
+    getPortfolioStats(): Observable<PortfolioStatsDTO[]> {
+      return this.http.get<PortfolioStatsDTO[]>(`${environment.apiBaseURL}/api/report/PortfolioStats`);
     }
 }
