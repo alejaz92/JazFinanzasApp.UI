@@ -31,7 +31,12 @@
                 <tr *ngFor="let transaction of transactions | paginate: { itemsPerPage: 20, currentPage: page, totalItems: totalTransactions}">
                     <td class="align-middle">{{ transaction.date | date: 'dd/MM/yyyy' }}</td>
                     <td class="align-middle">{{ transaction.movementType | movementType }}</td>
-                    <td class="align-middle">{{ transaction.transactionClassName }}</td>
+                    <td class="align-middle">
+                        {{ transaction.transactionClassName }}
+                        <span *ngIf="transaction.tripName" class="badge bg-info-subtle text-info-emphasis ms-1" [title]="transaction.tripName">
+                            <i class="bi-airplane"></i> {{ transaction.tripName }}
+                        </span>
+                    </td>
                     <td class="align-middle">{{ transaction.detail }}</td>
                     <td class="align-middle">{{ transaction.accountName }}</td>
                     <td class="align-middle">{{ transaction.assetName }}</td>

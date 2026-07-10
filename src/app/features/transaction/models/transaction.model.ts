@@ -13,4 +13,6 @@ export interface Transaction {
     transactionClassName?: string;
     detail: string;
     amount: number;
+    tripId?: number | null;
+    tripName?: string;
   }

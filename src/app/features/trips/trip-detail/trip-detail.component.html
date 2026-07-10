@@ -1,0 +1,159 @@
+<app-loading [isLoading]="isLoading"></app-loading>
+
+<div class="container mt-4" *ngIf="!isLoading">
+    <ng-container *ngIf="trip; else notFound">
+        <div class="d-flex justify-content-between align-items-start mt-3 mb-3">
+            <div>
+                <h1 class="mb-1">{{ trip.name }}</h1>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge" [ngClass]="statusBadgeClass(trip.status)">{{ statusLabel(trip.status) }}</span>
+                    <span class="text-muted">{{ typeLabel(trip.type) }}</span>
+                    <span class="text-muted">·</span>
+                    <span class="text-muted">{{ trip.startDate | date:'dd/MM/yyyy' }} - {{ trip.endDate | date:'dd/MM/yyyy' }}</span>
+                </div>
+            </div>
+            <app-back-button [defaultUrl]="['/management/trips']"></app-back-button>
+        </div>
+
+        <!-- Movimientos asociados -->
+        <h5 class="mt-4">Movimientos asociados</h5>
+        <div class="table-responsive" *ngIf="trip.movements.length > 0; else noMovements">
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Origen</th>
+                        <th>Clase</th>
+                        <th>Detalle</th>
+                        <th>Moneda</th>
+                        <th class="text-end">Monto</th>
+                        <th style="width: 100px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let movement of trip.movements">
+                        <td class="align-middle">{{ movement.date | date:'dd/MM/yyyy' }}</td>
+                        <td class="align-middle">{{ movement.origin === 'CARD' ? 'Tarjeta' : 'Cuenta' }}</td>
+                        <td class="align-middle">{{ movement.transactionClass }}</td>
+                        <td class="align-middle">{{ movement.detail }}</td>
+                        <td class="align-middle">{{ movement.assetSymbol }}</td>
+                        <td class="align-middle text-end">{{ movement.amount | currencyFiatFormat }}</td>
+                        <td class="align-middle">
+                            <button class="btn btn-sm btn-outline-danger" [disabled]="isBusy(movement)"
+                                    (click)="onDisassociate(movement)">
+                                Desasociar
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <ng-template #noMovements>
+            <p class="text-muted">Todavía no hay movimientos asociados a este viaje.</p>
+        </ng-template>
+
+        <!-- Sugerencias -->
+        <h5 class="mt-4">Sugerencias</h5>
+        <p class="text-muted small">Movimientos sin viaje asignado cuya fecha cae dentro del rango del viaje.</p>
+        <ng-container *ngIf="!suggestionsLoading; else loadingSuggestions">
+            <div class="table-responsive" *ngIf="suggestions.length > 0; else noSuggestions">
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Origen</th>
+                            <th>Clase</th>
+                            <th>Detalle</th>
+                            <th>Moneda</th>
+                            <th class="text-end">Monto</th>
+                            <th style="width: 190px;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let movement of suggestions">
+                            <td class="align-middle">{{ movement.date | date:'dd/MM/yyyy' }}</td>
+                            <td class="align-middle">{{ movement.origin === 'CARD' ? 'Tarjeta' : 'Cuenta' }}</td>
+                            <td class="align-middle">{{ movement.transactionClass }}</td>
+                            <td class="align-middle">{{ movement.detail }}</td>
+                            <td class="align-middle">{{ movement.assetSymbol }}</td>
+                            <td class="align-middle text-end">{{ movement.amount | currencyFiatFormat }}</td>
+                            <td class="align-middle">
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-outline-success" [disabled]="isBusy(movement)"
+                                            (click)="onAssociate(movement)">
+                                        Confirmar
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-secondary" [disabled]="isBusy(movement)"
+                                            (click)="onDismissSuggestion(movement)">
+                                        Descartar
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <ng-template #noSuggestions>
+                <p class="text-muted">No hay sugerencias pendientes.</p>
+            </ng-template>
+        </ng-container>
+        <ng-template #loadingSuggestions>
+            <p class="text-muted">Cargando sugerencias...</p>
+        </ng-template>
+
+        <!-- Asociación manual -->
+        <h5 class="mt-4">Asociar movimiento existente</h5>
+        <div class="row mb-2">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Buscar por detalle..."
+                           [(ngModel)]="searchTerm" (keyup.enter)="onSearch()">
+                    <button class="btn btn-primary" type="button" (click)="onSearch()" [disabled]="searchLoading">
+                        {{ searchLoading ? 'Buscando...' : 'Buscar' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-responsive" *ngIf="searchDone && searchResults.length > 0">
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Origen</th>
+                        <th>Clase</th>
+                        <th>Detalle</th>
+                        <th>Moneda</th>
+                        <th class="text-end">Monto</th>
+                        <th style="width: 100px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let movement of searchResults">
+                        <td class="align-middle">{{ movement.date | date:'dd/MM/yyyy' }}</td>
+                        <td class="align-middle">{{ movement.origin === 'CARD' ? 'Tarjeta' : 'Cuenta' }}</td>
+                        <td class="align-middle">{{ movement.transactionClass }}</td>
+                        <td class="align-middle">{{ movement.detail }}</td>
+                        <td class="align-middle">{{ movement.assetSymbol }}</td>
+                        <td class="align-middle text-end">{{ movement.amount | currencyFiatFormat }}</td>
+                        <td class="align-middle">
+                            <button class="btn btn-sm btn-outline-success" [disabled]="isBusy(movement)"
+                                    (click)="onAssociate(movement)">
+                                Asociar
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="text-muted" *ngIf="searchDone && searchResults.length === 0">
+            No se encontraron movimientos sin asociar que coincidan con la búsqueda.
+        </p>
+    </ng-container>
+
+    <ng-template #notFound>
+        <div class="alert alert-warning" role="alert">
+            El viaje no ha sido encontrado.
+        </div>
+    </ng-template>
+</div>

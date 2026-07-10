@@ -11,6 +11,8 @@ import { SharedExpenseService } from 'src/app/features/shared-expenses/services/
 import { SharedExpenseFormData, SplitInput } from 'src/app/features/shared-expenses/models/shared-expense.model';
 import { BankPromotionFormData } from 'src/app/features/shared-expenses/bank-promotion-form/bank-promotion-form.component';
 import { CardTransactionDiscountService } from 'src/app/features/card-transaction-discount/services/card-transaction-discount.service';
+import { TripService } from 'src/app/features/trips/services/trip.service';
+import { Trip } from 'src/app/features/trips/models/trip.model';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { NgIf, NgFor, DecimalPipe } from '@angular/common';
 import { CurrencyInputDirective } from '../../../shared/directives/currency-input.directive';
@@ -32,6 +34,7 @@ export class CardTransactionsAddComponent implements OnInit {
   assets: any[] = [];
   expenseClasses: any[] = [];
   cards: any[] = [];
+  trips: Trip[] = [];
 
   sharedExpenseActive: boolean = false;
   bankPromotionActive: boolean = false;
@@ -48,6 +51,7 @@ export class CardTransactionsAddComponent implements OnInit {
     private cardService: CardService,
     private sharedExpenseService: SharedExpenseService,
     private cardTransactionDiscountService: CardTransactionDiscountService,
+    private tripService: TripService,
     private http: HttpClient,
     private toastService: ToastService
   ) {}
@@ -64,12 +68,14 @@ export class CardTransactionsAddComponent implements OnInit {
       installments: [1],
       firstInstallmentDate: ['', Validators.required],
       lastInstallmentDate: [''],
+      trip: [''],
     });
 
     //this.assignFirstInstallment();
     this.loadAssets();
     this.loadExpenseClasses();
     this.loadCards();
+    this.loadTrips();
   }
 
   loadAssets() {
@@ -89,6 +95,12 @@ export class CardTransactionsAddComponent implements OnInit {
   loadCards() {
     this.cardService.getAllCards().subscribe((data: any) => {
       this.cards = data;
+    });
+  }
+
+  loadTrips() {
+    this.tripService.getAllTrips().subscribe((data) => {
+      this.trips = data;
     });
   }
 
@@ -183,7 +195,8 @@ export class CardTransactionsAddComponent implements OnInit {
       totalAmount: parseFloat(formValues.totalAmount) || 0,
       installments: parseInt(formValues.installments) || 1,
       firstInstallment: formValues.firstInstallmentDate + '-01',
-      repeat: "NO"
+      repeat: "NO",
+      tripId: formValues.trip ? parseInt(formValues.trip, 10) : null
     };
 
     if (formValues.movementType === 'R') {
@@ -244,6 +257,7 @@ export class CardTransactionsAddComponent implements OnInit {
         this.cardTransactionForm.reset();
         this.cardTransactionForm.controls['totalAmount'].setValue(0);
         this.cardTransactionForm.controls['installments'].setValue(1);
+        this.cardTransactionForm.controls['trip'].setValue('');
         this.sharedExpenseActive = false;
         this.bankPromotionActive = false;
         this.sharedExpenseData = null;

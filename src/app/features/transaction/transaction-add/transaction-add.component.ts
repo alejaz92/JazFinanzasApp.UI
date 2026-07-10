@@ -4,6 +4,8 @@ import { TransactionService } from '../services/transaction.service';
 import { AccountService } from '../../account/services/account.service';
 import { AssetService } from '../../asset/services/asset.service';
 import { TransactionClassService } from '../../transactionClass/services/transaction-class.service';
+import { TripService } from '../../trips/services/trip.service';
+import { Trip } from '../../trips/models/trip.model';
 import { SharedExpenseService } from '../../shared-expenses/services/shared-expense.service';
 import { SharedExpenseFormData } from '../../shared-expenses/models/shared-expense.model';
 import { Subscription } from 'rxjs';
@@ -31,6 +33,7 @@ export class TransactionAddComponent implements OnInit, OnDestroy {
   incomeClasses: any[] = [];
   expenseClasses: any[] = [];
   assets: any[] = [];
+  trips: Trip[] = [];
 
   sharedExpenseActive: boolean = false;
   sharedExpenseData: SharedExpenseFormData | null = null;
@@ -46,6 +49,7 @@ export class TransactionAddComponent implements OnInit, OnDestroy {
     private assetService: AssetService,
     private transactionClasses: TransactionClassService,
     private sharedExpenseService: SharedExpenseService,
+    private tripService: TripService,
     private toastService: ToastService
   ) { }
 
@@ -62,11 +66,13 @@ export class TransactionAddComponent implements OnInit, OnDestroy {
       expenseClass: [''],
       incomeExchangeAccount: [''],
       expenseExchangeAccount: [''],
+      trip: [''],
     });
 
     this.loadAccounts();
     this.loadAssets();
     this.loadTransactionClasses();
+    this.loadTrips();
 
     this.amountSub = this.transactionForm.get('amount')?.valueChanges.subscribe(value => {
       this.transactionAmountForForm = this.parseFormAmount(value);
@@ -97,11 +103,18 @@ export class TransactionAddComponent implements OnInit, OnDestroy {
     });
   }
 
+  loadTrips() {
+    this.tripService.getAllTrips().subscribe((data) => {
+      this.trips = data;
+    });
+  }
+
   onMovementTypeChange(event: any) {
     this.selectedMovementType = event.target.value;
     if (this.selectedMovementType !== 'E') {
       this.sharedExpenseActive = false;
       this.sharedExpenseData = null;
+      this.transactionForm.controls['trip'].setValue('');
     }
   }
 
@@ -192,7 +205,8 @@ export class TransactionAddComponent implements OnInit, OnDestroy {
         : (formValues.expenseClass ? parseInt(formValues.expenseClass, 10) : null),
       detail: formValues.detail,
       amount: Number(formValues.amount),
-      quotePrice: 0
+      quotePrice: 0,
+      tripId: formValues.movementType === 'E' && formValues.trip ? parseInt(formValues.trip, 10) : null
     };
 
     if (this.transactionForm.invalid) {

@@ -25,7 +25,7 @@
                         <th>Inicio</th>
                         <th>Fin</th>
                         <th>Estado</th>
-                        <th class="text-nowrap" style="width: 110px;">Acciones</th>
+                        <th class="text-nowrap" style="width: 150px;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -40,6 +40,9 @@
                         <td>
                             <!-- Acciones para pantallas grandes -->
                             <div class="d-none d-md-flex justify-content-center gap-2">
+                                <a title="Ver detalle" class="btn-icon bg-secondary" [routerLink]="['/management/trips', trip.id, 'detail']">
+                                    <i class="bi-eye"></i>
+                                </a>
                                 <a title="Editar" class="btn-icon bg-primary" [routerLink]="['/management/trips', trip.id]">
                                     <i class="bi-pencil-square"></i>
                                 </a>
@@ -60,6 +63,11 @@
                                         <i class="bi-list fs-5"></i>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <a class="dropdown-item" [routerLink]="['/management/trips', trip.id, 'detail']">
+                                                <i class="bi-eye me-2"></i>Ver detalle
+                                            </a>
+                                        </li>
                                         <li>
                                             <a class="dropdown-item" [routerLink]="['/management/trips', trip.id]">
                                                 <i class="bi-pencil-square me-2"></i>Editar

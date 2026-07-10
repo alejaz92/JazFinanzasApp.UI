@@ -112,6 +112,16 @@
             </div>
         </div>
 
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="trip" class="form-label">Viaje (opcional)</label>
+                <select class="form-control" id="trip" formControlName="trip">
+                    <option value="">Ninguno</option>
+                    <option *ngFor="let trip of trips" [value]="trip.id">{{ trip.name }}</option>
+                </select>
+            </div>
+        </div>
+
         <!-- Sección Promoción Bancaria: ajusta el monto, va primero -->
         <div class="row mb-2">
             <div class="col">

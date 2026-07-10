@@ -7,6 +7,8 @@ import { FormGroup, FormsModule } from '@angular/forms';
 import { AssetService } from '../../asset/services/asset.service';
 import { AccountService } from '../../account/services/account.service';
 import { TransactionClassService } from '../../transactionClass/services/transaction-class.service';
+import { TripService } from '../../trips/services/trip.service';
+import { Trip } from '../../trips/models/trip.model';
 import { SharedExpenseService } from '../../shared-expenses/services/shared-expense.service';
 import { SharedExpenseDetail, SharedExpenseFormData } from '../../shared-expenses/models/shared-expense.model';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
@@ -29,6 +31,7 @@ export class TransactionEditComponent implements OnInit, OnDestroy {
   assets: any[] = [];
   accounts: any[] = [];
   transactionClasses: any[] = [];
+  trips: Trip[] = [];
   paramsSubcription?: Subscription;
   editTransactionSubscription?: Subscription;
   transaction?: Transaction;
@@ -62,6 +65,7 @@ export class TransactionEditComponent implements OnInit, OnDestroy {
     private accountService: AccountService,
     private transactionClassService: TransactionClassService,
     private sharedExpenseService: SharedExpenseService,
+    private tripService: TripService,
     private router: Router,
     private toastService: ToastService
   ) { }
@@ -69,6 +73,7 @@ export class TransactionEditComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadAssets();
     this.loadAccounts();
+    this.loadTrips();
 
     this.paramsSubcription = this.route.paramMap.subscribe({
       next: (params) => {
@@ -113,6 +118,12 @@ export class TransactionEditComponent implements OnInit, OnDestroy {
   loadAccounts() {
     this.accountService.getAccountByTypeName("Moneda").subscribe((data: any) => {
       this.accounts = data;
+    });
+  }
+
+  loadTrips() {
+    this.tripService.getAllTrips().subscribe((data) => {
+      this.trips = data;
     });
   }
 

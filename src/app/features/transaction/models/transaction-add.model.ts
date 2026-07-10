@@ -8,4 +8,5 @@ export interface TransactionAdd {
     detail: string;
     amount: number;
     quotePrice: number;
+    tripId?: number | null;
 }

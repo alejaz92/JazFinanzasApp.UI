@@ -46,6 +46,15 @@
                     </select>
                 </div>
             </div>
+            <div class="row mb-3" *ngIf="transaction.movementType === 'Egreso'">
+                <div class="col-md-6">
+                    <label for="trip">Viaje (opcional)</label>
+                    <select class="form-control" name="trip" id="trip" [(ngModel)]="transaction.tripId">
+                        <option [ngValue]="null">Ninguno</option>
+                        <option *ngFor="let trip of trips" [ngValue]="trip.id">{{ trip.name }}</option>
+                    </select>
+                </div>
+            </div>
             <div class="row mb-3">
                 <div class="col">
                     <label for="detail">Detalle</label>

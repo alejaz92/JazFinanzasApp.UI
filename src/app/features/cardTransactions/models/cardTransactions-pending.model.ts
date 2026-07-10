@@ -11,4 +11,6 @@ export interface CardTransactionPending {
     firstInstallment: Date;
     lastInstallment: string;
     installmentAmount: number;
+    tripId?: number | null;
+    tripName?: string;
 }

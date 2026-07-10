@@ -37,7 +37,12 @@
                 <tr *ngFor="let cardTransaction of cardTransactions" >
                     <td class="align-middle">{{cardTransaction.date | date: 'dd/MM/yyyy'}}</td>
                     <td class="align-middle">{{cardTransaction.card}}</td>
-                    <td class="align-middle">{{cardTransaction.transactionClass}}</td>
+                    <td class="align-middle">
+                        {{cardTransaction.transactionClass}}
+                        <span *ngIf="cardTransaction.tripName" class="badge bg-info-subtle text-info-emphasis ms-1" [title]="cardTransaction.tripName">
+                            <i class="bi-airplane"></i> {{cardTransaction.tripName}}
+                        </span>
+                    </td>
                     <td class="align-middle">{{cardTransaction.detail}}</td>
                     <td class="align-middle">{{cardTransaction.installments}}</td>
                     <td class="align-middle">{{cardTransaction.asset}}</td>

@@ -8,5 +8,6 @@ export interface CardTransactionsAdd {
     installments: number;
     firstInstallment: string;
     lastInstallment?: string;
-    repeat: string;    
+    repeat: string;
+    tripId?: number | null;
 }
