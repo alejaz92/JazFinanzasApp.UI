@@ -26,6 +26,14 @@ export const reportRoutes: Routes = [
             {
                 path: 'crypto',
                 loadComponent: () => import('./crypto-report/crypto-report.component').then(m => m.CryptoReportComponent)
+            },
+            {
+                path: 'portfolio-general',
+                loadComponent: () => import('./portfolio-general-report/portfolio-general-report.component').then(m => m.PortfolioGeneralReportComponent)
+            },
+            {
+                path: 'portfolio-detail',
+                loadComponent: () => import('./portfolio-report/portfolio-report.component').then(m => m.PortfolioReportComponent)
             }
         ]
     }

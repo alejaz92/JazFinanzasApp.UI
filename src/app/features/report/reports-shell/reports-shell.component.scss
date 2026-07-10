@@ -76,6 +76,29 @@ $sidebar-bg-bottom: #1b0f44;
     }
 }
 
+// -- Categorías con subitems ----------------------------------------------------
+
+.sidebar-category {
+    cursor: pointer;
+}
+
+.category-chevron {
+    font-size: 0.7rem;
+    transition: transform 0.15s ease;
+}
+
+.sidebar-category.expanded .category-chevron {
+    transform: rotate(-180deg);
+}
+
+.sidebar-subnav {
+    .sidebar-sublink {
+        margin-left: 20px;
+        font-size: 0.92rem;
+        opacity: 0.9;
+    }
+}
+
 // -- Content -------------------------------------------------------------------
 
 .reports-content {

@@ -1,0 +1,100 @@
+<app-loading [isLoading]="isLoading"></app-loading>
+
+<div *ngIf="!isLoading">
+    <h2 class="mb-3">Carteras — Vista General</h2>
+
+    <div class="row">
+        <div class="col-md-4 mt-1">
+            <div class="card">
+                <div class="card-header">Valor Total (En {{ mainReference?.symbol }})</div>
+                <div class="card-body">
+                    <h4 class="card-title mb-0">{{ totalActualValue | currencyFiatFormat }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mt-1">
+            <div class="card">
+                <div class="card-header">Invertido (En {{ mainReference?.symbol }})</div>
+                <div class="card-body">
+                    <h4 class="card-title mb-0">{{ totalOriginalValue | currencyFiatFormat }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mt-1">
+            <div class="card">
+                <div class="card-header">Ganancia / Pérdida</div>
+                <div class="card-body">
+                    <h4 class="card-title mb-0" [class.text-success]="totalGainLossPct >= 0" [class.text-danger]="totalGainLossPct < 0">
+                        {{ totalGainLossPct | currencyInvestmentFormat }} %
+                    </h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <ng-container *ngIf="portfolios.length > 0">
+        <div class="row mt-4">
+            <div class="col-md-6 mt-1">
+                <div class="card">
+                    <div class="card-header">Valor Actual por Cartera (En {{ mainReference?.symbol }})</div>
+                    <div class="card-body">
+                        <canvas id="valueByPortfolioChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mt-1">
+                <div class="card">
+                    <div class="card-header">Distribución del Patrimonio por Cartera</div>
+                    <div class="card-body">
+                        <canvas id="portfolioDistributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12 mt-1">
+                <div class="card">
+                    <div class="card-header">Invertido vs Valor Actual por Cartera (En {{ mainReference?.symbol }})</div>
+                    <div class="card-body">
+                        <canvas id="originalVsActualByPortfolioChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12 mt-1">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Detalle por Cartera</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm">
+                                <thead class="table-header-brand">
+                                    <tr>
+                                        <th>Cartera</th>
+                                        <th class="text-end">Invertido</th>
+                                        <th class="text-end">Valor Actual</th>
+                                        <th class="text-end">Ganancia / Pérdida</th>
+                                        <th class="text-end">%</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let p of portfolios">
+                                        <td>{{ p.portfolioName }}</td>
+                                        <td class="text-end">{{ p.originalValue | currencyFiatFormat }}</td>
+                                        <td class="text-end">{{ p.actualValue | currencyFiatFormat }}</td>
+                                        <td class="text-end">{{ (p.actualValue - p.originalValue) | currencyFiatFormat }}</td>
+                                        <td class="text-end">{{ gainLossPct(p) | currencyInvestmentFormat }} %</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+</div>

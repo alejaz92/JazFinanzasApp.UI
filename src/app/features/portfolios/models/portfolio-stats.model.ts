@@ -5,3 +5,21 @@ export interface PortfolioStatsDTO {
     originalValue: number;
     actualValue: number;
 }
+
+export interface PortfolioHoldingDTO {
+    assetType: string;
+    assetName: string;
+    symbol: string;
+    accountName: string;
+    quantity: number;
+    originalValue: number;
+    actualValue: number;
+}
+
+export interface PortfolioDetailStatsDTO {
+    portfolioId: number;
+    portfolioName: string;
+    originalValue: number;
+    actualValue: number;
+    holdings: PortfolioHoldingDTO[];
+}

@@ -14,16 +14,44 @@
   </div>
 
   <ul class="nav flex-column py-2">
-    @for (item of navItems; track item.label) {
-      <li class="nav-item">
-        <a class="nav-link text-white px-3 py-2 d-flex align-items-center sidebar-link"
-           [routerLink]="item.route"
-           routerLinkActive="active"
-           (click)="sidebarOpen = false">
-          <i class="bi {{ item.icon }} me-2"></i>
-          {{ item.label }}
-        </a>
-      </li>
+    @for (entry of navEntries; track entry.label) {
+      @if (isCategory(entry)) {
+        <li class="nav-item">
+          <a class="nav-link text-white px-3 py-2 d-flex align-items-center sidebar-link sidebar-category"
+             [class.expanded]="expandedCategory === entry.label"
+             role="button"
+             (click)="toggleCategory(entry.label)">
+            <i class="bi {{ entry.icon }} me-2"></i>
+            <span class="flex-grow-1">{{ entry.label }}</span>
+            <i class="bi bi-chevron-down category-chevron"></i>
+          </a>
+          @if (expandedCategory === entry.label) {
+            <ul class="nav flex-column sidebar-subnav">
+              @for (child of entry.children; track child.label) {
+                <li class="nav-item">
+                  <a class="nav-link text-white px-3 py-2 d-flex align-items-center sidebar-link sidebar-sublink"
+                     [routerLink]="child.route"
+                     routerLinkActive="active"
+                     (click)="sidebarOpen = false">
+                    <i class="bi {{ child.icon }} me-2"></i>
+                    {{ child.label }}
+                  </a>
+                </li>
+              }
+            </ul>
+          }
+        </li>
+      } @else {
+        <li class="nav-item">
+          <a class="nav-link text-white px-3 py-2 d-flex align-items-center sidebar-link"
+             [routerLink]="entry.route"
+             routerLinkActive="active"
+             (click)="sidebarOpen = false">
+            <i class="bi {{ entry.icon }} me-2"></i>
+            {{ entry.label }}
+          </a>
+        </li>
+      }
     }
   </ul>
 </nav>
