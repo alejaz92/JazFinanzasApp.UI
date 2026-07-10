@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CryptoTransactionService } from '../services/crypto-transaction.service';
 import { CryptoTransaction } from '../models/CryptoTransaction.model';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
@@ -8,20 +8,25 @@ import { NgxPaginationModule } from 'ngx-pagination';
 import { CommerceTypePipe } from '../../../shared/pipes/commerceType/commerce-type.pipe';
 import { CurrencyInvestmentFormatPipe } from '../../../shared/pipes/currencyInvestmentFormat/currency-investment-format.pipe';
 import { MovementTypePipe } from '../../../shared/pipes/movementType/movement-type.pipe';
+import { ToastService } from '../../../core/services/toast.service';
+import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
 
 @Component({
     selector: 'app-crypto-transaction-list',
     templateUrl: './crypto-transaction-list.component.html',
     styleUrls: ['./crypto-transaction-list.component.css'],
-    imports: [LoadingComponent, NgIf, RouterLink, NgFor, NgxPaginationModule, DatePipe, CommerceTypePipe, CurrencyInvestmentFormatPipe, MovementTypePipe]
+    imports: [LoadingComponent, NgIf, RouterLink, NgFor, NgxPaginationModule, DatePipe, CommerceTypePipe, CurrencyInvestmentFormatPipe, MovementTypePipe, ConfirmModalComponent]
 })
 export class CryptoTransactionListComponent implements OnInit{
   isLoading: boolean = true;
   cryptoTransactions: CryptoTransaction[] = [];
   page: number = 1;
   totalCryptoTransactions: number = 0;
-  
-  constructor(private cryptoTransactionService: CryptoTransactionService) { }
+
+  @ViewChild('deleteModal') deleteModal!: ConfirmModalComponent;
+  private transactionToDelete: CryptoTransaction | null = null;
+
+  constructor(private cryptoTransactionService: CryptoTransactionService, private toastService: ToastService) { }
 
   ngOnInit(): void {
     this.loadCryptoTransactions();
@@ -45,12 +50,24 @@ export class CryptoTransactionListComponent implements OnInit{
   }
 
   onDeleteTransaction(cryptoTransaction: CryptoTransaction) {
-    if (!confirm(`¿Estás seguro de eliminar el movimiento?`)) {
-      return
-    }
-    this.cryptoTransactionService.deleteCryptoTransaction(cryptoTransaction.id)
-      .subscribe(() => {
-        this.loadCryptoTransactions();
+    this.transactionToDelete = cryptoTransaction;
+    this.deleteModal.open();
+  }
+
+  onDeleteConfirmed(): void {
+    if (!this.transactionToDelete) return;
+
+    this.cryptoTransactionService.deleteCryptoTransaction(this.transactionToDelete.id)
+      .subscribe({
+        next: () => {
+          this.toastService.success('Movimiento eliminado correctamente');
+          this.loadCryptoTransactions();
+        },
+        error: () => {
+          this.toastService.error('Error al eliminar el movimiento');
+        }
       });
+
+    this.transactionToDelete = null;
   }
 }

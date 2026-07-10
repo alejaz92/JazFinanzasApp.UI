@@ -42,6 +42,72 @@ body {
   color: #fff;
 }
 
+// ─── Tamaño de fuente para tablas compactas de reportes (Fase 13) ────────────
+// Los reportes usan `table-sm` para densidad visual. El font-size base de
+// Bootstrap (1rem) queda grande para tablas de datos — se reduce a 0.8rem
+// igual que hacía el override puntual que tenía reports.component.css antes.
+// Centralizado acá para no repetirlo por componente.
+.table-sm {
+  font-size: 0.8rem;
+}
+
+// ─── Alto de fila uniforme + centrado vertical en tablas CRUD ──────────────
+// Alto: sin esto, las filas sin botones de acción (ej. clases de movimiento
+// del sistema, sin permiso de editar/eliminar) quedan más bajas que las filas
+// con el ícono circular .btn-icon (2.25rem + padding de celda) — el alto de
+// fila en HTML depende del contenido de cada fila individualmente.
+// Centrado: Bootstrap 5 define `vertical-align: top` por defecto en
+// `.table > * > * > *`, por lo que cualquier celda sin la clase `align-middle`
+// queda con el texto pegado arriba — más notorio todavía con el alto fijo de
+// arriba. Antes de este fix había que acordarse de poner `align-middle` en
+// cada `<td>` de cada tabla nueva (se olvidó en `crypto-transaction-list`/
+// `stock-transaction-list`, Fase 9) — ahora es automático, ya no hace falta
+// agregar `align-middle` manualmente en tablas nuevas.
+// No aplica a tablas de reportes (table-sm), que buscan ser compactas.
+.table:not(.table-sm) td {
+  height: 3.25rem;
+  vertical-align: middle;
+}
+
+// ─── ngx-pagination: alinear con la paleta de marca ────────────────────────
+// La librería no trae soporte de temas — sus estilos por defecto fijan
+// colores hardcodeados (texto casi negro, página activa en azul genérico)
+// que no se adaptan a dark mode ni a la identidad violeta/índigo. Se
+// sobreescriben con las custom properties de Bootstrap, que ya resuelven al
+// tono correcto en cada tema.
+.ngx-pagination a,
+.ngx-pagination button {
+  color: var(--bs-body-color) !important;
+}
+
+.ngx-pagination a:hover,
+.ngx-pagination button:hover {
+  background: var(--bs-tertiary-bg) !important;
+}
+
+.ngx-pagination .current {
+  background: var(--bs-primary) !important;
+  color: #fff !important;
+}
+
+.ngx-pagination .disabled {
+  color: var(--bs-secondary-color) !important;
+}
+
+// ─── Cards: sombra sutil para dar profundidad respecto al fondo de página ──────
+// En dark mode la sombra se sobreescribe con none — las cards oscuras
+// se distinguen del fondo mediante su propio --bs-card-border-color.
+.card {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+}
+
+// ─── Cursor pointer en elementos no-ancla con routerLink ───────────────────────
+// Angular renderiza [routerLink] como atributo `routerlink` en el DOM.
+// Los <a> ya tienen cursor:pointer por defecto; los <div> no.
+.card[routerlink] {
+  cursor: pointer;
+}
+
 // ─── Dark mode: paleta violeta/índigo + overrides de componentes ──────────────
 // Va DESPUÉS del import de Bootstrap: Bootstrap también define su propio bloque
 // [data-bs-theme="dark"] (grises por defecto) y, al tener la misma especificidad,
@@ -81,9 +147,21 @@ body {
   --bs-link-hover-color-rgb:     196, 180, 247;
 
   // ── Cards: un tono más claro que la página para dar profundidad ────────────
+  // La sombra global no aplica en oscuro (sombra sobre fondo oscuro no se ve);
+  // la distinción visual viene del borde --bs-card-border-color.
   .card {
     --bs-card-bg:           var(--bs-secondary-bg);
     --bs-card-border-color: var(--bs-border-color);
+    box-shadow: none;
+  }
+
+  // ── Form controls: fondo levemente más claro que la página ────────────────
+  // Bootstrap usa --bs-body-bg (#1B1730) como fondo de inputs en dark mode,
+  // por lo que se funden con el fondo de página. Se eleva un tono.
+  .form-control,
+  .form-select {
+    background-color: var(--bs-secondary-bg);
+    border-color: var(--bs-border-color);
   }
 
   // ── Dropdowns: igual que cards ─────────────────────────────────────────────

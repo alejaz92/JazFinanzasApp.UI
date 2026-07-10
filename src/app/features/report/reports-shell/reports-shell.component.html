@@ -1,0 +1,39 @@
+<!-- Mobile top bar -->
+<div class="d-flex d-lg-none align-items-center reports-mobile-bar text-white px-3 py-2">
+  <button class="btn btn-outline-light btn-sm me-3" (click)="toggleSidebar()">
+    <i class="bi bi-list fs-5"></i>
+  </button>
+  <span class="fw-semibold flex-grow-1">Reportes</span>
+</div>
+
+<!-- Sidebar -->
+<nav class="reports-sidebar text-white" [class.open]="sidebarOpen">
+  <div class="sidebar-header d-none d-lg-flex align-items-center px-3 py-3">
+    <i class="bi bi-bar-chart-fill text-primary me-2 fs-5"></i>
+    <span class="fw-bold text-uppercase small">Reportes</span>
+  </div>
+
+  <ul class="nav flex-column py-2">
+    @for (item of navItems; track item.label) {
+      <li class="nav-item">
+        <a class="nav-link text-white px-3 py-2 d-flex align-items-center sidebar-link"
+           [routerLink]="item.route"
+           routerLinkActive="active"
+           (click)="sidebarOpen = false">
+          <i class="bi {{ item.icon }} me-2"></i>
+          {{ item.label }}
+        </a>
+      </li>
+    }
+  </ul>
+</nav>
+
+<!-- Mobile overlay -->
+@if (sidebarOpen) {
+  <div class="sidebar-overlay d-lg-none" (click)="sidebarOpen = false"></div>
+}
+
+<!-- Main content -->
+<main class="reports-content p-3 p-lg-4">
+  <router-outlet></router-outlet>
+</main>

@@ -1,18 +1,24 @@
 <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1>Intercambio de Monedas</h1>
-        <a class="btn btn-primary" [routerLink]="['/currencyExchange/add']">Nuevo <i class="bi-plus-lg"></i></a>
+    <div class="d-flex align-items-center gap-2 mb-3">
+        <h1 class="mb-0">Intercambio de Monedas</h1>
+        <a class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center"
+           [routerLink]="['/currencyExchange/add']"
+           title="Nuevo Intercambio"
+           style="width: 44px; height: 44px; font-size: 1.2rem;">
+            <i class="bi-plus-lg text-white"></i>
+        </a>
     </div>
 
+    <ng-container *ngIf="totalCurrencyExchanges > 0; else emptyCurrencyEx">
     <!-- tabla de movimientos-->
     <div class="table-responsive">
-        <table class="table table-striped">
+        <table class="table table-striped table-bordered">
             <thead>
                 <tr>
                     <th rowspan="2">Fecha</th>
                     <th colspan="3" class="text-center table-danger">Egreso</th>
                     <th colspan="3" class="text-center table-success">Ingreso</th>
-                    <th rowspan="2">Acciones</th>
+                    <th rowspan="2" class="text-nowrap" style="width: 80px;">Acciones</th>
                 </tr>
                 <tr>
                     <th class="table-danger">Activo</th>
@@ -36,10 +42,10 @@
                     <td class="text-end table-success">
                         {{ transaction.incomeAmount != null ? (transaction.incomeAmount | currencyFiatFormat) : ''   }}
                     </td>
-                    <td>
-                        <div class="justify-content-around">
-                            <button class="btn btn-sm btn-danger m-1" title="Eliminar" (click)="onDeleteExchange(transaction)"><i class="bi-trash-fill"></i></button>
-                        </div>
+                    <td class="text-center">
+                        <button title="Eliminar" class="btn-icon bg-danger" (click)="onDeleteExchange(transaction)">
+                            <i class="bi-trash"></i>
+                        </button>
                     </td>
                 </tr>
             </tbody>
@@ -48,11 +54,26 @@
 
     <!-- Paginacion-->
     <div class="d-flex justify-content-center">
-        <pagination-controls 
+        <pagination-controls
         (pageChange)="onPageChange($event)"
         [responsive]="true"
         [previousLabel]="'Anterior'"
         [nextLabel]="'Siguiente'">
     </pagination-controls>
     </div>
+    </ng-container>
+
+    <ng-template #emptyCurrencyEx>
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+            <p class="mb-0">No hay intercambios de monedas registrados.</p>
+        </div>
+    </ng-template>
 </div>
+
+<app-confirm-modal #deleteModal
+    title="Eliminar Intercambio"
+    message="¿Estás seguro de eliminar el intercambio?"
+    confirmLabel="Eliminar"
+    (confirmed)="onDeleteConfirmed()">
+</app-confirm-modal>

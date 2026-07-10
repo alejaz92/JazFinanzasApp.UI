@@ -1,0 +1,30 @@
+.table th, .table td {
+  white-space: nowrap;
+}
+
+.report-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.graph {
+  flex: 1 1 45%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 991.98px) {
+  .graph {
+    flex: 1 1 100%;
+  }
+}
+
+.card-body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}

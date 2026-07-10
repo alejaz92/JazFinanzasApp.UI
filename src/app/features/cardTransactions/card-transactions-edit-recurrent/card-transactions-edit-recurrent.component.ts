@@ -1,21 +1,22 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CardTransactionsService } from '../services/card-transactions.service';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { first, Subscription } from 'rxjs';
 import { RecurrentCardTransactionPut } from '../models/CardTransaction-recurrent.model';
 import { DatePipe, NgIf } from '@angular/common';
 import { CurrencyInputDirective } from '../../../shared/directives/currency-input.directive';
+import { ToastService } from '../../../core/services/toast.service';
+import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 
 @Component({
     selector: 'app-card-transactions-edit-recurrent',
     templateUrl: './card-transactions-edit-recurrent.component.html',
     styleUrls: ['./card-transactions-edit-recurrent.component.css'],
     providers: [DatePipe],
-    imports: [NgIf, FormsModule, ReactiveFormsModule, CurrencyInputDirective, RouterLink]
+    imports: [NgIf, FormsModule, ReactiveFormsModule, CurrencyInputDirective, BackButtonComponent]
 })
 export class CardTransactionsEditRecurrentComponent implements OnInit{
-  successMessage: string = '';
   editRecurrentForm!: FormGroup;
   action: string = 'Edit';
   id: number = 0;
@@ -25,7 +26,8 @@ export class CardTransactionsEditRecurrentComponent implements OnInit{
     private router: Router,
     private fb: FormBuilder,
     private cardTransactionsService: CardTransactionsService,
-    private datePipe: DatePipe
+    private datePipe: DatePipe,
+    private toastService: ToastService
   ) {
     const today = new Date();
 
@@ -71,7 +73,7 @@ export class CardTransactionsEditRecurrentComponent implements OnInit{
         });
       },
       (error) => {
-        console.error('Error loading recurrent card transaction details', error);
+        this.toastService.error('Error al cargar el movimiento recurrente');
       }
     );
   }
@@ -136,14 +138,11 @@ export class CardTransactionsEditRecurrentComponent implements OnInit{
 
     this.cardTransactionsService.editRecurrentCardTransaction(this.id, formValue).subscribe(
       (response) => {
-
-        this.successMessage = 'Movimiento de tarjeta actualizado correctamente';
-        setTimeout(() => {
-          this.router.navigateByUrl('/cardTransactions');
-        }, 3000);
-      }, 
+        this.toastService.success('Movimiento de tarjeta actualizado correctamente');
+        this.router.navigateByUrl('/cardTransactions');
+      },
       (error) => {
-        console.error('Error updating recurrent card transaction', error);
+        this.toastService.error('Error al actualizar el movimiento recurrente');
       }
     )
   }

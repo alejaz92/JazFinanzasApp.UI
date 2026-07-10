@@ -1,16 +1,22 @@
 <app-loading [isLoading]="isLoading"></app-loading>
-<div class="container mt-4" *ngIf="!isLoading">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1>Movimientos Tarjeta de Credito</h1>
-        <div>
-            <a class="btn btn-primary m-1" [routerLink]="['/cardTransactions/add']">Nuevo <i class="bi-plus-lg"></i></a>
-            <a class="btn btn-warning" [routerLink]="['/cardTransactions/pay']">Pago Tarjeta</a> 
-        </div>        
+<div class="container-fluid mt-4" *ngIf="!isLoading">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
+        <div class="d-flex align-items-center flex-grow-1 gap-2">
+            <h1 class="mb-0">Movimientos Tarjeta de Credito</h1>
+            <a class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center"
+               [routerLink]="['/cardTransactions/add']"
+               title="Nuevo Movimiento"
+               style="width: 44px; height: 44px; font-size: 1.2rem;">
+                <i class="bi-plus-lg text-white"></i>
+            </a>
+        </div>
+        <a class="btn btn-warning" [routerLink]="['/cardTransactions/pay']">Pago Tarjeta</a>
     </div>
 
     <!-- tabla de movimientos-->
+    <ng-container *ngIf="cardTransactions && cardTransactions.length > 0; else emptyCardTx">
      <div class="table-responsive">
-        <table class="table table-striped">
+        <table class="table table-striped table-bordered">
             <thead>
                 <tr>
                     <th>Fecha</th>
@@ -24,7 +30,7 @@
                     <th>Ultima Cuota</th>
                     <th class="text-end">Monto Cuota</th>
                     <th>Descuento</th>
-                    <th>Acciones</th>
+                    <th class="text-nowrap" style="width: 80px;">Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -46,18 +52,24 @@
                             <i class="bi-tag-fill"></i> {{ discount.amount - discount.amountApplied | currencyFiatFormat }}
                         </span>
                     </td>
-                    <td class="align-middle">
-                        <div class="justify-content-around">
-                            <button 
-                                *ngIf="cardTransaction.installments == 'Recurrente'" 
-                                class="btn btn-sm btn-primary m-1" 
-                                title="Editar Recurrente" 
-                                [routerLink]="['/cardTransactions/editRecurrent', cardTransaction.id]"
-                            ><i class="bi-pencil-fill"></i></button>
-                        </div>
+                    <td class="align-middle text-center">
+                        <a *ngIf="cardTransaction.installments == 'Recurrente'"
+                           class="btn-icon bg-primary"
+                           title="Editar Recurrente"
+                           [routerLink]="['/cardTransactions/editRecurrent', cardTransaction.id]">
+                            <i class="bi-pencil-square"></i>
+                        </a>
                     </td>
                 </tr>
             </tbody>
         </table>
      </div>
+    </ng-container>
+
+    <ng-template #emptyCardTx>
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+            <p class="mb-0">No hay movimientos de tarjeta registrados.</p>
+        </div>
+    </ng-template>
 </div>

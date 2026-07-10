@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Transaction } from '../models/transaction.model';
 import { TransactionService } from '../services/transaction.service';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
@@ -7,20 +7,25 @@ import { RouterLink } from '@angular/router';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { MovementTypePipe } from '../../../shared/pipes/movementType/movement-type.pipe';
+import { ToastService } from '../../../core/services/toast.service';
+import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
 
 @Component({
     selector: 'app-transaction-list',
     templateUrl: './transaction-list.component.html',
     styleUrls: ['./transaction-list.component.css'],
-    imports: [LoadingComponent, NgIf, RouterLink, NgFor, NgClass, NgxPaginationModule, DatePipe, CurrencyFiatFormatPipe, MovementTypePipe]
+    imports: [LoadingComponent, NgIf, RouterLink, NgFor, NgClass, NgxPaginationModule, DatePipe, CurrencyFiatFormatPipe, MovementTypePipe, ConfirmModalComponent]
 })
 export class TransactionListComponent implements OnInit {
   isLoading: boolean = true;
-  transactions: Transaction[] = []; 
+  transactions: Transaction[] = [];
   page: number = 1;
   totalTransactions: number = 0;
 
-  constructor(private transactionService: TransactionService) { }
+  @ViewChild('deleteModal') deleteModal!: ConfirmModalComponent;
+  private transactionToDelete: Transaction | null = null;
+
+  constructor(private transactionService: TransactionService, private toastService: ToastService) { }
 
   ngOnInit(): void {
     this.loadTransactions();
@@ -46,17 +51,25 @@ export class TransactionListComponent implements OnInit {
   }
 
   onDeleteTransaction(transaction: Transaction) {
+    this.transactionToDelete = transaction;
+    this.deleteModal.open();
+  }
 
-    //preguntar si esta seguro de eliminar
-    if (!confirm(`¿Estás seguro de eliminar el movimiento?`)) {
-      return
-    }
+  onDeleteConfirmed(): void {
+    if (!this.transactionToDelete) return;
 
-    this.transactionService.deleteTransaction(transaction.id)
-      .subscribe(() => {
-        
-        this.loadTransactions();
+    this.transactionService.deleteTransaction(this.transactionToDelete.id)
+      .subscribe({
+        next: () => {
+          this.toastService.success('Movimiento eliminado correctamente');
+          this.loadTransactions();
+        },
+        error: () => {
+          this.toastService.error('Error al eliminar el movimiento');
+        }
       });
+
+    this.transactionToDelete = null;
   }
 }
 

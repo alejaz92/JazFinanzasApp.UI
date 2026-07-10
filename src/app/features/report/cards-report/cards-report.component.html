@@ -1,0 +1,75 @@
+<app-loading [isLoading]="isLoading"></app-loading>
+
+<div *ngIf="!isLoading">
+    <h2 class="mb-3">Tarjetas</h2>
+
+    <div class="row">
+        <div class="col-md-6">
+            <select id="card" class="form-select" [(ngModel)]="selectedCardDB3" (change)="loadCardStats()">
+                <option value="0" selected>Todas</option>
+                <option *ngFor="let card of cards" [value]="card.id">{{ card.name }}</option>
+            </select>
+        </div>
+    </div>
+
+    <app-loading [isLoading]="isLoadingGraph"></app-loading>
+
+    <div *ngIf="!isLoadingGraph">
+        <div class="row mt-4">
+            <div class="col-md-6 mt-1">
+                <div class="card">
+                    <div class="card-header">Gastos en Pesos</div>
+                    <div class="card-body">
+                        <canvas id="pesosCardsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mt-1">
+                <div class="card">
+                    <div class="card-header">Gastos en Dolares</div>
+                    <div class="card-body">
+                        <canvas id="dollarCardsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4" *ngIf="cardTransactionsDTO.length > 0">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Gastos en el mes actual</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm">
+                            <thead class="table-header-brand">
+                                <tr>
+                                    <th>Tarjeta</th>
+                                    <th>Moneda</th>
+                                    <th>Fecha</th>
+                                    <th>Tipo Movimiento</th>
+                                    <th>Detalle</th>
+                                    <th>Cuota</th>
+                                    <th class="text-end">Monto Cuota</th>
+                                    <th class="text-end">Valor Pesos</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let transaction of cardTransactionsDTO">
+                                    <td>{{ transaction.card }}</td>
+                                    <td>{{ transaction.asset }}</td>
+                                    <td>{{ transaction.date | date: 'dd/MM/yyyy' }}</td>
+                                    <td>{{ transaction.transactionClass }}</td>
+                                    <td>{{ transaction.detail }}</td>
+                                    <td>{{ transaction.installment }}</td>
+                                    <td class="text-end">{{ transaction.installmentAmount | currencyFiatFormat }}</td>
+                                    <td class="text-end">{{ transaction.valueInPesos | currencyFiatFormat }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

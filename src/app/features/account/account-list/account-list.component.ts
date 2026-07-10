@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Account } from '../models/account.model';
 import { AccountService } from '../services/account.service';
@@ -6,18 +6,24 @@ import { LoadingComponent } from '../../../core/components/loading/loading.compo
 import { NgIf, NgFor } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { ToastService } from '../../../core/services/toast.service';
+import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
 
 @Component({
     selector: 'app-account-list',
     templateUrl: './account-list.component.html',
     styleUrls: ['./account-list.component.css'],
-    imports: [LoadingComponent, NgIf, RouterLink, NgFor, FormsModule]
+    imports: [LoadingComponent, NgIf, RouterLink, NgFor, FormsModule, ConfirmModalComponent]
 })
 export class AccountListComponent implements OnInit {
   isLoading: boolean = true;
   accounts: any[] | null = null;
   searchTerm: string = '';
-  constructor(private AccountService: AccountService) {
+
+  @ViewChild('deleteModal') deleteModal!: ConfirmModalComponent;
+  private accountIdToDelete: number | null = null;
+
+  constructor(private AccountService: AccountService, private toastService: ToastService) {
 
    }
 
@@ -41,25 +47,28 @@ export class AccountListComponent implements OnInit {
   }
   
   onDelete(accountId: number): void {
-    if(accountId){
-      const confirmed = window.confirm('¿Estás seguro de eliminar esta cuenta?');
-      if(confirmed) {
+    if (!accountId) return;
+    this.accountIdToDelete = accountId;
+    this.deleteModal.open();
+  }
 
-        this.AccountService.deleteAccount(accountId)
-        .subscribe({
-          next: (response) => {
-            alert('Cuenta eliminada correctamente');
-            this.ngOnInit();
-          }, 
-          error: (error) => {
-            if (error.error == 'Account is used in transactions') {
-              alert('No se puede eliminar la cuenta porque está siendo utilizada en transacciones');
-            }
-            
+  onDeleteConfirmed(): void {
+    if (!this.accountIdToDelete) return;
+
+    this.AccountService.deleteAccount(this.accountIdToDelete)
+      .subscribe({
+        next: (response) => {
+          this.toastService.success('Cuenta eliminada correctamente');
+          this.ngOnInit();
+        },
+        error: (error) => {
+          if (error.error == 'Account is used in transactions') {
+            this.toastService.error('No se puede eliminar la cuenta porque está siendo utilizada en transacciones');
           }
-        });
-      }
-    }    
+        }
+      });
+
+    this.accountIdToDelete = null;
   }
 
   updateAssetTypes(accountId: number): void {

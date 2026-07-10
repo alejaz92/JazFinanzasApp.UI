@@ -1,17 +1,19 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AssetSplitEvent, AssetSplitEventAdd } from '../models/assetSplitEvent.model';
 import { AssetSplitEventService } from '../services/asset-split-event.service';
 import { AssetTypeService } from '../../assetType/services/asset-type.service';
 import { AssetService } from '../../asset/services/asset.service';
-import { RouterLink } from '@angular/router';
 import { NgFor, NgIf, DatePipe } from '@angular/common';
+import { ToastService } from '../../../core/services/toast.service';
+import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
+import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
 
 @Component({
     selector: 'app-split-event',
     templateUrl: './split-event.component.html',
     styleUrls: ['./split-event.component.css'],
-    imports: [RouterLink, FormsModule, NgFor, NgIf, ReactiveFormsModule, DatePipe]
+    imports: [FormsModule, NgFor, NgIf, ReactiveFormsModule, DatePipe, BackButtonComponent, ConfirmModalComponent]
 })
 export class SplitEventComponent implements OnInit {
   splitForm!: FormGroup;
@@ -20,15 +22,18 @@ export class SplitEventComponent implements OnInit {
   splits: AssetSplitEvent[] = [];
   selectedAssetTypeId: string = '';
   selectedAssetId: string = '';
-  successMessage: string = '';
-  errorMessage: string = '';
   isLoadingSplits: boolean = false;
+
+  @ViewChild('deleteModal') deleteModal!: ConfirmModalComponent;
+  deleteModalMessage: string = '';
+  private splitToDelete: AssetSplitEvent | null = null;
 
   constructor(
     private fb: FormBuilder,
     private splitEventService: AssetSplitEventService,
     private assetTypeService: AssetTypeService,
-    private assetService: AssetService
+    private assetService: AssetService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -88,7 +93,7 @@ export class SplitEventComponent implements OnInit {
     if (this.splitForm.invalid || !this.selectedAssetId) return;
 
     if (this.splitRatioValue === 1) {
-      this.errorMessage = 'El ratio no puede ser 1 (no produce ningún efecto).';
+      this.toastService.error('El ratio no puede ser 1 (no produce ningún efecto).');
       return;
     }
 
@@ -100,23 +105,36 @@ export class SplitEventComponent implements OnInit {
 
     this.splitEventService.add(dto).subscribe({
       next: () => {
-        this.successMessage = 'Split registrado correctamente.';
-        this.errorMessage = '';
+        this.toastService.success('Split registrado correctamente.');
         this.splitForm.reset();
         this.loadSplits();
-        setTimeout(() => { this.successMessage = ''; }, 3000);
       },
       error: (err) => {
-        this.errorMessage = err?.error?.message || 'Error al registrar el split.';
+        this.toastService.error(err?.error?.message || 'Error al registrar el split.');
       }
     });
   }
 
   onDelete(split: AssetSplitEvent) {
     const dateStr = new Date(split.date).toLocaleDateString('es-AR');
-    if (!confirm(`¿Eliminar el split ${split.splitRatio}:1 del ${dateStr}?`)) return;
-    this.splitEventService.delete(split.id).subscribe(() => {
-      this.loadSplits();
+    this.splitToDelete = split;
+    this.deleteModalMessage = `¿Eliminar el split ${split.splitRatio}:1 del ${dateStr}?`;
+    this.deleteModal.open();
+  }
+
+  onDeleteConfirmed(): void {
+    if (!this.splitToDelete) return;
+
+    this.splitEventService.delete(this.splitToDelete.id).subscribe({
+      next: () => {
+        this.toastService.success('Split eliminado correctamente');
+        this.loadSplits();
+      },
+      error: () => {
+        this.toastService.error('Error al eliminar el split');
+      }
     });
+
+    this.splitToDelete = null;
   }
 }

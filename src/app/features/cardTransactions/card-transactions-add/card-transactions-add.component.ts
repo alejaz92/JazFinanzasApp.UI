@@ -16,13 +16,14 @@ import { NgIf, NgFor, DecimalPipe } from '@angular/common';
 import { CurrencyInputDirective } from '../../../shared/directives/currency-input.directive';
 import { BankPromotionFormComponent } from '../../shared-expenses/bank-promotion-form/bank-promotion-form.component';
 import { SharedExpenseFormComponent } from '../../shared-expenses/shared-expense-form/shared-expense-form.component';
-import { RouterLink } from '@angular/router';
+import { ToastService } from '../../../core/services/toast.service';
+import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 
 @Component({
     selector: 'app-card-transactions-add',
     templateUrl: './card-transactions-add.component.html',
     styleUrls: ['./card-transactions-add.component.css'],
-    imports: [LoadingComponent, NgIf, FormsModule, ReactiveFormsModule, NgFor, CurrencyInputDirective, BankPromotionFormComponent, SharedExpenseFormComponent, RouterLink, DecimalPipe]
+    imports: [LoadingComponent, NgIf, FormsModule, ReactiveFormsModule, NgFor, CurrencyInputDirective, BankPromotionFormComponent, SharedExpenseFormComponent, BackButtonComponent, DecimalPipe]
 })
 export class CardTransactionsAddComponent implements OnInit {
   isLoading: boolean = true;
@@ -31,8 +32,6 @@ export class CardTransactionsAddComponent implements OnInit {
   assets: any[] = [];
   expenseClasses: any[] = [];
   cards: any[] = [];
-
-  successMessage: string = '';
 
   sharedExpenseActive: boolean = false;
   bankPromotionActive: boolean = false;
@@ -49,7 +48,8 @@ export class CardTransactionsAddComponent implements OnInit {
     private cardService: CardService,
     private sharedExpenseService: SharedExpenseService,
     private cardTransactionDiscountService: CardTransactionDiscountService,
-    private http: HttpClient
+    private http: HttpClient,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -250,15 +250,11 @@ export class CardTransactionsAddComponent implements OnInit {
         this.bankPromotionData = null;
         this.sharedExpenseError = '';
         this.bankPromotionError = '';
-        this.successMessage = 'Gasto Tarjeta agregado correctamente';
-
-        setTimeout(() => {
-          this.successMessage = '';
-        }, 3000);
+        this.toastService.success('Gasto Tarjeta agregado correctamente');
       },
       error: (err) => {
         const msg = err?.error?.message || 'Error al guardar el gasto de tarjeta.';
-        this.sharedExpenseError = msg;
+        this.toastService.error(msg);
       }
     });
   }

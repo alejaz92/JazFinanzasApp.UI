@@ -1,7 +1,7 @@
 {
   "name": "JazFinanzasApp",
   "short_name": "JazFinanzas",
-  "theme_color": "#1976d2",
+  "theme_color": "#5B3DD9",
   "background_color": "#fafafa",
   "display": "standalone",
   "scope": "./",

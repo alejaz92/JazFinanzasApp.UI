@@ -7,13 +7,14 @@ import { PortfolioService } from '../../portfolios/services/portfolio.service';
 import { Portfolio } from '../../portfolios/models/portfolio.model';
 import { NgIf, NgFor } from '@angular/common';
 import { InvestmentInputDirective } from '../../../shared/directives/investment-input.directive';
-import { RouterLink } from '@angular/router';
+import { ToastService } from '../../../core/services/toast.service';
+import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 
 @Component({
     selector: 'app-crypto-transaction-add',
     templateUrl: './crypto-transaction-add.component.html',
     styleUrls: ['./crypto-transaction-add.component.css'],
-    imports: [NgIf, FormsModule, ReactiveFormsModule, NgFor, InvestmentInputDirective, RouterLink]
+    imports: [NgIf, FormsModule, ReactiveFormsModule, NgFor, InvestmentInputDirective, BackButtonComponent]
 })
 export class CryptoTransactionAddComponent implements OnInit {
   cryptoTransactionForm!: FormGroup;
@@ -31,15 +32,14 @@ export class CryptoTransactionAddComponent implements OnInit {
   expenseAssets: any[] = [];
   fiatAssets: any[] = [];
   formattedAmount: string = '';
-  successMessage: string = '';
-
 
   constructor(
     private fb: FormBuilder,
     private cryptoTransactionService: CryptoTransactionService,
     private accountService: AccountService,
     private assetService: AssetService,
-    private portfolioService: PortfolioService
+    private portfolioService: PortfolioService,
+    private toastService: ToastService
   ) { }
 
   ngOnInit(): void {
@@ -273,14 +273,14 @@ export class CryptoTransactionAddComponent implements OnInit {
 
 
     this.cryptoTransactionService.createCryptoTransaction(transactionAdd)
-      .subscribe(() => {
-
-        this.successMessage = 'Movimiento agregado correctamente';
-        this.cryptoTransactionForm.reset();
-
-        setTimeout(() => {
-          this.successMessage = '';
-        }, 3000);
+      .subscribe({
+        next: () => {
+          this.toastService.success('Movimiento agregado correctamente');
+          this.cryptoTransactionForm.reset();
+        },
+        error: () => {
+          this.toastService.error('Error al agregar el movimiento');
+        }
       });
   }
 

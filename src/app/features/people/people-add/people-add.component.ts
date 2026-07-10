@@ -1,20 +1,26 @@
 import { Component, OnDestroy } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { PersonAddRequest } from '../models/person-add-request.model';
 import { PersonService } from '../services/person.service';
 import { FormsModule } from '@angular/forms';
+import { ToastService } from '../../../core/services/toast.service';
+import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 
 @Component({
     selector: 'app-people-add',
     templateUrl: './people-add.component.html',
-    imports: [FormsModule, RouterLink]
+    imports: [FormsModule, BackButtonComponent]
 })
 export class PeopleAddComponent implements OnDestroy {
   model: PersonAddRequest;
   private addSubscription?: Subscription;
 
-  constructor(private personService: PersonService, private router: Router) {
+  constructor(
+    private personService: PersonService,
+    private router: Router,
+    private toastService: ToastService
+  ) {
     this.model = { name: '', alias: '' };
   }
 
@@ -26,7 +32,11 @@ export class PeopleAddComponent implements OnDestroy {
 
     this.addSubscription = this.personService.addPerson(request).subscribe({
       next: () => {
+        this.toastService.success('Persona agregada correctamente');
         this.router.navigate(['/management/people']);
+      },
+      error: () => {
+        this.toastService.error('Error al agregar la persona');
       }
     });
   }

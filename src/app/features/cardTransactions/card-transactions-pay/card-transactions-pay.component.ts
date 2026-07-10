@@ -13,14 +13,15 @@ import { catchError, merge, of, switchMap } from 'rxjs';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { NgIf, NgFor, DatePipe } from '@angular/common';
 import { CurrencyInputDirective } from '../../../shared/directives/currency-input.directive';
-import { RouterLink } from '@angular/router';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
+import { ToastService } from '../../../core/services/toast.service';
+import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 
 @Component({
     selector: 'app-card-transactions-pay',
     templateUrl: './card-transactions-pay.component.html',
     styleUrls: ['./card-transactions-pay.component.css'],
-    imports: [LoadingComponent, NgIf, FormsModule, ReactiveFormsModule, NgFor, CurrencyInputDirective, RouterLink, DatePipe, CurrencyFiatFormatPipe]
+    imports: [LoadingComponent, NgIf, FormsModule, ReactiveFormsModule, NgFor, CurrencyInputDirective, BackButtonComponent, DatePipe, CurrencyFiatFormatPipe]
 })
 export class CardTransactionsPayComponent implements OnInit {
   isLoading: boolean = true;
@@ -31,7 +32,6 @@ export class CardTransactionsPayComponent implements OnInit {
   assets: any[] = [];
   cardTransactions: CardTransactionPaymentList[] = [];
   selectedPaymentAssets: string | null = null;
-  successMessage: string = '';
   tableLength: number = 0;
   originalTableLength: number = 0;
   reimbursementsPreview: number = 0;
@@ -44,7 +44,8 @@ export class CardTransactionsPayComponent implements OnInit {
     private transactionClassService: TransactionClassService,
     private cardTransactionService: CardTransactionsService,
     private sharedExpenseService: SharedExpenseService,
-    private cardTransactionDiscountService: CardTransactionDiscountService
+    private cardTransactionDiscountService: CardTransactionDiscountService,
+    private toastService: ToastService
   ) { }
 
   get cardTransactionsArray(): FormArray {
@@ -308,7 +309,7 @@ refreshCurrencyFormat() {
   addManualEntry() {
     // Chequear si la tabla tiene valores previamente
     if (this.cardTransactionsArray.length === 0) {
-      alert("La tabla está vacía. Debes tener al menos una fila existente antes de agregar una manual.");
+      this.toastService.error('La tabla está vacía. Debes tener al menos una fila existente antes de agregar una manual.');
       return;
     }
 
@@ -341,7 +342,7 @@ refreshCurrencyFormat() {
 
 
     if (this.tableLength === this.originalTableLength) {
-      alert("No hay filas manuales para eliminar.");
+      this.toastService.error('No hay filas manuales para eliminar.');
       return;
     }
 
@@ -350,7 +351,7 @@ refreshCurrencyFormat() {
       this.cardTransactionsArray.removeAt(this.cardTransactionsArray.length - 1);
       this.tableLength = this.cardTransactionsArray.length;
     } else {
-      alert("La última fila no es una fila manual.");
+      this.toastService.error('La última fila no es una fila manual.');
     }
   }
  
@@ -455,7 +456,7 @@ refreshCurrencyFormat() {
     // check if there are any rows with missing values, except for the disabled inputs
     const incompleteRow = this.cardTransactionsArray.controls.find((control) => this.isRowIncomplete(control as FormGroup));
     if (incompleteRow) {
-      alert("Hay filas incompletas. Por favor, completa todos los campos antes de continuar.");
+      this.toastService.error('Hay filas incompletas. Por favor, completa todos los campos antes de continuar.');
       return;
     }
     
@@ -496,16 +497,17 @@ refreshCurrencyFormat() {
       }
 
 
-         this.cardTransactionService.createCardPayment(cardPaymentRequest).subscribe(() => {
+         this.cardTransactionService.createCardPayment(cardPaymentRequest).subscribe({
+           next: () => {
+             this.cardPaymentForm.reset();
+             this.cardTransactionsArray.clear();
+             this.reimbursementsPreview = 0;
 
-           this.cardPaymentForm.reset();
-           this.cardTransactionsArray.clear();
-           this.reimbursementsPreview = 0;
-
-           this.successMessage = 'Movimiento creado con éxito';
-           setTimeout(() => {
-             this.successMessage = '';
-           }, 3000);
+             this.toastService.success('Movimiento creado con éxito');
+           },
+           error: () => {
+             this.toastService.error('Error al registrar el pago de tarjeta');
+           }
          });
 
   }

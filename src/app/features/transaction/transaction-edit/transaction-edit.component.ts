@@ -1,5 +1,5 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TransactionService } from '../services/transaction.service';
 import { Subscription } from 'rxjs';
 import { Transaction } from '../models/transaction.model';
@@ -13,12 +13,15 @@ import { LoadingComponent } from '../../../core/components/loading/loading.compo
 import { NgIf, NgFor, DecimalPipe, DatePipe } from '@angular/common';
 import { CurrencyInputDirective } from '../../../shared/directives/currency-input.directive';
 import { SharedExpenseFormComponent } from '../../shared-expenses/shared-expense-form/shared-expense-form.component';
+import { ToastService } from '../../../core/services/toast.service';
+import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
+import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
 
 @Component({
     selector: 'app-transaction-edit',
     templateUrl: './transaction-edit.component.html',
     styleUrls: ['./transaction-edit.component.css'],
-    imports: [LoadingComponent, NgIf, FormsModule, NgFor, CurrencyInputDirective, RouterLink, SharedExpenseFormComponent, DecimalPipe, DatePipe]
+    imports: [LoadingComponent, NgIf, FormsModule, NgFor, CurrencyInputDirective, SharedExpenseFormComponent, DecimalPipe, DatePipe, BackButtonComponent, ConfirmModalComponent]
 })
 export class TransactionEditComponent implements OnInit, OnDestroy {
   transactionForm!: FormGroup;
@@ -29,7 +32,6 @@ export class TransactionEditComponent implements OnInit, OnDestroy {
   paramsSubcription?: Subscription;
   editTransactionSubscription?: Subscription;
   transaction?: Transaction;
-  successMessage: string = '';
   isLoading: boolean = true;
 
   sharedExpense: SharedExpenseDetail | null = null;
@@ -38,6 +40,8 @@ export class TransactionEditComponent implements OnInit, OnDestroy {
   pendingSharedExpenseData: SharedExpenseFormData | null = null;
   sharedExpenseError: string = '';
   sharedExpenseSaving: boolean = false;
+
+  @ViewChild('deleteSharedExpenseModal') deleteSharedExpenseModal!: ConfirmModalComponent;
 
   readonly splitStatusLabel: { [key: number]: string } = {
     0: 'Pendiente',
@@ -58,7 +62,8 @@ export class TransactionEditComponent implements OnInit, OnDestroy {
     private accountService: AccountService,
     private transactionClassService: TransactionClassService,
     private sharedExpenseService: SharedExpenseService,
-    private router: Router
+    private router: Router,
+    private toastService: ToastService
   ) { }
 
   ngOnInit(): void {
@@ -170,17 +175,22 @@ export class TransactionEditComponent implements OnInit, OnDestroy {
     });
   }
 
+  onDeleteSharedExpense(): void {
+    if (!this.sharedExpense) return;
+    this.deleteSharedExpenseModal.open();
+  }
+
   deleteSharedExpense(): void {
     if (!this.sharedExpense) return;
-    if (!confirm('¿Eliminar el gasto compartido? Esta acción no se puede deshacer.')) return;
 
     this.sharedExpenseService.deleteSharedExpense(this.sharedExpense.id).subscribe({
       next: () => {
         this.sharedExpense = null;
         this.showAddSharedExpenseForm = false;
+        this.toastService.success('Gasto compartido eliminado correctamente');
       },
       error: (err) => {
-        alert(err?.error?.message || 'Error al eliminar el gasto compartido.');
+        this.toastService.error(err?.error?.message || 'Error al eliminar el gasto compartido.');
       }
     });
   }
@@ -191,14 +201,18 @@ export class TransactionEditComponent implements OnInit, OnDestroy {
     if (!formValues) return;
 
     if (isNaN(formValues.amount) || formValues.amount <= 0) {
-      alert('El monto no es valido');
+      this.toastService.error('El monto no es valido');
       return;
     }
 
     if (this.id && this.transaction) {
       this.editTransactionSubscription = this.transactionService.updateTransaction(Number(this.id), this.transaction).subscribe({
         next: () => {
+          this.toastService.success('Movimiento actualizado correctamente');
           this.router.navigateByUrl('/transactions');
+        },
+        error: () => {
+          this.toastService.error('Error al actualizar el movimiento');
         }
       });
     }

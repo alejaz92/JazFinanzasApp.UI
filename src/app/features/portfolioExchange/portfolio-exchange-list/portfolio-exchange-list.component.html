@@ -2,14 +2,20 @@
 
 
 <div class="container mt-4" *ngIf="!isLoading">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1>Intercambio de Carteras</h1>
-        <a class="btn btn-primary" [routerLink]="['/portfolioExchange/add']">Nuevo <i class="bi-plus-lg"></i></a>
+    <div class="d-flex align-items-center gap-2 mb-3">
+        <h1 class="mb-0">Intercambio de Carteras</h1>
+        <a class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center"
+           [routerLink]="['/portfolioExchange/add']"
+           title="Nuevo Intercambio"
+           style="width: 44px; height: 44px; font-size: 1.2rem;">
+            <i class="bi-plus-lg text-white"></i>
+        </a>
     </div>
 
+    <ng-container *ngIf="totalPortfolioExchanges > 0; else emptyPortfolioEx">
     <!-- tabla de movimientos-->
     <div class="table-responsive">
-        <table class="table table-striped">
+        <table class="table table-striped table-bordered">
             <thead>
                 <tr>
                     <th>Fecha</th>
@@ -18,7 +24,7 @@
                     <th class="text-center table-danger">Cartera Egreso</th>
                     <th class="text-center table-success">Cartera Ingreso</th>
                     <th class="text-end">Monto</th>
-                    <th>Acciones</th>
+                    <th class="text-nowrap" style="width: 80px;">Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -29,12 +35,12 @@
                     <td class="text-center table-danger">{{ transaction.expensePortfolio ?? '' }}</td>
                     <td class="text-center table-success">{{ transaction.incomePortfolio ?? '' }}</td>
                     <td class="text-end">
-                        {{ transaction.incomeAmount != null ? (transaction.incomeAmount ) : ''   }}
+                        {{ transaction.incomeAmount != null ? (transaction.incomeAmount | currencyInvestmentFormat) : ''   }}
                     </td>
-                    <td>
-                        <div class="justify-content-around">
-                            <button class="btn btn-sm btn-danger m-1" title="Eliminar" (click)="onDeleteExchange(transaction)"><i class="bi-trash-fill"></i></button>
-                        </div>
+                    <td class="text-center">
+                        <button title="Eliminar" class="btn-icon bg-danger" (click)="onDeleteExchange(transaction)">
+                            <i class="bi-trash"></i>
+                        </button>
                     </td>
                 </tr>
             </tbody>
@@ -43,11 +49,26 @@
 
     <!-- Paginacion-->
     <div class="d-flex justify-content-center">
-        <pagination-controls 
+        <pagination-controls
         (pageChange)="onPageChange($event)"
         [responsive]="true"
         [previousLabel]="'Anterior'"
         [nextLabel]="'Siguiente'">
     </pagination-controls>
     </div>
+    </ng-container>
+
+    <ng-template #emptyPortfolioEx>
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+            <p class="mb-0">No hay intercambios de carteras registrados.</p>
+        </div>
+    </ng-template>
 </div>
+
+<app-confirm-modal #deleteModal
+    title="Eliminar Intercambio"
+    message="¿Estás seguro de eliminar el movimiento?"
+    confirmLabel="Eliminar"
+    (confirmed)="onDeleteConfirmed()">
+</app-confirm-modal>

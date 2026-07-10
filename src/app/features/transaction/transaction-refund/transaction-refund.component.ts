@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } 
 import { Subscription } from 'rxjs';
 import { TransactionRefund } from '../models/transaction-refund.model';
 import { Transaction } from '../models/transaction.model';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TransactionService } from '../services/transaction.service';
 import { AccountService } from '../../account/services/account.service';
 import { SharedExpenseService } from '../../shared-expenses/services/shared-expense.service';
@@ -12,6 +12,8 @@ import { LoadingComponent } from '../../../core/components/loading/loading.compo
 import { NgIf, NgFor, NgClass, DecimalPipe, DatePipe } from '@angular/common';
 import { CurrencyInputDirective } from '../../../shared/directives/currency-input.directive';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
+import { ToastService } from '../../../core/services/toast.service';
+import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 
 interface AllocationRow {
   splitId: number;
@@ -24,7 +26,7 @@ interface AllocationRow {
     selector: 'app-transaction-refund',
     templateUrl: './transaction-refund.component.html',
     styleUrls: ['./transaction-refund.component.css'],
-    imports: [LoadingComponent, NgIf, NgFor, FormsModule, ReactiveFormsModule, CurrencyInputDirective, NgClass, RouterLink, DecimalPipe, DatePipe, CurrencyFiatFormatPipe]
+    imports: [LoadingComponent, NgIf, NgFor, FormsModule, ReactiveFormsModule, CurrencyInputDirective, NgClass, DecimalPipe, DatePipe, CurrencyFiatFormatPipe, BackButtonComponent]
 })
 export class TransactionRefundComponent implements OnInit, OnDestroy {
   refundForm!: FormGroup;
@@ -33,7 +35,6 @@ export class TransactionRefundComponent implements OnInit, OnDestroy {
   refundSubscription?: Subscription;
   refund?: TransactionRefund;
   transaction?: Transaction;
-  successMessage: string = '';
   accounts: any[] = [];
   isLoading: boolean = true;
 
@@ -46,7 +47,8 @@ export class TransactionRefundComponent implements OnInit, OnDestroy {
     private transactionService: TransactionService,
     private accountService: AccountService,
     private sharedExpenseService: SharedExpenseService,
-    private router: Router
+    private router: Router,
+    private toastService: ToastService
   ) { }
 
   ngOnInit(): void {
@@ -198,10 +200,11 @@ export class TransactionRefundComponent implements OnInit, OnDestroy {
         .refundTransaction(Number(this.id), this.refund)
         .subscribe({
           next: () => {
-            this.successMessage = 'Reembolso realizado con éxito';
-            setTimeout(() => {
-              this.router.navigate(['/transactions']);
-            }, 2000);
+            this.toastService.success('Reembolso realizado con éxito');
+            this.router.navigate(['/transactions']);
+          },
+          error: () => {
+            this.toastService.error('Error al realizar el reembolso');
           }
         });
     }
