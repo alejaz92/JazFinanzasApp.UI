@@ -43,6 +43,13 @@ export class ReportsShellComponent {
                 { type: 'link', label: 'General', icon: 'bi-grid-1x2', route: '/report/portfolio-general' },
                 { type: 'link', label: 'Detalle',  icon: 'bi-list-ul', route: '/report/portfolio-detail' }
             ]
+        },
+        {
+            type: 'category', label: 'Viajes', icon: 'bi-airplane',
+            children: [
+                { type: 'link', label: 'General', icon: 'bi-grid-1x2', route: '/report/trips-general' },
+                { type: 'link', label: 'Detalle',  icon: 'bi-list-ul', route: '/report/trip-detail' }
+            ]
         }
     ];
 

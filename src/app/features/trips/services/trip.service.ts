@@ -6,6 +6,7 @@ import { Trip } from '../models/trip.model';
 import { TripRequest } from '../models/trip-request.model';
 import { TripDetail } from '../models/trip-detail.model';
 import { TripMovement, TripMovementRef } from '../models/trip-movement.model';
+import { TripGeneralStats, TripDetailStats } from '../models/trip-stats.model';
 
 @Injectable({
   providedIn: 'root'
@@ -57,5 +58,15 @@ export class TripService {
 
   dismissSuggestion(tripId: number, movement: TripMovementRef): Observable<void> {
     return this.http.post<void>(`${environment.apiBaseURL}/api/trip/${tripId}/dismissals`, movement);
+  }
+
+  // total por viaje en la moneda de referencia principal del usuario
+  getTripsGeneralStats(): Observable<TripGeneralStats[]> {
+    return this.http.get<TripGeneralStats[]>(`${environment.apiBaseURL}/api/report/trips-general`);
+  }
+
+  // total + breakdown por clase de movimiento de un viaje puntual
+  getTripDetailStats(tripId: number): Observable<TripDetailStats> {
+    return this.http.get<TripDetailStats>(`${environment.apiBaseURL}/api/report/trip-detail/${tripId}`);
   }
 }

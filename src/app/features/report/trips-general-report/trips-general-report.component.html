@@ -1,0 +1,78 @@
+<app-loading [isLoading]="isLoading"></app-loading>
+
+<div *ngIf="!isLoading">
+    <h2 class="mb-3">Viajes — Vista General</h2>
+
+    <div class="row">
+        <div class="col-md-4 mt-1">
+            <div class="card">
+                <div class="card-header">Total Gastado (En {{ mainReference?.symbol }})</div>
+                <div class="card-body">
+                    <h4 class="card-title mb-0">{{ totalInReference | currencyFiatFormat }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mt-1">
+            <label for="typeFilter">Tipo</label>
+            <select id="typeFilter" class="form-select" [(ngModel)]="typeFilter" (change)="onFilterChange()">
+                <option value="ALL">Todos</option>
+                <option value="DOMESTIC">Doméstico</option>
+                <option value="INTERNATIONAL">Internacional</option>
+            </select>
+        </div>
+    </div>
+
+    <ng-container *ngIf="trips.length > 0; else empty">
+        <div class="row mt-4" *ngIf="filteredTrips.length > 0">
+            <div class="col-12 mt-1">
+                <div class="card">
+                    <div class="card-header">Total por Viaje (En {{ mainReference?.symbol }})</div>
+                    <div class="card-body">
+                        <canvas id="totalByTripChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12 mt-1">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Detalle por Viaje</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm">
+                                <thead class="table-header-brand">
+                                    <tr>
+                                        <th>Viaje</th>
+                                        <th>Tipo</th>
+                                        <th>Fechas</th>
+                                        <th>Estado</th>
+                                        <th class="text-end">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let trip of filteredTrips">
+                                        <td>{{ trip.name }}</td>
+                                        <td>{{ typeLabel(trip.type) }}</td>
+                                        <td>{{ trip.startDate | date:'dd/MM/yyyy' }} - {{ trip.endDate | date:'dd/MM/yyyy' }}</td>
+                                        <td>{{ statusLabel(trip.status) }}</td>
+                                        <td class="text-end">{{ trip.totalInReference | currencyFiatFormat }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+
+    <ng-template #empty>
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+            <p class="mb-0">No hay viajes registrados.</p>
+        </div>
+    </ng-template>
+</div>

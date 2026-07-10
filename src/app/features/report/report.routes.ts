@@ -34,6 +34,14 @@ export const reportRoutes: Routes = [
             {
                 path: 'portfolio-detail',
                 loadComponent: () => import('./portfolio-report/portfolio-report.component').then(m => m.PortfolioReportComponent)
+            },
+            {
+                path: 'trips-general',
+                loadComponent: () => import('./trips-general-report/trips-general-report.component').then(m => m.TripsGeneralReportComponent)
+            },
+            {
+                path: 'trip-detail',
+                loadComponent: () => import('./trip-report/trip-report.component').then(m => m.TripReportComponent)
             }
         ]
     }

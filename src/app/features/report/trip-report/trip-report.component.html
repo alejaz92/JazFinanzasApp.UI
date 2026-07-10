@@ -1,0 +1,68 @@
+<app-loading [isLoading]="isLoading"></app-loading>
+
+<div *ngIf="!isLoading">
+    <h2 class="mb-3">Viajes — Detalle</h2>
+
+    <div class="row">
+        <div class="col-md-6">
+            <label for="trip">Viaje</label>
+            <select id="trip" class="form-select" [(ngModel)]="selectedTripId" (change)="loadTripDetail()">
+                <option value="0" selected disabled>Seleccione</option>
+                <option *ngFor="let t of trips" [value]="t.id">{{ t.name }}</option>
+            </select>
+        </div>
+    </div>
+
+    <app-loading [isLoading]="isLoadingDetail"></app-loading>
+
+    <div *ngIf="viewDetail && !isLoadingDetail && detail">
+        <div class="row mt-4">
+            <div class="col-md-6 mt-1">
+                <div class="card">
+                    <div class="card-header">Total Gastado (En {{ mainReference?.symbol }})</div>
+                    <div class="card-body">
+                        <h4 class="card-title mb-0">{{ detail.total | currencyFiatFormat }}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mt-1" *ngIf="detail.breakdown.length > 0">
+                <div class="card">
+                    <div class="card-header">Breakdown por Clase (En {{ mainReference?.symbol }})</div>
+                    <div class="card-body">
+                        <canvas id="tripBreakdownChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4" *ngIf="detail.breakdown.length > 0">
+            <div class="col-12 mt-1">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Detalle por Clase</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm">
+                                <thead class="table-header-brand">
+                                    <tr>
+                                        <th>Clase</th>
+                                        <th class="text-end">Monto</th>
+                                        <th class="text-end">%</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let b of detail.breakdown">
+                                        <td>{{ b.transactionClass }}</td>
+                                        <td class="text-end">{{ b.amount | currencyFiatFormat }}</td>
+                                        <td class="text-end">{{ (detail.total > 0 ? (b.amount / detail.total * 100) : 0) | number:'1.2-2' }} %</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
