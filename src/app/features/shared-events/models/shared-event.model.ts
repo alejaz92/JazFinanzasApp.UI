@@ -122,6 +122,44 @@ export interface SharedEventPayment {
   allocations: SharedEventPaymentAllocation[];
 }
 
+export interface SharedEventPaymentAllocationInput {
+  splitId?: number | null;
+  shareId?: number | null;
+  amount: number;
+}
+
+export interface SharedEventPaymentAddRequest {
+  date: string;
+  assetId: number;
+  amount: number;
+  fromPersonId?: number | null;
+  toPersonId?: number | null;
+  accountId?: number | null;
+  isInternalCompensation: boolean;
+  notes?: string;
+  allocations?: SharedEventPaymentAllocationInput[];
+}
+
+export interface SharedEventPaymentPreviewItem {
+  kind: 'Credit' | 'Debt';
+  splitId: number | null;
+  shareId: number | null;
+  movementId: number;
+  movementDescription: string;
+  movementDate: string;
+  personId: number | null;
+  personName: string | null;
+  amount: number;
+  pendingBefore: number;
+  pendingAfter: number;
+}
+
+export interface SharedEventPaymentPreview {
+  creditsAllocated: number;
+  debtsAllocated: number;
+  items: SharedEventPaymentPreviewItem[];
+}
+
 export interface SharedEventDetail {
   id: number;
   name: string;

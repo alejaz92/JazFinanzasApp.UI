@@ -184,8 +184,22 @@
 
     <!-- Pagos -->
     <div class="card mb-4">
-        <div class="card-header">Pagos registrados</div>
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Pagos registrados</span>
+            <button *ngIf="!showPaymentForm && !event.isClosed" class="btn btn-primary btn-sm" (click)="onAddPayment()">
+                <i class="bi-plus-lg me-1"></i>Registrar pago
+            </button>
+        </div>
         <div class="card-body">
+            <app-shared-event-payment-form
+                *ngIf="showPaymentForm"
+                [eventId]="id"
+                [participants]="event.participants"
+                [balances]="event.balances"
+                (saved)="onPaymentSaved()"
+                (cancelled)="onPaymentCancelled()">
+            </app-shared-event-payment-form>
+
             <div class="table-responsive" *ngIf="event.payments.length > 0; else noPayments">
                 <table class="table table-sm table-bordered mb-0">
                     <thead class="table-light">
@@ -195,15 +209,26 @@
                             <th>A</th>
                             <th class="text-end">Monto</th>
                             <th>Notas</th>
+                            <th style="width: 50px;"></th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr *ngFor="let p of event.payments">
                             <td>{{ p.date | date:'dd/MM/yyyy' }}</td>
-                            <td>{{ p.fromPersonId === null ? 'Vos' : p.fromPersonName }}</td>
-                            <td>{{ p.toPersonId === null ? 'Vos' : p.toPersonName }}</td>
-                            <td class="text-end">{{ p.amount | number:'1.2-2' }} {{ p.assetSymbol }}</td>
+                            <td>{{ p.isInternalCompensation ? '—' : (p.fromPersonId === null ? 'Vos' : p.fromPersonName) }}</td>
+                            <td>{{ p.isInternalCompensation ? '—' : (p.toPersonId === null ? 'Vos' : p.toPersonName) }}</td>
+                            <td class="text-end">
+                                {{ p.isInternalCompensation ? 'Compensación interna' : (p.amount | number:'1.2-2') + ' ' + p.assetSymbol }}
+                            </td>
                             <td>{{ p.notes }}</td>
+                            <td class="text-center">
+                                <button class="btn-icon bg-danger" *ngIf="isLastPayment(p.id)"
+                                        title="Eliminar" (click)="onDeletePayment(p.id)">
+                                    <i class="bi-trash"></i>
+                                </button>
+                                <i *ngIf="!isLastPayment(p.id)" class="bi-trash text-muted"
+                                   title="Solo se puede eliminar el último pago registrado del evento; para pagos anteriores, registrar un ajuste"></i>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -228,4 +253,11 @@
     message="¿Estás seguro de eliminar este movimiento? Se eliminarán también sus derivados (egreso o gasto de tarjeta)."
     confirmLabel="Eliminar"
     (confirmed)="onDeleteMovementConfirmed()">
+</app-confirm-modal>
+
+<app-confirm-modal #deletePaymentModal
+    title="Eliminar pago"
+    message="¿Estás seguro de eliminar este pago? Se revertirán sus efectos (reintegros, egresos y ajustes de saldo creados)."
+    confirmLabel="Eliminar"
+    (confirmed)="onDeletePaymentConfirmed()">
 </app-confirm-modal>

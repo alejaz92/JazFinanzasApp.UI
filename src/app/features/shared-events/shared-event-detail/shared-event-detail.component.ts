@@ -11,11 +11,12 @@ import { ToastService } from '../../../core/services/toast.service';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
 import { SharedEventMovementFormComponent } from '../shared-event-movement-form/shared-event-movement-form.component';
+import { SharedEventPaymentFormComponent } from '../shared-event-payment-form/shared-event-payment-form.component';
 
 @Component({
     selector: 'app-shared-event-detail',
     templateUrl: './shared-event-detail.component.html',
-    imports: [LoadingComponent, NgIf, NgFor, DecimalPipe, DatePipe, FormsModule, BackButtonComponent, ConfirmModalComponent, SharedEventMovementFormComponent]
+    imports: [LoadingComponent, NgIf, NgFor, DecimalPipe, DatePipe, FormsModule, BackButtonComponent, ConfirmModalComponent, SharedEventMovementFormComponent, SharedEventPaymentFormComponent]
 })
 export class SharedEventDetailComponent implements OnInit {
   isLoading: boolean = true;
@@ -36,9 +37,13 @@ export class SharedEventDetailComponent implements OnInit {
   showMovementForm: boolean = false;
   editingMovement: SharedEventMovement | null = null;
 
+  showPaymentForm: boolean = false;
+
   @ViewChild('deleteEventModal') deleteEventModal!: ConfirmModalComponent;
   @ViewChild('deleteMovementModal') deleteMovementModal!: ConfirmModalComponent;
+  @ViewChild('deletePaymentModal') deletePaymentModal!: ConfirmModalComponent;
   private movementIdToDelete: number | null = null;
+  private paymentIdToDelete: number | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -219,5 +224,47 @@ export class SharedEventDetailComponent implements OnInit {
     });
 
     this.movementIdToDelete = null;
+  }
+
+  // ── Pagos ─────────────────────────────────────────────────────────────
+
+  onAddPayment(): void {
+    this.showPaymentForm = true;
+  }
+
+  onPaymentSaved(): void {
+    this.showPaymentForm = false;
+    this.load();
+  }
+
+  onPaymentCancelled(): void {
+    this.showPaymentForm = false;
+  }
+
+  isLastPayment(paymentId: number): boolean {
+    if (!this.event || this.event.payments.length === 0) return false;
+    const maxId = Math.max(...this.event.payments.map(p => p.id));
+    return paymentId === maxId;
+  }
+
+  onDeletePayment(paymentId: number): void {
+    this.paymentIdToDelete = paymentId;
+    this.deletePaymentModal.open();
+  }
+
+  onDeletePaymentConfirmed(): void {
+    if (!this.paymentIdToDelete) return;
+
+    this.sharedEventService.deletePayment(this.id, this.paymentIdToDelete).subscribe({
+      next: () => {
+        this.toastService.success('Pago eliminado');
+        this.load();
+      },
+      error: (error) => {
+        this.toastService.error(error.error?.message ?? 'Error al eliminar el pago');
+      }
+    });
+
+    this.paymentIdToDelete = null;
   }
 }

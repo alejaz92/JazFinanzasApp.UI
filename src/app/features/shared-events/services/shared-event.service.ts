@@ -11,7 +11,10 @@ import {
   SharedEventMovementAddRequest,
   SharedEventMovement,
   SharedEventActiveSummary,
-  SharedEventConsolidatedDebt
+  SharedEventConsolidatedDebt,
+  SharedEventPaymentAddRequest,
+  SharedEventPaymentPreview,
+  SharedEventPayment
 } from '../models/shared-event.model';
 
 @Injectable({
@@ -75,5 +78,17 @@ export class SharedEventService {
 
   getConsolidatedDebts(): Observable<SharedEventConsolidatedDebt[]> {
     return this.http.get<SharedEventConsolidatedDebt[]>(`${environment.apiBaseURL}/api/shared-event/consolidated-debts`);
+  }
+
+  previewPayment(id: number, model: SharedEventPaymentAddRequest): Observable<SharedEventPaymentPreview> {
+    return this.http.post<SharedEventPaymentPreview>(`${environment.apiBaseURL}/api/shared-event/${id}/payments/preview`, model);
+  }
+
+  createPayment(id: number, model: SharedEventPaymentAddRequest): Observable<SharedEventPayment> {
+    return this.http.post<SharedEventPayment>(`${environment.apiBaseURL}/api/shared-event/${id}/payments`, model);
+  }
+
+  deletePayment(id: number, paymentId: number): Observable<void> {
+    return this.http.delete<void>(`${environment.apiBaseURL}/api/shared-event/${id}/payments/${paymentId}`);
   }
 }
