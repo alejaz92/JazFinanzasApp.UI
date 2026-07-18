@@ -11,12 +11,19 @@ import { Transaction } from '../../transaction/models/transaction.model';
 import { CardTransactionPending } from '../../cardTransactions/models/cardTransactions-pending.model';
 import { AssetService } from '../../asset/services/asset.service';
 import { Asset } from '../../asset/models/asset.model';
-import { SharedExpenseService } from '../../shared-expenses/services/shared-expense.service';
+import { SharedEventService } from '../../shared-events/services/shared-event.service';
+import { SharedEventActiveSummary } from '../../shared-events/models/shared-event.model';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
-import { NgIf, NgFor, NgClass, SlicePipe } from '@angular/common';
+import { NgIf, NgFor, NgClass, SlicePipe, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { ToastService } from '../../../core/services/toast.service';
+
+interface ConsolidatedTotal {
+  assetId: number;
+  assetSymbol: string;
+  net: number;
+}
 
 Chart.register(...registerables);
 
@@ -24,7 +31,7 @@ Chart.register(...registerables);
     selector: 'app-home',
     templateUrl: './home.component.html',
     styleUrls: ['./home.component.css'],
-    imports: [LoadingComponent, NgIf, RouterLink, NgFor, NgClass, SlicePipe, CurrencyFiatFormatPipe]
+    imports: [LoadingComponent, NgIf, RouterLink, NgFor, NgClass, SlicePipe, DecimalPipe, CurrencyFiatFormatPipe]
 })
 export class HomeComponent implements OnInit, AfterViewInit {
   isLoading: boolean = true;
@@ -34,7 +41,8 @@ export class HomeComponent implements OnInit, AfterViewInit {
   stocksChart: any;
   cryptosChart: any;
   mainReference: Asset | null = null;
-  totalDebtPending: number = 0;
+  activeSummaries: SharedEventActiveSummary[] = [];
+  consolidatedTotals: ConsolidatedTotal[] = [];
 
   constructor(
     private transactionService: TransactionService,
@@ -42,7 +50,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
     private cardTransactioneService: CardTransactionsService,
     private reportService: ReportService,
     private assetService: AssetService,
-    private sharedExpenseService: SharedExpenseService,
+    private sharedEventService: SharedEventService,
     private toastService: ToastService
   ) {}
 
@@ -60,13 +68,15 @@ export class HomeComponent implements OnInit, AfterViewInit {
       transactionsData: this.transactionService.getTransactions(1, 6),
       cardTransactionsData: this.cardTransactioneService.getPendingCardTransactions(),
       homeStatsData: this.reportService.getHomeStats(),
-      debtSummaryData: this.sharedExpenseService.getSummary()
+      activeSummaryData: this.sharedEventService.getActiveSummary(),
+      consolidatedDebtsData: this.sharedEventService.getConsolidatedDebts()
     }).subscribe({
-      next: ({ userData, transactionsData, cardTransactionsData, homeStatsData, debtSummaryData }) => {
+      next: ({ userData, transactionsData, cardTransactionsData, homeStatsData, activeSummaryData, consolidatedDebtsData }) => {
         this.userName = userData.name;
         this.transactions = transactionsData.transactions;
         this.cardTransactions = cardTransactionsData.reverse();
-        this.totalDebtPending = debtSummaryData.reduce((sum, s) => sum + s.totalPending, 0);
+        this.activeSummaries = activeSummaryData;
+        this.consolidatedTotals = this.computeConsolidatedTotals(consolidatedDebtsData);
         setTimeout(() => {
           this.loadMainReferences(homeStatsData);
 
@@ -81,6 +91,20 @@ export class HomeComponent implements OnInit, AfterViewInit {
         this.toastService.error('Error al cargar los datos del inicio');
       }
     });
+  }
+
+  private computeConsolidatedTotals(debts: { assetId: number; assetSymbol: string; pendingInFavor: number; pendingAgainst: number }[]): ConsolidatedTotal[] {
+    const totals = new Map<number, ConsolidatedTotal>();
+    for (const d of debts) {
+      const existing = totals.get(d.assetId);
+      const net = d.pendingInFavor - d.pendingAgainst;
+      if (existing) {
+        existing.net += net;
+      } else {
+        totals.set(d.assetId, { assetId: d.assetId, assetSymbol: d.assetSymbol, net });
+      }
+    }
+    return Array.from(totals.values()).filter(t => Math.abs(t.net) > 0.01);
   }
 
   loadMainReferences(homeStatsData: HomeStatsDTO) {

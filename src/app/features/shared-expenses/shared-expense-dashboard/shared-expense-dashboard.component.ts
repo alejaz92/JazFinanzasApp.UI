@@ -2,16 +2,19 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { PersonDebtSplit, PersonDebtSummary } from '../models/shared-expense.model';
 import { SharedExpenseService } from '../services/shared-expense.service';
+import { SharedEventService } from '../../shared-events/services/shared-event.service';
+import { SharedEventActiveSummary, SharedEventConsolidatedDebt } from '../../shared-events/models/shared-event.model';
 import { AccountService } from '../../account/services/account.service';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
-import { NgIf, NgClass, NgFor } from '@angular/common';
+import { NgIf, NgClass, NgFor, DecimalPipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
     selector: 'app-shared-expense-dashboard',
     templateUrl: './shared-expense-dashboard.component.html',
-    imports: [LoadingComponent, NgIf, NgClass, NgFor, FormsModule, ReactiveFormsModule, CurrencyFiatFormatPipe]
+    imports: [LoadingComponent, NgIf, NgClass, NgFor, DecimalPipe, RouterLink, FormsModule, ReactiveFormsModule, CurrencyFiatFormatPipe]
 })
 export class SharedExpenseDashboardComponent implements OnInit {
   isLoading = true;
@@ -21,6 +24,9 @@ export class SharedExpenseDashboardComponent implements OnInit {
 
   accounts: any[] = [];
 
+  consolidatedDebts: SharedEventConsolidatedDebt[] = [];
+  activeEvents: SharedEventActiveSummary[] = [];
+
   reimbursementForm!: FormGroup;
   selectedSplit: PersonDebtSplit | null = null;
   reimbursementError: string = '';
@@ -28,6 +34,7 @@ export class SharedExpenseDashboardComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private sharedExpenseService: SharedExpenseService,
+    private sharedEventService: SharedEventService,
     private accountService: AccountService,
     private toastService: ToastService
   ) {}
@@ -41,6 +48,18 @@ export class SharedExpenseDashboardComponent implements OnInit {
 
     this.load();
     this.loadAccounts();
+    this.loadConsolidated();
+  }
+
+  loadConsolidated(): void {
+    this.sharedEventService.getConsolidatedDebts().subscribe({
+      next: data => this.consolidatedDebts = data,
+      error: () => this.toastService.error('Error al cargar el resumen consolidado de eventos')
+    });
+    this.sharedEventService.getActiveSummary().subscribe({
+      next: data => this.activeEvents = data,
+      error: () => this.toastService.error('Error al cargar los eventos compartidos activos')
+    });
   }
 
   load(): void {
