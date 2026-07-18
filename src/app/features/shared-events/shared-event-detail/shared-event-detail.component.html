@@ -1,0 +1,231 @@
+<app-loading [isLoading]="isLoading"></app-loading>
+
+<div class="container mt-4" *ngIf="!isLoading && event">
+
+    <div class="d-flex justify-content-between align-items-start mb-3">
+        <div class="flex-grow-1">
+            <div *ngIf="!editingHeader">
+                <div class="d-flex align-items-center gap-2">
+                    <h1 class="mb-0">{{ event.name }}</h1>
+                    <span class="badge" [class.bg-secondary]="event.isClosed" [class.bg-success]="!event.isClosed">
+                        {{ event.isClosed ? 'Cerrado' : 'Abierto' }}
+                    </span>
+                    <button class="btn btn-sm btn-outline-secondary" (click)="onEditHeader()" title="Editar">
+                        <i class="bi-pencil-square"></i>
+                    </button>
+                </div>
+                <p *ngIf="event.notes" class="text-muted mb-0 mt-1">{{ event.notes }}</p>
+            </div>
+            <div *ngIf="editingHeader" class="mt-2">
+                <input type="text" class="form-control mb-2" [(ngModel)]="editName" name="editName" placeholder="Nombre">
+                <textarea class="form-control mb-2" [(ngModel)]="editNotes" name="editNotes" rows="2" placeholder="Notas"></textarea>
+                <button class="btn btn-primary btn-sm me-2" (click)="onSaveHeader()">Guardar</button>
+                <button class="btn btn-outline-secondary btn-sm" (click)="onCancelEditHeader()">Cancelar</button>
+            </div>
+        </div>
+        <app-back-button [defaultUrl]="['/shared-events']"></app-back-button>
+    </div>
+
+    <div class="d-flex gap-2 mb-4">
+        <button *ngIf="!event.isClosed" class="btn btn-outline-secondary btn-sm" (click)="onClose()">
+            <i class="bi-lock me-1"></i>Cerrar evento
+        </button>
+        <button *ngIf="event.isClosed" class="btn btn-outline-secondary btn-sm" (click)="onReopen()">
+            <i class="bi-unlock me-1"></i>Reabrir evento
+        </button>
+        <button class="btn btn-outline-danger btn-sm" (click)="onDeleteEvent()">
+            <i class="bi-trash me-1"></i>Eliminar evento
+        </button>
+    </div>
+
+    <!-- Participantes -->
+    <div class="card mb-4">
+        <div class="card-header">Participantes</div>
+        <div class="card-body">
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                <span *ngFor="let p of event.participants" class="badge bg-body-tertiary text-body border d-flex align-items-center gap-2 py-2 px-3">
+                    {{ p.personName }}
+                    <button type="button" class="btn-close btn-close-sm" style="font-size: 0.6rem;"
+                            (click)="onRemoveParticipant(p.personId)" title="Quitar"></button>
+                </span>
+                <span *ngIf="event.participants.length === 0" class="text-muted">Sin participantes.</span>
+            </div>
+            <div class="input-group" style="max-width: 350px;" *ngIf="!event.isClosed">
+                <select class="form-control" [(ngModel)]="selectedNewParticipantId" name="newParticipant">
+                    <option value="" disabled>Agregar participante...</option>
+                    <option *ngFor="let p of availablePeopleToAdd" [value]="p.id">{{ p.alias || p.name }}</option>
+                </select>
+                <button type="button" class="btn btn-outline-secondary" (click)="onAddParticipant()" [disabled]="!selectedNewParticipantId">
+                    + Agregar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Balances -->
+    <div class="card mb-4">
+        <div class="card-header">Balances</div>
+        <div class="card-body">
+            <div class="table-responsive" *ngIf="event.balances.length > 0; else noBalances">
+                <table class="table table-sm table-bordered mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Persona</th>
+                            <th>Moneda</th>
+                            <th class="text-end">Puso</th>
+                            <th class="text-end">Consumió</th>
+                            <th class="text-end">Posición neta</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let b of event.balances">
+                            <td>{{ b.personId === null ? 'Vos' : b.personName }}</td>
+                            <td>{{ b.assetSymbol }}</td>
+                            <td class="text-end">{{ b.contributed | number:'1.2-2' }}</td>
+                            <td class="text-end">{{ b.consumed | number:'1.2-2' }}</td>
+                            <td class="text-end fw-bold" [class.text-success]="b.netBalance > 0" [class.text-danger]="b.netBalance < 0">
+                                {{ b.netBalance | number:'1.2-2' }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <ng-template #noBalances>
+                <p class="text-muted mb-0">Todavía no hay movimientos cargados.</p>
+            </ng-template>
+        </div>
+    </div>
+
+    <!-- Totales por categoría -->
+    <div class="card mb-4" *ngIf="event.categoryTotals.length > 0">
+        <div class="card-header">Totales por categoría</div>
+        <div class="card-body">
+            <table class="table table-sm table-bordered mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Categoría</th>
+                        <th>Moneda</th>
+                        <th class="text-end">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let c of event.categoryTotals">
+                        <td>{{ c.transactionClassName }}</td>
+                        <td>{{ c.assetSymbol }}</td>
+                        <td class="text-end">{{ c.total | number:'1.2-2' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Movimientos -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Movimientos</span>
+            <button *ngIf="!showMovementForm && !event.isClosed" class="btn btn-primary btn-sm" (click)="onAddMovement()">
+                <i class="bi-plus-lg me-1"></i>Agregar movimiento
+            </button>
+        </div>
+        <div class="card-body">
+            <app-shared-event-movement-form
+                *ngIf="showMovementForm"
+                [eventId]="id"
+                [participants]="event.participants"
+                [editingMovement]="editingMovement"
+                (saved)="onMovementSaved()"
+                (cancelled)="onMovementCancelled()">
+            </app-shared-event-movement-form>
+
+            <div class="table-responsive" *ngIf="event.movements.length > 0; else noMovements">
+                <table class="table table-sm table-bordered mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Descripción</th>
+                            <th>Categoría</th>
+                            <th>Pagó</th>
+                            <th class="text-end">Monto</th>
+                            <th>División</th>
+                            <th style="width: 90px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let m of event.movements">
+                            <td>{{ m.date | date:'dd/MM/yyyy' }}</td>
+                            <td>{{ m.description }}</td>
+                            <td>{{ m.transactionClassName }}</td>
+                            <td>{{ m.payerPersonId === null ? 'Vos' : m.payerPersonName }}</td>
+                            <td class="text-end">{{ m.totalAmount | number:'1.2-2' }} {{ m.assetSymbol }}</td>
+                            <td>
+                                <span *ngFor="let s of m.shares; let last = last" class="small">
+                                    {{ s.personId === null ? 'Vos' : s.personName }}: {{ s.amount | number:'1.2-2' }}{{ last ? '' : ', ' }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <div class="d-flex justify-content-center gap-1">
+                                    <button class="btn-icon bg-secondary" title="Editar" (click)="onEditMovement(m)">
+                                        <i class="bi-pencil-square"></i>
+                                    </button>
+                                    <button class="btn-icon bg-danger" title="Eliminar" (click)="onDeleteMovement(m.id)">
+                                        <i class="bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <ng-template #noMovements>
+                <p class="text-muted mb-0">Todavía no hay movimientos cargados.</p>
+            </ng-template>
+        </div>
+    </div>
+
+    <!-- Pagos -->
+    <div class="card mb-4">
+        <div class="card-header">Pagos registrados</div>
+        <div class="card-body">
+            <div class="table-responsive" *ngIf="event.payments.length > 0; else noPayments">
+                <table class="table table-sm table-bordered mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Fecha</th>
+                            <th>De</th>
+                            <th>A</th>
+                            <th class="text-end">Monto</th>
+                            <th>Notas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let p of event.payments">
+                            <td>{{ p.date | date:'dd/MM/yyyy' }}</td>
+                            <td>{{ p.fromPersonId === null ? 'Vos' : p.fromPersonName }}</td>
+                            <td>{{ p.toPersonId === null ? 'Vos' : p.toPersonName }}</td>
+                            <td class="text-end">{{ p.amount | number:'1.2-2' }} {{ p.assetSymbol }}</td>
+                            <td>{{ p.notes }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <ng-template #noPayments>
+                <p class="text-muted mb-0">Todavía no hay pagos registrados.</p>
+            </ng-template>
+        </div>
+    </div>
+
+</div>
+
+<app-confirm-modal #deleteEventModal
+    title="Eliminar evento"
+    message="¿Estás seguro de eliminar este evento compartido? Solo se puede eliminar si no tiene movimientos ni pagos."
+    confirmLabel="Eliminar"
+    (confirmed)="onDeleteEventConfirmed()">
+</app-confirm-modal>
+
+<app-confirm-modal #deleteMovementModal
+    title="Eliminar movimiento"
+    message="¿Estás seguro de eliminar este movimiento? Se eliminarán también sus derivados (egreso o gasto de tarjeta)."
+    confirmLabel="Eliminar"
+    (confirmed)="onDeleteMovementConfirmed()">
+</app-confirm-modal>

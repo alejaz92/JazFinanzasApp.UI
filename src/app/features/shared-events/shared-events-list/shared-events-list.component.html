@@ -1,0 +1,74 @@
+<app-loading [isLoading]="isLoading"></app-loading>
+
+<div class="container mt-4" *ngIf="!isLoading">
+    <div class="d-flex align-items-center gap-2 mb-3">
+        <h1 class="mb-0">Eventos compartidos</h1>
+        <a class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center"
+           [routerLink]="['/shared-events/add']"
+           title="Nuevo evento"
+           style="width: 44px; height: 44px; font-size: 1.2rem;">
+            <i class="bi-plus-lg text-white"></i>
+        </a>
+        <div class="ms-auto d-flex align-items-center gap-3">
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="includeClosed"
+                       [(ngModel)]="includeClosed" (change)="onIncludeClosedChange()">
+                <label class="form-check-label" for="includeClosed">Mostrar cerrados</label>
+            </div>
+            <input type="text" class="form-control" placeholder="Buscar evento..."
+                   [(ngModel)]="searchTerm" style="max-width: 250px;">
+        </div>
+    </div>
+
+    <ng-container *ngIf="filteredEvents && filteredEvents.length > 0; else empty">
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Participantes</th>
+                        <th>Movimientos</th>
+                        <th>Estado</th>
+                        <th class="text-nowrap" style="width: 120px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let event of filteredEvents">
+                        <td>{{ event.name }}</td>
+                        <td>{{ event.participantCount }}</td>
+                        <td>{{ event.movementCount }}</td>
+                        <td>
+                            <span class="badge" [class.bg-secondary]="event.isClosed" [class.bg-success]="!event.isClosed">
+                                {{ event.isClosed ? 'Cerrado' : 'Abierto' }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="d-flex justify-content-center gap-2">
+                                <a title="Ver detalle" class="btn-icon bg-secondary" [routerLink]="['/shared-events', event.id]">
+                                    <i class="bi-eye"></i>
+                                </a>
+                                <button title="Eliminar" class="btn-icon bg-danger" (click)="onDelete(event.id)">
+                                    <i class="bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </ng-container>
+
+    <ng-template #empty>
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+            <p class="mb-0">No hay eventos compartidos{{ includeClosed ? '' : ' abiertos' }}.</p>
+        </div>
+    </ng-template>
+</div>
+
+<app-confirm-modal #deleteModal
+    title="Eliminar evento"
+    message="¿Estás seguro de eliminar este evento compartido? Solo se puede eliminar si no tiene movimientos ni pagos."
+    confirmLabel="Eliminar"
+    (confirmed)="onDeleteConfirmed()">
+</app-confirm-modal>

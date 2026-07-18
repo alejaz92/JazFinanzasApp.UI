@@ -16,11 +16,15 @@
           <li class="nav-item">
             <a class="nav-link" [routerLink]="['report']">Reportes</a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link" [routerLink]="['shared-expenses']">Gastos Compartidos</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" [routerLink]="['management/trips']">Viajes</a>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+             Compartido
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" [routerLink]="['shared-events']">Eventos</a></li>
+              <li><a class="dropdown-item" [routerLink]="['shared-expenses']">Gastos Compartidos</a></li>
+              <li><a class="dropdown-item" [routerLink]="['management/trips']">Viajes</a></li>
+            </ul>
           </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
