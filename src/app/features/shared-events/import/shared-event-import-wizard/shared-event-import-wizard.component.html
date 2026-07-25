@@ -140,7 +140,7 @@
             <p class="small text-muted mb-2">
                 <i class="bi-info-circle me-1"></i>
                 "Crear nuevo" da de alta un movimiento o pago nuevo. "Vincular a existente" (solo si ya tenías cargada una transacción parecida) engancha el gasto a esa transacción en vez de duplicarla.
-                La columna "Cuenta / vínculo" solo pide algo cuando la fila involucra tu propia plata (la pagaste vos, o sos una de las dos partes de un pago) — si pagó otra persona, esa fila no toca tu cuenta y queda vacía.
+La columna "Cuenta / vínculo" solo pide algo cuando la fila involucra tu propia plata (la pagaste vos, o sos una de las dos partes de un pago) — si pagó otra persona, esa fila no toca tu cuenta y queda vacía. En los gastos podés elegir pagar con cuenta o con tarjeta (cuotas + primer vencimiento); los pagos entre personas siempre son con cuenta.
             </p>
 
             <div class="table-responsive">
@@ -153,7 +153,7 @@
                             <th class="text-end">Monto</th>
                             <th>¿Quién?</th>
                             <th style="width: 150px">Acción</th>
-                            <th style="width: 220px">Cuenta / vínculo</th>
+                            <th style="width: 260px">Cuenta / vínculo</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -189,12 +189,35 @@
                                         {{ s.date | date:'dd/MM/yyyy' }} - {{ s.detail }} ({{ s.amount | number:'1.2-2' }})
                                     </option>
                                 </select>
-                                <select *ngIf="d.action === 'CreateNew' && rowNeedsAccount(d)" class="form-control form-control-sm"
-                                        [(ngModel)]="d.accountId" [name]="'account_' + i">
-                                    <option value="" disabled>Cuenta...</option>
-                                    <option *ngFor="let a of accounts" [value]="a.id">{{ a.name }}</option>
-                                </select>
-                                <span *ngIf="d.action === 'CreateNew' && !rowNeedsAccount(d)" class="text-muted small">— (no toca tu cuenta)</span>
+
+                                <ng-container *ngIf="d.action === 'CreateNew' && rowNeedsPayment(d)">
+                                    <div class="btn-group btn-group-sm mb-1 d-flex" role="group" *ngIf="rowSupportsCard(d)">
+                                        <input type="radio" class="btn-check" [name]="'paymode_' + i" [id]="'pmAccount_' + i" value="account" [(ngModel)]="d.paymentMode">
+                                        <label class="btn btn-outline-secondary btn-sm py-0" [for]="'pmAccount_' + i">Cuenta</label>
+                                        <input type="radio" class="btn-check" [name]="'paymode_' + i" [id]="'pmCard_' + i" value="card" [(ngModel)]="d.paymentMode">
+                                        <label class="btn btn-outline-secondary btn-sm py-0" [for]="'pmCard_' + i">Tarjeta</label>
+                                    </div>
+
+                                    <select *ngIf="d.paymentMode === 'account'" class="form-control form-control-sm"
+                                            [(ngModel)]="d.accountId" [name]="'account_' + i">
+                                        <option value="" disabled>Cuenta...</option>
+                                        <option *ngFor="let a of accounts" [value]="a.id">{{ a.name }}</option>
+                                    </select>
+
+                                    <div *ngIf="d.paymentMode === 'card'" class="d-flex flex-column gap-1">
+                                        <select class="form-control form-control-sm" [(ngModel)]="d.cardId" [name]="'card_' + i">
+                                            <option value="" disabled>Tarjeta...</option>
+                                            <option *ngFor="let c of cards" [value]="c.id">{{ c.name }}</option>
+                                        </select>
+                                        <div class="d-flex gap-1">
+                                            <input type="number" class="form-control form-control-sm" placeholder="Cuotas" min="1" style="width: 70px"
+                                                   [(ngModel)]="d.installments" [name]="'installments_' + i">
+                                            <input type="month" class="form-control form-control-sm" [(ngModel)]="d.firstInstallment" [name]="'firstInstallment_' + i">
+                                        </div>
+                                    </div>
+                                </ng-container>
+
+                                <span *ngIf="d.action === 'CreateNew' && !rowNeedsPayment(d)" class="text-muted small">— (no toca tu cuenta)</span>
                             </td>
                         </tr>
                     </tbody>

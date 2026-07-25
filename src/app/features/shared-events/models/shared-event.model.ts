@@ -270,6 +270,9 @@ export interface SharedEventImportRowDecision {
   transactionId?: number | null;
   cardTransactionId?: number | null;
   accountId?: number | null;
+  cardId?: number | null;
+  installments?: number | null;
+  firstInstallment?: string | null;
 }
 
 export interface SharedEventImportConfirmRequest {

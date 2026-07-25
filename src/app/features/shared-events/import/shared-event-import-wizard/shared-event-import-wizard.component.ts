@@ -17,6 +17,7 @@ import { PersonService } from '../../../people/services/person.service';
 import { Person } from '../../../people/models/person.model';
 import { TransactionClassService } from '../../../transactionClass/services/transaction-class.service';
 import { AccountService } from '../../../account/services/account.service';
+import { CardService } from '../../../card/services/card.service';
 import { LoadingComponent } from '../../../../core/components/loading/loading.component';
 import { ToastService } from '../../../../core/services/toast.service';
 
@@ -38,7 +39,11 @@ interface RowDecisionRow {
   row: SharedEventImportRow;
   action: SharedEventImportRowAction;
   selectedMatchKey: string; // '' | 'tx:<id>' | 'card:<id>'
+  paymentMode: 'account' | 'card';
   accountId: string;
+  cardId: string;
+  installments: number;
+  firstInstallment: string; // 'yyyy-MM'
 }
 
 @Component({
@@ -70,6 +75,7 @@ export class SharedEventImportWizardComponent implements OnInit {
   rowDecisions: RowDecisionRow[] = [];
   defaultAccountId: string = '';
   accounts: any[] = [];
+  cards: any[] = [];
 
   // ── Paso 4 ──
   confirmResult: SharedEventImportConfirmResult | null = null;
@@ -79,6 +85,7 @@ export class SharedEventImportWizardComponent implements OnInit {
     private personService: PersonService,
     private transactionClassService: TransactionClassService,
     private accountService: AccountService,
+    private cardService: CardService,
     private toastService: ToastService,
     private router: Router
   ) { }
@@ -90,6 +97,7 @@ export class SharedEventImportWizardComponent implements OnInit {
       this.transactionClasses = data.filter((c: any) => c.incExp === 'E');
     });
     this.accountService.getAccountByTypeName('Moneda').subscribe((data: any) => this.accounts = data);
+    this.cardService.getAllCards().subscribe((data: any) => this.cards = data);
   }
 
   // ── Paso 1 ──────────────────────────────────────────────────────────────
@@ -211,7 +219,11 @@ export class SharedEventImportWizardComponent implements OnInit {
       row,
       action: row.unsupported ? 'Skip' : 'CreateNew',
       selectedMatchKey: '',
-      accountId: ''
+      paymentMode: 'account',
+      accountId: '',
+      cardId: '',
+      installments: 1,
+      firstInstallment: ''
     }));
   }
 
@@ -220,11 +232,16 @@ export class SharedEventImportWizardComponent implements OnInit {
   applyDefaultAccountToAll(): void {
     if (!this.defaultAccountId) return;
     this.rowDecisions.forEach(d => {
-      if (d.action !== 'Skip' && this.rowNeedsAccount(d)) d.accountId = this.defaultAccountId;
+      if (d.action !== 'Skip' && this.rowNeedsPayment(d)) {
+        d.paymentMode = 'account';
+        d.accountId = this.defaultAccountId;
+      }
     });
   }
 
-  rowNeedsAccount(d: RowDecisionRow): boolean {
+  // true si esta fila involucra la propia plata del usuario (la pagó él, o es una de las dos
+  // partes de un pago) y por lo tanto necesita indicar cómo se pagó (cuenta o tarjeta)
+  rowNeedsPayment(d: RowDecisionRow): boolean {
     if (d.action === 'LinkExisting') return false;
     if (d.row.isPayment) {
       const fromIsMe = d.row.payerMemberName === this.currentUserMemberName;
@@ -232,6 +249,11 @@ export class SharedEventImportWizardComponent implements OnInit {
       return fromIsMe || toIsMe;
     }
     return d.row.payerMemberName === this.currentUserMemberName;
+  }
+
+  // los pagos (a diferencia de los gastos) solo soportan cuenta, nunca tarjeta
+  rowSupportsCard(d: RowDecisionRow): boolean {
+    return !d.row.isPayment;
   }
 
   onSelectedMatchChange(d: RowDecisionRow): void {
@@ -246,7 +268,9 @@ export class SharedEventImportWizardComponent implements OnInit {
     return this.rowDecisions.every(d => {
       if (d.action === 'Skip') return true;
       if (d.action === 'LinkExisting') return !!d.selectedMatchKey;
-      return !this.rowNeedsAccount(d) || !!d.accountId;
+      if (!this.rowNeedsPayment(d)) return true;
+      if (d.paymentMode === 'account') return !!d.accountId;
+      return !!d.cardId && d.installments > 0 && !!d.firstInstallment;
     });
   }
 
@@ -283,8 +307,14 @@ export class SharedEventImportWizardComponent implements OnInit {
         if (kind === 'tx') decision.transactionId = Number(id);
         else decision.cardTransactionId = Number(id);
       }
-      if (d.action === 'CreateNew' && this.rowNeedsAccount(d)) {
-        decision.accountId = Number(d.accountId);
+      if (d.action === 'CreateNew' && this.rowNeedsPayment(d)) {
+        if (d.paymentMode === 'account') {
+          decision.accountId = Number(d.accountId);
+        } else {
+          decision.cardId = Number(d.cardId);
+          decision.installments = d.installments;
+          decision.firstInstallment = d.firstInstallment + '-01';
+        }
       }
       return decision;
     });
