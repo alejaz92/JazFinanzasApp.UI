@@ -14,7 +14,11 @@ import {
   SharedEventConsolidatedDebt,
   SharedEventPaymentAddRequest,
   SharedEventPaymentPreview,
-  SharedEventPayment
+  SharedEventPayment,
+  SharedEventImportParseRequest,
+  SharedEventImportParseResult,
+  SharedEventImportConfirmRequest,
+  SharedEventImportConfirmResult
 } from '../models/shared-event.model';
 
 @Injectable({
@@ -90,5 +94,13 @@ export class SharedEventService {
 
   deletePayment(id: number, paymentId: number): Observable<void> {
     return this.http.delete<void>(`${environment.apiBaseURL}/api/shared-event/${id}/payments/${paymentId}`);
+  }
+
+  parseImport(model: SharedEventImportParseRequest): Observable<SharedEventImportParseResult> {
+    return this.http.post<SharedEventImportParseResult>(`${environment.apiBaseURL}/api/shared-event/import/parse`, model);
+  }
+
+  confirmImport(id: number, model: SharedEventImportConfirmRequest): Observable<SharedEventImportConfirmResult> {
+    return this.http.post<SharedEventImportConfirmResult>(`${environment.apiBaseURL}/api/shared-event/${id}/import/confirm`, model);
   }
 }

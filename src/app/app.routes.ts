@@ -258,6 +258,11 @@ export const routes: Routes = [
     canActivate: [AuthGuard]
   },
   {
+    path: 'shared-events/import',
+    loadComponent: () => import('./features/shared-events/import/shared-event-import-wizard/shared-event-import-wizard.component').then(m => m.SharedEventImportWizardComponent),
+    canActivate: [AuthGuard]
+  },
+  {
     path: 'shared-events/:id',
     loadComponent: () => import('./features/shared-events/shared-event-detail/shared-event-detail.component').then(m => m.SharedEventDetailComponent),
     canActivate: [AuthGuard]

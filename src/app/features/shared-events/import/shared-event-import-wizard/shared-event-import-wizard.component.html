@@ -1,0 +1,231 @@
+<app-loading [isLoading]="isLoading"></app-loading>
+
+<div class="container mt-4" *ngIf="!isLoading">
+    <h1 class="mb-3">Importar desde Splitwise</h1>
+
+    <div class="d-flex gap-2 mb-4">
+        <span class="badge" [class.bg-primary]="step === 1" [class.bg-secondary]="step !== 1">1. Archivo y evento</span>
+        <span class="badge" [class.bg-primary]="step === 2" [class.bg-secondary]="step !== 2">2. Mapeo</span>
+        <span class="badge" [class.bg-primary]="step === 3" [class.bg-secondary]="step !== 3">3. Revisión</span>
+        <span class="badge" [class.bg-primary]="step === 4" [class.bg-secondary]="step !== 4">4. Resultado</span>
+    </div>
+
+    <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+
+    <!-- Paso 1: archivo + evento destino -->
+    <div *ngIf="step === 1" class="card">
+        <div class="card-body">
+            <div class="mb-3">
+                <label class="form-label">Archivo CSV exportado de Splitwise <span class="text-danger">*</span></label>
+                <input type="file" class="form-control" accept=".csv" (change)="onFileSelected($event)">
+                <div *ngIf="csvFileName" class="form-text">Archivo cargado: {{ csvFileName }}</div>
+            </div>
+
+            <div class="mb-2">
+                <label class="form-label fw-semibold">Evento destino <span class="text-danger">*</span></label>
+                <div class="form-check">
+                    <input type="radio" class="form-check-input" id="destExisting" name="dest" [value]="false" [(ngModel)]="creatingNewEvent">
+                    <label class="form-check-label" for="destExisting">Evento existente</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input type="radio" class="form-check-input" id="destNew" name="dest" [value]="true" [(ngModel)]="creatingNewEvent">
+                    <label class="form-check-label" for="destNew">Crear evento nuevo</label>
+                </div>
+
+                <select *ngIf="!creatingNewEvent" class="form-control" [(ngModel)]="selectedEventId">
+                    <option value="" disabled>Seleccionar evento...</option>
+                    <option *ngFor="let e of events" [value]="e.id">{{ e.name }}</option>
+                </select>
+                <input *ngIf="creatingNewEvent" type="text" class="form-control" placeholder="Nombre del evento nuevo" [(ngModel)]="newEventName">
+            </div>
+
+            <div class="text-end mt-3">
+                <button type="button" class="btn btn-primary" [disabled]="!step1Valid" (click)="onStep1Next()">Siguiente</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paso 2: mapeo de miembros y categorías -->
+    <div *ngIf="step === 2 && parseResult" class="card">
+        <div class="card-body">
+            <h5>Miembros del archivo</h5>
+            <p class="text-muted small">Indicá quién sos vos, y a qué persona (existente o nueva) corresponde cada uno de los demás miembros.</p>
+            <table class="table table-sm table-bordered mb-4">
+                <thead class="table-light">
+                    <tr>
+                        <th>Miembro (Splitwise)</th>
+                        <th style="width: 320px">Es...</th>
+                        <th>Persona / nombre</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let m of memberMappings; let i = index">
+                        <td class="align-middle">{{ m.name }}</td>
+                        <td>
+                            <select class="form-control form-control-sm" [(ngModel)]="m.mode" [name]="'memberMode_' + i">
+                                <option value="me">Soy yo</option>
+                                <option value="existing">Persona existente</option>
+                                <option value="new">Persona nueva</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select *ngIf="m.mode === 'existing'" class="form-control form-control-sm" [(ngModel)]="m.personId" [name]="'memberPerson_' + i">
+                                <option value="" disabled>Seleccionar...</option>
+                                <option *ngFor="let p of allPeople" [value]="p.id">{{ p.alias || p.name }}</option>
+                            </select>
+                            <input *ngIf="m.mode === 'new'" type="text" class="form-control form-control-sm" [(ngModel)]="m.newPersonName" [name]="'memberNew_' + i">
+                            <span *ngIf="m.mode === 'me'" class="text-muted small">—</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h5>Categorías del archivo</h5>
+            <table class="table table-sm table-bordered mb-2">
+                <thead class="table-light">
+                    <tr>
+                        <th>Categoría (Splitwise)</th>
+                        <th style="width: 220px">Es...</th>
+                        <th>Categoría / nombre</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let c of categoryMappings; let i = index">
+                        <td class="align-middle">{{ c.name }}</td>
+                        <td>
+                            <select class="form-control form-control-sm" [(ngModel)]="c.mode" [name]="'catMode_' + i">
+                                <option value="existing">Categoría existente</option>
+                                <option value="new">Categoría nueva</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select *ngIf="c.mode === 'existing'" class="form-control form-control-sm" [(ngModel)]="c.transactionClassId" [name]="'catExisting_' + i">
+                                <option value="" disabled>Seleccionar...</option>
+                                <option *ngFor="let tc of transactionClasses" [value]="tc.id">{{ tc.description }}</option>
+                            </select>
+                            <input *ngIf="c.mode === 'new'" type="text" class="form-control form-control-sm" [(ngModel)]="c.newCategoryName" [name]="'catNew_' + i">
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div *ngIf="parseResult.warnings.length > 0" class="alert alert-warning small mt-3">
+                <div *ngFor="let w of parseResult.warnings">{{ w }}</div>
+            </div>
+
+            <div class="d-flex justify-content-between mt-3">
+                <button type="button" class="btn btn-outline-secondary" (click)="onStep2Back()">Atrás</button>
+                <button type="button" class="btn btn-primary" [disabled]="!step2Valid" (click)="onStep2Next()">Siguiente</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paso 3: revisión fila por fila -->
+    <div *ngIf="step === 3" class="card">
+        <div class="card-body">
+            <div class="d-flex align-items-end gap-2 mb-3">
+                <div>
+                    <label class="form-label mb-0 small">Cuenta por defecto</label>
+                    <select class="form-control form-control-sm" [(ngModel)]="defaultAccountId">
+                        <option value="" disabled>Seleccionar...</option>
+                        <option *ngFor="let a of accounts" [value]="a.id">{{ a.name }}</option>
+                    </select>
+                </div>
+                <button type="button" class="btn btn-outline-secondary btn-sm" [disabled]="!defaultAccountId" (click)="applyDefaultAccountToAll()">
+                    Aplicar a todas las filas
+                </button>
+                <span class="ms-auto small text-muted">{{ pendingRowsCount }} de {{ rowDecisions.length }} filas para importar</span>
+            </div>
+
+            <p class="small text-muted mb-2">
+                <i class="bi-info-circle me-1"></i>
+                "Crear nuevo" da de alta un movimiento o pago nuevo. "Vincular a existente" (solo si ya tenías cargada una transacción parecida) engancha el gasto a esa transacción en vez de duplicarla.
+                La columna "Cuenta / vínculo" solo pide algo cuando la fila involucra tu propia plata (la pagaste vos, o sos una de las dos partes de un pago) — si pagó otra persona, esa fila no toca tu cuenta y queda vacía.
+            </p>
+
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered mb-2">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Descripción</th>
+                            <th>Tipo</th>
+                            <th class="text-end">Monto</th>
+                            <th>¿Quién?</th>
+                            <th style="width: 150px">Acción</th>
+                            <th style="width: 220px">Cuenta / vínculo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let d of rowDecisions; let i = index" [class.table-secondary]="d.row.unsupported">
+                            <td>{{ d.row.date | date:'dd/MM/yyyy' }}</td>
+                            <td>{{ d.row.description }}</td>
+                            <td>{{ d.row.isPayment ? 'Pago' : d.row.category }}</td>
+                            <td class="text-end">{{ d.row.cost | number:'1.2-2' }} {{ d.row.currency }}</td>
+                            <td class="small">
+                                <ng-container *ngIf="!d.row.isPayment">
+                                    Pagó: <strong [class.text-primary]="d.row.payerMemberName === currentUserMemberName">{{ d.row.payerMemberName === currentUserMemberName ? 'vos' : d.row.payerMemberName }}</strong>
+                                </ng-container>
+                                <ng-container *ngIf="d.row.isPayment">
+                                    <strong [class.text-primary]="d.row.payerMemberName === currentUserMemberName">{{ d.row.payerMemberName === currentUserMemberName ? 'Vos' : d.row.payerMemberName }}</strong>
+                                    le pagó a
+                                    <strong [class.text-primary]="d.row.receiverMemberName === currentUserMemberName">{{ d.row.receiverMemberName === currentUserMemberName ? 'vos' : d.row.receiverMemberName }}</strong>
+                                </ng-container>
+                            </td>
+                            <td>
+                                <span *ngIf="d.row.unsupported" class="badge bg-secondary" title="Más de un pagador/receptor, no soportado">No soportada</span>
+                                <select *ngIf="!d.row.unsupported" class="form-control form-control-sm" [(ngModel)]="d.action" [name]="'action_' + i">
+                                    <option value="CreateNew">Crear nuevo</option>
+                                    <option value="LinkExisting" *ngIf="d.row.suggestedMatches.length > 0">Vincular a existente</option>
+                                    <option value="Skip">Saltear</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select *ngIf="d.action === 'LinkExisting'" class="form-control form-control-sm"
+                                        [(ngModel)]="d.selectedMatchKey" (ngModelChange)="onSelectedMatchChange(d)" [name]="'match_' + i">
+                                    <option value="" disabled>Seleccionar...</option>
+                                    <option *ngFor="let s of d.row.suggestedMatches"
+                                            [value]="(s.transactionId ? 'tx:' + s.transactionId : 'card:' + s.cardTransactionId)">
+                                        {{ s.date | date:'dd/MM/yyyy' }} - {{ s.detail }} ({{ s.amount | number:'1.2-2' }})
+                                    </option>
+                                </select>
+                                <select *ngIf="d.action === 'CreateNew' && rowNeedsAccount(d)" class="form-control form-control-sm"
+                                        [(ngModel)]="d.accountId" [name]="'account_' + i">
+                                    <option value="" disabled>Cuenta...</option>
+                                    <option *ngFor="let a of accounts" [value]="a.id">{{ a.name }}</option>
+                                </select>
+                                <span *ngIf="d.action === 'CreateNew' && !rowNeedsAccount(d)" class="text-muted small">— (no toca tu cuenta)</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-between mt-3">
+                <button type="button" class="btn btn-outline-secondary" (click)="onStep3Back()">Atrás</button>
+                <button type="button" class="btn btn-primary" [disabled]="!step3Valid" (click)="onStep3Confirm()">Confirmar importación</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paso 4: resultado -->
+    <div *ngIf="step === 4 && confirmResult" class="card">
+        <div class="card-body">
+            <h5>Importación finalizada</h5>
+            <ul>
+                <li>{{ confirmResult.movementsCreated }} movimientos creados</li>
+                <li>{{ confirmResult.paymentsCreated }} pagos creados</li>
+                <li>{{ confirmResult.skipped }} filas salteadas</li>
+            </ul>
+
+            <div *ngIf="confirmResult.errors.length > 0" class="alert alert-warning">
+                <strong>Filas con error (no se importaron):</strong>
+                <ul class="mb-0">
+                    <li *ngFor="let e of confirmResult.errors">{{ e }}</li>
+                </ul>
+            </div>
+
+            <button type="button" class="btn btn-primary" (click)="goToEvent()">Ver evento</button>
+        </div>
+    </div>
+</div>

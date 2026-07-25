@@ -187,3 +187,101 @@ export interface SharedEventConsolidatedDebt {
   pendingInFavor: number;
   pendingAgainst: number;
 }
+
+// ── Import de Splitwise ────────────────────────────────────────────────
+
+export interface SharedEventImportMember {
+  name: string;
+  suggestedPersonId: number | null;
+  suggestedPersonName: string | null;
+}
+
+export interface SharedEventImportCategory {
+  name: string;
+  suggestedTransactionClassId: number | null;
+  suggestedTransactionClassName: string | null;
+}
+
+export interface SharedEventImportMemberDelta {
+  memberName: string;
+  delta: number;
+}
+
+export interface SharedEventImportSuggestedMatch {
+  transactionId: number | null;
+  cardTransactionId: number | null;
+  date: string;
+  amount: number;
+  detail: string;
+}
+
+export interface SharedEventImportRow {
+  rowIndex: number;
+  date: string;
+  description: string;
+  category: string;
+  cost: number;
+  currency: string;
+  assetId: number | null;
+  isPayment: boolean;
+  unsupported: boolean;
+  payerMemberName: string | null;
+  receiverMemberName: string | null;
+  memberDeltas: SharedEventImportMemberDelta[];
+  suggestedMatches: SharedEventImportSuggestedMatch[];
+}
+
+export interface SharedEventImportBalanceRow {
+  currency: string;
+  memberBalances: SharedEventImportMemberDelta[];
+}
+
+export interface SharedEventImportParseResult {
+  members: SharedEventImportMember[];
+  categories: SharedEventImportCategory[];
+  rows: SharedEventImportRow[];
+  balanceRows: SharedEventImportBalanceRow[];
+  warnings: string[];
+}
+
+export interface SharedEventImportParseRequest {
+  csvContent: string;
+  currentUserMemberName?: string;
+}
+
+export interface SharedEventImportMemberMapping {
+  memberName: string;
+  personId?: number | null;
+  newPersonName?: string;
+  isCurrentUser: boolean;
+}
+
+export interface SharedEventImportCategoryMapping {
+  categoryName: string;
+  transactionClassId?: number | null;
+  newCategoryName?: string;
+}
+
+export type SharedEventImportRowAction = 'CreateNew' | 'LinkExisting' | 'Skip';
+
+export interface SharedEventImportRowDecision {
+  rowIndex: number;
+  action: SharedEventImportRowAction;
+  transactionId?: number | null;
+  cardTransactionId?: number | null;
+  accountId?: number | null;
+}
+
+export interface SharedEventImportConfirmRequest {
+  csvContent: string;
+  memberMappings: SharedEventImportMemberMapping[];
+  categoryMappings: SharedEventImportCategoryMapping[];
+  rowDecisions: SharedEventImportRowDecision[];
+}
+
+export interface SharedEventImportConfirmResult {
+  movementsCreated: number;
+  paymentsCreated: number;
+  skipped: number;
+  errors: string[];
+}
