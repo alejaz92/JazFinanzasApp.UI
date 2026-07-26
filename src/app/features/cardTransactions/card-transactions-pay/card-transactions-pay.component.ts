@@ -66,7 +66,9 @@ export class CardTransactionsPayComponent implements OnInit {
       paymentAssets: ['', Validators.required],
       pesosPayment: ['', Validators.required],
       cardExpenses: [''],
-      cardTransactionsArray: this.fb.array([]) 
+      nextClosingDate: [''],
+      nextDueDate: [''],
+      cardTransactionsArray: this.fb.array([])
     });
 
 
@@ -487,7 +489,9 @@ refreshCurrencyFormat() {
         pesosAmount: parseFloat(this.cardPaymentForm.get('pesosPayment')?.value),
         dolarAmount: 0,
         cardExpenses: parseFloat(this.cardPaymentForm.get('cardExpenses')?.value),
-        cardTransactions: cardTransactions        
+        nextClosingDate: this.cardPaymentForm.get('nextClosingDate')?.value || null,
+        nextDueDate: this.cardPaymentForm.get('nextDueDate')?.value || null,
+        cardTransactions: cardTransactions
       }
 
       if (cardPaymentRequest.paymentAsset === 'Pesos+Dolar') {

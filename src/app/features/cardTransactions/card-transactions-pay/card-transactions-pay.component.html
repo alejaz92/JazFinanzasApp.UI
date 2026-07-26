@@ -93,12 +93,23 @@
                             <div class="form-group mb-3">
                                 <label for="cardExpenses">Gastos Tarjeta</label>
                                 <input type="text" class="form-control" id="cardExpenses" formControlName="cardExpenses" readonly appCurrencyInput>
-                                <div *ngIf="cardPaymentForm.controls['cardExpenses'].errors?.['incorrect'] " 
+                                <div *ngIf="cardPaymentForm.controls['cardExpenses'].errors?.['incorrect'] "
                                     class="text-danger mt-2">
                                     Revise los valores ingresados.
                                 </div>
                             </div>
 
+                        </fieldset>
+                        <hr>
+                        <fieldset>
+                            <div class="form-group mb-3">
+                                <label for="nextClosingDate" class="form-label">Próximo cierre</label>
+                                <input type="date" class="form-control" id="nextClosingDate" formControlName="nextClosingDate">
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="nextDueDate" class="form-label">Próximo vencimiento</label>
+                                <input type="date" class="form-control" id="nextDueDate" formControlName="nextDueDate">
+                            </div>
                         </fieldset>
                     </div>
                 </div>
