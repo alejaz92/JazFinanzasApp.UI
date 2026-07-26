@@ -12,6 +12,14 @@
                     <label class="form-label" for="cardName">Nombre</label>
                     <input type="text" class="form-control" id="cardName" [(ngModel)]="card.name" name="cardName">
                 </div>
+                <div class="mt-3">
+                    <label class="form-label" for="nextClosingDate">Próximo cierre</label>
+                    <input type="date" class="form-control" id="nextClosingDate" [(ngModel)]="card.nextClosingDate" name="nextClosingDate">
+                </div>
+                <div class="mt-3">
+                    <label class="form-label" for="nextDueDate">Próximo vencimiento</label>
+                    <input type="date" class="form-control" id="nextDueDate" [(ngModel)]="card.nextDueDate" name="nextDueDate">
+                </div>
                 <div class="text-end mt-3">
                     <button type="submit" class="btn btn-primary m-1">Guardar</button>
                 </div>

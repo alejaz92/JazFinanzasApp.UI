@@ -34,7 +34,11 @@ export class CardEditComponent implements OnInit, OnDestroy {
           // Get data from server
           this.cardService.getCardById(Number(this.id)).subscribe({
             next: (response) => {
-              this.card = response;
+              this.card = {
+                ...response,
+                nextClosingDate: response.nextClosingDate?.substring(0, 10) ?? null,
+                nextDueDate: response.nextDueDate?.substring(0, 10) ?? null
+              };
               this.isLoading = false;
             },
             error: (error) => {
@@ -49,7 +53,9 @@ export class CardEditComponent implements OnInit, OnDestroy {
 
   onFormSubmit(): void {
     const cardUpdateRequest: CardUpdateRequest = {
-      name: this.card?.name ?? ''
+      name: this.card?.name ?? '',
+      nextClosingDate: this.card?.nextClosingDate || null,
+      nextDueDate: this.card?.nextDueDate || null
     };
 
 

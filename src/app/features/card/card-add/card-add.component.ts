@@ -23,12 +23,17 @@ export class CardAddComponent implements OnDestroy {
     private toastService: ToastService)
   {
     this.model = {
-      name: ''
+      name: '',
+      nextClosingDate: null,
+      nextDueDate: null
     };
   }
 
 
   onFormSubmit() {
+    this.model.nextClosingDate = this.model.nextClosingDate || null;
+    this.model.nextDueDate = this.model.nextDueDate || null;
+
     this.addCardSubscription = this.cardService.addCard(this.model)
       .subscribe({
         next: (response) => {
