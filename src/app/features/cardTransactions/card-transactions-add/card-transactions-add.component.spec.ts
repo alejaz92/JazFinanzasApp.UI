@@ -57,5 +57,21 @@ describe('CardTransactionsAddComponent', () => {
       component.assignFirstInstallment();
       expect(component.cardTransactionForm.controls['firstInstallmentDate'].value).toBe('2026-09');
     });
+
+    it('should recalculate correctly when the date is set BEFORE selecting the card (order-independent)', () => {
+      component.cardTransactionForm.controls['date'].setValue('2026-07-26');
+      component.assignFirstInstallment(); // dispara con (change) del input de fecha, sin tarjeta aun -> fallback (sin tarjeta seleccionada, cards.find no encuentra nada)
+
+      component.cardTransactionForm.controls['card'].setValue('1');
+      component.assignFirstInstallment(); // dispara con (change) del select de tarjeta
+
+      expect(component.cardTransactionForm.controls['firstInstallmentDate'].value).toBe('2026-08');
+    });
+
+    it('should do nothing when the card changes before any date is set', () => {
+      component.cardTransactionForm.controls['card'].setValue('1');
+      component.assignFirstInstallment();
+      expect(component.cardTransactionForm.controls['firstInstallmentDate'].value).toBe('');
+    });
   });
 });
