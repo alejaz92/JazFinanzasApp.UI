@@ -291,11 +291,20 @@ export class CardTransactionsAddComponent implements OnInit {
   assignFirstInstallment() {
 
     const date = new Date(this.cardTransactionForm.controls['date'].value);
-    const lastThursday = this.getLastThursday(date.getFullYear(), date.getMonth());
+    const cardId = parseInt(this.cardTransactionForm.controls['card'].value);
+    const selectedCard = this.cards.find((c: any) => c.id === cardId);
 
+    // Si la tarjeta tiene cierre propio cargado (Fase 1-4), se usa ese dato; si no, fallback al último jueves del mes.
+    let closingReference: Date;
+    if (selectedCard?.nextClosingDate) {
+      const [closingYear, closingMonth, closingDay] = selectedCard.nextClosingDate.substring(0, 10).split('-').map(Number);
+      closingReference = new Date(closingYear, closingMonth - 1, closingDay);
+    } else {
+      closingReference = this.getLastThursday(date.getFullYear(), date.getMonth());
+    }
 
     // Comparación de fechas completa en lugar de solo días
-    if (date > lastThursday) {
+    if (date > closingReference) {
       const nextMonthDate = new Date(date.getFullYear(), date.getMonth() + 1);
       this.cardTransactionForm.controls['firstInstallmentDate'].setValue(this.formatDateToMonth(nextMonthDate));
     } else {
