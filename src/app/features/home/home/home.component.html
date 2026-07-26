@@ -8,6 +8,24 @@
             <p class="lead">Aquí hay un resumen de tu estado financiero.</p>
         </div>
     </div>
+    <!-- Avisos de cierre/vencimiento de tarjeta (Flujo 3) - solo alerta/vencido, nunca informativo -->
+    <div class="row mb-4" *ngIf="cardsWithDueAlert.length > 0">
+        <div class="col-12">
+            <div *ngFor="let card of cardsWithDueAlert"
+                 class="alert d-flex justify-content-between align-items-center mb-2"
+                 [ngClass]="{
+                     'alert-warning': card.dueStatus === 'alerta',
+                     'alert-danger': card.dueStatus === 'vencido'
+                 }">
+                <span [ngSwitch]="card.dueStatus">
+                    <i class="bi bi-credit-card me-2"></i><strong>{{ card.name }}</strong> —
+                    <span *ngSwitchCase="'alerta'">vence pronto, el {{ card.nextDueDate | date: 'dd/MM/yyyy' }}</span>
+                    <span *ngSwitchCase="'vencido'">vencida desde el {{ card.nextDueDate | date: 'dd/MM/yyyy' }}</span>
+                </span>
+                <a class="btn btn-sm btn-warning" [routerLink]="['/cardTransactions/pay']">Pagar</a>
+            </div>
+        </div>
+    </div>
     <!-- Eventos compartidos activos + total consolidado -->
     <div class="row mb-4" *ngIf="activeSummaries.length > 0 || consolidatedTotals.length > 0">
         <div class="col-12">

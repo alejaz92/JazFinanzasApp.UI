@@ -13,6 +13,25 @@
         <a class="btn btn-warning" [routerLink]="['/cardTransactions/pay']">Pago Tarjeta</a>
     </div>
 
+    <!-- avisos de cierre/vencimiento de tarjeta (Flujo 3) -->
+    <div *ngIf="cardsWithDueNotice.length > 0" class="mb-3">
+        <div *ngFor="let card of cardsWithDueNotice"
+             class="alert d-flex justify-content-between align-items-center mb-2"
+             [ngClass]="{
+                 'alert-info': card.dueStatus === 'informativo',
+                 'alert-warning': card.dueStatus === 'alerta',
+                 'alert-danger': card.dueStatus === 'vencido'
+             }">
+            <span [ngSwitch]="card.dueStatus">
+                <strong>{{ card.name }}</strong> —
+                <span *ngSwitchCase="'informativo'">vence el {{ card.nextDueDate | date: 'dd/MM/yyyy' }}</span>
+                <span *ngSwitchCase="'alerta'">vence pronto, el {{ card.nextDueDate | date: 'dd/MM/yyyy' }}</span>
+                <span *ngSwitchCase="'vencido'">vencida desde el {{ card.nextDueDate | date: 'dd/MM/yyyy' }}</span>
+            </span>
+            <a class="btn btn-sm btn-warning" [routerLink]="['/cardTransactions/pay']">Pagar</a>
+        </div>
+    </div>
+
     <!-- tabla de movimientos-->
     <ng-container *ngIf="cardTransactions && cardTransactions.length > 0; else emptyCardTx">
      <div class="table-responsive">

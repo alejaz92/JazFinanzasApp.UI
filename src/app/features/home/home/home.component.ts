@@ -13,8 +13,11 @@ import { AssetService } from '../../asset/services/asset.service';
 import { Asset } from '../../asset/models/asset.model';
 import { SharedEventService } from '../../shared-events/services/shared-event.service';
 import { SharedEventActiveSummary } from '../../shared-events/models/shared-event.model';
+import { CardService } from '../../card/services/card.service';
+import { Card } from '../../card/models/card.model';
+import { CardDueStatus, getCardDueStatus } from '../../card/utils/card-due-status.util';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
-import { NgIf, NgFor, NgClass, SlicePipe, DecimalPipe } from '@angular/common';
+import { NgIf, NgFor, NgClass, NgSwitch, NgSwitchCase, SlicePipe, DecimalPipe, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { ToastService } from '../../../core/services/toast.service';
@@ -25,13 +28,17 @@ interface ConsolidatedTotal {
   net: number;
 }
 
+interface CardWithDueStatus extends Card {
+  dueStatus: CardDueStatus;
+}
+
 Chart.register(...registerables);
 
 @Component({
     selector: 'app-home',
     templateUrl: './home.component.html',
     styleUrls: ['./home.component.css'],
-    imports: [LoadingComponent, NgIf, RouterLink, NgFor, NgClass, SlicePipe, DecimalPipe, CurrencyFiatFormatPipe]
+    imports: [LoadingComponent, NgIf, RouterLink, NgFor, NgClass, NgSwitch, NgSwitchCase, SlicePipe, DecimalPipe, DatePipe, CurrencyFiatFormatPipe]
 })
 export class HomeComponent implements OnInit, AfterViewInit {
   isLoading: boolean = true;
@@ -43,6 +50,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
   mainReference: Asset | null = null;
   activeSummaries: SharedEventActiveSummary[] = [];
   consolidatedTotals: ConsolidatedTotal[] = [];
+  cardsWithDueAlert: CardWithDueStatus[] = [];
 
   constructor(
     private transactionService: TransactionService,
@@ -51,6 +59,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
     private reportService: ReportService,
     private assetService: AssetService,
     private sharedEventService: SharedEventService,
+    private cardService: CardService,
     private toastService: ToastService
   ) {}
 
@@ -69,14 +78,18 @@ export class HomeComponent implements OnInit, AfterViewInit {
       cardTransactionsData: this.cardTransactioneService.getPendingCardTransactions(),
       homeStatsData: this.reportService.getHomeStats(),
       activeSummaryData: this.sharedEventService.getActiveSummary(),
-      consolidatedDebtsData: this.sharedEventService.getConsolidatedDebts()
+      consolidatedDebtsData: this.sharedEventService.getConsolidatedDebts(),
+      cardsData: this.cardService.getAllCards()
     }).subscribe({
-      next: ({ userData, transactionsData, cardTransactionsData, homeStatsData, activeSummaryData, consolidatedDebtsData }) => {
+      next: ({ userData, transactionsData, cardTransactionsData, homeStatsData, activeSummaryData, consolidatedDebtsData, cardsData }) => {
         this.userName = userData.name;
         this.transactions = transactionsData.transactions;
         this.cardTransactions = cardTransactionsData.reverse();
         this.activeSummaries = activeSummaryData;
         this.consolidatedTotals = this.computeConsolidatedTotals(consolidatedDebtsData);
+        this.cardsWithDueAlert = cardsData
+          .map(card => ({ ...card, dueStatus: getCardDueStatus(card) }))
+          .filter(card => card.dueStatus === 'alerta' || card.dueStatus === 'vencido');
         setTimeout(() => {
           this.loadMainReferences(homeStatsData);
 
