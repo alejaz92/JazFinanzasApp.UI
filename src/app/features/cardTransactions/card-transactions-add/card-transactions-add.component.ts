@@ -289,6 +289,9 @@ export class CardTransactionsAddComponent implements OnInit {
   }
 
   assignFirstInstallment() {
+    // Se dispara tanto al cambiar la fecha como al cambiar la tarjeta (el cálculo depende de
+    // ambas); si todavía no hay fecha cargada no hay nada que calcular.
+    if (!this.cardTransactionForm.controls['date'].value) return;
 
     const date = new Date(this.cardTransactionForm.controls['date'].value);
     const cardId = parseInt(this.cardTransactionForm.controls['card'].value);

@@ -44,7 +44,7 @@
         <div class="row mb-3">
             <div class="col-md-6">
                 <label for="card" class="form-label">Tarjeta</label>
-                <select id="card" formControlName="card" class="form-control">
+                <select id="card" formControlName="card" class="form-control" (change)="assignFirstInstallment()">
                     <option value="" disabled selected>Seleccione</option>
                     <option *ngFor="let card of cards" [value]="card.id">{{ card.name }}</option>
                 </select>
