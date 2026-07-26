@@ -15,10 +15,17 @@
                     </button>
                 </div>
                 <p *ngIf="event.notes" class="text-muted mb-0 mt-1">{{ event.notes }}</p>
+                <p *ngIf="event.tripName" class="text-muted mb-0 mt-1">
+                    <i class="bi-airplane me-1"></i>{{ event.tripName }}
+                </p>
             </div>
             <div *ngIf="editingHeader" class="mt-2">
                 <input type="text" class="form-control mb-2" [(ngModel)]="editName" name="editName" placeholder="Nombre">
                 <textarea class="form-control mb-2" [(ngModel)]="editNotes" name="editNotes" rows="2" placeholder="Notas"></textarea>
+                <select class="form-control mb-2" [(ngModel)]="editTripId" name="editTripId">
+                    <option value="">Ningún viaje</option>
+                    <option *ngFor="let trip of trips" [value]="trip.id">{{ trip.name }}</option>
+                </select>
                 <button class="btn btn-primary btn-sm me-2" (click)="onSaveHeader()">Guardar</button>
                 <button class="btn btn-outline-secondary btn-sm" (click)="onCancelEditHeader()">Cancelar</button>
             </div>

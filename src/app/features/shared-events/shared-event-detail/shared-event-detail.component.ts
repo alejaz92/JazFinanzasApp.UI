@@ -4,6 +4,8 @@ import { SharedEventService } from '../services/shared-event.service';
 import { SharedEventDetail, SharedEventMovement } from '../models/shared-event.model';
 import { PersonService } from '../../people/services/person.service';
 import { Person } from '../../people/models/person.model';
+import { TripService } from '../../trips/services/trip.service';
+import { Trip } from '../../trips/models/trip.model';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { NgIf, NgFor, DecimalPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -26,6 +28,8 @@ export class SharedEventDetailComponent implements OnInit {
   editingHeader: boolean = false;
   editName: string = '';
   editNotes: string = '';
+  editTripId: string = '';
+  trips: Trip[] = [];
 
   allPeople: Person[] = [];
   selectedNewParticipantId: string = '';
@@ -50,6 +54,7 @@ export class SharedEventDetailComponent implements OnInit {
     private router: Router,
     private sharedEventService: SharedEventService,
     private personService: PersonService,
+    private tripService: TripService,
     private toastService: ToastService
   ) { }
 
@@ -62,6 +67,9 @@ export class SharedEventDetailComponent implements OnInit {
     this.personService.getAllPeople().subscribe(data => {
       this.allPeople = data;
       this.updateAvailablePeopleToAdd();
+    });
+    this.tripService.getAllTrips().subscribe(data => {
+      this.trips = data;
     });
   }
 
@@ -94,11 +102,16 @@ export class SharedEventDetailComponent implements OnInit {
     if (!this.event) return;
     this.editName = this.event.name;
     this.editNotes = this.event.notes ?? '';
+    this.editTripId = this.event.tripId ? String(this.event.tripId) : '';
     this.editingHeader = true;
   }
 
   onSaveHeader(): void {
-    this.sharedEventService.update(this.id, { name: this.editName, notes: this.editNotes || undefined }).subscribe({
+    this.sharedEventService.update(this.id, {
+      name: this.editName,
+      notes: this.editNotes || undefined,
+      tripId: this.editTripId ? Number(this.editTripId) : undefined
+    }).subscribe({
       next: () => {
         this.toastService.success('Evento actualizado');
         this.editingHeader = false;

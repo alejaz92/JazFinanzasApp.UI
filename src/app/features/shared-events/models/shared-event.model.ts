@@ -7,6 +7,8 @@ export interface SharedEventListItem {
   id: number;
   name: string;
   isClosed: boolean;
+  tripId: number | null;
+  tripName: string | null;
   participantCount: number;
   movementCount: number;
 }
@@ -14,12 +16,14 @@ export interface SharedEventListItem {
 export interface SharedEventAddRequest {
   name: string;
   notes?: string;
+  tripId?: number | null;
   personIds: number[];
 }
 
 export interface SharedEventEditRequest {
   name: string;
   notes?: string;
+  tripId?: number | null;
 }
 
 export interface SharedEventParticipantAddRequest {
@@ -165,6 +169,8 @@ export interface SharedEventDetail {
   name: string;
   notes: string | null;
   isClosed: boolean;
+  tripId: number | null;
+  tripName: string | null;
   participants: SharedEventParticipant[];
   movements: SharedEventMovement[];
   balances: SharedEventBalance[];

@@ -3,6 +3,8 @@ import { Router, RouterLink } from '@angular/router';
 import { SharedEventService } from '../services/shared-event.service';
 import { PersonService } from '../../people/services/person.service';
 import { Person } from '../../people/models/person.model';
+import { TripService } from '../../trips/services/trip.service';
+import { Trip } from '../../trips/models/trip.model';
 import { FormsModule } from '@angular/forms';
 import { NgFor, NgIf } from '@angular/common';
 import { ToastService } from '../../../core/services/toast.service';
@@ -16,12 +18,15 @@ import { BackButtonComponent } from '../../../shared/components/back-button/back
 export class SharedEventAddComponent implements OnInit {
   name: string = '';
   notes: string = '';
+  tripId: string = '';
   people: Person[] = [];
+  trips: Trip[] = [];
   selectedPersonIds = new Set<number>();
 
   constructor(
     private sharedEventService: SharedEventService,
     private personService: PersonService,
+    private tripService: TripService,
     private router: Router,
     private toastService: ToastService
   ) { }
@@ -29,6 +34,9 @@ export class SharedEventAddComponent implements OnInit {
   ngOnInit(): void {
     this.personService.getAllPeople().subscribe((data) => {
       this.people = data;
+    });
+    this.tripService.getAllTrips().subscribe((data) => {
+      this.trips = data;
     });
   }
 
@@ -48,6 +56,7 @@ export class SharedEventAddComponent implements OnInit {
     this.sharedEventService.create({
       name: this.name,
       notes: this.notes || undefined,
+      tripId: this.tripId ? Number(this.tripId) : undefined,
       personIds: Array.from(this.selectedPersonIds)
     }).subscribe({
       next: (created) => {
