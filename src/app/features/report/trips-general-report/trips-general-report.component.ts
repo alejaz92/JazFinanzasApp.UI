@@ -71,6 +71,10 @@ export class TripsGeneralReportComponent implements OnInit {
         return this.filteredTrips.reduce((sum, t) => sum + t.totalInReference, 0);
     }
 
+    get netAmount(): number {
+        return this.filteredTrips.reduce((sum, t) => sum + t.netAmount, 0);
+    }
+
     statusLabel(status: TripStatus): string {
         return STATUS_LABELS[status];
     }

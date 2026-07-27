@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TripDetail } from '../models/trip-detail.model';
 import { TripMovement, TripMovementRef } from '../models/trip-movement.model';
 import { TripStatus, TripType } from '../models/trip.model';
@@ -31,7 +31,7 @@ const TYPE_LABELS: Record<TripType, string> = {
 @Component({
     selector: 'app-trip-detail',
     templateUrl: './trip-detail.component.html',
-    imports: [LoadingComponent, NgIf, NgFor, NgClass, DatePipe, FormsModule, BackButtonComponent, CurrencyFiatFormatPipe]
+    imports: [LoadingComponent, NgIf, NgFor, NgClass, DatePipe, FormsModule, RouterLink, BackButtonComponent, CurrencyFiatFormatPipe]
 })
 export class TripDetailComponent implements OnInit {
   isLoading: boolean = true;
