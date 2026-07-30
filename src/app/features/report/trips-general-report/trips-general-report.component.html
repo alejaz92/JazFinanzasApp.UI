@@ -4,7 +4,7 @@
     <h2 class="mb-3">Viajes — Vista General</h2>
 
     <div class="row">
-        <div class="col-md-4 mt-1">
+        <div class="col-md-6 mt-1">
             <div class="card">
                 <div class="card-header">Total Gastado (En {{ mainReference?.symbol }})</div>
                 <div class="card-body">
@@ -12,15 +12,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mt-1">
-            <div class="card">
-                <div class="card-header">Neto según Eventos (En {{ mainReference?.symbol }})</div>
-                <div class="card-body">
-                    <h4 class="card-title mb-0">{{ netAmount | currencyFiatFormat }}</h4>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4 mt-1">
+        <div class="col-md-6 mt-1">
             <label for="typeFilter">Tipo</label>
             <select id="typeFilter" class="form-select" [(ngModel)]="typeFilter" (change)="onFilterChange()">
                 <option value="ALL">Todos</option>
@@ -58,7 +50,6 @@
                                         <th>Fechas</th>
                                         <th>Estado</th>
                                         <th class="text-end">Total</th>
-                                        <th class="text-end">Neto según Eventos</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -68,7 +59,6 @@
                                         <td>{{ trip.startDate | date:'dd/MM/yyyy' }} - {{ trip.endDate | date:'dd/MM/yyyy' }}</td>
                                         <td>{{ statusLabel(trip.status) }}</td>
                                         <td class="text-end">{{ trip.totalInReference | currencyFiatFormat }}</td>
-                                        <td class="text-end">{{ trip.netAmount | currencyFiatFormat }}</td>
                                     </tr>
                                 </tbody>
                             </table>

@@ -8,7 +8,6 @@ export interface TripGeneralStats {
     endDate: string;
     status: TripStatus;
     totalInReference: number;
-    netAmount: number;
 }
 
 export interface TripClassBreakdown {
@@ -27,6 +26,5 @@ export interface TripDetailStats {
     name: string;
     total: number;
     breakdown: TripClassBreakdown[];
-    netAmount: number;
     netBreakdown: TripEventNet[];
 }
