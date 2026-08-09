@@ -10,6 +10,8 @@ import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../core/services/toast.service';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
+import { AssetService } from '../../asset/services/asset.service';
+import { Asset } from '../../asset/models/asset.model';
 
 const STATUS_LABELS: Record<TripStatus, string> = {
   PLANNED: 'Planificado',
@@ -37,6 +39,7 @@ export class TripDetailComponent implements OnInit {
   isLoading: boolean = true;
   id: number = 0;
   trip?: TripDetail;
+  mainReference: Asset | null = null;
 
   suggestions: TripMovement[] = [];
   suggestionsLoading: boolean = true;
@@ -51,7 +54,8 @@ export class TripDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private tripService: TripService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private assetService: AssetService
   ) { }
 
   ngOnInit(): void {
@@ -61,6 +65,13 @@ export class TripDetailComponent implements OnInit {
 
     this.loadTrip();
     this.loadSuggestions();
+    this.loadMainReference();
+  }
+
+  private loadMainReference(): void {
+    this.assetService.getReferenceAssets().subscribe((data: Asset[]) => {
+      this.mainReference = data.find(x => x.isMainReference) ?? null;
+    });
   }
 
   private loadTrip(): void {

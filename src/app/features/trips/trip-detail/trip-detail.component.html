@@ -15,6 +15,26 @@
             <app-back-button [defaultUrl]="['/management/trips']"></app-back-button>
         </div>
 
+        <!-- Las dos lecturas del viaje: lo que costó (sigue la lista de abajo) y lo que se gastó en total -->
+        <div class="row mb-3">
+            <div class="col-md-6 mt-1">
+                <div class="card">
+                    <div class="card-header">Te costó (En {{ mainReference?.symbol }})</div>
+                    <div class="card-body">
+                        <h4 class="card-title mb-0">{{ trip.ownTotal | currencyFiatFormat }}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mt-1">
+                <div class="card">
+                    <div class="card-header">Se gastó en total (En {{ mainReference?.symbol }})</div>
+                    <div class="card-body">
+                        <h4 class="card-title mb-0 text-muted">{{ trip.grossTotal | currencyFiatFormat }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Eventos vinculados -->
         <h5 class="mt-4">Eventos vinculados</h5>
         <div class="table-responsive" *ngIf="trip.linkedEvents.length > 0; else noLinkedEvents">
