@@ -76,7 +76,19 @@
                         <td class="align-middle">{{ movement.transactionClass }}</td>
                         <td class="align-middle">{{ movement.detail }}</td>
                         <td class="align-middle">{{ movement.assetSymbol }}</td>
-                        <td class="align-middle text-end">{{ movement.amount | currencyFiatFormat }}</td>
+                        <td class="align-middle text-end">
+                            <ng-container *ngIf="movement.isShared; else plainAmount">
+                                <div>{{ movement.ownAmount! | currencyFiatFormat }}</div>
+                                <div class="small text-muted">de {{ (movement.grossAmount ?? movement.amount) | currencyFiatFormat }}<ng-container
+                                        *ngIf="movement.paidByName">, pagó {{ movement.paidByName }}</ng-container><ng-container
+                                        *ngIf="!movement.paidByName && movement.sharedWith?.length"> compartido con
+                                        <span *ngFor="let name of movement.sharedWith; let last = last">{{ name }}{{ last ? '' : ', ' }}</span></ng-container>
+                                    <a *ngIf="movement.sharedEventId" [routerLink]="['/shared-events', movement.sharedEventId]"
+                                       class="ms-1" title="Ver evento">→</a>
+                                </div>
+                            </ng-container>
+                            <ng-template #plainAmount>{{ movement.amount | currencyFiatFormat }}</ng-template>
+                        </td>
                         <td class="align-middle">
                             <button class="btn btn-sm btn-outline-danger" [disabled]="isBusy(movement)"
                                     (click)="onDisassociate(movement)">
