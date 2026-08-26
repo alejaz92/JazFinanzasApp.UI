@@ -9,6 +9,7 @@ import { AssetService } from 'src/app/features/asset/services/asset.service';
 import { TmplAstVariable } from '@angular/compiler';
 import { SharedExpenseService } from 'src/app/features/shared-expenses/services/shared-expense.service';
 import { CardTransactionDiscountService } from 'src/app/features/card-transaction-discount/services/card-transaction-discount.service';
+import { CardPendingCredit } from 'src/app/features/card-transaction-discount/models/card-transaction-discount.model';
 import { catchError, merge, of, switchMap } from 'rxjs';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { NgIf, NgFor, DatePipe } from '@angular/common';
@@ -35,6 +36,7 @@ export class CardTransactionsPayComponent implements OnInit {
   tableLength: number = 0;
   originalTableLength: number = 0;
   reimbursementsPreview: number = 0;
+  cardPendingCredit: CardPendingCredit | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -66,6 +68,7 @@ export class CardTransactionsPayComponent implements OnInit {
       paymentAssets: ['', Validators.required],
       pesosPayment: ['', Validators.required],
       cardExpenses: [''],
+      cardCreditApplied: [0],
       nextClosingDate: [''],
       nextDueDate: [''],
       cardTransactionsArray: this.fb.array([])
@@ -114,6 +117,23 @@ export class CardTransactionsPayComponent implements OnInit {
       this.selectedPaymentAssets = value;
       this.updateEditOptions();
     });
+    // El saldo a favor es de la tarjeta, no del mes: se recarga solo al cambiar de tarjeta.
+    this.cardPaymentForm.get('card')!.valueChanges.subscribe((cardId) => {
+      this.cardPendingCredit = null;
+      this.cardPaymentForm.get('cardCreditApplied')?.setValue(0, { emitEvent: false });
+      if (!cardId) return;
+
+      this.cardTransactionDiscountService.getPendingCredit(cardId).subscribe({
+        next: (credit) => {
+          this.cardPendingCredit = credit;
+          // Se propone aplicar todo lo disponible; el usuario lo corrige contra el resumen.
+          this.cardPaymentForm.get('cardCreditApplied')?.setValue(credit.totalPending);
+        },
+        error: () => { this.cardPendingCredit = null; }
+      });
+    });
+
+    this.cardPaymentForm.get('cardCreditApplied')?.valueChanges.subscribe(() => this.updateCardExpenses());
     this.cardPaymentForm.get('pesosPayment')?.valueChanges.subscribe(() => this.updateCardExpenses());
     this.cardPaymentForm.get('cardTransactionsArray')?.valueChanges.subscribe(() => this.updateCardExpenses());    
   }
@@ -178,9 +198,18 @@ export class CardTransactionsPayComponent implements OnInit {
       });
   }
 
+  get cardCreditApplied(): number {
+    const value = parseFloat(this.cardPaymentForm.get('cardCreditApplied')?.value);
+    return isNaN(value) ? 0 : value;
+  }
+
+  get cardCreditAvailable(): number {
+    return this.cardPendingCredit?.totalPending ?? 0;
+  }
+
   get netPesosAfterReimbursement(): number {
     const totals = this.getTotalValues();
-    return Math.round((totals.totalPesos - this.reimbursementsPreview) * 100) / 100;
+    return Math.round((totals.totalPesos - this.reimbursementsPreview - this.cardCreditApplied) * 100) / 100;
   }
 
   populateCardTransactionsArray(cardTransactions: CardTransactionPaymentList[]) {
@@ -263,7 +292,7 @@ refreshCurrencyFormat() {
     const pesosPayment = this.cardPaymentForm.get('pesosPayment')?.value;
     const paymentAssets = this.selectedPaymentAssets;
 
-    if (pesosPayment != '' && paymentAssets != null) {
+    if (pesosPayment !== '' && pesosPayment !== null && paymentAssets != null) {
       
       const cardTransactionsArray = this.cardTransactionsArray;
 
@@ -294,12 +323,17 @@ refreshCurrencyFormat() {
         }
       });
 
-      if(total > pesosPayment){
+      // El banco descuenta el saldo a favor del total del resumen, asi que lo que pagaste puede ser
+      // menor que la suma de las cuotas. Sin contemplarlo, este calculo tiraba "Datos Incorrectos"
+      // siempre que hubiera credito aplicado.
+      const creditApplied = this.cardCreditApplied;
+
+      if(total > pesosPayment + creditApplied){
         this.cardPaymentForm.get('cardExpenses')?.setValue('Datos Incorrectos');
         return;
       }
 
-      var cardExpenses = pesosPayment - total;
+      var cardExpenses = pesosPayment + creditApplied - total;
       
       cardExpenses = Math.round(cardExpenses * 100) / 100;
 
@@ -444,7 +478,10 @@ refreshCurrencyFormat() {
       return;
     }
 
-    if (formValues.pesosPayment === '' || isNaN(formValues.pesosPayment) || formValues.pesosPayment <= 0) {
+    // Un pago de $0 es valido cuando el saldo a favor de la tarjeta cubrio el resumen entero.
+    const minimoPago = this.cardCreditApplied > 0 ? 0 : 0.01;
+    if (formValues.pesosPayment === '' || formValues.pesosPayment === null
+        || isNaN(formValues.pesosPayment) || formValues.pesosPayment < minimoPago) {
       this.cardPaymentForm.controls['pesosPayment'].setErrors({ 'incorrect': true });
       return;
     }
@@ -454,6 +491,11 @@ refreshCurrencyFormat() {
       return;
     }
 
+
+    if (this.cardCreditApplied > this.cardCreditAvailable) {
+      this.toastService.error('El saldo a favor aplicado supera el disponible en la tarjeta.');
+      return;
+    }
 
     // check if there are any rows with missing values, except for the disabled inputs
     const incompleteRow = this.cardTransactionsArray.controls.find((control) => this.isRowIncomplete(control as FormGroup));
@@ -489,6 +531,7 @@ refreshCurrencyFormat() {
         pesosAmount: parseFloat(this.cardPaymentForm.get('pesosPayment')?.value),
         dolarAmount: 0,
         cardExpenses: parseFloat(this.cardPaymentForm.get('cardExpenses')?.value),
+        cardCreditApplied: this.cardCreditApplied,
         nextClosingDate: this.cardPaymentForm.get('nextClosingDate')?.value || null,
         nextDueDate: this.cardPaymentForm.get('nextDueDate')?.value || null,
         cardTransactions: cardTransactions
@@ -506,6 +549,7 @@ refreshCurrencyFormat() {
              this.cardPaymentForm.reset();
              this.cardTransactionsArray.clear();
              this.reimbursementsPreview = 0;
+             this.cardPendingCredit = null;
 
              this.toastService.success('Movimiento creado con éxito');
            },
