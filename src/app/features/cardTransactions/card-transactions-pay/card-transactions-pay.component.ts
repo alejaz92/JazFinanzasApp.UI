@@ -37,7 +37,7 @@ export class CardTransactionsPayComponent implements OnInit {
   originalTableLength: number = 0;
   reimbursementsPreview: number = 0;
   cardPendingCredit: CardPendingCredit | null = null;
-  creditManuallyEdited: boolean = false;
+  gastosAutoCalculados: boolean = true;
 
   constructor(
     private fb: FormBuilder,
@@ -127,7 +127,7 @@ export class CardTransactionsPayComponent implements OnInit {
       this.cardTransactionDiscountService.getPendingCredit(cardId).subscribe({
         next: (credit) => {
           this.cardPendingCredit = credit;
-          this.creditManuallyEdited = false;
+          this.gastosAutoCalculados = true;
           this.updateCardExpenses();
         },
         error: () => { this.cardPendingCredit = null; }
@@ -212,11 +212,6 @@ export class CardTransactionsPayComponent implements OnInit {
     return Math.round((this.cardCreditAvailable - this.cardCreditApplied) * 100) / 100;
   }
 
-  onCreditManuallyChanged(): void {
-    this.creditManuallyEdited = true;
-    this.updateCardExpenses();
-  }
-
   get netPesosAfterReimbursement(): number {
     const totals = this.getTotalValues();
     return Math.round((totals.totalPesos - this.reimbursementsPreview - this.cardCreditApplied) * 100) / 100;
@@ -298,12 +293,45 @@ refreshCurrencyFormat() {
   }, 0);
 }
 
+  // El control puede guardar el número ya formateado por appCurrencyInput ("22.777,48"), porque la
+  // directiva escribe sobre el DOM. Se interpreta con el mismo criterio que usa ella.
+  private parseAmount(value: any): number {
+    if (value === null || value === undefined || value === '') return 0;
+    if (typeof value === 'number') return value;
+
+    const texto = String(value);
+    let normalizado: string;
+    if (texto.includes('.') && texto.includes(',')) {
+      normalizado = texto.replace(/\./g, '').replace(',', '.');
+    } else if (texto.includes('.')) {
+      normalizado = texto.replace(/,/g, '');
+    } else {
+      normalizado = texto.replace(',', '.');
+    }
+
+    const numero = parseFloat(normalizado);
+    return isNaN(numero) ? 0 : numero;
+  }
+
+  // Con un pago de $0 ese número deja de traer información: el resumen pudo haber tenido impuestos
+  // que el saldo a favor también cubrió. Ahí los gastos pasan a completarse a mano y el crédito
+  // usado se deduce de ellos. En cualquier otro caso los gastos se siguen calculando solos.
+  get gastosEditables(): boolean {
+    return this.cardCreditAvailable > 0
+      && this.parseAmount(this.cardPaymentForm?.get('pesosPayment')?.value) === 0;
+  }
+
+  onGastosManuallyChanged(): void {
+    this.gastosAutoCalculados = false;
+    this.updateCardExpenses();
+  }
+
   updateCardExpenses() {
-    const pesosPayment = this.cardPaymentForm.get('pesosPayment')?.value;
+    const pesosPaymentRaw = this.cardPaymentForm.get('pesosPayment')?.value;
     const paymentAssets = this.selectedPaymentAssets;
 
-    if (pesosPayment !== '' && pesosPayment !== null && paymentAssets != null) {
-      
+    if (pesosPaymentRaw !== '' && pesosPaymentRaw !== null && paymentAssets != null) {
+
       const cardTransactionsArray = this.cardTransactionsArray;
 
       //recorrer cardTransactionsArray y sumar installmentamount
@@ -324,41 +352,53 @@ refreshCurrencyFormat() {
           if (paymentAssets === 'Pesos') {
             total += parseFloat(control.get('valueInPesos')?.value);
           } else if (paymentAssets === 'Pesos+Dolar') {
-            
+
             if(control.get('asset')?.value === 'Peso Argentino' || control.get('assetId')?.value === 1){
-             
+
               total += parseFloat(control.get('installmentAmount')?.value);
             }
           }
         }
       });
 
-      // El banco aplica el saldo a favor solo, contra el total del resumen, y lo que sobra queda
-      // para el mes siguiente. No es una decision del usuario, asi que se deduce en vez de pedirse:
-      //   - Si pago $0, el credito cubrio el resumen entero -> se uso lo que suman las cuotas.
-      //   - Si pago algo, el credito se agoto (si no, habria pagado menos) -> se uso todo el disponible.
-      // Queda editable solo por el unico caso que la formula no puede separar: un resumen con credito
-      // y gastos a la vez pagando $0.
-      if (!this.creditManuallyEdited) {
-        const disponible = this.cardCreditAvailable;
-        const auto = pesosPayment > 0 ? disponible : Math.min(disponible, total);
-        this.cardPaymentForm.get('cardCreditApplied')?.setValue(Math.round(auto * 100) / 100, { emitEvent: false });
-      }
+      const pago = this.parseAmount(pesosPaymentRaw);
+      const disponible = this.cardCreditAvailable;
+      const creditControl = this.cardPaymentForm.get('cardCreditApplied');
+      const gastosControl = this.cardPaymentForm.get('cardExpenses');
 
-      const creditApplied = this.cardCreditApplied;
+      // El banco aplica el saldo a favor solo, contra el total del resumen, y lo que sobra queda para
+      // el mes siguiente. No es una decisión del usuario, así que se deduce en vez de pedirse.
+      if (this.gastosEditables) {
+        // Pago $0: el crédito cubrió cuotas + impuestos. Los impuestos los pone el usuario.
+        if (this.gastosAutoCalculados) {
+          gastosControl?.setValue(0, { emitEvent: false });
+        }
 
-      if(total > pesosPayment + creditApplied){
-        this.cardPaymentForm.get('cardExpenses')?.setValue('Datos Incorrectos');
+        const gastos = this.parseAmount(gastosControl?.value);
+        const credito = Math.round((total + gastos) * 100) / 100;
+        creditControl?.setValue(credito, { emitEvent: false });
         return;
       }
 
-      var cardExpenses = pesosPayment + creditApplied - total;
-      
+      // Pago > $0: si hubiera quedado saldo a favor, el banco lo habría aplicado y habrías pagado
+      // menos. Así que se usó todo el disponible, y la diferencia son los gastos e impuestos.
+      const credito = disponible;
+      creditControl?.setValue(credito, { emitEvent: false });
+
+      if(total > pago + credito){
+        this.gastosAutoCalculados = true;
+        gastosControl?.setValue('Datos Incorrectos', { emitEvent: false });
+        return;
+      }
+
+      var cardExpenses = pago + credito - total;
+
       cardExpenses = Math.round(cardExpenses * 100) / 100;
 
-      this.cardPaymentForm.get('cardExpenses')?.setValue(cardExpenses);
-      
-    }   
+      this.gastosAutoCalculados = true;
+      gastosControl?.setValue(cardExpenses, { emitEvent: false });
+
+    }
   }
 
   addManualEntry() {
@@ -498,14 +538,20 @@ refreshCurrencyFormat() {
     }
 
     // Un pago de $0 es valido cuando el saldo a favor de la tarjeta cubrio el resumen entero.
+    // Un pago de $0 es válido cuando el saldo a favor de la tarjeta cubrió el resumen entero.
     const minimoPago = this.cardCreditApplied > 0 ? 0 : 0.01;
     if (formValues.pesosPayment === '' || formValues.pesosPayment === null
-        || isNaN(formValues.pesosPayment) || formValues.pesosPayment < minimoPago) {
+        || this.parseAmount(formValues.pesosPayment) < minimoPago) {
       this.cardPaymentForm.controls['pesosPayment'].setErrors({ 'incorrect': true });
       return;
     }
 
-    if (formValues.cardExpenses === '' || isNaN(formValues.cardExpenses) || formValues.cardExpenses < 0) {
+    // 'Datos Incorrectos' es el centinela que pone updateCardExpenses cuando los números no cierran.
+    const gastosCrudos = formValues.cardExpenses;
+    const gastosInvalidos = gastosCrudos === '' || gastosCrudos === null
+      || String(gastosCrudos) === 'Datos Incorrectos'
+      || this.parseAmount(gastosCrudos) < 0;
+    if (gastosInvalidos) {
       this.cardPaymentForm.controls['cardExpenses'].setErrors({ 'incorrect': true });
       return;
     }
@@ -547,9 +593,9 @@ refreshCurrencyFormat() {
         paymentDate: this.cardPaymentForm.get('date')?.value,
         accountId: parseInt(this.cardPaymentForm.get('account')?.value),
         paymentAsset: this.cardPaymentForm.get('paymentAssets')?.value,
-        pesosAmount: parseFloat(this.cardPaymentForm.get('pesosPayment')?.value),
+        pesosAmount: this.parseAmount(this.cardPaymentForm.get('pesosPayment')?.value),
         dolarAmount: 0,
-        cardExpenses: parseFloat(this.cardPaymentForm.get('cardExpenses')?.value),
+        cardExpenses: this.parseAmount(this.cardPaymentForm.get('cardExpenses')?.value),
         cardCreditApplied: this.cardCreditApplied,
         nextClosingDate: this.cardPaymentForm.get('nextClosingDate')?.value || null,
         nextDueDate: this.cardPaymentForm.get('nextDueDate')?.value || null,

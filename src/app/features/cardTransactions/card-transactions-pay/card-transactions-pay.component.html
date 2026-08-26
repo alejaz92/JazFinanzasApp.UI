@@ -95,8 +95,7 @@
                                 <div class="input-group">
                                     <span class="input-group-text">$</span>
                                     <input type="number" class="form-control" id="cardCreditApplied"
-                                           formControlName="cardCreditApplied" min="0" step="0.01"
-                                           (input)="onCreditManuallyChanged()">
+                                           formControlName="cardCreditApplied" readonly>
                                 </div>
                                 <small class="text-muted d-block">
                                     Se calcula solo: el banco aplica el saldo a favor contra el resumen y lo que sobra queda para el mes siguiente.
@@ -111,7 +110,12 @@
                             </div>
                             <div class="form-group mb-3">
                                 <label for="cardExpenses">Gastos Tarjeta</label>
-                                <input type="text" class="form-control" id="cardExpenses" formControlName="cardExpenses" readonly appCurrencyInput>
+                                <input type="text" class="form-control" id="cardExpenses" formControlName="cardExpenses"
+                                       [readonly]="!gastosEditables" (input)="onGastosManuallyChanged()" appCurrencyInput>
+                                <small class="text-muted d-block" *ngIf="gastosEditables">
+                                    Como pagaste $0, el saldo a favor cubrió también los impuestos del resumen y no se pueden
+                                    deducir. Poné acá los impuestos y sellados (0 si no hubo).
+                                </small>
                                 <div *ngIf="cardPaymentForm.controls['cardExpenses'].errors?.['incorrect'] "
                                     class="text-danger mt-2">
                                     Revise los valores ingresados.
