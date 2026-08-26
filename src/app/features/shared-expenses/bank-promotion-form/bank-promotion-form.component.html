@@ -1,5 +1,25 @@
 <div class="bank-promotion-form">
   <div class="row mb-2">
+    <div class="col-12">
+      <label class="form-label">¿Dónde acreditó el banco el reintegro?</label>
+      <div class="d-flex gap-3 flex-wrap">
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="bankPromotionCreditTarget"
+                 id="creditTargetAccount" value="ACCOUNT"
+                 [(ngModel)]="creditTarget" (ngModelChange)="onCreditTargetChange()">
+          <label class="form-check-label" for="creditTargetAccount">En una cuenta</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="bankPromotionCreditTarget"
+                 id="creditTargetCard" value="CARD"
+                 [(ngModel)]="creditTarget" (ngModelChange)="onCreditTargetChange()">
+          <label class="form-check-label" for="creditTargetCard">Sobre el saldo de la tarjeta</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-2">
     <div class="col-md-6">
       <label class="form-label">Monto devuelto por el banco</label>
       <div class="input-group input-group-sm">
@@ -15,7 +35,8 @@
              [(ngModel)]="date" (ngModelChange)="onChange()">
     </div>
   </div>
-  <div class="row mb-2">
+
+  <div class="row mb-2" *ngIf="acreditaEnCuenta">
     <div class="col-md-6">
       <label class="form-label">Cuenta donde se acreditó</label>
       <select class="form-select form-select-sm" name="bankPromotionAccount"
@@ -25,8 +46,13 @@
       </select>
     </div>
   </div>
-  <small class="text-muted">
-    El banco acreditó este monto al momento de la compra; se descontará de las próximas cuotas hasta agotarse.
+
+  <small class="text-muted" *ngIf="acreditaEnCuenta">
+    El banco acreditó este monto en la cuenta al momento de la compra; se descontará de las próximas cuotas hasta agotarse.
+  </small>
+  <small class="text-muted" *ngIf="!acreditaEnCuenta">
+    El monto queda como saldo a favor de la tarjeta. No se registra ningún movimiento todavía: se va a descontar
+    cuando el resumen lo absorba, o cuando pases esa plata a una cuenta.
   </small>
 
   <div class="mt-3 mb-0">

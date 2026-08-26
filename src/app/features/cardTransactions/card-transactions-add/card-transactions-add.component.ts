@@ -244,6 +244,7 @@ export class CardTransactionsAddComponent implements OnInit {
           this.cardTransactionDiscountService.create({
             cardTransactionId: response.id,
             amount: bankPromotionData.amount,
+            creditTarget: bankPromotionData.creditTarget,
             accountId: bankPromotionData.accountId,
             date: bankPromotionData.date,
             notes: bankPromotionData.notes
