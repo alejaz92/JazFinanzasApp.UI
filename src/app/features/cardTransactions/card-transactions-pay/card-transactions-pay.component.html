@@ -91,15 +91,19 @@
                                 </div>
                             </div>
                             <div class="form-group mb-3" *ngIf="cardCreditAvailable > 0">
-                                <label for="cardCreditApplied">Saldo a favor aplicado por el banco</label>
+                                <label for="cardCreditApplied">Saldo a favor usado en este resumen</label>
                                 <div class="input-group">
                                     <span class="input-group-text">$</span>
                                     <input type="number" class="form-control" id="cardCreditApplied"
-                                           formControlName="cardCreditApplied" min="0" step="0.01">
+                                           formControlName="cardCreditApplied" min="0" step="0.01"
+                                           (input)="onCreditManuallyChanged()">
                                 </div>
-                                <small class="text-muted">
-                                    Esta tarjeta tiene <strong>{{ cardCreditAvailable | currencyFiatFormat }}</strong> de saldo a favor.
-                                    Está propuesto aplicarlo todo: corregilo si el resumen dice otra cosa.
+                                <small class="text-muted d-block">
+                                    Se calcula solo: el banco aplica el saldo a favor contra el resumen y lo que sobra queda para el mes siguiente.
+                                </small>
+                                <small class="text-muted d-block">
+                                    La tarjeta tiene <strong>{{ cardCreditAvailable | currencyFiatFormat }}</strong>;
+                                    después de este pago le quedan <strong>{{ cardCreditRemaining | currencyFiatFormat }}</strong>.
                                 </small>
                                 <div *ngIf="cardCreditApplied > cardCreditAvailable" class="text-danger mt-2">
                                     Supera el saldo a favor disponible en la tarjeta.
@@ -141,8 +145,9 @@
                                 Hay <strong>{{ reimbursementsPreview | currencyFiatFormat }}</strong> en reintegros aplicables a estos gastos.
                             </div>
                             <div *ngIf="cardCreditApplied > 0">
-                                El banco aplicó <strong>{{ cardCreditApplied | currencyFiatFormat }}</strong> de saldo a favor de la tarjeta.
-                                Se registra como ingreso en la cuenta con la que pagás y se descuenta de las cuotas de la compra que lo generó.
+                                Se usaron <strong>{{ cardCreditApplied | currencyFiatFormat }}</strong> del saldo a favor de la tarjeta.
+                                Se registran como ingreso en la cuenta con la que pagás y se descuentan de las cuotas de la compra que lo generó.
+                                Quedan <strong>{{ cardCreditRemaining | currencyFiatFormat }}</strong> en la tarjeta.
                             </div>
                             <div *ngIf="selectedPaymentAssets">
                                 Tu egreso neto será aproximadamente <strong>{{ netPesosAfterReimbursement | currencyFiatFormat }}</strong>.

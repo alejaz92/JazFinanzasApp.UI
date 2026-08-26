@@ -37,6 +37,7 @@ export class CardTransactionsPayComponent implements OnInit {
   originalTableLength: number = 0;
   reimbursementsPreview: number = 0;
   cardPendingCredit: CardPendingCredit | null = null;
+  creditManuallyEdited: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -126,8 +127,8 @@ export class CardTransactionsPayComponent implements OnInit {
       this.cardTransactionDiscountService.getPendingCredit(cardId).subscribe({
         next: (credit) => {
           this.cardPendingCredit = credit;
-          // Se propone aplicar todo lo disponible; el usuario lo corrige contra el resumen.
-          this.cardPaymentForm.get('cardCreditApplied')?.setValue(credit.totalPending);
+          this.creditManuallyEdited = false;
+          this.updateCardExpenses();
         },
         error: () => { this.cardPendingCredit = null; }
       });
@@ -205,6 +206,15 @@ export class CardTransactionsPayComponent implements OnInit {
 
   get cardCreditAvailable(): number {
     return this.cardPendingCredit?.totalPending ?? 0;
+  }
+
+  get cardCreditRemaining(): number {
+    return Math.round((this.cardCreditAvailable - this.cardCreditApplied) * 100) / 100;
+  }
+
+  onCreditManuallyChanged(): void {
+    this.creditManuallyEdited = true;
+    this.updateCardExpenses();
   }
 
   get netPesosAfterReimbursement(): number {
@@ -323,9 +333,18 @@ refreshCurrencyFormat() {
         }
       });
 
-      // El banco descuenta el saldo a favor del total del resumen, asi que lo que pagaste puede ser
-      // menor que la suma de las cuotas. Sin contemplarlo, este calculo tiraba "Datos Incorrectos"
-      // siempre que hubiera credito aplicado.
+      // El banco aplica el saldo a favor solo, contra el total del resumen, y lo que sobra queda
+      // para el mes siguiente. No es una decision del usuario, asi que se deduce en vez de pedirse:
+      //   - Si pago $0, el credito cubrio el resumen entero -> se uso lo que suman las cuotas.
+      //   - Si pago algo, el credito se agoto (si no, habria pagado menos) -> se uso todo el disponible.
+      // Queda editable solo por el unico caso que la formula no puede separar: un resumen con credito
+      // y gastos a la vez pagando $0.
+      if (!this.creditManuallyEdited) {
+        const disponible = this.cardCreditAvailable;
+        const auto = pesosPayment > 0 ? disponible : Math.min(disponible, total);
+        this.cardPaymentForm.get('cardCreditApplied')?.setValue(Math.round(auto * 100) / 100, { emitEvent: false });
+      }
+
       const creditApplied = this.cardCreditApplied;
 
       if(total > pesosPayment + creditApplied){
