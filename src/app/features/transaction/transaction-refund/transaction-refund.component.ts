@@ -14,6 +14,7 @@ import { CurrencyInputDirective } from '../../../shared/directives/currency-inpu
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { ToastService } from '../../../core/services/toast.service';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
+import { SubmitButtonComponent } from '../../../shared/components/submit-button/submit-button.component';
 
 interface AllocationRow {
   splitId: number;
@@ -26,7 +27,7 @@ interface AllocationRow {
     selector: 'app-transaction-refund',
     templateUrl: './transaction-refund.component.html',
     styleUrls: ['./transaction-refund.component.css'],
-    imports: [LoadingComponent, NgIf, NgFor, FormsModule, ReactiveFormsModule, CurrencyInputDirective, NgClass, DecimalPipe, DatePipe, CurrencyFiatFormatPipe, BackButtonComponent]
+    imports: [LoadingComponent, NgIf, NgFor, FormsModule, ReactiveFormsModule, CurrencyInputDirective, NgClass, DecimalPipe, DatePipe, CurrencyFiatFormatPipe, BackButtonComponent, SubmitButtonComponent]
 })
 export class TransactionRefundComponent implements OnInit, OnDestroy {
   refundForm!: FormGroup;
@@ -37,6 +38,7 @@ export class TransactionRefundComponent implements OnInit, OnDestroy {
   transaction?: Transaction;
   accounts: any[] = [];
   isLoading: boolean = true;
+  isSubmitting: boolean = false;
 
   sharedExpense: SharedExpenseDetail | null = null;
   allocations: AllocationRow[] = [];
@@ -165,7 +167,7 @@ export class TransactionRefundComponent implements OnInit, OnDestroy {
   }
 
   onFormSubmit(): void {
-    if (this.refundForm.invalid) return;
+    if (this.refundForm.invalid || this.isSubmitting) return;
 
     const formValues = this.refundForm.value;
     let oldValue = this.transaction?.amount ?? 0;
@@ -196,14 +198,17 @@ export class TransactionRefundComponent implements OnInit, OnDestroy {
     };
 
     if (this.id && this.refund) {
+      this.isSubmitting = true;
       this.refundSubscription = this.transactionService
         .refundTransaction(Number(this.id), this.refund)
         .subscribe({
           next: () => {
+            this.isSubmitting = false;
             this.toastService.success('Reembolso realizado con éxito');
             this.router.navigate(['/transactions']);
           },
           error: () => {
+            this.isSubmitting = false;
             this.toastService.error('Error al realizar el reembolso');
           }
         });

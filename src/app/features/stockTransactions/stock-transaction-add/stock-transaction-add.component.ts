@@ -10,15 +10,17 @@ import { NgIf, NgFor } from '@angular/common';
 import { InvestmentInputDirective } from '../../../shared/directives/investment-input.directive';
 import { ToastService } from '../../../core/services/toast.service';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
+import { SubmitButtonComponent } from '../../../shared/components/submit-button/submit-button.component';
 
 @Component({
     selector: 'app-stock-transaction-add',
     templateUrl: './stock-transaction-add.component.html',
     styleUrls: ['./stock-transaction-add.component.css'],
-    imports: [NgIf, FormsModule, ReactiveFormsModule, NgFor, InvestmentInputDirective, BackButtonComponent]
+    imports: [NgIf, FormsModule, ReactiveFormsModule, NgFor, InvestmentInputDirective, BackButtonComponent, SubmitButtonComponent]
 })
 export class StockTransactionAddComponent implements OnInit{
   stockTransactionForm!: FormGroup;
+  isSubmitting = false;
   selectedMovementType: string = '';
   selectedCommerceType: string = '';
   selectedAssetType: string = '';
@@ -170,6 +172,8 @@ export class StockTransactionAddComponent implements OnInit{
   }
 
   onSubmit() {
+    if (this.isSubmitting) return;
+
     const formValues = this.stockTransactionForm.value;
     formValues.incomeAmount = parseFloat(formValues.incomeAmount);
     formValues.expenseAmount = parseFloat(formValues.expenseAmount);
@@ -304,12 +308,15 @@ export class StockTransactionAddComponent implements OnInit{
       environment: 'Stock'
     };
 
+    this.isSubmitting = true;
     this.stockTransactionService.createStockTransaction(stockTransactionAdd).subscribe({
       next: () => {
+        this.isSubmitting = false;
         this.toastService.success('Movimiento agregado correctamente');
         this.stockTransactionForm.reset();
       },
       error: () => {
+        this.isSubmitting = false;
         this.toastService.error('Error al agregar el movimiento');
       }
     });

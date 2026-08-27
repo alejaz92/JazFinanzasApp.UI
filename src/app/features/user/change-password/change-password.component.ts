@@ -6,11 +6,12 @@ import { Router } from '@angular/router';
 import { NgClass, NgIf } from '@angular/common';
 import { ToastService } from '../../../core/services/toast.service';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
+import { SubmitButtonComponent } from '../../../shared/components/submit-button/submit-button.component';
 
 @Component({
     selector: 'app-change-password',
     templateUrl: './change-password.component.html',
-    imports: [FormsModule, ReactiveFormsModule, NgClass, NgIf, BackButtonComponent]
+    imports: [FormsModule, ReactiveFormsModule, NgClass, NgIf, BackButtonComponent, SubmitButtonComponent]
 })
 export class ChangePasswordComponent implements OnInit {
   changePasswordForm!: FormGroup;
@@ -65,7 +66,7 @@ export class ChangePasswordComponent implements OnInit {
     this.submitted = true;
 
     // Detener si el formulario es inválido
-    if (this.changePasswordForm.invalid) {
+    if (this.changePasswordForm.invalid || this.loading) {
       return;
     }
 

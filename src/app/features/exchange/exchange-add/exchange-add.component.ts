@@ -7,12 +7,13 @@ import { NgIf, NgFor } from '@angular/common';
 import { CurrencyInputDirective } from '../../../shared/directives/currency-input.directive';
 import { ToastService } from '../../../core/services/toast.service';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
+import { SubmitButtonComponent } from '../../../shared/components/submit-button/submit-button.component';
 
 @Component({
     selector: 'app-exchange-add',
     templateUrl: './exchange-add.component.html',
     styleUrls: ['./exchange-add.component.css'],
-    imports: [NgIf, FormsModule, ReactiveFormsModule, NgFor, CurrencyInputDirective, BackButtonComponent]
+    imports: [NgIf, FormsModule, ReactiveFormsModule, NgFor, CurrencyInputDirective, BackButtonComponent, SubmitButtonComponent]
 })
 export class ExchangeAddComponent implements OnInit {
   transactionForm!: FormGroup;
@@ -20,6 +21,7 @@ export class ExchangeAddComponent implements OnInit {
   assets: any[] = [];
   formattedAmount: string = '';
   errorMessage: string = '';
+  isSubmitting = false;
 
 
   constructor(
@@ -58,6 +60,8 @@ export class ExchangeAddComponent implements OnInit {
   } 
 
   onSubmit() {
+    if (this.isSubmitting) return;
+
     const formValues = this.transactionForm.value;
     this.errorMessage = '';
 
@@ -108,12 +112,15 @@ export class ExchangeAddComponent implements OnInit {
       return;
     }
 
+    this.isSubmitting = true;
     this.transactionService.createTransaction(transactionAdd).subscribe({
       next: () => {
+        this.isSubmitting = false;
         this.transactionForm.reset();
         this.toastService.success('Intercambio creado con éxito');
       },
       error: () => {
+        this.isSubmitting = false;
         this.toastService.error('Error al crear el intercambio');
       }
     });

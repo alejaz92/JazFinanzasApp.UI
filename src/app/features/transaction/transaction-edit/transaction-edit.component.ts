@@ -18,15 +18,17 @@ import { SharedExpenseFormComponent } from '../../shared-expenses/shared-expense
 import { ToastService } from '../../../core/services/toast.service';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
+import { SubmitButtonComponent } from '../../../shared/components/submit-button/submit-button.component';
 
 @Component({
     selector: 'app-transaction-edit',
     templateUrl: './transaction-edit.component.html',
     styleUrls: ['./transaction-edit.component.css'],
-    imports: [LoadingComponent, NgIf, FormsModule, NgFor, CurrencyInputDirective, SharedExpenseFormComponent, DecimalPipe, DatePipe, BackButtonComponent, ConfirmModalComponent]
+    imports: [LoadingComponent, NgIf, FormsModule, NgFor, CurrencyInputDirective, SharedExpenseFormComponent, DecimalPipe, DatePipe, BackButtonComponent, ConfirmModalComponent, SubmitButtonComponent]
 })
 export class TransactionEditComponent implements OnInit, OnDestroy {
   transactionForm!: FormGroup;
+  isSubmitting: boolean = false;
   id: string | null = null;
   assets: any[] = [];
   accounts: any[] = [];
@@ -207,6 +209,8 @@ export class TransactionEditComponent implements OnInit, OnDestroy {
   }
 
   onFormSubmit(): void {
+    if (this.isSubmitting) return;
+
     const formValues = this.transaction;
 
     if (!formValues) return;
@@ -217,12 +221,15 @@ export class TransactionEditComponent implements OnInit, OnDestroy {
     }
 
     if (this.id && this.transaction) {
+      this.isSubmitting = true;
       this.editTransactionSubscription = this.transactionService.updateTransaction(Number(this.id), this.transaction).subscribe({
         next: () => {
+          this.isSubmitting = false;
           this.toastService.success('Movimiento actualizado correctamente');
           this.router.navigateByUrl('/transactions');
         },
         error: () => {
+          this.isSubmitting = false;
           this.toastService.error('Error al actualizar el movimiento');
         }
       });

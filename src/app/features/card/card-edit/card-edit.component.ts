@@ -9,15 +9,17 @@ import { NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../core/services/toast.service';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
+import { SubmitButtonComponent } from '../../../shared/components/submit-button/submit-button.component';
 
 @Component({
     selector: 'app-card-edit',
     templateUrl: './card-edit.component.html',
     styleUrls: ['./card-edit.component.css'],
-    imports: [LoadingComponent, NgIf, FormsModule, BackButtonComponent]
+    imports: [LoadingComponent, NgIf, FormsModule, BackButtonComponent, SubmitButtonComponent]
 })
 export class CardEditComponent implements OnInit, OnDestroy {
   isLoading: boolean = true;
+  isSubmitting: boolean = false;
   id: string | null = null;
   paramsSubcription?: Subscription;
   editCardSubscription?: Subscription;
@@ -52,6 +54,8 @@ export class CardEditComponent implements OnInit, OnDestroy {
   }
 
   onFormSubmit(): void {
+    if (this.isSubmitting) return;
+
     const cardUpdateRequest: CardUpdateRequest = {
       name: this.card?.name ?? '',
       nextClosingDate: this.card?.nextClosingDate || null,
@@ -60,12 +64,15 @@ export class CardEditComponent implements OnInit, OnDestroy {
 
 
     if (this.id) {
+      this.isSubmitting = true;
       this.editCardSubscription = this.cardService.updateCard(Number(this.id), cardUpdateRequest).subscribe({
         next: (response) => {
+          this.isSubmitting = false;
           this.toastService.success('Tarjeta actualizada correctamente');
           this.router.navigateByUrl('/management/card');
         },
         error: (error) => {
+          this.isSubmitting = false;
           this.toastService.error('Error al actualizar la tarjeta');
         }
       });

@@ -169,11 +169,13 @@
                     </ng-container>
 
                     <div class="text-end mt-3">
-                        <button type="submit"
-                                class="btn btn-primary"
-                                [disabled]="refundForm.invalid || (hasAnyAllocation && !allocationsValid)">
-                            Guardar
-                        </button>
+                        <app-submit-button
+                                [loading]="isSubmitting"
+                                [disabled]="refundForm.invalid || (hasAnyAllocation && !allocationsValid)"
+                                label="Guardar"
+                                loadingLabel="Guardando..."
+                                btnClass="btn btn-primary">
+                        </app-submit-button>
                     </div>
                 </form>
             </div>

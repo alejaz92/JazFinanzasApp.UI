@@ -20,15 +20,17 @@ import { BankPromotionFormComponent } from '../../shared-expenses/bank-promotion
 import { SharedExpenseFormComponent } from '../../shared-expenses/shared-expense-form/shared-expense-form.component';
 import { ToastService } from '../../../core/services/toast.service';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
+import { SubmitButtonComponent } from '../../../shared/components/submit-button/submit-button.component';
 
 @Component({
     selector: 'app-card-transactions-add',
     templateUrl: './card-transactions-add.component.html',
     styleUrls: ['./card-transactions-add.component.css'],
-    imports: [LoadingComponent, NgIf, FormsModule, ReactiveFormsModule, NgFor, CurrencyInputDirective, BankPromotionFormComponent, SharedExpenseFormComponent, BackButtonComponent, DecimalPipe]
+    imports: [LoadingComponent, NgIf, FormsModule, ReactiveFormsModule, NgFor, CurrencyInputDirective, BankPromotionFormComponent, SharedExpenseFormComponent, BackButtonComponent, DecimalPipe, SubmitButtonComponent]
 })
 export class CardTransactionsAddComponent implements OnInit {
   isLoading: boolean = true;
+  isSubmitting: boolean = false;
   cardTransactionForm!: FormGroup;
   selectedMovementType: string = '';
   assets: any[] = [];
@@ -144,6 +146,8 @@ export class CardTransactionsAddComponent implements OnInit {
   }
 
   onSubmit() {
+    if (this.isSubmitting) return;
+
     const formValues = this.cardTransactionForm.value;
 
     if (formValues.movementType === '') {
@@ -224,8 +228,10 @@ export class CardTransactionsAddComponent implements OnInit {
     const sharedExpenseNotes = this.sharedExpenseData?.notes ?? '';
     const bankPromotionData = this.bankPromotionData;
 
+    this.isSubmitting = true;
     this.cardTransactionService.addCardTransaction(cardTransactionAdd).subscribe({
       next: (response) => {
+        this.isSubmitting = false;
         // Gasto compartido con personas y promoción bancaria son recursos independientes:
         // cada uno se crea contra su propio endpoint y reporta su propio error sin bloquear al otro.
         if (createSharedExpense) {
@@ -268,6 +274,7 @@ export class CardTransactionsAddComponent implements OnInit {
         this.toastService.success('Gasto Tarjeta agregado correctamente');
       },
       error: (err) => {
+        this.isSubmitting = false;
         const msg = err?.error?.message || 'Error al guardar el gasto de tarjeta.';
         this.toastService.error(msg);
       }

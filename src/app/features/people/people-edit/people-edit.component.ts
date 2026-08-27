@@ -9,14 +9,16 @@ import { NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../core/services/toast.service';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
+import { SubmitButtonComponent } from '../../../shared/components/submit-button/submit-button.component';
 
 @Component({
     selector: 'app-people-edit',
     templateUrl: './people-edit.component.html',
-    imports: [LoadingComponent, NgIf, FormsModule, BackButtonComponent]
+    imports: [LoadingComponent, NgIf, FormsModule, BackButtonComponent, SubmitButtonComponent]
 })
 export class PeopleEditComponent implements OnInit, OnDestroy {
   isLoading: boolean = true;
+  isSubmitting: boolean = false;
   id: string | null = null;
   person?: Person;
   private paramsSubscription?: Subscription;
@@ -50,8 +52,9 @@ export class PeopleEditComponent implements OnInit, OnDestroy {
   }
 
   onFormSubmit(): void {
-    if (!this.id || !this.person) return;
+    if (!this.id || !this.person || this.isSubmitting) return;
 
+    this.isSubmitting = true;
     const request: PersonAddRequest = {
       name: this.person.name,
       alias: this.person.alias?.trim() || undefined
@@ -59,10 +62,12 @@ export class PeopleEditComponent implements OnInit, OnDestroy {
 
     this.editSubscription = this.personService.updatePerson(Number(this.id), request).subscribe({
       next: () => {
+        this.isSubmitting = false;
         this.toastService.success('Persona actualizada correctamente');
         this.router.navigate(['/management/people']);
       },
       error: () => {
+        this.isSubmitting = false;
         this.toastService.error('Error al actualizar la persona');
       }
     });

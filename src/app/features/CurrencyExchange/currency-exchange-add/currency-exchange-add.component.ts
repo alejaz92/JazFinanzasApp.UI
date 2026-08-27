@@ -7,12 +7,13 @@ import { NgIf, NgFor } from '@angular/common';
 import { CurrencyInputDirective } from '../../../shared/directives/currency-input.directive';
 import { ToastService } from '../../../core/services/toast.service';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
+import { SubmitButtonComponent } from '../../../shared/components/submit-button/submit-button.component';
 
 @Component({
     selector: 'app-currency-exchange-add',
     templateUrl: './currency-exchange-add.component.html',
     styleUrls: ['./currency-exchange-add.component.css'],
-    imports: [NgIf, FormsModule, ReactiveFormsModule, NgFor, CurrencyInputDirective, BackButtonComponent]
+    imports: [NgIf, FormsModule, ReactiveFormsModule, NgFor, CurrencyInputDirective, BackButtonComponent, SubmitButtonComponent]
 })
 export class CurrencyExchangeAddComponent implements OnInit {
   currencyExchangeForm!: FormGroup;
@@ -20,6 +21,7 @@ export class CurrencyExchangeAddComponent implements OnInit {
   assets: any[] = [];
   formattedAmount: string = '';
   errorMessage: string = '';
+  isSubmitting = false;
 
 
   constructor(
@@ -60,6 +62,8 @@ export class CurrencyExchangeAddComponent implements OnInit {
   }
 
   onSubmit() {
+    if (this.isSubmitting) return;
+
     const formValues = this.currencyExchangeForm.value;
     formValues.incomeAmount = parseFloat(formValues.incomeAmount);
     formValues.expenseAmount = parseFloat(formValues.expenseAmount);
@@ -126,13 +130,16 @@ export class CurrencyExchangeAddComponent implements OnInit {
       incomeAmount: formValues.incomeAmount
     }
 
+    this.isSubmitting = true;
     this.currencyExchangeService.createCurrencyExchange(currencyExchange)
       .subscribe({
         next: () => {
+          this.isSubmitting = false;
           this.toastService.success('Intercambio de moneda creado correctamente');
           this.currencyExchangeForm.reset();
         },
         error: () => {
+          this.isSubmitting = false;
           this.toastService.error('Error al crear el intercambio de moneda');
         }
       });

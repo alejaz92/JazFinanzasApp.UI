@@ -6,14 +6,16 @@ import { TripService } from '../services/trip.service';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../core/services/toast.service';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
+import { SubmitButtonComponent } from '../../../shared/components/submit-button/submit-button.component';
 
 @Component({
     selector: 'app-trip-add',
     templateUrl: './trip-add.component.html',
-    imports: [FormsModule, BackButtonComponent]
+    imports: [FormsModule, BackButtonComponent, SubmitButtonComponent]
 })
 export class TripAddComponent implements OnDestroy {
   model: TripRequest;
+  isSubmitting = false;
   private addSubscription?: Subscription;
 
   constructor(
@@ -25,12 +27,17 @@ export class TripAddComponent implements OnDestroy {
   }
 
   onFormSubmit(): void {
+    if (this.isSubmitting) return;
+    this.isSubmitting = true;
+
     this.addSubscription = this.tripService.addTrip(this.model).subscribe({
       next: () => {
+        this.isSubmitting = false;
         this.toastService.success('Viaje agregado correctamente');
         this.router.navigate(['/management/trips']);
       },
       error: (error) => {
+        this.isSubmitting = false;
         this.toastService.error(error.error?.message ?? 'Error al agregar el viaje');
       }
     });

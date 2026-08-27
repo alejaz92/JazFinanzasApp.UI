@@ -15,7 +15,7 @@
                 [(ngModel)]="model.alias">
         </div>
         <div class="text-end mt-4">
-            <button type="submit" class="btn btn-primary" [disabled]="!form.valid">Guardar</button>
+            <app-submit-button [loading]="isSubmitting" [disabled]="!form.valid" label="Guardar" loadingLabel="Guardando..." btnClass="btn btn-primary"></app-submit-button>
         </div>
     </form>
 </div>

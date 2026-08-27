@@ -17,15 +17,17 @@ import { CurrencyInputDirective } from '../../../shared/directives/currency-inpu
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { ToastService } from '../../../core/services/toast.service';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
+import { SubmitButtonComponent } from '../../../shared/components/submit-button/submit-button.component';
 
 @Component({
     selector: 'app-card-transactions-pay',
     templateUrl: './card-transactions-pay.component.html',
     styleUrls: ['./card-transactions-pay.component.css'],
-    imports: [LoadingComponent, NgIf, FormsModule, ReactiveFormsModule, NgFor, CurrencyInputDirective, BackButtonComponent, DatePipe, CurrencyFiatFormatPipe]
+    imports: [LoadingComponent, NgIf, FormsModule, ReactiveFormsModule, NgFor, CurrencyInputDirective, BackButtonComponent, DatePipe, CurrencyFiatFormatPipe, SubmitButtonComponent]
 })
 export class CardTransactionsPayComponent implements OnInit {
   isLoading: boolean = true;
+  isSubmitting: boolean = false;
   cardPaymentForm!: FormGroup;
   cards: any[] = [];
   accounts: any[] = [];
@@ -504,6 +506,7 @@ refreshCurrencyFormat() {
   }
 
   onSubmit() {
+    if (this.isSubmitting) return;
 
     // if (this.cardPaymentForm.invalid) {
     //   alert('Datos incorrectos');
@@ -609,8 +612,10 @@ refreshCurrencyFormat() {
       }
 
 
+         this.isSubmitting = true;
          this.cardTransactionService.createCardPayment(cardPaymentRequest).subscribe({
            next: () => {
+             this.isSubmitting = false;
              this.cardPaymentForm.reset();
              this.cardTransactionsArray.clear();
              this.reimbursementsPreview = 0;
@@ -619,6 +624,7 @@ refreshCurrencyFormat() {
              this.toastService.success('Movimiento creado con éxito');
            },
            error: () => {
+             this.isSubmitting = false;
              this.toastService.error('Error al registrar el pago de tarjeta');
            }
          });

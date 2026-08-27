@@ -10,11 +10,12 @@ import { NgIf, NgClass, NgFor, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { ToastService } from '../../../core/services/toast.service';
+import { SubmitButtonComponent } from '../../../shared/components/submit-button/submit-button.component';
 
 @Component({
     selector: 'app-shared-expense-dashboard',
     templateUrl: './shared-expense-dashboard.component.html',
-    imports: [LoadingComponent, NgIf, NgClass, NgFor, DecimalPipe, RouterLink, FormsModule, ReactiveFormsModule, CurrencyFiatFormatPipe]
+    imports: [LoadingComponent, NgIf, NgClass, NgFor, DecimalPipe, RouterLink, FormsModule, ReactiveFormsModule, CurrencyFiatFormatPipe, SubmitButtonComponent]
 })
 export class SharedExpenseDashboardComponent implements OnInit {
   isLoading = true;
@@ -30,6 +31,7 @@ export class SharedExpenseDashboardComponent implements OnInit {
   reimbursementForm!: FormGroup;
   selectedSplit: PersonDebtSplit | null = null;
   reimbursementError: string = '';
+  isReimbursing: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -115,10 +117,11 @@ export class SharedExpenseDashboardComponent implements OnInit {
 
   closeReimbursementModal(): void {
     this.selectedSplit = null;
+    this.isReimbursing = false;
   }
 
   confirmReimbursement(): void {
-    if (!this.selectedSplit || this.reimbursementForm.invalid) {
+    if (!this.selectedSplit || this.reimbursementForm.invalid || this.isReimbursing) {
       return;
     }
 
@@ -129,6 +132,7 @@ export class SharedExpenseDashboardComponent implements OnInit {
       return;
     }
 
+    this.isReimbursing = true;
     this.sharedExpenseService.registerReimbursement({
       splitId: this.selectedSplit.splitId,
       amount: Number(formValues.amount),
@@ -141,6 +145,7 @@ export class SharedExpenseDashboardComponent implements OnInit {
         this.load();
       },
       error: (err) => {
+        this.isReimbursing = false;
         this.reimbursementError = err?.error?.message || 'Error al registrar el reintegro.';
       }
     });

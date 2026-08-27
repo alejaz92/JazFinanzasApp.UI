@@ -165,7 +165,7 @@
 
                     <div class="d-flex justify-content-end">
                         <button type="button" class="btn btn-secondary me-2" (click)="closeRescueModal()">Cancelar</button>
-                        <button type="submit" class="btn btn-primary" [disabled]="rescueForm.invalid">Confirmar</button>
+                        <app-submit-button [loading]="isRescuing" [disabled]="rescueForm.invalid" label="Confirmar" loadingLabel="Confirmando..." btnClass="btn btn-primary"></app-submit-button>
                     </div>
                 </form>
             </div>

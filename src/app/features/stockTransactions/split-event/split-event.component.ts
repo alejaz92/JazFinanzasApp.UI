@@ -8,12 +8,13 @@ import { NgFor, NgIf, DatePipe } from '@angular/common';
 import { ToastService } from '../../../core/services/toast.service';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
+import { SubmitButtonComponent } from '../../../shared/components/submit-button/submit-button.component';
 
 @Component({
     selector: 'app-split-event',
     templateUrl: './split-event.component.html',
     styleUrls: ['./split-event.component.css'],
-    imports: [FormsModule, NgFor, NgIf, ReactiveFormsModule, DatePipe, BackButtonComponent, ConfirmModalComponent]
+    imports: [FormsModule, NgFor, NgIf, ReactiveFormsModule, DatePipe, BackButtonComponent, ConfirmModalComponent, SubmitButtonComponent]
 })
 export class SplitEventComponent implements OnInit {
   splitForm!: FormGroup;
@@ -23,6 +24,7 @@ export class SplitEventComponent implements OnInit {
   selectedAssetTypeId: string = '';
   selectedAssetId: string = '';
   isLoadingSplits: boolean = false;
+  isSubmitting: boolean = false;
 
   @ViewChild('deleteModal') deleteModal!: ConfirmModalComponent;
   deleteModalMessage: string = '';
@@ -90,7 +92,7 @@ export class SplitEventComponent implements OnInit {
   }
 
   onSubmit() {
-    if (this.splitForm.invalid || !this.selectedAssetId) return;
+    if (this.splitForm.invalid || !this.selectedAssetId || this.isSubmitting) return;
 
     if (this.splitRatioValue === 1) {
       this.toastService.error('El ratio no puede ser 1 (no produce ningún efecto).');
@@ -103,13 +105,16 @@ export class SplitEventComponent implements OnInit {
       splitRatio: parseFloat(this.splitForm.value.splitRatio)
     };
 
+    this.isSubmitting = true;
     this.splitEventService.add(dto).subscribe({
       next: () => {
+        this.isSubmitting = false;
         this.toastService.success('Split registrado correctamente.');
         this.splitForm.reset();
         this.loadSplits();
       },
       error: (err) => {
+        this.isSubmitting = false;
         this.toastService.error(err?.error?.message || 'Error al registrar el split.');
       }
     });

@@ -17,16 +17,18 @@ import { CurrencyInputDirective } from '../../../shared/directives/currency-inpu
 import { SharedExpenseFormComponent } from '../../shared-expenses/shared-expense-form/shared-expense-form.component';
 import { ToastService } from '../../../core/services/toast.service';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
+import { SubmitButtonComponent } from '../../../shared/components/submit-button/submit-button.component';
 
 
 @Component({
     selector: 'app-transaction-add',
     templateUrl: './transaction-add.component.html',
     styleUrls: ['./transaction-add.component.css'],
-    imports: [LoadingComponent, NgIf, FormsModule, ReactiveFormsModule, NgFor, CurrencyInputDirective, SharedExpenseFormComponent, BackButtonComponent]
+    imports: [LoadingComponent, NgIf, FormsModule, ReactiveFormsModule, NgFor, CurrencyInputDirective, SharedExpenseFormComponent, BackButtonComponent, SubmitButtonComponent]
 })
 export class TransactionAddComponent implements OnInit, OnDestroy {
   isLoading: boolean = true;
+  isSubmitting: boolean = false;
   transactionForm!: FormGroup;
   selectedMovementType: string = '';
   accounts: any[] = [];
@@ -145,6 +147,8 @@ export class TransactionAddComponent implements OnInit, OnDestroy {
   }
 
   onSubmit() {
+    if (this.isSubmitting) return;
+
     const formValues = this.transactionForm.value;
 
     if (formValues.movementType === '') {
@@ -217,6 +221,7 @@ export class TransactionAddComponent implements OnInit, OnDestroy {
       && formValues.movementType === 'E'
       && this.sharedExpenseData !== null;
 
+    this.isSubmitting = true;
     this.transactionService.createTransaction(transactionAdd).pipe(
       switchMap(response => {
         if (createAndLinkSharedExpense && this.sharedExpenseData) {
@@ -230,6 +235,7 @@ export class TransactionAddComponent implements OnInit, OnDestroy {
       })
     ).subscribe({
       next: () => {
+        this.isSubmitting = false;
         this.transactionForm.reset();
         this.selectedMovementType = '';
         this.sharedExpenseActive = false;
@@ -239,6 +245,7 @@ export class TransactionAddComponent implements OnInit, OnDestroy {
         this.toastService.success('Movimiento creado con éxito');
       },
       error: (err) => {
+        this.isSubmitting = false;
         const msg = err?.error?.message || 'Error al guardar el gasto compartido.';
         this.sharedExpenseError = msg;
         this.toastService.error(msg);

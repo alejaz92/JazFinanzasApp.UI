@@ -9,14 +9,16 @@ import { NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../core/services/toast.service';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
+import { SubmitButtonComponent } from '../../../shared/components/submit-button/submit-button.component';
 
 @Component({
     selector: 'app-trip-edit',
     templateUrl: './trip-edit.component.html',
-    imports: [LoadingComponent, NgIf, FormsModule, BackButtonComponent]
+    imports: [LoadingComponent, NgIf, FormsModule, BackButtonComponent, SubmitButtonComponent]
 })
 export class TripEditComponent implements OnInit, OnDestroy {
   isLoading: boolean = true;
+  isSubmitting: boolean = false;
   id: string | null = null;
   model?: TripRequest;
   private paramsSubscription?: Subscription;
@@ -55,14 +57,17 @@ export class TripEditComponent implements OnInit, OnDestroy {
   }
 
   onFormSubmit(): void {
-    if (!this.id || !this.model) return;
+    if (!this.id || !this.model || this.isSubmitting) return;
 
+    this.isSubmitting = true;
     this.editSubscription = this.tripService.updateTrip(Number(this.id), this.model).subscribe({
       next: () => {
+        this.isSubmitting = false;
         this.toastService.success('Viaje actualizado correctamente');
         this.router.navigate(['/management/trips']);
       },
       error: (error) => {
+        this.isSubmitting = false;
         this.toastService.error(error.error?.message ?? 'Error al actualizar el viaje');
       }
     });

@@ -106,7 +106,7 @@
 
         <!-- Botón de Registro -->
         <div class="mt-4">
-          <button type="submit" class="btn btn-primary w-100">Registrar</button>
+          <app-submit-button [loading]="isSubmitting" label="Registrar" loadingLabel="Registrando..." btnClass="btn btn-primary w-100"></app-submit-button>
         </div>
       </form>
     </div>

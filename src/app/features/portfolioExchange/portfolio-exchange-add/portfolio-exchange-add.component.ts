@@ -8,12 +8,13 @@ import { NgIf, NgFor } from '@angular/common';
 import { InvestmentInputDirective } from '../../../shared/directives/investment-input.directive';
 import { ToastService } from '../../../core/services/toast.service';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
+import { SubmitButtonComponent } from '../../../shared/components/submit-button/submit-button.component';
 
 @Component({
     selector: 'app-portfolio-exchange-add',
     templateUrl: './portfolio-exchange-add.component.html',
     styleUrls: ['./portfolio-exchange-add.component.css'],
-    imports: [NgIf, FormsModule, ReactiveFormsModule, NgFor, InvestmentInputDirective, BackButtonComponent]
+    imports: [NgIf, FormsModule, ReactiveFormsModule, NgFor, InvestmentInputDirective, BackButtonComponent, SubmitButtonComponent]
 })
 export class PortfolioExchangeAddComponent implements  OnInit {
   portfolioExchangeForm: any;
@@ -23,6 +24,7 @@ export class PortfolioExchangeAddComponent implements  OnInit {
   portfolios: any[] = [];
   formattedAmount: string = '';
   selectedAssetType: string = '';
+  isSubmitting = false;
 
   constructor(
     private fb: FormBuilder,
@@ -86,6 +88,8 @@ export class PortfolioExchangeAddComponent implements  OnInit {
 
 
   onSubmit() {
+    if (this.isSubmitting) return;
+
     if (this.portfolioExchangeForm.valid) {
       const portfolioExchange = {
         date: this.portfolioExchangeForm.get('date').value,
@@ -96,12 +100,15 @@ export class PortfolioExchangeAddComponent implements  OnInit {
         incomePortfolioId: this.portfolioExchangeForm.get('incomePortfolio').value
       };
 
+      this.isSubmitting = true;
       this.portfolioExchangeService.createCurrencyExchange(portfolioExchange).subscribe(
         (response) => {
+          this.isSubmitting = false;
           this.toastService.success('Intercambio creado exitosamente');
           this.portfolioExchangeForm.reset();
         },
         (error) => {
+          this.isSubmitting = false;
           this.toastService.error('Error al crear el intercambio');
         }
       );

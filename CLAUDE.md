@@ -57,6 +57,7 @@ app/
 │   └── user/
 ├── app.routes.ts     # rutas con loadComponent (lazy)
 └── shared/
+    ├── components/   # back-button, confirm-modal, submit-button
     ├── directives/
     ├── pipes/        # commerceType, currencyFiatFormat, currencyFiatInputFormat, currencyInvestmentFormat, movementType
     └── services/
@@ -79,6 +80,10 @@ Para mantener formato consistente, los montos y valores enumerados se formatean 
 | `movementType` | Traduce el tipo de movimiento a su label |
 
 Al mostrar un monto o un valor enumerado, preferir el pipe existente (o crear uno nuevo en `shared/pipes/` si la necesidad se repite) antes que formatear el valor manualmente en el componente o el template.
+
+### Botón de submit (`shared/components/submit-button/`)
+
+Todos los formularios usan `<app-submit-button>` en lugar de un `<button type="submit">` a mano: deshabilita el botón y muestra un spinner mientras la request está en curso (evita doble submit y da feedback visual). Inputs: `[loading]` (bindear al flag `isSubmitting`/`loading` del componente, seteado a `true` antes del `subscribe` y a `false` en `next`/`error`), `[disabled]` (condición extra, ej. validez del formulario), `label`/`loadingLabel` (textos) y `btnClass` (clases Bootstrap, default `btn btn-primary m-1`). Al crear un formulario nuevo, seguir este patrón en vez de un botón nativo con lógica de disabled/spinner ad-hoc.
 
 ### Tests
 

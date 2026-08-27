@@ -108,7 +108,7 @@
                             <div class="invalid-feedback">Ingresá un ratio válido mayor a 0.</div>
                         </div>
                         <div class="col-md-3">
-                            <button type="submit" class="btn btn-primary w-100">Registrar</button>
+                            <app-submit-button [loading]="isSubmitting" label="Registrar" loadingLabel="Registrando..." btnClass="btn btn-primary w-100"></app-submit-button>
                         </div>
                     </div>
                     <div *ngIf="splitInterpretation" class="mt-2 text-muted small">

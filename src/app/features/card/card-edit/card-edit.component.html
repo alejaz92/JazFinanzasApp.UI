@@ -21,7 +21,7 @@
                     <input type="date" class="form-control" id="nextDueDate" [(ngModel)]="card.nextDueDate" name="nextDueDate">
                 </div>
                 <div class="text-end mt-3">
-                    <button type="submit" class="btn btn-primary m-1">Guardar</button>
+                    <app-submit-button [loading]="isSubmitting" label="Guardar" loadingLabel="Guardando..." btnClass="btn btn-primary m-1"></app-submit-button>
                 </div>
             </div>
         </form>

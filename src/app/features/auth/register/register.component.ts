@@ -7,17 +7,19 @@ import { last } from 'rxjs';
 import { NgIf, NgClass } from '@angular/common';
 import { ToastService } from '../../../core/services/toast.service';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
+import { SubmitButtonComponent } from '../../../shared/components/submit-button/submit-button.component';
 
 @Component({
     selector: 'app-register',
     templateUrl: './register.component.html',
     styleUrls: ['./register.component.css'],
-    imports: [NgIf, FormsModule, ReactiveFormsModule, NgClass, BackButtonComponent]
+    imports: [NgIf, FormsModule, ReactiveFormsModule, NgClass, BackButtonComponent, SubmitButtonComponent]
 })
 
 export class RegisterComponent implements OnInit{
   registerForm!: FormGroup;
   submitted = false;
+  isSubmitting = false;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -63,18 +65,21 @@ export class RegisterComponent implements OnInit{
   onSubmit(): void {
     this.submitted = true;
 
-    if (this.registerForm.invalid) {
+    if (this.registerForm.invalid || this.isSubmitting) {
       return;
     }
 
     const registerData = this.registerForm.value;
 
+    this.isSubmitting = true;
     this.authService.register(registerData).subscribe({
       next: (response) => {
+        this.isSubmitting = false;
         this.toastService.success('Usuario registrado correctamente');
         this.router.navigate(['/login']);
       },
       error: (err) => {
+        this.isSubmitting = false;
         console.error('Error al registrar el usuario', err);
         this.toastService.error('Error al registrar el usuario. Intente nuevamente');
       }

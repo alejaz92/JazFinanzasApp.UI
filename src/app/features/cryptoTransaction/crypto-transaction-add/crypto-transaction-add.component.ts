@@ -9,15 +9,17 @@ import { NgIf, NgFor } from '@angular/common';
 import { InvestmentInputDirective } from '../../../shared/directives/investment-input.directive';
 import { ToastService } from '../../../core/services/toast.service';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
+import { SubmitButtonComponent } from '../../../shared/components/submit-button/submit-button.component';
 
 @Component({
     selector: 'app-crypto-transaction-add',
     templateUrl: './crypto-transaction-add.component.html',
     styleUrls: ['./crypto-transaction-add.component.css'],
-    imports: [NgIf, FormsModule, ReactiveFormsModule, NgFor, InvestmentInputDirective, BackButtonComponent]
+    imports: [NgIf, FormsModule, ReactiveFormsModule, NgFor, InvestmentInputDirective, BackButtonComponent, SubmitButtonComponent]
 })
 export class CryptoTransactionAddComponent implements OnInit {
   cryptoTransactionForm!: FormGroup;
+  isSubmitting = false;
   selectedMovementType: string = '';
   selectedCommerceType: string = '';
   cryptoAccounts: any[] = [];
@@ -143,6 +145,8 @@ export class CryptoTransactionAddComponent implements OnInit {
   }
 
   onSubmit() {
+    if (this.isSubmitting) return;
+
     const formValues = this.cryptoTransactionForm.value;
     formValues.incomeAmount = parseFloat(formValues.incomeAmount);
     formValues.expenseAmount = parseFloat(formValues.expenseAmount);
@@ -272,13 +276,16 @@ export class CryptoTransactionAddComponent implements OnInit {
     };
 
 
+    this.isSubmitting = true;
     this.cryptoTransactionService.createCryptoTransaction(transactionAdd)
       .subscribe({
         next: () => {
+          this.isSubmitting = false;
           this.toastService.success('Movimiento agregado correctamente');
           this.cryptoTransactionForm.reset();
         },
         error: () => {
+          this.isSubmitting = false;
           this.toastService.error('Error al agregar el movimiento');
         }
       });

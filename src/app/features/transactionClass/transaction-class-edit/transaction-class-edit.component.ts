@@ -8,15 +8,17 @@ import { NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../core/services/toast.service';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
+import { SubmitButtonComponent } from '../../../shared/components/submit-button/submit-button.component';
 
 @Component({
     selector: 'app-transaction-class-edit',
     templateUrl: './transaction-class-edit.component.html',
     styleUrls: ['./transaction-class-edit.component.css'],
-    imports: [LoadingComponent, NgIf, FormsModule, BackButtonComponent]
+    imports: [LoadingComponent, NgIf, FormsModule, BackButtonComponent, SubmitButtonComponent]
 })
 export class TransactionClassEditComponent implements OnInit, OnDestroy{
   isLoading: boolean = true;
+  isSubmitting: boolean = false;
   id: string | null = null;
   paramsSubcription?: Subscription;
   editTransactionClassSubscription?: Subscription;
@@ -52,6 +54,8 @@ export class TransactionClassEditComponent implements OnInit, OnDestroy{
   }
 
   onFormSubmit(): void {
+    if (this.isSubmitting) return;
+
     const transactionClassUpdateRequest: TransactionClass = {
       incExp: this.transactionClass?.incExp ?? '',
       id: this.transactionClass?.id ?? 0,
@@ -59,12 +63,15 @@ export class TransactionClassEditComponent implements OnInit, OnDestroy{
     };
 
     if (this.id) {
+      this.isSubmitting = true;
       this.editTransactionClassSubscription = this.transactionClassService.updateTransactionClass(Number(this.id), transactionClassUpdateRequest).subscribe({
         next: (response) => {
+          this.isSubmitting = false;
           this.toastService.success('Clase de movimiento actualizada correctamente');
           this.router.navigateByUrl('/management/transactionClass');
         },
         error: () => {
+          this.isSubmitting = false;
           this.toastService.error('Error al actualizar la clase de movimiento');
         }
       });

@@ -13,6 +13,7 @@ import { NgIf, NgFor, NgClass, NgSwitch, NgSwitchCase, DatePipe } from '@angular
 import { RouterLink } from '@angular/router';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { ToastService } from '../../../core/services/toast.service';
+import { SubmitButtonComponent } from '../../../shared/components/submit-button/submit-button.component';
 
 interface CardWithDueStatus extends Card {
   dueStatus: CardDueStatus;
@@ -22,7 +23,7 @@ interface CardWithDueStatus extends Card {
     selector: 'app-card-transactions-list',
     templateUrl: './card-transactions-list.component.html',
     styleUrls: ['./card-transactions-list.component.css'],
-    imports: [LoadingComponent, NgIf, RouterLink, NgFor, NgClass, NgSwitch, NgSwitchCase, DatePipe, CurrencyFiatFormatPipe, ReactiveFormsModule]
+    imports: [LoadingComponent, NgIf, RouterLink, NgFor, NgClass, NgSwitch, NgSwitchCase, DatePipe, CurrencyFiatFormatPipe, ReactiveFormsModule, SubmitButtonComponent]
 })
 export class CardTransactionsListComponent implements OnInit {
   isLoading: boolean = true;
@@ -35,6 +36,7 @@ export class CardTransactionsListComponent implements OnInit {
   selectedDiscount: CardTransactionDiscountDetail | null = null;
   selectedDiscountDetail: string = '';
   rescueError: string = '';
+  isRescuing: boolean = false;
 
   constructor(
     private cardTransactioneService: CardTransactionsService,
@@ -117,10 +119,11 @@ export class CardTransactionsListComponent implements OnInit {
     this.selectedDiscount = null;
     this.selectedDiscountDetail = '';
     this.rescueError = '';
+    this.isRescuing = false;
   }
 
   confirmRescue(): void {
-    if (!this.selectedDiscount || this.rescueForm.invalid) return;
+    if (!this.selectedDiscount || this.rescueForm.invalid || this.isRescuing) return;
 
     const amount = Number(this.rescueForm.get('amount')?.value);
     if (amount > this.selectedDiscount.pendingOnCard) {
@@ -128,6 +131,7 @@ export class CardTransactionsListComponent implements OnInit {
       return;
     }
 
+    this.isRescuing = true;
     this.cardTransactionDiscountService.rescue(this.selectedDiscount.id, {
       amount,
       accountId: Number(this.rescueForm.get('accountId')?.value),
@@ -139,6 +143,7 @@ export class CardTransactionsListComponent implements OnInit {
         this.toastService.success('Saldo a favor pasado a la cuenta');
       },
       error: (err) => {
+        this.isRescuing = false;
         this.rescueError = err?.error?.message || 'Error al registrar el rescate.';
       }
     });

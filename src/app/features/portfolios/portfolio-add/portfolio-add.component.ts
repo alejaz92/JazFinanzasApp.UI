@@ -5,16 +5,18 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../core/services/toast.service';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
+import { SubmitButtonComponent } from '../../../shared/components/submit-button/submit-button.component';
 
 @Component({
     selector: 'app-portfolio-add',
     templateUrl: './portfolio-add.component.html',
     styleUrls: ['./portfolio-add.component.css'],
-    imports: [FormsModule, BackButtonComponent]
+    imports: [FormsModule, BackButtonComponent, SubmitButtonComponent]
 })
 export class PortfolioAddComponent implements OnDestroy {
 
   model: PortfolioAddRequest;
+  isSubmitting = false;
   private addPortfoliosubscription?: any;
 
   constructor(
@@ -28,13 +30,18 @@ export class PortfolioAddComponent implements OnDestroy {
   }
 
   onFormSubmit() {
+    if (this.isSubmitting) return;
+    this.isSubmitting = true;
+
     this.addPortfoliosubscription = this.portfolioService.addPortfolio(this.model)
       .subscribe({
         next: (response) => {
+          this.isSubmitting = false;
           this.toastService.success('Cartera creada correctamente');
           this.router.navigate(['/management/portfolio']);
         },
         error: (error) => {
+          this.isSubmitting = false;
           this.toastService.error('Error al crear la cartera');
         }
       })

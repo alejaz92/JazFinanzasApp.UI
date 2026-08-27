@@ -5,12 +5,13 @@ import { UserService } from '../services/user.service';
 import { NgClass, NgIf } from '@angular/common';
 import { ToastService } from '../../../core/services/toast.service';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
+import { SubmitButtonComponent } from '../../../shared/components/submit-button/submit-button.component';
 
 @Component({
     selector: 'app-profile',
     templateUrl: './profile.component.html',
     styleUrls: ['./profile.component.css'],
-    imports: [FormsModule, ReactiveFormsModule, NgClass, NgIf, BackButtonComponent]
+    imports: [FormsModule, ReactiveFormsModule, NgClass, NgIf, BackButtonComponent, SubmitButtonComponent]
 })
 export class ProfileComponent implements OnInit {
   profileForm!: FormGroup;
@@ -50,7 +51,7 @@ export class ProfileComponent implements OnInit {
 
   onSubmit() {
     this.submitted = true;
-    if (this.profileForm.invalid) {
+    if (this.profileForm.invalid || this.loading) {
       return;
     }
 

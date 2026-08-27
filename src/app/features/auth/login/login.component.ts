@@ -1,10 +1,9 @@
 import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { Router, RouterLink } from '@angular/router';
-import { LoadingComponent } from '../../../core/components/loading/loading.component';
-import { NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../core/services/toast.service';
+import { SubmitButtonComponent } from '../../../shared/components/submit-button/submit-button.component';
 declare var bootstrap: any;
 
 
@@ -13,10 +12,10 @@ declare var bootstrap: any;
     selector: 'app-login',
     templateUrl: './login.component.html',
     styleUrls: ['./login.component.css'],
-    imports: [LoadingComponent, NgIf, FormsModule, RouterLink]
+    imports: [FormsModule, RouterLink, SubmitButtonComponent]
 })
 export class LoginComponent implements AfterViewInit{
-  isLoading: boolean = false;
+  isSubmitting: boolean = false;
   username: string = '';
   password: string = '';
 
@@ -25,13 +24,16 @@ export class LoginComponent implements AfterViewInit{
 
 
   login(): void {
-    this.isLoading = true;
+    if (this.isSubmitting) return;
+    this.isSubmitting = true;
+
     this.authService.login(this.username,this.password).subscribe({
       next: () => {
+        this.isSubmitting = false;
         this.router.navigate(['/']);
       },
       error: (error) => {
-        this.isLoading = false;
+        this.isSubmitting = false;
         this.toastService.error('Usuario y/o contraseña incorrectos');
       }
     });

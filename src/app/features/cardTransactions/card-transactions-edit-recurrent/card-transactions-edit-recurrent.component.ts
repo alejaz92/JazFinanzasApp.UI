@@ -8,18 +8,20 @@ import { DatePipe, NgIf } from '@angular/common';
 import { CurrencyInputDirective } from '../../../shared/directives/currency-input.directive';
 import { ToastService } from '../../../core/services/toast.service';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
+import { SubmitButtonComponent } from '../../../shared/components/submit-button/submit-button.component';
 
 @Component({
     selector: 'app-card-transactions-edit-recurrent',
     templateUrl: './card-transactions-edit-recurrent.component.html',
     styleUrls: ['./card-transactions-edit-recurrent.component.css'],
     providers: [DatePipe],
-    imports: [NgIf, FormsModule, ReactiveFormsModule, CurrencyInputDirective, BackButtonComponent]
+    imports: [NgIf, FormsModule, ReactiveFormsModule, CurrencyInputDirective, BackButtonComponent, SubmitButtonComponent]
 })
 export class CardTransactionsEditRecurrentComponent implements OnInit{
   editRecurrentForm!: FormGroup;
   action: string = 'Edit';
   id: number = 0;
+  isSubmitting: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -98,7 +100,8 @@ export class CardTransactionsEditRecurrentComponent implements OnInit{
     }).format(value);
   }
 
-  onSubmit() {  
+  onSubmit() {
+    if (this.isSubmitting) return;
 
     const formValue = {
       newDate: this.editRecurrentForm.get('newDate')?.value,
@@ -136,12 +139,15 @@ export class CardTransactionsEditRecurrentComponent implements OnInit{
     }
 
 
+    this.isSubmitting = true;
     this.cardTransactionsService.editRecurrentCardTransaction(this.id, formValue).subscribe(
       (response) => {
+        this.isSubmitting = false;
         this.toastService.success('Movimiento de tarjeta actualizado correctamente');
         this.router.navigateByUrl('/cardTransactions');
       },
       (error) => {
+        this.isSubmitting = false;
         this.toastService.error('Error al actualizar el movimiento recurrente');
       }
     )

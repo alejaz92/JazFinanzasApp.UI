@@ -9,11 +9,12 @@ import { FormsModule } from '@angular/forms';
 import { NgFor, NgIf } from '@angular/common';
 import { ToastService } from '../../../core/services/toast.service';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
+import { SubmitButtonComponent } from '../../../shared/components/submit-button/submit-button.component';
 
 @Component({
     selector: 'app-shared-event-add',
     templateUrl: './shared-event-add.component.html',
-    imports: [FormsModule, NgFor, NgIf, RouterLink, BackButtonComponent]
+    imports: [FormsModule, NgFor, NgIf, RouterLink, BackButtonComponent, SubmitButtonComponent]
 })
 export class SharedEventAddComponent implements OnInit {
   name: string = '';
@@ -22,6 +23,7 @@ export class SharedEventAddComponent implements OnInit {
   people: Person[] = [];
   trips: Trip[] = [];
   selectedPersonIds = new Set<number>();
+  isSubmitting = false;
 
   constructor(
     private sharedEventService: SharedEventService,
@@ -53,6 +55,9 @@ export class SharedEventAddComponent implements OnInit {
   }
 
   onFormSubmit(): void {
+    if (this.isSubmitting) return;
+    this.isSubmitting = true;
+
     this.sharedEventService.create({
       name: this.name,
       notes: this.notes || undefined,
@@ -60,10 +65,12 @@ export class SharedEventAddComponent implements OnInit {
       personIds: Array.from(this.selectedPersonIds)
     }).subscribe({
       next: (created) => {
+        this.isSubmitting = false;
         this.toastService.success('Evento creado correctamente');
         this.router.navigate(['/shared-events', created.id]);
       },
       error: (error) => {
+        this.isSubmitting = false;
         this.toastService.error(error.error?.message ?? 'Error al crear el evento');
       }
     });
