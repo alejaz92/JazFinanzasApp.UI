@@ -229,12 +229,11 @@
                             </td>
                             <td>{{ p.notes }}</td>
                             <td class="text-center">
-                                <button class="btn-icon bg-danger" *ngIf="isLastPayment(p.id)"
-                                        title="Eliminar" (click)="onDeletePayment(p.id)">
+                                <button class="btn-icon bg-danger" [disabled]="!isLastPayment(p.id)"
+                                        [title]="isLastPayment(p.id) ? 'Eliminar' : 'Solo se puede eliminar el último pago registrado del evento; para pagos anteriores, registrar un ajuste'"
+                                        (click)="onDeletePayment(p.id)">
                                     <i class="bi-trash"></i>
                                 </button>
-                                <i *ngIf="!isLastPayment(p.id)" class="bi-trash text-muted"
-                                   title="Solo se puede eliminar el último pago registrado del evento; para pagos anteriores, registrar un ajuste"></i>
                             </td>
                         </tr>
                     </tbody>
