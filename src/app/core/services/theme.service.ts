@@ -1,11 +1,16 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 
 export type Theme = 'light' | 'dark';
 
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
   private readonly STORAGE_KEY = 'app-theme';
-  private current: Theme = 'light';
+  private readonly currentSignal = signal<Theme>('light');
+
+  // Señal de solo lectura para consumidores que necesitan reaccionar al cambio de
+  // tema (ej. ChartComponent, que reinicializa ECharts porque su tema se fija en
+  // el init y no se puede mutar en caliente).
+  readonly theme = this.currentSignal.asReadonly();
 
   init(): void {
     const saved = localStorage.getItem(this.STORAGE_KEY) as Theme | null;
@@ -15,15 +20,15 @@ export class ThemeService {
   }
 
   toggle(): void {
-    this.apply(this.current === 'light' ? 'dark' : 'light');
+    this.apply(this.currentSignal() === 'light' ? 'dark' : 'light');
   }
 
   get isDark(): boolean {
-    return this.current === 'dark';
+    return this.currentSignal() === 'dark';
   }
 
   private apply(theme: Theme): void {
-    this.current = theme;
+    this.currentSignal.set(theme);
     document.documentElement.setAttribute('data-bs-theme', theme);
     localStorage.setItem(this.STORAGE_KEY, theme);
   }
