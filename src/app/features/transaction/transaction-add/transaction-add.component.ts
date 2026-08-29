@@ -8,7 +8,7 @@ import { TripService } from '../../trips/services/trip.service';
 import { Trip } from '../../trips/models/trip.model';
 import { SharedExpenseService } from '../../shared-expenses/services/shared-expense.service';
 import { SharedExpenseFormData } from '../../shared-expenses/models/shared-expense.model';
-import { Subscription, forkJoin } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
@@ -18,15 +18,13 @@ import { SharedExpenseFormComponent } from '../../shared-expenses/shared-expense
 import { ToastService } from '../../../core/services/toast.service';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 import { SubmitButtonComponent } from '../../../shared/components/submit-button/submit-button.component';
-import { TagPickerComponent } from '../../../shared/components/tag-picker/tag-picker.component';
-import { TagService } from '../../tags/services/tag.service';
 
 
 @Component({
     selector: 'app-transaction-add',
     templateUrl: './transaction-add.component.html',
     styleUrls: ['./transaction-add.component.css'],
-    imports: [LoadingComponent, NgIf, FormsModule, ReactiveFormsModule, NgFor, CurrencyInputDirective, SharedExpenseFormComponent, BackButtonComponent, SubmitButtonComponent, TagPickerComponent]
+    imports: [LoadingComponent, NgIf, FormsModule, ReactiveFormsModule, NgFor, CurrencyInputDirective, SharedExpenseFormComponent, BackButtonComponent, SubmitButtonComponent]
 })
 export class TransactionAddComponent implements OnInit, OnDestroy {
   isLoading: boolean = true;
@@ -43,7 +41,6 @@ export class TransactionAddComponent implements OnInit, OnDestroy {
   sharedExpenseData: SharedExpenseFormData | null = null;
   transactionAmountForForm: number = 0;
   sharedExpenseError: string = '';
-  selectedTagIds: number[] = [];
 
   private amountSub?: Subscription;
 
@@ -55,7 +52,6 @@ export class TransactionAddComponent implements OnInit, OnDestroy {
     private transactionClasses: TransactionClassService,
     private sharedExpenseService: SharedExpenseService,
     private tripService: TripService,
-    private tagService: TagService,
     private toastService: ToastService
   ) { }
 
@@ -225,12 +221,9 @@ export class TransactionAddComponent implements OnInit, OnDestroy {
       && formValues.movementType === 'E'
       && this.sharedExpenseData !== null;
 
-    let newTransactionId: number | undefined;
-
     this.isSubmitting = true;
     this.transactionService.createTransaction(transactionAdd).pipe(
       switchMap(response => {
-        newTransactionId = response.id;
         if (createAndLinkSharedExpense && this.sharedExpenseData) {
           return this.sharedExpenseService.createSharedExpense({
             transactionId: response.id,
@@ -242,16 +235,8 @@ export class TransactionAddComponent implements OnInit, OnDestroy {
       })
     ).subscribe({
       next: () => {
-        // Recurso independiente, igual que el gasto compartido: si alguna asignación falla no
-        // bloquea el alta ya confirmada, solo avisa aparte.
-        if (newTransactionId && this.selectedTagIds.length > 0) {
-          forkJoin(this.selectedTagIds.map(tagId => this.tagService.assignToTransaction(tagId, newTransactionId!)))
-            .subscribe({ error: () => this.toastService.error('El movimiento se guardó, pero hubo un error al asignar alguna etiqueta.') });
-        }
-
         this.isSubmitting = false;
         this.transactionForm.reset();
-        this.selectedTagIds = [];
         this.selectedMovementType = '';
         this.sharedExpenseActive = false;
         this.sharedExpenseData = null;

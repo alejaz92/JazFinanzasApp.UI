@@ -80,22 +80,6 @@ $sidebar-bg-bottom: #1b0f44;
 
 .sidebar-category {
     cursor: pointer;
-
-    // Panorama, Patrimonio, Compartidos, Retrospectiva: declaradas en el menú desde ya (T4)
-    // pero sin ningún reporte propio todavía (llegan en el Bloque D) — no clickeable, sin
-    // flecha, con una marca discreta en vez de aparentar un link roto.
-    &.sidebar-category-empty {
-        cursor: default;
-        opacity: 0.55;
-    }
-
-    // Sub-categoría (ej. Carteras/Cryptos dentro de Inversiones) — mismo tratamiento visual
-    // que un link de primer nivel de sub-item.
-    &.level-1 {
-        margin-left: 20px;
-        font-size: 0.92rem;
-        opacity: 0.9;
-    }
 }
 
 .category-chevron {
@@ -107,24 +91,11 @@ $sidebar-bg-bottom: #1b0f44;
     transform: rotate(-180deg);
 }
 
-.sidebar-soon-badge {
-    font-size: 0.65rem;
-    font-weight: 500;
-    background: rgba(255, 255, 255, 0.12);
-    color: rgba(255, 255, 255, 0.75);
-}
-
 .sidebar-subnav {
     .sidebar-sublink {
         margin-left: 20px;
         font-size: 0.92rem;
         opacity: 0.9;
-    }
-
-    // Tercer nivel (ej. Inversiones > Carteras > General/Detalle).
-    &.level-2 .sidebar-sublink {
-        margin-left: 36px;
-        font-size: 0.88rem;
     }
 }
 

@@ -1,5 +1,5 @@
 
-<nav class="navbar navbar-expand-lg bg-body-tertiary shadow-sm" *ngIf="!isLoginPage()">
+<nav class="navbar navbar-expand-lg bg-body-tertiary" *ngIf="!isLoginPage()">
     <div class="container-fluid">
       <a class="navbar-brand" href="#">
         <img src="../../../../assets/images/logo.ico" alt="Logo" width="30" height="30"
@@ -58,7 +58,6 @@
               <li><a class="dropdown-item" [routerLink]="['management/portfolio']">Carteras</a></li>
               <li><a class="dropdown-item" [routerLink]="['management/transactionClass']">Clases de Movimiento</a></li>
               <li><a class="dropdown-item" [routerLink]="['management/account']">Cuentas</a></li>
-              <li><a class="dropdown-item" [routerLink]="['management/tags']">Etiquetas</a></li>
               <li><a class="dropdown-item" [routerLink]="['management/card']">Tarjetas</a></li>
               <li><a class="dropdown-item" [routerLink]="['management/people']">Personas</a></li>
             </ul>

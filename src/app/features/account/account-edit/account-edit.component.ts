@@ -1,11 +1,11 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Account, ACCOUNT_TYPES, ACCOUNT_TYPE_LABELS } from '../models/account.model';
+import { Account } from '../models/account.model';
 import { Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AccountService } from '../services/account.service';
 import { AccountAddRequest } from '../models/account-add-request.model';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
-import { NgIf, NgFor } from '@angular/common';
+import { NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../core/services/toast.service';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
@@ -15,7 +15,7 @@ import { SubmitButtonComponent } from '../../../shared/components/submit-button/
     selector: 'app-account-edit',
     templateUrl: './account-edit.component.html',
     styleUrls: ['./account-edit.component.css'],
-    imports: [LoadingComponent, NgIf, NgFor, FormsModule, BackButtonComponent, SubmitButtonComponent]
+    imports: [LoadingComponent, NgIf, FormsModule, BackButtonComponent, SubmitButtonComponent]
 })
 export class AccountEditComponent implements OnInit, OnDestroy {
   isLoading: boolean = true;
@@ -24,9 +24,6 @@ export class AccountEditComponent implements OnInit, OnDestroy {
   paramsSubcription?: Subscription;
   editAccountSubscription?: Subscription;
   account?: Account;
-
-  readonly types = ACCOUNT_TYPES;
-  readonly typeLabels = ACCOUNT_TYPE_LABELS;
 
   constructor(private route: ActivatedRoute, private accountService: AccountService,
     private router: Router,
@@ -60,9 +57,7 @@ export class AccountEditComponent implements OnInit, OnDestroy {
       if (this.isSubmitting) return;
 
       const accountUpdateRequest: AccountAddRequest = {
-        name: this.account?.name ?? '',
-        type: this.account?.type ?? null,
-        countsAsLiquid: this.account?.countsAsLiquid ?? true
+        name: this.account?.name ?? ''
       };
 
       if (this.id) {

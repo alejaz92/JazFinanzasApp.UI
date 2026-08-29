@@ -38,7 +38,7 @@
                 <div class="card">
                     <div class="card-header">Valor Actual por Cartera (En {{ mainReference?.symbol }})</div>
                     <div class="card-body">
-                        <app-chart [options]="valueByPortfolioOptions" height="320px"></app-chart>
+                        <canvas id="valueByPortfolioChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -46,7 +46,7 @@
                 <div class="card">
                     <div class="card-header">Distribución del Patrimonio por Cartera</div>
                     <div class="card-body">
-                        <app-chart [options]="portfolioDistributionOptions" height="320px"></app-chart>
+                        <canvas id="portfolioDistributionChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -57,7 +57,7 @@
                 <div class="card">
                     <div class="card-header">Invertido vs Valor Actual por Cartera (En {{ mainReference?.symbol }})</div>
                     <div class="card-body">
-                        <app-chart [options]="originalVsActualOptions" height="320px"></app-chart>
+                        <canvas id="originalVsActualByPortfolioChart"></canvas>
                     </div>
                 </div>
             </div>

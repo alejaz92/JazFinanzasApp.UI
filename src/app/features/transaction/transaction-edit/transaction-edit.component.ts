@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TransactionService } from '../services/transaction.service';
-import { Subscription, forkJoin } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { Transaction } from '../models/transaction.model';
 import { FormGroup, FormsModule } from '@angular/forms';
 import { AssetService } from '../../asset/services/asset.service';
@@ -19,14 +19,12 @@ import { ToastService } from '../../../core/services/toast.service';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
 import { SubmitButtonComponent } from '../../../shared/components/submit-button/submit-button.component';
-import { TagPickerComponent } from '../../../shared/components/tag-picker/tag-picker.component';
-import { TagService } from '../../tags/services/tag.service';
 
 @Component({
     selector: 'app-transaction-edit',
     templateUrl: './transaction-edit.component.html',
     styleUrls: ['./transaction-edit.component.css'],
-    imports: [LoadingComponent, NgIf, FormsModule, NgFor, CurrencyInputDirective, SharedExpenseFormComponent, DecimalPipe, DatePipe, BackButtonComponent, ConfirmModalComponent, SubmitButtonComponent, TagPickerComponent]
+    imports: [LoadingComponent, NgIf, FormsModule, NgFor, CurrencyInputDirective, SharedExpenseFormComponent, DecimalPipe, DatePipe, BackButtonComponent, ConfirmModalComponent, SubmitButtonComponent]
 })
 export class TransactionEditComponent implements OnInit, OnDestroy {
   transactionForm!: FormGroup;
@@ -50,9 +48,6 @@ export class TransactionEditComponent implements OnInit, OnDestroy {
 
   @ViewChild('deleteSharedExpenseModal') deleteSharedExpenseModal!: ConfirmModalComponent;
 
-  selectedTagIds: number[] = [];
-  private initialTagIds: number[] = [];
-
   readonly splitStatusLabel: { [key: number]: string } = {
     0: 'Pendiente',
     1: 'Pago parcial',
@@ -73,7 +68,6 @@ export class TransactionEditComponent implements OnInit, OnDestroy {
     private transactionClassService: TransactionClassService,
     private sharedExpenseService: SharedExpenseService,
     private tripService: TripService,
-    private tagService: TagService,
     private router: Router,
     private toastService: ToastService
   ) { }
@@ -105,8 +99,6 @@ export class TransactionEditComponent implements OnInit, OnDestroy {
               } else {
                 this.sharedExpenseLoaded = true;
               }
-
-              this.loadTags(Number(this.id));
 
               this.isLoading = false;
             },
@@ -144,13 +136,6 @@ export class TransactionEditComponent implements OnInit, OnDestroy {
       } else {
         this.transactionClasses = data.filter((x: any) => x.incExp === 'E');
       }
-    });
-  }
-
-  loadTags(transactionId: number): void {
-    this.tagService.getTagsForTransaction(transactionId).subscribe(tags => {
-      this.selectedTagIds = tags.map(t => t.id);
-      this.initialTagIds = [...this.selectedTagIds];
     });
   }
 
@@ -239,7 +224,6 @@ export class TransactionEditComponent implements OnInit, OnDestroy {
       this.isSubmitting = true;
       this.editTransactionSubscription = this.transactionService.updateTransaction(Number(this.id), this.transaction).subscribe({
         next: () => {
-          this.syncTags(Number(this.id));
           this.isSubmitting = false;
           this.toastService.success('Movimiento actualizado correctamente');
           this.router.navigateByUrl('/transactions');
@@ -250,23 +234,6 @@ export class TransactionEditComponent implements OnInit, OnDestroy {
         }
       });
     }
-  }
-
-  // Solo llama a asignar/desasignar por las etiquetas que realmente cambiaron desde que se
-  // abrió el formulario — recurso independiente, un error acá no vuelve a bloquear el guardado
-  // ya confirmado.
-  private syncTags(transactionId: number): void {
-    const toAdd = this.selectedTagIds.filter(id => !this.initialTagIds.includes(id));
-    const toRemove = this.initialTagIds.filter(id => !this.selectedTagIds.includes(id));
-    if (toAdd.length === 0 && toRemove.length === 0) return;
-
-    const calls = [
-      ...toAdd.map(tagId => this.tagService.assignToTransaction(tagId, transactionId)),
-      ...toRemove.map(tagId => this.tagService.unassignFromTransaction(tagId, transactionId))
-    ];
-    forkJoin(calls).subscribe({
-      error: () => this.toastService.error('El movimiento se guardó, pero hubo un error al actualizar sus etiquetas.')
-    });
   }
 
   ngOnDestroy(): void {

@@ -13,18 +13,6 @@
                     <input type="text" class="form-control" id="accountName" [(ngModel)]="account.name"
                     name="accountName">
                 </div>
-                <div class="mt-3">
-                    <label class="form-label" for="accountType">Tipo</label>
-                    <select class="form-select" id="accountType" name="accountType" [(ngModel)]="account.type">
-                        <option [ngValue]="null">Sin asignar</option>
-                        <option *ngFor="let type of types" [ngValue]="type">{{ typeLabels[type] }}</option>
-                    </select>
-                </div>
-                <div class="mt-3 form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="accountCountsAsLiquid"
-                           name="accountCountsAsLiquid" [(ngModel)]="account.countsAsLiquid">
-                    <label class="form-check-label" for="accountCountsAsLiquid">Cuenta como plata disponible</label>
-                </div>
                 <div class="text-end mt-3">
                     <app-submit-button [loading]="isSubmitting" label="Guardar" loadingLabel="Guardando..." btnClass="btn btn-primary m-1"></app-submit-button>
                 </div>

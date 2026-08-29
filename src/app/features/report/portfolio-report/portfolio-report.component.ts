@@ -3,22 +3,22 @@ import { NgIf, NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import type { EChartsOption } from 'echarts';
+import { Chart, ChartConfiguration, registerables } from 'chart.js';
+Chart.register(...registerables);
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 import { PortfolioService } from '../../portfolios/services/portfolio.service';
 import { AssetService } from '../../asset/services/asset.service';
 import { Asset } from '../../asset/models/asset.model';
 import { PortfolioStatsDTO, PortfolioDetailStatsDTO, PortfolioHoldingDTO, PortfolioValueByDateDTO } from '../../portfolios/models/portfolio-stats.model';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
-import { ChartComponent } from '../../../shared/components/chart/chart.component';
-import { ChartThemeService } from '../../../shared/services/chart-theme.service';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { CurrencyInvestmentFormatPipe } from '../../../shared/pipes/currencyInvestmentFormat/currency-investment-format.pipe';
 
 @Component({
     selector: 'app-portfolio-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, FormsModule, ChartComponent, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe],
+    imports: [LoadingComponent, NgIf, NgFor, FormsModule, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe],
     templateUrl: './portfolio-report.component.html',
     styleUrl: './portfolio-report.component.css'
 })
@@ -35,13 +35,12 @@ export class PortfolioReportComponent implements OnInit {
     disaggregateByAccount = false;
     displayedHoldings: PortfolioHoldingDTO[] = [];
 
-    compositionOptions: EChartsOption = {};
-    evolutionOptions: EChartsOption = {};
+    private compositionChart: Chart | undefined;
+    private evolutionChart: Chart | undefined;
 
     constructor(
         private portfolioService: PortfolioService,
-        private assetService: AssetService,
-        private chartThemeService: ChartThemeService
+        private assetService: AssetService
     ) {}
 
     ngOnInit(): void {
@@ -71,6 +70,11 @@ export class PortfolioReportComponent implements OnInit {
         this.viewAux = false;
         this.isLoadingDetail = true;
 
+        // Combinados: si cada uno renderizara su gráfico desde su propio subscribe con un setTimeout
+        // independiente, el de evolución podía correr antes de que "viewAux" pasara a true (todavía no
+        // hay <canvas> en el DOM) si esa respuesta llegaba primero — quedaba con la tarjeta vacía sin
+        // ningún reintento. Con forkJoin ambos gráficos se renderizan recién cuando los dos datos están
+        // listos, en el mismo ciclo que "viewAux".
         forkJoin({
             detail: this.portfolioService.getPortfolioDetailStats(this.selectedPortfolioId),
             // si el historial falla (ej. deploy del endpoint todavía no propagado), no debe tirar abajo
@@ -83,8 +87,10 @@ export class PortfolioReportComponent implements OnInit {
             this.viewAux = true;
             this.detail = detail;
             this.updateDisplayedHoldings();
-            this.compositionOptions = this.buildCompositionOptions(detail.holdings);
-            this.evolutionOptions = this.buildEvolutionOptions(history);
+            setTimeout(() => {
+                this.renderCompositionChart(detail.holdings);
+                this.renderEvolutionChart(history);
+            }, 0);
         });
     }
 
@@ -119,62 +125,93 @@ export class PortfolioReportComponent implements OnInit {
         this.displayedHoldings = Array.from(byAsset.values());
     }
 
-    private buildCompositionOptions(holdings: PortfolioHoldingDTO[]): EChartsOption {
+    private renderCompositionChart(holdings: PortfolioHoldingDTO[]): void {
+        const ctx = document.getElementById('portfolioCompositionChart') as HTMLCanvasElement;
+        if (!ctx) return;
+        this.compositionChart?.destroy();
+
         // el frontend agrupa por AssetType (incluye "Moneda" como una categoría más) — el backend
         // devuelve una fila por activo + cuenta, sin agrupar (ver docs/plans/activos/portfolios-estadisticas.md)
         const byAssetType = new Map<string, number>();
         holdings.forEach(h => byAssetType.set(h.assetType, (byAssetType.get(h.assetType) ?? 0) + h.actualValue));
 
-        const data = Array.from(byAssetType.entries()).map(([name, value]) => ({ name, value }));
+        const assetTypes = Array.from(byAssetType.keys());
+        const values = Array.from(byAssetType.values());
+        const colors = this.generateControlledColors(values.length);
 
-        return {
-            tooltip: {
-                trigger: 'item',
-                formatter: (params) => {
-                    const p = params as { name: string; value: number; percent: number };
-                    return `${p.name}: ${this.formatUsd(p.value)} (${p.percent}%)`;
-                }
-            },
-            series: [{
-                type: 'pie',
-                radius: ['45%', '70%'],
-                data,
-                label: {
-                    show: true,
-                    position: 'inside',
-                    color: '#fff',
-                    formatter: (params) => {
-                        const p = params as { name: string; percent: number };
-                        return p.percent > 5 ? p.name : '';
+        this.compositionChart = new Chart(ctx, {
+            type: 'pie',
+            data: { labels: assetTypes, datasets: [{ data: values, backgroundColor: colors, hoverOffset: 4 }] },
+            options: {
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (tooltipItem) => {
+                                const total = values.reduce((a, b) => a + b, 0);
+                                const pct = ((Number(tooltipItem.raw) / total) * 100).toFixed(2);
+                                return `${assetTypes[tooltipItem.dataIndex]}: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(tooltipItem.raw))} (${pct}%)`;
+                            }
+                        }
+                    },
+                    datalabels: {
+                        display: true, color: 'white', align: 'center', anchor: 'center', font: { weight: 'bold' },
+                        formatter: (value, context) => {
+                            const total = (context.chart.data.datasets[0].data as number[]).reduce((a, b) => a + b, 0);
+                            const pct = total ? ((value / total) * 100).toFixed(2) : '0.00';
+                            return Number(pct) > 5 && context.chart.data.labels ? context.chart.data.labels[context.dataIndex] : '';
+                        }
                     }
                 }
-            }]
-        };
+            } as ChartConfiguration['options'],
+            plugins: [ChartDataLabels]
+        });
     }
 
-    private buildEvolutionOptions(history: PortfolioValueByDateDTO[]): EChartsOption {
+    private renderEvolutionChart(history: PortfolioValueByDateDTO[]): void {
+        const ctx = document.getElementById('portfolioEvolutionChart') as HTMLCanvasElement;
+        if (!ctx) return;
+        this.evolutionChart?.destroy();
+
         const labels = history.map(h => new Date(h.date).toLocaleDateString('es-AR', { month: 'short', year: 'numeric' }));
         const values = history.map(h => h.value);
-        const color = this.chartThemeService.colorAt(0);
 
-        return {
-            tooltip: { trigger: 'axis', valueFormatter: (value) => this.formatUsd(Number(value)) },
-            grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
-            xAxis: { type: 'category', data: labels },
-            yAxis: { type: 'value', axisLabel: { formatter: (value: number) => this.formatUsd(value) } },
-            series: [{
-                type: 'line',
-                data: values,
-                showSymbol: false,
-                smooth: 0.2,
-                areaStyle: {},
-                lineStyle: { color },
-                itemStyle: { color }
-            }]
-        };
+        this.evolutionChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [{
+                    label: 'Valor de la cartera',
+                    data: values,
+                    borderColor: 'rgba(91, 61, 217, 1)',
+                    backgroundColor: 'rgba(91, 61, 217, 0.15)',
+                    fill: true,
+                    tension: 0.2
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (tooltipItem) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(tooltipItem.raw))
+                        }
+                    }
+                },
+                scales: { y: { beginAtZero: true, ticks: { callback: (v) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(v)) } } }
+            }
+        });
     }
 
-    private formatUsd(value: number): string {
-        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+    private generateControlledColors(quantity: number): string[] {
+        const colors = [];
+        const step = 360 / quantity;
+        for (let i = 0; i < quantity; i++) {
+            const hue = Math.floor(i * step);
+            const saturation = Math.floor(Math.random() * 30 + 70);
+            const lightness = Math.floor(Math.random() * 20 + 40);
+            colors.push(`hsl(${hue}, ${saturation}%, ${lightness}%)`);
+        }
+        return colors;
     }
 }

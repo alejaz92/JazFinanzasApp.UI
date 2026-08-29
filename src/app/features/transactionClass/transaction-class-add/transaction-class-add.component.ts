@@ -1,11 +1,9 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { TransactionClassAddRequest } from '../models/transactionClass-addRequest.model';
-import { TransactionClass, TRANSACTION_CLASS_NATURES, TRANSACTION_CLASS_NATURE_LABELS } from '../models/transactionClass.model';
 import { Subscription } from 'rxjs';
 import { TransactionClassService } from '../services/transaction-class.service';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { NgFor } from '@angular/common';
 import { ToastService } from '../../../core/services/toast.service';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 import { SubmitButtonComponent } from '../../../shared/components/submit-button/submit-button.component';
@@ -14,18 +12,12 @@ import { SubmitButtonComponent } from '../../../shared/components/submit-button/
     selector: 'app-transaction-class-add',
     templateUrl: './transaction-class-add.component.html',
     styleUrls: ['./transaction-class-add.component.css'],
-    imports: [FormsModule, NgFor, BackButtonComponent, SubmitButtonComponent]
+    imports: [FormsModule, BackButtonComponent, SubmitButtonComponent]
 })
-export class TransactionClassAddComponent implements OnInit, OnDestroy {
+export class TransactionClassAddComponent implements OnDestroy{
   model: TransactionClassAddRequest;
   isSubmitting = false;
-  allClasses: TransactionClass[] = [];
-
-  readonly natures = TRANSACTION_CLASS_NATURES;
-  readonly natureLabels = TRANSACTION_CLASS_NATURE_LABELS;
-
   private addTransactionClassSubscription?: Subscription;
-  private loadClassesSubscription?: Subscription;
 
   constructor(
     private transactionClassService: TransactionClassService,
@@ -34,22 +26,8 @@ export class TransactionClassAddComponent implements OnInit, OnDestroy {
   ) {
     this.model = {
       description: '',
-      incExp: '',
-      parentId: null,
-      nature: null
+      incExp: ''
     };
-  }
-
-  ngOnInit(): void {
-    // Candidatas a padre: solo categorías sin padre propio (T13, jerarquía de un solo nivel).
-    this.loadClassesSubscription = this.transactionClassService.getAllTransactionClasses()
-      .subscribe(classes => this.allClasses = classes);
-  }
-
-  // Filtradas por el mismo tipo (Ingreso/Egreso) que se está eligiendo — evita mezclar una
-  // categoría de egreso bajo un padre de ingreso, aunque el backend no lo prohíbe.
-  get availableParents(): TransactionClass[] {
-    return this.allClasses.filter(c => !c.parentId && c.incExp === this.model.incExp);
   }
 
   onFormSubmit() {
@@ -72,6 +50,5 @@ export class TransactionClassAddComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.addTransactionClassSubscription?.unsubscribe();
-    this.loadClassesSubscription?.unsubscribe();
   }
 }
