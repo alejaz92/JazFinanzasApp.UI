@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Account } from '../models/account.model';
+import { Account, ACCOUNT_TYPE_LABELS, AccountTypeValue } from '../models/account.model';
 import { AccountService } from '../services/account.service';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { NgIf, NgFor } from '@angular/common';
@@ -45,7 +45,12 @@ export class AccountListComponent implements OnInit {
     if (!term) return this.accounts;
     return this.accounts.filter(account => account.name.toLowerCase().includes(term));
   }
-  
+
+  typeLabel(type: string | null | undefined): string {
+    return type ? (ACCOUNT_TYPE_LABELS[type as AccountTypeValue] ?? type) : '—';
+  }
+
+
   onDelete(accountId: number): void {
     if (!accountId) return;
     this.accountIdToDelete = accountId;

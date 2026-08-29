@@ -1,9 +1,11 @@
 import { Component, OnDestroy } from '@angular/core';
 import { AccountAddRequest } from '../models/account-add-request.model';
+import { ACCOUNT_TYPES, ACCOUNT_TYPE_LABELS } from '../models/account.model';
 import { Subscription } from 'rxjs';
 import { AccountService } from '../services/account.service';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { NgFor } from '@angular/common';
 import { ToastService } from '../../../core/services/toast.service';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 import { SubmitButtonComponent } from '../../../shared/components/submit-button/submit-button.component';
@@ -12,7 +14,7 @@ import { SubmitButtonComponent } from '../../../shared/components/submit-button/
     selector: 'app-account-add',
     templateUrl: './account-add.component.html',
     styleUrls: ['./account-add.component.css'],
-    imports: [FormsModule, BackButtonComponent, SubmitButtonComponent]
+    imports: [FormsModule, NgFor, BackButtonComponent, SubmitButtonComponent]
 })
 export class AccountAddComponent implements OnDestroy {
 
@@ -20,12 +22,17 @@ export class AccountAddComponent implements OnDestroy {
   isSubmitting = false;
   private addCategorysubscription?: Subscription;
 
+  readonly types = ACCOUNT_TYPES;
+  readonly typeLabels = ACCOUNT_TYPE_LABELS;
+
   constructor(private accountService: AccountService,
     private router: Router,
     private toastService: ToastService
   ) {
     this.model = {
-      name: ''
+      name: '',
+      type: null,
+      countsAsLiquid: true
     };
   }
 
