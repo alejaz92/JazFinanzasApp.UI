@@ -137,7 +137,7 @@
                     Tenencias de Bolsa
                 </div>
                 <div class="card-body">
-                    <canvas id="stocksHomeChart"></canvas>
+                    <app-chart [options]="stocksOptions" height="320px"></app-chart>
                 </div>
             </div>            
         </div>
@@ -147,7 +147,7 @@
                     Tenencias de Criptomonedas
                 </div>
                 <div class="card-body">
-                    <canvas id="cryptosHomeChart"></canvas>
+                    <app-chart [options]="cryptosOptions" height="320px"></app-chart>
                 </div>
             </div>                
         </div>

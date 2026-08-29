@@ -59,15 +59,29 @@ export class ChartThemeService {
         return this.currencyInvestmentPipe.transform(value);
     }
 
+    // Getters live (no cacheados) sobre las custom properties de Bootstrap vigentes en
+    // <html> — para series con opciones puntuales (ej. el texto central de un gauge) que
+    // necesitan un color explícito legible en ambos temas y no lo heredan del theme general.
+    get textColor(): string {
+        return getComputedStyle(document.documentElement).getPropertyValue('--bs-body-color').trim() || '#332E4D';
+    }
+
+    get borderColor(): string {
+        return getComputedStyle(document.documentElement).getPropertyValue('--bs-border-color').trim() || '#dee2e6';
+    }
+
+    get surfaceColor(): string {
+        return getComputedStyle(document.documentElement).getPropertyValue('--bs-secondary-bg').trim() || '#ffffff';
+    }
+
     // Objeto de tema para echarts.init(dom, theme): se recalcula cada vez que se pide,
     // leyendo las custom properties de Bootstrap vigentes en <html> — así sigue
     // automáticamente cualquier cambio de paleta en styles.scss (incluido el toggle de
     // modo claro/oscuro) sin duplicar valores hexadecimales acá.
     buildEChartsTheme(): Record<string, unknown> {
-        const cs = getComputedStyle(document.documentElement);
-        const textColor = cs.getPropertyValue('--bs-body-color').trim() || '#332E4D';
-        const borderColor = cs.getPropertyValue('--bs-border-color').trim() || '#dee2e6';
-        const surfaceColor = cs.getPropertyValue('--bs-secondary-bg').trim() || '#ffffff';
+        const textColor = this.textColor;
+        const borderColor = this.borderColor;
+        const surfaceColor = this.surfaceColor;
         const fontFamily = "'Inter', system-ui, -apple-system, sans-serif";
 
         const axisCommon = {

@@ -32,7 +32,7 @@
                 <div class="card">
                     <div class="card-header">Breakdown por Clase (En {{ mainReference?.symbol }})</div>
                     <div class="card-body">
-                        <canvas id="tripBreakdownChart"></canvas>
+                        <app-chart [options]="breakdownOptions" height="320px"></app-chart>
                     </div>
                 </div>
             </div>

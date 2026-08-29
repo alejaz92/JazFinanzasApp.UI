@@ -21,7 +21,7 @@
                 <div class="card">
                     <div class="card-header">Distribución por Tipo de Activo (En {{ mainReference?.symbol }})</div>
                     <div class="card-body">
-                        <canvas id="stocksGralChart"></canvas>
+                        <app-chart [options]="stocksGralOptions" height="320px"></app-chart>
                     </div>
                 </div>
             </div>
@@ -29,7 +29,7 @@
                 <div class="card">
                     <div class="card-header">Distribución por Ticker (En {{ mainReference?.symbol }})</div>
                     <div class="card-body">
-                        <canvas id="percentajeByTickerChart"></canvas>
+                        <app-chart [options]="percentajeByTickerOptions" height="320px"></app-chart>
                     </div>
                 </div>
             </div>
@@ -40,7 +40,7 @@
                 <div class="card">
                     <div class="card-header">Valores Originales Promedio vs Valores Actuales (En {{ mainReference?.symbol }})</div>
                     <div class="card-body">
-                        <canvas id="origVsActualChart"></canvas>
+                        <app-chart [options]="origVsActualOptions" height="320px"></app-chart>
                     </div>
                 </div>
             </div>

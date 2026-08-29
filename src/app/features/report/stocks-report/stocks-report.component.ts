@@ -1,9 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { NgIf, NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Chart, ChartConfiguration, registerables } from 'chart.js';
-Chart.register(...registerables);
-import ChartDataLabels from 'chartjs-plugin-datalabels';
+import type { EChartsOption } from 'echarts';
 
 import { ReportService } from '../services/report.service';
 import { AssetTypeService } from '../../assetType/services/asset-type.service';
@@ -12,13 +10,14 @@ import { Asset } from '../../asset/models/asset.model';
 import { AssetType } from '../../account/models/assetType.model';
 import { StockStatsDTO, StockStatsListDTO } from '../models/StockStats.model';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
+import { ChartComponent } from '../../../shared/components/chart/chart.component';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { CurrencyInvestmentFormatPipe } from '../../../shared/pipes/currencyInvestmentFormat/currency-investment-format.pipe';
 
 @Component({
     selector: 'app-stocks-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, FormsModule, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe],
+    imports: [LoadingComponent, NgIf, NgFor, FormsModule, ChartComponent, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe],
     templateUrl: './stocks-report.component.html',
     styleUrl: './stocks-report.component.css'
 })
@@ -31,9 +30,9 @@ export class StocksReportComponent implements OnInit {
     stocksStatsDTO: StockStatsListDTO[] = [];
     mainReference: Asset | null = null;
 
-    private db4Graph1: Chart | undefined;
-    private db4Graph2: Chart | undefined;
-    private db4Graph3: Chart | undefined;
+    stocksGralOptions: EChartsOption = {};
+    percentajeByTickerOptions: EChartsOption = {};
+    origVsActualOptions: EChartsOption = {};
 
     constructor(
         private reportService: ReportService,
@@ -70,127 +69,67 @@ export class StocksReportComponent implements OnInit {
 
         this.reportService.getStockStats(this.selectedAssetTypeDB4).subscribe(response => {
             this.isLoadingGraph = false;
+            this.buildChartOptions(response);
+            this.stocksStatsDTO = response.stockStatsInd;
             this.viewAux = true;
-            setTimeout(() => {
-                this.renderCharts(response);
-                this.stocksStatsDTO = response.stockStatsInd;
-            }, 0);
         });
     }
 
-    private renderCharts(data: StockStatsDTO): void {
-        this.renderDistributionByTicker(data);
-        this.renderOrigVsActual(data);
-        this.renderStocksGral(data);
+    private buildChartOptions(data: StockStatsDTO): void {
+        this.percentajeByTickerOptions = this.buildPieOptions(
+            data.stockStatsInd.map(i => ({ name: i.symbol, tooltipName: `${i.assetName} (${i.symbol})`, value: i.actualValue }))
+        );
+        this.stocksGralOptions = this.buildPieOptions(
+            data.stockStatsGral.map(i => ({ name: i.assetType, tooltipName: i.assetType, value: i.actualValue }))
+        );
+        this.origVsActualOptions = this.buildOrigVsActualOptions(data);
     }
 
-    private renderDistributionByTicker(data: StockStatsDTO): void {
-        const ctx = document.getElementById('percentajeByTickerChart') as HTMLCanvasElement;
-        if (!ctx) return;
-        this.db4Graph1?.destroy();
+    private buildPieOptions(data: { name: string; tooltipName: string; value: number }[]): EChartsOption {
+        const tooltipNames = new Map(data.map(d => [d.name, d.tooltipName]));
 
-        const tickers = data.stockStatsInd.map(i => i.assetName);
-        const symbols = data.stockStatsInd.map(i => i.symbol);
-        const currentValues = data.stockStatsInd.map(i => i.actualValue);
-        const colors = this.generateControlledColors(currentValues.length);
-
-        this.db4Graph1 = new Chart(ctx, {
-            type: 'pie',
-            data: { labels: symbols, datasets: [{ data: currentValues, backgroundColor: colors, hoverOffset: 4 }] },
-            options: {
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: (tooltipItem) => {
-                                const total = currentValues.reduce((a, b) => a + b, 0);
-                                const pct = ((Number(tooltipItem.raw) / total) * 100).toFixed(2);
-                                return `${tickers[tooltipItem.dataIndex]} (${symbols[tooltipItem.dataIndex]}): ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(tooltipItem.raw))} (${pct}%)`;
-                            }
-                        }
-                    },
-                    datalabels: {
-                        display: true, color: 'white', align: 'center', anchor: 'center', font: { weight: 'bold' },
-                        formatter: (value, context) => {
-                            const total = (context.chart.data.datasets[0].data as number[]).reduce((a, b) => a + b, 0);
-                            const pct = total ? ((value / total) * 100).toFixed(2) : '0.00';
-                            return Number(pct) > 5 && context.chart.data.labels ? context.chart.data.labels[context.dataIndex] : '';
-                        }
-                    }
+        return {
+            tooltip: {
+                trigger: 'item',
+                formatter: (params) => {
+                    const p = params as { name: string; value: number; percent: number };
+                    return `${tooltipNames.get(p.name) ?? p.name}: ${this.formatUsd(p.value)} (${p.percent}%)`;
                 }
-            } as ChartConfiguration['options'],
-            plugins: [ChartDataLabels]
-        });
-    }
-
-    private renderOrigVsActual(data: StockStatsDTO): void {
-        const ctx = document.getElementById('origVsActualChart') as HTMLCanvasElement;
-        if (!ctx) return;
-        this.db4Graph2?.destroy();
-
-        const symbols = data.stockStatsInd.map(i => i.symbol);
-        this.db4Graph2 = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: symbols,
-                datasets: [
-                    { label: 'Valores Originales Promedio', data: data.stockStatsInd.map(i => i.originalValue), backgroundColor: 'rgba(255, 99, 132, 0.2)', borderColor: 'rgba(255, 99, 132, 1)', borderWidth: 1 },
-                    { label: 'Valores Actuales', data: data.stockStatsInd.map(i => i.actualValue), backgroundColor: 'rgba(75, 192, 192, 0.2)', borderColor: 'rgba(75, 192, 192, 1)', borderWidth: 1 }
-                ]
             },
-            options: {
-                scales: { y: { beginAtZero: true, ticks: { callback: (v) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(v)) } } }
-            }
-        });
-    }
-
-    private renderStocksGral(data: StockStatsDTO): void {
-        const ctx = document.getElementById('stocksGralChart') as HTMLCanvasElement;
-        if (!ctx) return;
-        this.db4Graph3?.destroy();
-
-        const assetTypes = data.stockStatsGral.map(i => i.assetType);
-        const gralValues = data.stockStatsGral.map(i => i.actualValue);
-        const colors = this.generateControlledColors(gralValues.length);
-
-        this.db4Graph3 = new Chart(ctx, {
-            type: 'pie',
-            data: { labels: assetTypes, datasets: [{ data: gralValues, backgroundColor: colors, hoverOffset: 4 }] },
-            options: {
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: (tooltipItem) => {
-                                const total = gralValues.reduce((a, b) => a + b, 0);
-                                const pct = ((Number(tooltipItem.raw) / total) * 100).toFixed(2);
-                                return `${assetTypes[tooltipItem.dataIndex]}: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(tooltipItem.raw))} (${pct}%)`;
-                            }
-                        }
-                    },
-                    datalabels: {
-                        display: true, color: 'white', align: 'center', anchor: 'center', font: { weight: 'bold' },
-                        formatter: (value, context) => {
-                            const total = (context.chart.data.datasets[0].data as number[]).reduce((a, b) => a + b, 0);
-                            const pct = total ? ((value / total) * 100).toFixed(2) : '0.00';
-                            return Number(pct) > 5 && context.chart.data.labels ? context.chart.data.labels[context.dataIndex] : '';
-                        }
+            series: [{
+                type: 'pie',
+                radius: ['45%', '70%'],
+                data: data.map(d => ({ name: d.name, value: d.value })),
+                label: {
+                    show: true,
+                    position: 'inside',
+                    color: '#fff',
+                    formatter: (params) => {
+                        const p = params as { name: string; percent: number };
+                        return p.percent > 5 ? p.name : '';
                     }
                 }
-            } as ChartConfiguration['options'],
-            plugins: [ChartDataLabels]
-        });
+            }]
+        };
     }
 
-    private generateControlledColors(quantity: number): string[] {
-        const colors = [];
-        const step = 360 / quantity;
-        for (let i = 0; i < quantity; i++) {
-            const hue = Math.floor(i * step);
-            const saturation = Math.floor(Math.random() * 30 + 70);
-            const lightness = Math.floor(Math.random() * 20 + 40);
-            colors.push(`hsl(${hue}, ${saturation}%, ${lightness}%)`);
-        }
-        return colors;
+    private buildOrigVsActualOptions(data: StockStatsDTO): EChartsOption {
+        const symbols = data.stockStatsInd.map(i => i.symbol);
+
+        return {
+            tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, valueFormatter: (value) => this.formatUsd(Number(value)) },
+            legend: {},
+            grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+            xAxis: { type: 'category', data: symbols },
+            yAxis: { type: 'value', axisLabel: { formatter: (value: number) => this.formatUsd(value) } },
+            series: [
+                { name: 'Valores Originales Promedio', type: 'bar', data: data.stockStatsInd.map(i => i.originalValue) },
+                { name: 'Valores Actuales', type: 'bar', data: data.stockStatsInd.map(i => i.actualValue) }
+            ]
+        };
+    }
+
+    private formatUsd(value: number): string {
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
     }
 }

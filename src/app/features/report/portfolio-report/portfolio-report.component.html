@@ -33,7 +33,7 @@
                 <div class="card">
                     <div class="card-header">Composición por Tipo de Activo (En {{ mainReference?.symbol }})</div>
                     <div class="card-body">
-                        <canvas id="portfolioCompositionChart"></canvas>
+                        <app-chart [options]="compositionOptions" height="320px"></app-chart>
                     </div>
                 </div>
             </div>
@@ -44,7 +44,7 @@
                 <div class="card">
                     <div class="card-header">Evolución del Valor (En {{ mainReference?.symbol }}, últimos 12 meses)</div>
                     <div class="card-body">
-                        <canvas id="portfolioEvolutionChart"></canvas>
+                        <app-chart [options]="evolutionOptions" height="320px"></app-chart>
                     </div>
                 </div>
             </div>

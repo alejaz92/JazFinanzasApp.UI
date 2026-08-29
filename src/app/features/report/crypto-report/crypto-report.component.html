@@ -21,7 +21,7 @@
                     <div class="card">
                         <div class="card-header">Estado de Valuación (En {{ mainReference?.symbol }})</div>
                         <div class="card-body">
-                            <div id="gaugeChart" style="width: 100%; height: 300px;"></div>
+                            <app-chart [options]="gaugeOptions" height="300px"></app-chart>
                         </div>
                     </div>
                 </div>
@@ -29,7 +29,7 @@
                     <div class="card">
                         <div class="card-header">Evolución del Valor de la Criptomoneda (En {{ mainReference?.symbol }})</div>
                         <div class="card-body">
-                            <canvas id="priceEvolutionChart"></canvas>
+                            <app-chart [options]="priceEvolutionOptions" height="320px"></app-chart>
                         </div>
                     </div>
                 </div>
@@ -38,7 +38,7 @@
                 <div class="card">
                     <div class="card-header">Distribución de Saldos por Cuenta</div>
                     <div class="card-body">
-                        <canvas id="cryptoBalanceChart"></canvas>
+                        <app-chart [options]="cryptoBalanceOptions" height="320px"></app-chart>
                     </div>
                 </div>
             </div>

@@ -1,9 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { NgIf, NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Chart, ChartConfiguration, registerables } from 'chart.js';
-Chart.register(...registerables);
-import ChartDataLabels from 'chartjs-plugin-datalabels';
+import type { EChartsOption } from 'echarts';
 
 import { ReportService } from '../services/report.service';
 import { AssetService } from '../../asset/services/asset.service';
@@ -11,13 +9,15 @@ import { Asset } from '../../asset/models/asset.model';
 import { CryptoGralStatsDTO } from '../models/CryptoGralStats.model';
 import { StockStatsListDTO } from '../models/StockStats.model';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
+import { ChartComponent } from '../../../shared/components/chart/chart.component';
+import { ChartThemeService } from '../../../shared/services/chart-theme.service';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { CurrencyInvestmentFormatPipe } from '../../../shared/pipes/currencyInvestmentFormat/currency-investment-format.pipe';
 
 @Component({
     selector: 'app-cryptos-gral-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, FormsModule, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe],
+    imports: [LoadingComponent, NgIf, NgFor, FormsModule, ChartComponent, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe],
     templateUrl: './cryptos-gral-report.component.html',
     styleUrl: './cryptos-gral-report.component.css'
 })
@@ -27,13 +27,14 @@ export class CryptosGralReportComponent implements OnInit {
     cryptoGralStatsDTO: StockStatsListDTO[] = [];
     mainReference: Asset | null = null;
 
-    private db5Graph1: Chart | undefined;
-    private db5Graph2: Chart | undefined;
-    private db5Graph3: Chart | undefined;
+    distributionOptions: EChartsOption = {};
+    walletEvolutionOptions: EChartsOption = {};
+    buyVolumeOptions: EChartsOption = {};
 
     constructor(
         private reportService: ReportService,
-        private assetService: AssetService
+        private assetService: AssetService,
+        private chartThemeService: ChartThemeService
     ) {}
 
     ngOnInit(): void {
@@ -51,87 +52,71 @@ export class CryptosGralReportComponent implements OnInit {
         this.isLoadingGraph = true;
         this.reportService.getCryptoGralStats(this.includeStables).subscribe(response => {
             this.isLoadingGraph = false;
-            setTimeout(() => {
-                this.cryptoGralStatsDTO = response.cryptoGralStats;
-                this.renderCharts(response);
-            }, 0);
+            this.cryptoGralStatsDTO = response.cryptoGralStats;
+            this.buildChartOptions(response);
         });
     }
 
-    private renderCharts(data: CryptoGralStatsDTO): void {
-        this.renderDistribution(data);
-        this.renderWalletEvolution(data);
-        this.renderBuyVolume(data);
+    private buildChartOptions(data: CryptoGralStatsDTO): void {
+        this.distributionOptions = this.buildDistributionOptions(data);
+        this.walletEvolutionOptions = this.buildWalletEvolutionOptions(data);
+        this.buyVolumeOptions = this.buildBuyVolumeOptions(data);
     }
 
-    private renderDistribution(data: CryptoGralStatsDTO): void {
-        const ctx = document.getElementById('cryptosGralDistributionChart') as HTMLCanvasElement;
-        if (!ctx) return;
-        this.db5Graph1?.destroy();
+    private buildDistributionOptions(data: CryptoGralStatsDTO): EChartsOption {
+        const tooltipNames = new Map(data.cryptoGralStats.map(i => [i.symbol, `${i.assetName} (${i.symbol})`]));
 
-        const tickers = data.cryptoGralStats.map(i => i.assetName);
-        const symbols = data.cryptoGralStats.map(i => i.symbol);
-        const currentValues = data.cryptoGralStats.map(i => i.actualValue);
-        const colors = this.generateControlledColors(currentValues.length);
-
-        this.db5Graph1 = new Chart(ctx, {
-            type: 'pie',
-            data: { labels: symbols, datasets: [{ data: currentValues, backgroundColor: colors, hoverOffset: 4 }] },
-            options: {
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: (tooltipItem) => {
-                                const total = currentValues.reduce((a, b) => a + b, 0);
-                                const pct = ((Number(tooltipItem.raw) / total) * 100).toFixed(2);
-                                return `${tickers[tooltipItem.dataIndex]} (${symbols[tooltipItem.dataIndex]}): ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(tooltipItem.raw))} (${pct}%)`;
-                            }
-                        }
-                    },
-                    datalabels: {
-                        display: true, color: 'white', align: 'center', anchor: 'center', font: { weight: 'bold' },
-                        formatter: (value, context) => {
-                            const total = (context.chart.data.datasets[0].data as number[]).reduce((a, b) => a + b, 0);
-                            const pct = total ? ((value / total) * 100).toFixed(2) : '0.00';
-                            return Number(pct) > 5 && context.chart.data.labels ? context.chart.data.labels[context.dataIndex] : '';
-                        }
+        return {
+            tooltip: {
+                trigger: 'item',
+                formatter: (params) => {
+                    const p = params as { name: string; value: number; percent: number };
+                    return `${tooltipNames.get(p.name) ?? p.name}: ${this.formatUsd(p.value)} (${p.percent}%)`;
+                }
+            },
+            series: [{
+                type: 'pie',
+                radius: ['45%', '70%'],
+                data: data.cryptoGralStats.map(i => ({ name: i.symbol, value: i.actualValue })),
+                label: {
+                    show: true,
+                    position: 'inside',
+                    color: '#fff',
+                    formatter: (params) => {
+                        const p = params as { name: string; percent: number };
+                        return p.percent > 5 ? p.name : '';
                     }
                 }
-            } as ChartConfiguration['options'],
-            plugins: [ChartDataLabels]
-        });
+            }]
+        };
     }
 
-    private renderWalletEvolution(data: CryptoGralStatsDTO): void {
-        const ctx = document.getElementById('walletValueEvolutionChart') as HTMLCanvasElement;
-        if (!ctx) return;
-        this.db5Graph2?.destroy();
-
+    private buildWalletEvolutionOptions(data: CryptoGralStatsDTO): EChartsOption {
         const labels = data.cryptoStatsByDate.map(i => new Date(i.date).toLocaleDateString('es-AR'));
         const values = data.cryptoStatsByDate.map(i => i.value);
+        const color = this.chartThemeService.colorAt(0);
 
-        this.db5Graph2 = new Chart(ctx, {
-            type: 'line',
-            data: { labels, datasets: [{ label: 'Valor de la Cartera', data: values, fill: true, borderColor: 'rgba(75, 192, 192, 1)', borderWidth: 1.5, pointRadius: 0 }] },
-            options: {
-                plugins: {
-                    legend: { display: false },
-                    tooltip: { callbacks: { label: (t) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(t.raw)) } }
-                },
-                scales: {
-                    x: { ticks: { callback: function(value, index) { return index % 2 === 0 ? this.getLabelForValue(Number(value)) : ''; } } },
-                    y: { beginAtZero: false, ticks: { callback: (v) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(v)) } }
-                }
-            }
-        });
+        return {
+            tooltip: { trigger: 'axis', valueFormatter: (value) => this.formatUsd(Number(value)) },
+            grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+            xAxis: {
+                type: 'category',
+                data: labels,
+                axisLabel: { interval: (index: number) => index % 2 === 0 }
+            },
+            yAxis: { type: 'value', scale: true, axisLabel: { formatter: (value: number) => this.formatUsd(value) } },
+            series: [{
+                type: 'line',
+                data: values,
+                showSymbol: false,
+                areaStyle: {},
+                lineStyle: { color, width: 1.5 },
+                itemStyle: { color }
+            }]
+        };
     }
 
-    private renderBuyVolume(data: CryptoGralStatsDTO): void {
-        const ctx = document.getElementById('buyVolumeEvolutionChart') as HTMLCanvasElement;
-        if (!ctx) return;
-        this.db5Graph3?.destroy();
-
+    private buildBuyVolumeOptions(data: CryptoGralStatsDTO): EChartsOption {
         const commerceTypeTranslations: Record<string, string> = {
             'BalanceAdj': 'Ajuste de Saldos',
             'Trading': 'Trading',
@@ -150,40 +135,26 @@ export class CryptosGralReportComponent implements OnInit {
 
         const labels = Object.keys(groupedData);
         const commerceTypesArray = Array.from(commerceTypes);
-        const colors = this.generateControlledColors(commerceTypesArray.length);
 
-        const datasets = commerceTypesArray.map((type, index) => ({
-            label: commerceTypeTranslations[type] || type,
+        const series = commerceTypesArray.map((type, index) => ({
+            name: commerceTypeTranslations[type] || type,
+            type: 'bar' as const,
+            stack: 'total',
             data: labels.map(month => groupedData[month][type] || 0),
-            backgroundColor: colors[index]
+            itemStyle: { color: this.chartThemeService.colorAt(index) }
         }));
 
-        this.db5Graph3 = new Chart(ctx, {
-            type: 'bar',
-            data: { labels, datasets },
-            options: {
-                responsive: true,
-                plugins: {
-                    tooltip: { callbacks: { label: (t) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(t.raw)) } },
-                    legend: { position: 'top' }
-                },
-                scales: {
-                    x: { stacked: true },
-                    y: { beginAtZero: false, ticks: { callback: (v) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(v)) } }
-                }
-            }
-        });
+        return {
+            tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, valueFormatter: (value) => this.formatUsd(Number(value)) },
+            legend: {},
+            grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+            xAxis: { type: 'category', data: labels },
+            yAxis: { type: 'value', axisLabel: { formatter: (value: number) => this.formatUsd(value) } },
+            series
+        };
     }
 
-    private generateControlledColors(quantity: number): string[] {
-        const colors = [];
-        const step = 360 / quantity;
-        for (let i = 0; i < quantity; i++) {
-            const hue = Math.floor(i * step);
-            const saturation = Math.floor(Math.random() * 30 + 70);
-            const lightness = Math.floor(Math.random() * 20 + 40);
-            colors.push(`hsl(${hue}, ${saturation}%, ${lightness}%)`);
-        }
-        return colors;
+    private formatUsd(value: number): string {
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
     }
 }
