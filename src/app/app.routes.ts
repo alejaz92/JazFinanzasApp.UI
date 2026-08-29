@@ -238,11 +238,6 @@ export const routes: Routes = [
     canActivate: [AuthGuard]
   },
   {
-    path: 'management/merchants',
-    loadComponent: () => import('./features/merchants/merchant-list/merchant-list.component').then(m => m.MerchantListComponent),
-    canActivate: [AuthGuard]
-  },
-  {
     path: 'management/trips',
     loadComponent: () => import('./features/trips/trip-list/trip-list.component').then(m => m.TripListComponent),
     canActivate: [AuthGuard]
