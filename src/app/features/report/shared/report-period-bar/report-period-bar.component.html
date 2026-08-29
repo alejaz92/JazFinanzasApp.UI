@@ -1,0 +1,36 @@
+<div class="report-period-bar d-flex flex-wrap align-items-center gap-2 mb-3">
+
+    <div class="btn-group btn-group-sm flex-wrap" role="group" aria-label="Período">
+        @for (preset of presets; track preset) {
+            <button type="button" class="btn"
+                    [class.btn-primary]="activePreset === preset"
+                    [class.btn-outline-secondary]="activePreset !== preset"
+                    (click)="selectPreset(preset)">
+                {{ presetLabels[preset] }}
+            </button>
+        }
+    </div>
+
+    @if (customMode) {
+        <div class="d-flex align-items-center gap-2">
+            <input type="date" class="form-control form-control-sm" style="width: 145px;" [(ngModel)]="customFrom" />
+            <span class="text-muted small">a</span>
+            <input type="date" class="form-control form-control-sm" style="width: 145px;" [(ngModel)]="customTo" />
+            <button type="button" class="btn btn-primary btn-sm" [disabled]="!customFrom || !customTo" (click)="applyCustomRange()">
+                Aplicar
+            </button>
+        </div>
+    }
+
+    <div class="ms-auto d-flex align-items-center gap-2">
+        <label class="form-label mb-0 small text-muted">Moneda</label>
+        <select class="form-select form-select-sm" style="width: auto;"
+                [ngModel]="context.currencyAssetId()"
+                (ngModelChange)="onCurrencyChange($event)">
+            @for (asset of context.referenceAssets(); track asset.id) {
+                <option [ngValue]="asset.id">{{ asset.symbol }}</option>
+            }
+        </select>
+    </div>
+
+</div>

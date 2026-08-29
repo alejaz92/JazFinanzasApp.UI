@@ -1,17 +1,10 @@
 <app-loading [isLoading]="isLoading"></app-loading>
 
 <div *ngIf="!isLoading">
-    <h2 class="mb-3">Ingresos y Egresos</h2>
+    <h2 class="mb-3">Ingresos y Egresos (En {{ reportContext.currentCurrency()?.symbol }})</h2>
 
     <div class="row mt-1">
-        <div class="col-md-6">
-            <label for="asset">Moneda a Visualizar</label>
-            <select class="form-select" id="asset" [(ngModel)]="selectedAssetIdDB1" (change)="loadIncExpStats()">
-                <option value="0" selected disabled>Seleccione</option>
-                <option *ngFor="let asset of assetsDB1" [value]="asset.id">{{ asset.name }}</option>
-            </select>
-        </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
             <label for="MonthDB1">Mes</label>
             <input class="form-control" type="month" id="MonthDB1" [(ngModel)]="selectedMonthDB1" (change)="loadIncExpStats()"/>
         </div>

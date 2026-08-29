@@ -1,0 +1,14 @@
+.kpi-card-clickable {
+    cursor: pointer;
+
+    &:hover {
+        border-color: var(--bs-primary);
+    }
+}
+
+.kpi-sparkline {
+    width: 70px;
+    height: 28px;
+    color: var(--bs-primary);
+    flex-shrink: 0;
+}

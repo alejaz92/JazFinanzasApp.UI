@@ -15,53 +15,59 @@
 
   <ul class="nav flex-column py-2">
     @for (entry of navEntries; track entry.label) {
-      @if (isCategory(entry)) {
-        <li class="nav-item">
-          <a class="nav-link text-white px-3 py-2 d-flex align-items-center sidebar-link sidebar-category"
-             [class.expanded]="expandedCategory === entry.label"
-             role="button"
-             (click)="toggleCategory(entry.label)">
-            <i class="bi {{ entry.icon }} me-2"></i>
-            <span class="flex-grow-1">{{ entry.label }}</span>
-            <i class="bi bi-chevron-down category-chevron"></i>
-          </a>
-          @if (expandedCategory === entry.label) {
-            <ul class="nav flex-column sidebar-subnav">
-              @for (child of entry.children; track child.label) {
-                <li class="nav-item">
-                  <a class="nav-link text-white px-3 py-2 d-flex align-items-center sidebar-link sidebar-sublink"
-                     [routerLink]="child.route"
-                     routerLinkActive="active"
-                     (click)="sidebarOpen = false">
-                    <i class="bi {{ child.icon }} me-2"></i>
-                    {{ child.label }}
-                  </a>
-                </li>
-              }
-            </ul>
-          }
-        </li>
-      } @else {
-        <li class="nav-item">
-          <a class="nav-link text-white px-3 py-2 d-flex align-items-center sidebar-link"
-             [routerLink]="entry.route"
-             routerLinkActive="active"
-             (click)="sidebarOpen = false">
-            <i class="bi {{ entry.icon }} me-2"></i>
-            {{ entry.label }}
-          </a>
-        </li>
-      }
+      <ng-container *ngTemplateOutlet="entryTpl; context: { entry: entry, level: 0 }"></ng-container>
     }
   </ul>
 </nav>
 
+<!-- Template recursivo: una categoría puede contener tanto links como sub-categorías
+     (ej. Inversiones > Carteras > General/Detalle) — Fase 4, plan-rediseno-reportes.md. -->
+<ng-template #entryTpl let-entry="entry" let-level="level">
+  @if (isCategory(entry)) {
+    <li class="nav-item">
+      <a class="nav-link text-white px-3 py-2 d-flex align-items-center sidebar-link sidebar-category"
+         [class.expanded]="isExpanded(entry.label)"
+         [class.sidebar-category-empty]="entry.children.length === 0"
+         [class.level-1]="level === 1"
+         role="button"
+         (click)="entry.children.length > 0 && toggleCategory(entry.label)">
+        <i class="bi {{ entry.icon }} me-2"></i>
+        <span class="flex-grow-1">{{ entry.label }}</span>
+        @if (entry.children.length === 0) {
+          <span class="badge sidebar-soon-badge">Próximamente</span>
+        } @else {
+          <i class="bi bi-chevron-down category-chevron"></i>
+        }
+      </a>
+      @if (isExpanded(entry.label) && entry.children.length > 0) {
+        <ul class="nav flex-column sidebar-subnav" [class.level-2]="level === 1">
+          @for (child of entry.children; track child.label) {
+            <ng-container *ngTemplateOutlet="entryTpl; context: { entry: child, level: level + 1 }"></ng-container>
+          }
+        </ul>
+      }
+    </li>
+  } @else {
+    <li class="nav-item">
+      <a class="nav-link text-white px-3 py-2 d-flex align-items-center sidebar-link sidebar-sublink"
+         [class.level-2]="level === 2"
+         [routerLink]="entry.route"
+         routerLinkActive="active"
+         (click)="closeSidebar()">
+        <i class="bi {{ entry.icon }} me-2"></i>
+        {{ entry.label }}
+      </a>
+    </li>
+  }
+</ng-template>
+
 <!-- Mobile overlay -->
 @if (sidebarOpen) {
-  <div class="sidebar-overlay d-lg-none" (click)="sidebarOpen = false"></div>
+  <div class="sidebar-overlay d-lg-none" (click)="closeSidebar()"></div>
 }
 
 <!-- Main content -->
 <main class="reports-content p-3 p-lg-4">
+  <app-report-period-bar></app-report-period-bar>
   <router-outlet></router-outlet>
 </main>

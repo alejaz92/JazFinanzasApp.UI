@@ -1,12 +1,11 @@
-import { Component, OnInit } from '@angular/core';
-import { NgIf, NgFor } from '@angular/common';
+import { Component, OnInit, effect } from '@angular/core';
+import { NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import type { EChartsOption } from 'echarts';
 
 import { ReportService } from '../services/report.service';
+import { ReportContextService } from '../services/report-context.service';
 import { IncExpStats } from '../models/IncExpStats.model';
-import { AssetService } from '../../asset/services/asset.service';
-import { Asset } from '../../asset/models/asset.model';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
@@ -14,14 +13,10 @@ import { ChartThemeService } from '../../../shared/services/chart-theme.service'
 @Component({
     selector: 'app-inc-exp-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, FormsModule, ChartComponent],
+    imports: [LoadingComponent, NgIf, FormsModule, ChartComponent],
     templateUrl: './inc-exp-report.component.html'
 })
 export class IncExpReportComponent implements OnInit {
-    isLoading = true;
-    assetsDB1: Asset[] = [];
-    selectedAssetIdDB1 = 0;
-    selectedAssetDB1: Asset | null = null;
     selectedMonthDB1 = '';
     incExpStats: IncExpStats | null = null;
     viewAux = false;
@@ -34,50 +29,51 @@ export class IncExpReportComponent implements OnInit {
 
     constructor(
         private reportService: ReportService,
-        private assetService: AssetService,
-        private chartThemeService: ChartThemeService
-    ) {}
+        private chartThemeService: ChartThemeService,
+        public reportContext: ReportContextService
+    ) {
+        // La moneda ya no se elige acá: viene de la barra de período/moneda del shell
+        // (Fase 4, docs/plans/activos/plan-rediseno-reportes.md). Recarga sola apenas
+        // ReportContextService resuelve la referencia principal, y de nuevo si el usuario
+        // la cambia desde la barra.
+        effect(() => {
+            if (this.reportContext.currentCurrency()) this.loadIncExpStats();
+        });
+    }
 
     ngOnInit(): void {
-        this.viewAux = false;
         const now = new Date();
         const year = now.getFullYear();
         const month = (now.getMonth() + 1).toString().padStart(2, '0');
         this.selectedMonthDB1 = `${year}-${month}`;
-        this.loadAssetsDB1();
     }
 
-    loadAssetsDB1(): void {
-        this.assetService.getReferenceAssets().subscribe((data: Asset[]) => {
-            this.assetsDB1 = data;
-            this.isLoading = false;
-        });
+    // Ya no hay una carga local de "lista de monedas": la resuelve ReportContextService,
+    // compartida por todos los reportes. Mientras no haya moneda todavía no hay nada que mostrar.
+    get isLoading(): boolean {
+        return !this.reportContext.currentCurrency();
     }
 
     loadIncExpStats(): void {
-        this.selectedAssetDB1 = this.assetsDB1.find(x => x.id == this.selectedAssetIdDB1) ?? null;
-
-        if (this.selectedAssetDB1 == null) {
+        const currency = this.reportContext.currentCurrency();
+        if (!currency || !this.selectedMonthDB1) {
             this.viewAux = false;
             return;
         }
 
-        if (this.selectedMonthDB1 != null && this.selectedAssetIdDB1 != 0) {
-            this.isLoadingGraph = true;
-            this.viewAux = false;
+        this.isLoadingGraph = true;
+        this.viewAux = false;
 
-            this.reportService.getIncExpStats(this.selectedMonthDB1, this.selectedAssetDB1.id)
-                .subscribe(response => {
-                    this.incExpStats = response;
-                    this.isLoadingGraph = false;
-                    this.buildChartOptions();
-                    this.viewAux = true;
-                });
-        }
+        this.reportService.getIncExpStats(this.selectedMonthDB1, currency.id)
+            .subscribe(response => {
+                this.incExpStats = response;
+                this.isLoadingGraph = false;
+                this.buildChartOptions(currency.symbol);
+                this.viewAux = true;
+            });
     }
 
-    private buildChartOptions(): void {
-        const currency = this.selectedAssetDB1?.symbol ?? '';
+    private buildChartOptions(currency: string): void {
         const semantic = this.chartThemeService.semantic;
 
         this.incomeByClassOptions = this.buildBarOptions(this.filterByClass(this.incExpStats?.classIncomeStats ?? []), currency, semantic.income);
