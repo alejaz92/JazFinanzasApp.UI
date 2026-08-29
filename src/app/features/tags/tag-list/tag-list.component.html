@@ -1,0 +1,88 @@
+<app-loading [isLoading]="isLoading"></app-loading>
+
+<div class="container mt-4" *ngIf="!isLoading">
+    <div class="d-flex align-items-center gap-2 mb-3">
+        <h1 class="mb-0">Etiquetas</h1>
+        <a class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center"
+           [routerLink]="['/management/tags/add']"
+           title="Agregar Etiqueta"
+           style="width: 44px; height: 44px; font-size: 1.2rem;">
+            <i class="bi-plus-lg text-white"></i>
+        </a>
+        <div class="ms-auto">
+            <input type="text" class="form-control" placeholder="Buscar etiqueta..."
+                   [(ngModel)]="searchTerm" style="max-width: 250px;">
+        </div>
+    </div>
+
+    <ng-container *ngIf="filteredTags && filteredTags.length > 0; else empty">
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>Etiqueta</th>
+                        <th class="text-nowrap" style="width: 110px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let tag of filteredTags">
+                        <td class="align-middle">
+                            <span class="d-inline-block rounded-circle me-2" style="width: 10px; height: 10px;"
+                                  [style.background-color]="tag.color || '#8B72E8'"></span>
+                            {{ tag.name }}
+                        </td>
+                        <td>
+                            <div class="d-none d-md-flex justify-content-center gap-2">
+                                <a title="Editar" class="btn-icon bg-primary" [routerLink]="['/management/tags', tag.id]">
+                                    <i class="bi-pencil-square"></i>
+                                </a>
+                                <button title="Eliminar" class="btn-icon bg-danger" (click)="onDelete(tag.id)">
+                                    <i class="bi-trash"></i>
+                                </button>
+                            </div>
+                            <div class="d-md-none d-flex justify-content-center align-items-center">
+                                <div class="dropdown">
+                                    <button
+                                        class="btn btn-light border rounded-circle d-flex align-items-center justify-content-center"
+                                        type="button"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false"
+                                        title="Acciones"
+                                        style="width: 40px; height: 40px;">
+                                        <i class="bi-list fs-5"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <a class="dropdown-item" [routerLink]="['/management/tags', tag.id]">
+                                                <i class="bi-pencil-square me-2"></i>Editar
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <button class="dropdown-item text-danger" (click)="onDelete(tag.id)">
+                                                <i class="bi-trash me-2"></i>Eliminar
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </ng-container>
+
+    <ng-template #empty>
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-tags fs-1 d-block mb-3"></i>
+            <p class="mb-0">No hay etiquetas registradas.</p>
+        </div>
+    </ng-template>
+</div>
+
+<app-confirm-modal #deleteModal
+    title="Eliminar Etiqueta"
+    message="¿Estás seguro de eliminar esta etiqueta? Se quitará de todos los movimientos y consumos donde esté asignada."
+    confirmLabel="Eliminar"
+    (confirmed)="onDeleteConfirmed()">
+</app-confirm-modal>

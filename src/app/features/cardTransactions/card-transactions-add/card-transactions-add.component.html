@@ -75,6 +75,12 @@
             </div>
         </div>
         <div class="row mb-3">
+            <div class="col">
+                <label class="form-label">Etiquetas (opcional)</label>
+                <app-tag-picker [(selectedTagIds)]="selectedTagIds"></app-tag-picker>
+            </div>
+        </div>
+        <div class="row mb-3">
             <div class="col-md-6">
                 <label for="totalAmount" class="form-label">Monto Total</label>
                 <div class="input-group">

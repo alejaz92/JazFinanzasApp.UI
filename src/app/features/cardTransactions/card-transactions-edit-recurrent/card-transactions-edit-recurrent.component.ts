@@ -2,32 +2,37 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CardTransactionsService } from '../services/card-transactions.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { first, Subscription } from 'rxjs';
+import { first, Subscription, forkJoin } from 'rxjs';
 import { RecurrentCardTransactionPut } from '../models/CardTransaction-recurrent.model';
 import { DatePipe, NgIf } from '@angular/common';
 import { CurrencyInputDirective } from '../../../shared/directives/currency-input.directive';
 import { ToastService } from '../../../core/services/toast.service';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 import { SubmitButtonComponent } from '../../../shared/components/submit-button/submit-button.component';
+import { TagPickerComponent } from '../../../shared/components/tag-picker/tag-picker.component';
+import { TagService } from '../../tags/services/tag.service';
 
 @Component({
     selector: 'app-card-transactions-edit-recurrent',
     templateUrl: './card-transactions-edit-recurrent.component.html',
     styleUrls: ['./card-transactions-edit-recurrent.component.css'],
     providers: [DatePipe],
-    imports: [NgIf, FormsModule, ReactiveFormsModule, CurrencyInputDirective, BackButtonComponent, SubmitButtonComponent]
+    imports: [NgIf, FormsModule, ReactiveFormsModule, CurrencyInputDirective, BackButtonComponent, SubmitButtonComponent, TagPickerComponent]
 })
 export class CardTransactionsEditRecurrentComponent implements OnInit{
   editRecurrentForm!: FormGroup;
   action: string = 'Edit';
   id: number = 0;
   isSubmitting: boolean = false;
+  selectedTagIds: number[] = [];
+  private initialTagIds: number[] = [];
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private fb: FormBuilder,
     private cardTransactionsService: CardTransactionsService,
+    private tagService: TagService,
     private datePipe: DatePipe,
     private toastService: ToastService
   ) {
@@ -51,8 +56,16 @@ export class CardTransactionsEditRecurrentComponent implements OnInit{
 
     
     this.id = Number(this.route.snapshot.paramMap.get('id'));
-    this.loadTransactionDetails(this.id);    
+    this.loadTransactionDetails(this.id);
     this.onActionChange();
+    this.loadTags(this.id);
+  }
+
+  loadTags(cardTransactionId: number): void {
+    this.tagService.getTagsForCardTransaction(cardTransactionId).subscribe(tags => {
+      this.selectedTagIds = tags.map(t => t.id);
+      this.initialTagIds = [...this.selectedTagIds];
+    });
   }
 
   loadTransactionDetails(id: number) {
@@ -142,6 +155,7 @@ export class CardTransactionsEditRecurrentComponent implements OnInit{
     this.isSubmitting = true;
     this.cardTransactionsService.editRecurrentCardTransaction(this.id, formValue).subscribe(
       (response) => {
+        this.syncTags();
         this.isSubmitting = false;
         this.toastService.success('Movimiento de tarjeta actualizado correctamente');
         this.router.navigateByUrl('/cardTransactions');
@@ -153,5 +167,17 @@ export class CardTransactionsEditRecurrentComponent implements OnInit{
     )
   }
 
-  
+  private syncTags(): void {
+    const toAdd = this.selectedTagIds.filter(id => !this.initialTagIds.includes(id));
+    const toRemove = this.initialTagIds.filter(id => !this.selectedTagIds.includes(id));
+    if (toAdd.length === 0 && toRemove.length === 0) return;
+
+    const calls = [
+      ...toAdd.map(tagId => this.tagService.assignToCardTransaction(tagId, this.id)),
+      ...toRemove.map(tagId => this.tagService.unassignFromCardTransaction(tagId, this.id))
+    ];
+    forkJoin(calls).subscribe({
+      error: () => this.toastService.error('El gasto se guardó, pero hubo un error al actualizar sus etiquetas.')
+    });
+  }
 }

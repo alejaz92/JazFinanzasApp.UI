@@ -223,6 +223,26 @@ export const routes: Routes = [
     canActivate: [AuthGuard]
   },
   {
+    path: 'management/tags',
+    loadComponent: () => import('./features/tags/tag-list/tag-list.component').then(m => m.TagListComponent),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'management/tags/add',
+    loadComponent: () => import('./features/tags/tag-add/tag-add.component').then(m => m.TagAddComponent),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'management/tags/:id',
+    loadComponent: () => import('./features/tags/tag-edit/tag-edit.component').then(m => m.TagEditComponent),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'management/merchants',
+    loadComponent: () => import('./features/merchants/merchant-list/merchant-list.component').then(m => m.MerchantListComponent),
+    canActivate: [AuthGuard]
+  },
+  {
     path: 'management/trips',
     loadComponent: () => import('./features/trips/trip-list/trip-list.component').then(m => m.TripListComponent),
     canActivate: [AuthGuard]

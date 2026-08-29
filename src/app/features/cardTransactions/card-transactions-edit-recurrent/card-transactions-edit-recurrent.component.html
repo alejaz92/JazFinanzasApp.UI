@@ -32,9 +32,13 @@
                 </div>
                 <div class="form-group">
                     <label for="currentAmount" class="form-label mt-3">Monto Actual</label>
-                    <input type="string" class="form-control" id="currentAmount" formControlName="currentAmount" 
+                    <input type="string" class="form-control" id="currentAmount" formControlName="currentAmount"
                         readonly appCurrencyInput
                     >
+                </div>
+                <div class="form-group">
+                    <label class="form-label mt-3">Etiquetas (opcional)</label>
+                    <app-tag-picker [(selectedTagIds)]="selectedTagIds"></app-tag-picker>
                 </div>
             </div>
             <div class="col-md-6">
