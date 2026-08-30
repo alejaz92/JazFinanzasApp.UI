@@ -4,6 +4,7 @@
 
 /* You can add global styles to this file, and also import other style files */
 body {
+    padding-top: 57px; /* Alto de la navbar, ahora fija (ver navbar.component.css) */
     margin-bottom: 30px; /* Ajusta este valor según la altura del footer */
   }
   footer {
