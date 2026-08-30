@@ -22,10 +22,35 @@
                 class="form-select"
                 id="transactionClassIncExp"
                 name="transactionClassIncExp"
-                [(ngModel)]="model.incExp">
+                [(ngModel)]="model.incExp"
+                (ngModelChange)="model.parentId = null">
                 <option value="I">Ingreso</option>
                 <option value="E">Egreso</option>
             </select>
+        </div>
+
+        <div class="mt-3">
+            <label for="transactionClassParent" class="form-label">Rubro (opcional)</label>
+            <select
+                class="form-select"
+                id="transactionClassParent"
+                name="transactionClassParent"
+                [(ngModel)]="model.parentId">
+                <option [ngValue]="null">Sin rubro</option>
+                <option *ngFor="let rubro of parentOptions" [ngValue]="rubro.id">{{ rubro.description }}</option>
+            </select>
+        </div>
+
+        <div class="mt-3 form-check">
+            <input type="checkbox"
+                class="form-check-input"
+                id="transactionClassCountsAsIncomeExpense"
+                name="transactionClassCountsAsIncomeExpense"
+                [(ngModel)]="model.countsAsIncomeExpense">
+            <label class="form-check-label" for="transactionClassCountsAsIncomeExpense">
+                Cuenta como ingreso/egreso en los reportes
+            </label>
+            <div class="form-text">Desmarcá esto solo para categorías que no representan un ingreso o gasto real (ej. ajustes de saldo).</div>
         </div>
 
         <div class="text-end mt-3">

@@ -3,4 +3,6 @@ export interface TransactionClass {
     description: string;
     incExp: string;
     isSystem?: boolean;
+    countsAsIncomeExpense: boolean;
+    parentId: number | null;
 }

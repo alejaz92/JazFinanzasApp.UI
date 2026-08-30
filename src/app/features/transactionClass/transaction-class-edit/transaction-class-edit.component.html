@@ -19,6 +19,35 @@
                         <option value="E">Egreso</option>
                     </select>
                 </div>
+
+                <div class="mt-3">
+                    <label class="form-label" for="transactionClassParent">Rubro (opcional)</label>
+                    <select
+                        class="form-select"
+                        id="transactionClassParent"
+                        name="transactionClassParent"
+                        [(ngModel)]="transactionClass.parentId"
+                        [disabled]="hasChildren">
+                        <option [ngValue]="null">Sin rubro</option>
+                        <option *ngFor="let rubro of parentOptions" [ngValue]="rubro.id">{{ rubro.description }}</option>
+                    </select>
+                    <div class="form-text" *ngIf="hasChildren">
+                        Esta categoría ya es un rubro de otras — no puede colgar de otro rubro (máximo dos niveles).
+                    </div>
+                </div>
+
+                <div class="mt-3 form-check">
+                    <input type="checkbox"
+                        class="form-check-input"
+                        id="transactionClassCountsAsIncomeExpense"
+                        name="transactionClassCountsAsIncomeExpense"
+                        [(ngModel)]="transactionClass.countsAsIncomeExpense">
+                    <label class="form-check-label" for="transactionClassCountsAsIncomeExpense">
+                        Cuenta como ingreso/egreso en los reportes
+                    </label>
+                    <div class="form-text">Desmarcá esto solo para categorías que no representan un ingreso o gasto real (ej. ajustes de saldo).</div>
+                </div>
+
                 <div class="text-end mt-3">
                     <app-submit-button [loading]="isSubmitting" label="Guardar" loadingLabel="Guardando..." btnClass="btn btn-primary m-1"></app-submit-button>
                 </div>

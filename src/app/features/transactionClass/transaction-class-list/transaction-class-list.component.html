@@ -23,21 +23,40 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let transactionClass of incomeClasses">
-                            <td class="align-middle">{{transactionClass.description}}</td>
-                            <td class="align-middle">
-                                <ng-container *ngIf="canEditOrDelete(transactionClass)">
-                                    <div class="d-flex justify-content-center gap-2">
-                                        <a title="Editar" class="btn-icon bg-primary" [routerLink]="['/management/transactionClass',transactionClass.id]">
-                                            <i class="bi-pencil-square"></i>
-                                        </a>
-                                        <button title="Eliminar" class="btn-icon bg-danger" (click)="onDelete(transactionClass.id)">
-                                            <i class="bi-trash"></i>
-                                        </button>
-                                    </div>
-                                </ng-container>
-                            </td>
-                        </tr>
+                        <ng-container *ngFor="let transactionClass of incomeClasses">
+                            <tr>
+                                <td class="align-middle">{{transactionClass.description}}</td>
+                                <td class="align-middle">
+                                    <ng-container *ngIf="canEditOrDelete(transactionClass)">
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <a title="Editar" class="btn-icon bg-primary" [routerLink]="['/management/transactionClass',transactionClass.id]">
+                                                <i class="bi-pencil-square"></i>
+                                            </a>
+                                            <button title="Eliminar" class="btn-icon bg-danger" (click)="onDelete(transactionClass.id)">
+                                                <i class="bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </ng-container>
+                                </td>
+                            </tr>
+                            <tr *ngFor="let child of transactionClass.children">
+                                <td class="align-middle ps-4 text-body-secondary">
+                                    <i class="bi-arrow-return-right me-1"></i>{{child.description}}
+                                </td>
+                                <td class="align-middle">
+                                    <ng-container *ngIf="canEditOrDelete(child)">
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <a title="Editar" class="btn-icon bg-primary" [routerLink]="['/management/transactionClass',child.id]">
+                                                <i class="bi-pencil-square"></i>
+                                            </a>
+                                            <button title="Eliminar" class="btn-icon bg-danger" (click)="onDelete(child.id)">
+                                                <i class="bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </ng-container>
+                                </td>
+                            </tr>
+                        </ng-container>
                     </tbody>
                 </table>
             </div>
@@ -54,21 +73,40 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let transactionClass of expenseClasses">
-                            <td class="align-middle">{{transactionClass.description}}</td>
-                            <td class="align-middle">
-                                <ng-container *ngIf="canEditOrDelete(transactionClass)">
-                                    <div class="d-flex justify-content-center gap-2">
-                                        <a title="Editar" class="btn-icon bg-primary" [routerLink]="['/management/transactionClass',transactionClass.id]">
-                                            <i class="bi-pencil-square"></i>
-                                        </a>
-                                        <button title="Eliminar" class="btn-icon bg-danger" (click)="onDelete(transactionClass.id)">
-                                            <i class="bi-trash"></i>
-                                        </button>
-                                    </div>
-                                </ng-container>
-                            </td>
-                        </tr>
+                        <ng-container *ngFor="let transactionClass of expenseClasses">
+                            <tr>
+                                <td class="align-middle">{{transactionClass.description}}</td>
+                                <td class="align-middle">
+                                    <ng-container *ngIf="canEditOrDelete(transactionClass)">
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <a title="Editar" class="btn-icon bg-primary" [routerLink]="['/management/transactionClass',transactionClass.id]">
+                                                <i class="bi-pencil-square"></i>
+                                            </a>
+                                            <button title="Eliminar" class="btn-icon bg-danger" (click)="onDelete(transactionClass.id)">
+                                                <i class="bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </ng-container>
+                                </td>
+                            </tr>
+                            <tr *ngFor="let child of transactionClass.children">
+                                <td class="align-middle ps-4 text-body-secondary">
+                                    <i class="bi-arrow-return-right me-1"></i>{{child.description}}
+                                </td>
+                                <td class="align-middle">
+                                    <ng-container *ngIf="canEditOrDelete(child)">
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <a title="Editar" class="btn-icon bg-primary" [routerLink]="['/management/transactionClass',child.id]">
+                                                <i class="bi-pencil-square"></i>
+                                            </a>
+                                            <button title="Eliminar" class="btn-icon bg-danger" (click)="onDelete(child.id)">
+                                                <i class="bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </ng-container>
+                                </td>
+                            </tr>
+                        </ng-container>
                     </tbody>
                 </table>
             </div>
