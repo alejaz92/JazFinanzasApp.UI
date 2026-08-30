@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import type { EChartsOption } from 'echarts';
 import { ThemeService } from '../../core/services/theme.service';
 
 /**
@@ -117,6 +118,100 @@ export class ChartThemeService {
       backgroundColor: s.tooltipBg,
       borderColor: s.tooltipBorder,
       textStyle: { color: s.tooltipText },
+    };
+  }
+
+  /**
+   * Torta/dona de composición: mismo patrón repetido en varios reportes
+   * (distribución de bolsa, cripto, carteras, viajes) — nombre, valor
+   * formateado y porcentaje en el tooltip; etiqueta solo si supera el
+   * umbral, para no amontonar texto en las porciones chicas.
+   */
+  pieOptions(
+    labels: string[],
+    values: number[],
+    opts?: {
+      formatValue?: (v: number) => string;
+      /** Nombre a mostrar en el tooltip cuando la etiqueta de la porción (ej. el ticker) no alcanza — ej. "Nombre completo (TICKER)". */
+      formatTooltipName?: (label: string, index: number) => string;
+      title?: string;
+      labelThresholdPct?: number;
+      donut?: boolean;
+      /** Leyenda real abajo — para cuando las porciones ya tienen pocos elementos y nombres cortos (ej. carteras). */
+      showLegend?: boolean;
+    }
+  ): EChartsOption {
+    const formatValue = opts?.formatValue ?? ((v: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(v));
+    const formatTooltipName = opts?.formatTooltipName ?? ((label: string) => label);
+    const threshold = opts?.labelThresholdPct ?? 5;
+    const axisLabel = this.surface.axisLabel;
+
+    return {
+      color: labels.map((_, i) => this.colorAt(i)),
+      ...(opts?.title ? { title: { text: opts.title, left: 'center', textStyle: { color: axisLabel, fontSize: 14 } } } : {}),
+      ...(opts?.showLegend ? { legend: { bottom: 0, textStyle: { color: axisLabel } } } : {}),
+      tooltip: {
+        trigger: 'item',
+        ...this.tooltipDefaults(),
+        formatter: (p: any) => `${formatTooltipName(p.name, p.dataIndex)}: ${formatValue(p.value)} (${p.percent}%)`,
+      },
+      series: [{
+        type: 'pie',
+        radius: opts?.donut ? ['45%', '70%'] : '70%',
+        top: opts?.title ? 20 : 0,
+        bottom: opts?.showLegend ? 30 : 0,
+        data: labels.map((name, i) => ({ name, value: values[i] })),
+        label: {
+          show: true,
+          color: '#fff',
+          fontWeight: 'bold',
+          formatter: (p: any) => (p.percent > threshold ? p.name : ''),
+        },
+        labelLine: { show: false },
+        emphasis: { scaleSize: 6 },
+      }],
+    };
+  }
+
+  /**
+   * Línea de evolución de un solo valor en el tiempo (precio, valor de
+   * cartera/tenencia): área rellena, sin marcadores, eje X salteando
+   * etiquetas cuando hay muchos puntos. Mismo patrón repetido en varios
+   * reportes de inversión.
+   */
+  lineOptions(
+    labels: string[],
+    values: number[],
+    opts?: { formatValue?: (v: number) => string; colorIndex?: number; smooth?: boolean; skipLabels?: boolean }
+  ): EChartsOption {
+    const formatValue = opts?.formatValue ?? ((v: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(v));
+    const axisLabel = this.surface.axisLabel;
+
+    return {
+      color: [this.colorAt(opts?.colorIndex ?? 6)],
+      grid: { left: 70, right: 20, top: 20, bottom: 40 },
+      tooltip: { trigger: 'axis', ...this.tooltipDefaults(), valueFormatter: (v: unknown) => formatValue(Number(v)) },
+      xAxis: {
+        type: 'category',
+        data: labels,
+        boundaryGap: false,
+        axisLabel: { color: axisLabel, interval: opts?.skipLabels === false ? 0 : 1 },
+        axisLine: { lineStyle: { color: this.surface.axisLine } },
+      },
+      yAxis: {
+        type: 'value',
+        scale: true,
+        axisLabel: { color: axisLabel, formatter: (v: number) => formatValue(v) },
+        splitLine: { lineStyle: { color: this.surface.splitLine } },
+      },
+      series: [{
+        type: 'line',
+        data: values,
+        showSymbol: false,
+        smooth: opts?.smooth ?? false,
+        lineStyle: { width: 1.5 },
+        areaStyle: { opacity: 0.15 },
+      }],
     };
   }
 }

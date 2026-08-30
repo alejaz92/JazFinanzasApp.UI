@@ -5,8 +5,7 @@ import { UserService } from '../../user/services/user.service';
 import { CardTransactionsService } from '../../cardTransactions/services/card-transactions.service';
 import { ReportService } from '../../report/services/report.service';
 import { HomeStatsDTO } from '../../report/models/HomeStats.model';
-import { Chart, registerables } from 'chart.js';
-import ChartDataLabels from 'chartjs-plugin-datalabels';
+import type { EChartsOption } from 'echarts';
 import { Transaction } from '../../transaction/models/transaction.model';
 import { CardTransactionPending } from '../../cardTransactions/models/cardTransactions-pending.model';
 import { AssetService } from '../../asset/services/asset.service';
@@ -17,6 +16,8 @@ import { CardService } from '../../card/services/card.service';
 import { Card } from '../../card/models/card.model';
 import { CardDueStatus, getCardDueStatus } from '../../card/utils/card-due-status.util';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
+import { ChartComponent } from '../../../shared/components/chart/chart.component';
+import { ChartThemeService } from '../../../shared/services/chart-theme.service';
 import { NgIf, NgFor, NgClass, NgSwitch, NgSwitchCase, SlicePipe, DecimalPipe, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
@@ -32,21 +33,19 @@ interface CardWithDueStatus extends Card {
   dueStatus: CardDueStatus;
 }
 
-Chart.register(...registerables);
-
 @Component({
     selector: 'app-home',
     templateUrl: './home.component.html',
     styleUrls: ['./home.component.css'],
-    imports: [LoadingComponent, NgIf, RouterLink, NgFor, NgClass, NgSwitch, NgSwitchCase, SlicePipe, DecimalPipe, DatePipe, CurrencyFiatFormatPipe]
+    imports: [LoadingComponent, NgIf, RouterLink, NgFor, NgClass, NgSwitch, NgSwitchCase, SlicePipe, DecimalPipe, DatePipe, CurrencyFiatFormatPipe, ChartComponent]
 })
 export class HomeComponent implements OnInit, AfterViewInit {
   isLoading: boolean = true;
   transactions: Transaction[] = [];
   cardTransactions: CardTransactionPending[] = [];
   userName: string = '';
-  stocksChart: any;
-  cryptosChart: any;
+  stocksChartOptions: EChartsOption = {};
+  cryptosChartOptions: EChartsOption = {};
   mainReference: Asset | null = null;
   activeSummaries: SharedEventActiveSummary[] = [];
   consolidatedTotals: ConsolidatedTotal[] = [];
@@ -60,7 +59,8 @@ export class HomeComponent implements OnInit, AfterViewInit {
     private assetService: AssetService,
     private sharedEventService: SharedEventService,
     private cardService: CardService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private chartTheme: ChartThemeService
   ) {}
 
   ngOnInit(): void {
@@ -131,134 +131,16 @@ export class HomeComponent implements OnInit, AfterViewInit {
   }
   
   renderHomeGraphs(data: HomeStatsDTO) {
+    const assetTypes = data.stockStatsGral.map(x => x.assetType);
+    const stocksCurrentValues = data.stockStatsGral.map(x => x.actualValue);
+    this.stocksChartOptions = this.chartTheme.pieOptions(assetTypes, stocksCurrentValues, {
+      title: 'Distribución por Tipo de Activo (En ' + this.mainReference?.name + ')',
+    });
 
-    const ctx1 = document.getElementById('stocksHomeChart') as HTMLCanvasElement;
-    if (ctx1) {
-      const assetTypes = data.stockStatsGral.map(x => x.assetType);
-      const stocksCurrentValues = data.stockStatsGral.map(x => x.actualValue);
-      const stocksControlledColors = this.generateControlledColors(assetTypes.length);
-  
-      this.stocksChart = new Chart(ctx1, {
-        type: 'pie',
-        data: {
-          labels: assetTypes,
-          datasets: [{
-            data: stocksCurrentValues,
-            backgroundColor: stocksControlledColors,
-            hoverOffset: 4
-          }]
-        },
-        options: {
-          plugins: {
-            legend: { display: false, position: 'right' },
-            title: { display: true, text: 'Distribución por Tipo de Activo (En ' + this.mainReference?.name + ')' },
-            tooltip: {
-              callbacks: {
-                label: (tooltipItem) => {
-                  const total = stocksCurrentValues.reduce((a, b) => a + b, 0);
-                  const percentage = ((Number(tooltipItem.raw) / total) * 100).toFixed(2);
-                  const tipo = assetTypes[tooltipItem.dataIndex];
-                  return `${tipo}: ${new Intl.NumberFormat('en-US', {
-                    style: 'currency',
-                    currency: 'USD'
-                  }).format(Number(tooltipItem.raw))} (${percentage}%)`;
-                }
-              }
-            },
-            datalabels: {
-              display: true,
-              color: 'white',
-              anchor: 'center',
-              align: 'center',
-              font: {
-                weight: 'bold',
-                size: 12
-              },
-              formatter: (value, context) => {
-                const total = context.chart.data.datasets[0].data.reduce((a, b) => (a as number) + (b as number), 0);
-                const percentage = total ? ((Number(value) / Number(total)) * 100).toFixed(2) : '0.00';
-                return Number(percentage) > 5 && context.chart.data.labels 
-                  ? context.chart.data.labels[context.dataIndex] 
-                  : '';
-              }
-            }
-          }
-        },
-        plugins: [ChartDataLabels]
-      });
-    }
-  
-    const ctx2 = document.getElementById('cryptosHomeChart') as HTMLCanvasElement;
-    if (ctx2) {
-      const cryptoAssets = data.cryptoStatsGral.map(x => x.assetName);
-      const cryptosCurrentValues = data.cryptoStatsGral.map(x => x.actualValue);
-      const cryptosControlledColors = this.generateControlledColors(cryptoAssets.length);
-  
-      this.cryptosChart = new Chart(ctx2, {
-        type: 'pie',
-        data: {
-          labels: cryptoAssets,
-          datasets: [{
-            data: cryptosCurrentValues,
-            backgroundColor: cryptosControlledColors,
-            hoverOffset: 4
-          }]
-        },
-        options: {
-          plugins: {
-            legend: { display: false, position: 'right' },
-            title: { display: true, text: 'Distribución por Criptomoneda (En ' + this.mainReference?.name + ')' },
-            tooltip: {
-              callbacks: {
-                label: (tooltipItem) => {
-                  const total = cryptosCurrentValues.reduce((a, b) => a + b, 0);
-                  const percentage = ((Number(tooltipItem.raw) / total) * 100).toFixed(2);
-                  const tipo = cryptoAssets[tooltipItem.dataIndex];
-                  return `${tipo}: ${new Intl.NumberFormat('en-US', {
-                    style: 'currency',
-                    currency: 'USD'
-                  }).format(Number(tooltipItem.raw))} (${percentage}%)`;
-                }
-              }
-            },
-            datalabels: {
-              display: true,
-              color: 'white',
-              anchor: 'center',
-              align: 'center',
-              font: {
-                weight: 'bold',
-                size: 12
-              },
-              formatter: (value, context) => {
-                const total = context.chart.data.datasets[0].data.reduce((a, b) => (a as number) + (b as number), 0);
-                const percentage = total ? ((Number(value) / Number(total)) * 100).toFixed(2) : '0.00';
-                return Number(percentage) > 5 && context.chart.data.labels 
-                  ? context.chart.data.labels[context.dataIndex] 
-                  : '';
-              }
-            }
-          }
-        },
-        plugins: [ChartDataLabels]
-      });
-    }
-  }
-  
-
-  generateControlledColors(quantity: number) {
-    const colors = [];
-    const step = 360 / quantity; // Divide el espectro de tonos uniformemente
-  
-    for (let i = 0; i < quantity; i++) {
-      const hue = Math.floor(i * step); // Asigna un tono único basado en el índice
-      const saturation = Math.floor(Math.random() * (100 - 70) + 70); // Mantén una saturación alta (70% a 100%)
-      const lightness = Math.floor(Math.random() * (60 - 40) + 40); // Mantén colores balanceados (40% a 60%)
-  
-      const color = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-      colors.push(color);
-    }
-    
-    return colors;
+    const cryptoAssets = data.cryptoStatsGral.map(x => x.assetName);
+    const cryptosCurrentValues = data.cryptoStatsGral.map(x => x.actualValue);
+    this.cryptosChartOptions = this.chartTheme.pieOptions(cryptoAssets, cryptosCurrentValues, {
+      title: 'Distribución por Criptomoneda (En ' + this.mainReference?.name + ')',
+    });
   }
 }

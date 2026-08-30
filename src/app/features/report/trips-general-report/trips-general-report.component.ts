@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { NgIf, NgFor, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Chart, registerables } from 'chart.js';
-Chart.register(...registerables);
+import type { EChartsOption } from 'echarts';
 
 import { TripService } from '../../trips/services/trip.service';
 import { AssetService } from '../../asset/services/asset.service';
@@ -10,6 +9,8 @@ import { Asset } from '../../asset/models/asset.model';
 import { TripGeneralStats } from '../../trips/models/trip-stats.model';
 import { TripStatus, TripType } from '../../trips/models/trip.model';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
+import { ChartComponent } from '../../../shared/components/chart/chart.component';
+import { ChartThemeService } from '../../../shared/services/chart-theme.service';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 
 const STATUS_LABELS: Record<TripStatus, string> = {
@@ -26,7 +27,7 @@ const TYPE_LABELS: Record<TripType, string> = {
 @Component({
     selector: 'app-trips-general-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, DatePipe, FormsModule, CurrencyFiatFormatPipe],
+    imports: [LoadingComponent, NgIf, NgFor, DatePipe, FormsModule, CurrencyFiatFormatPipe, ChartComponent],
     templateUrl: './trips-general-report.component.html',
     styleUrl: './trips-general-report.component.css'
 })
@@ -35,12 +36,12 @@ export class TripsGeneralReportComponent implements OnInit {
     trips: TripGeneralStats[] = [];
     mainReference: Asset | null = null;
     typeFilter: TripType | 'ALL' = 'ALL';
-
-    private totalByTripChart: Chart | undefined;
+    totalByTripOptions: EChartsOption = {};
 
     constructor(
         private tripService: TripService,
-        private assetService: AssetService
+        private assetService: AssetService,
+        private chartTheme: ChartThemeService
     ) {}
 
     ngOnInit(): void {
@@ -84,42 +85,26 @@ export class TripsGeneralReportComponent implements OnInit {
     }
 
     private renderChart(): void {
-        const ctx = document.getElementById('totalByTripChart') as HTMLCanvasElement;
-        if (!ctx) return;
-        this.totalByTripChart?.destroy();
-        if (this.filteredTrips.length === 0) return;
+        if (this.filteredTrips.length === 0) {
+            this.totalByTripOptions = {};
+            return;
+        }
 
         const names = this.filteredTrips.map(t => t.name);
         const values = this.filteredTrips.map(t => t.totalInReference);
-        const colors = this.generateControlledColors(values.length);
+        const fmt = (v: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(v);
+        const axisLabel = this.chartTheme.surface.axisLabel;
 
-        this.totalByTripChart = new Chart(ctx, {
-            type: 'bar',
-            data: { labels: names, datasets: [{ label: 'Total', data: values, backgroundColor: colors }] },
-            options: {
-                indexAxis: 'y',
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: (tooltipItem) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(tooltipItem.raw))
-                        }
-                    }
-                },
-                scales: { x: { beginAtZero: true } }
-            }
-        });
-    }
-
-    private generateControlledColors(quantity: number): string[] {
-        const colors = [];
-        const step = 360 / quantity;
-        for (let i = 0; i < quantity; i++) {
-            const hue = Math.floor(i * step);
-            const saturation = Math.floor(Math.random() * 30 + 70);
-            const lightness = Math.floor(Math.random() * 20 + 40);
-            colors.push(`hsl(${hue}, ${saturation}%, ${lightness}%)`);
-        }
-        return colors;
+        this.totalByTripOptions = {
+            grid: { left: 100, right: 30, top: 20, bottom: 30 },
+            tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, ...this.chartTheme.tooltipDefaults(), valueFormatter: (v: unknown) => fmt(Number(v)) },
+            xAxis: { type: 'value', axisLabel: { color: axisLabel, formatter: (v: number) => fmt(v) }, splitLine: { lineStyle: { color: this.chartTheme.surface.splitLine } } },
+            yAxis: { type: 'category', data: names, axisLabel: { color: axisLabel }, axisLine: { lineStyle: { color: this.chartTheme.surface.axisLine } } },
+            series: [{
+                type: 'bar',
+                data: values,
+                itemStyle: { color: (p: any) => this.chartTheme.colorAt(p.dataIndex) },
+            }],
+        };
     }
 }

@@ -1,21 +1,21 @@
 import { Component, OnInit } from '@angular/core';
 import { NgIf, NgFor } from '@angular/common';
-import { Chart, ChartConfiguration, registerables } from 'chart.js';
-Chart.register(...registerables);
-import ChartDataLabels from 'chartjs-plugin-datalabels';
+import type { EChartsOption } from 'echarts';
 
 import { PortfolioService } from '../../portfolios/services/portfolio.service';
 import { AssetService } from '../../asset/services/asset.service';
 import { Asset } from '../../asset/models/asset.model';
 import { PortfolioStatsDTO } from '../../portfolios/models/portfolio-stats.model';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
+import { ChartComponent } from '../../../shared/components/chart/chart.component';
+import { ChartThemeService } from '../../../shared/services/chart-theme.service';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { CurrencyInvestmentFormatPipe } from '../../../shared/pipes/currencyInvestmentFormat/currency-investment-format.pipe';
 
 @Component({
     selector: 'app-portfolio-general-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe],
+    imports: [LoadingComponent, NgIf, NgFor, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, ChartComponent],
     templateUrl: './portfolio-general-report.component.html',
     styleUrl: './portfolio-general-report.component.css'
 })
@@ -26,14 +26,14 @@ export class PortfolioGeneralReportComponent implements OnInit {
 
     totalActualValue = 0;
     totalOriginalValue = 0;
-
-    private valueByPortfolioChart: Chart | undefined;
-    private distributionChart: Chart | undefined;
-    private originalVsActualChart: Chart | undefined;
+    valueByPortfolioOptions: EChartsOption = {};
+    distributionOptions: EChartsOption = {};
+    originalVsActualOptions: EChartsOption = {};
 
     constructor(
         private portfolioService: PortfolioService,
-        private assetService: AssetService
+        private assetService: AssetService,
+        private chartTheme: ChartThemeService
     ) {}
 
     ngOnInit(): void {
@@ -73,101 +73,46 @@ export class PortfolioGeneralReportComponent implements OnInit {
     }
 
     private renderValueByPortfolio(): void {
-        const ctx = document.getElementById('valueByPortfolioChart') as HTMLCanvasElement;
-        if (!ctx) return;
-        this.valueByPortfolioChart?.destroy();
-
         const names = this.portfolios.map(p => p.portfolioName);
         const values = this.portfolios.map(p => p.actualValue);
-        const colors = this.generateControlledColors(values.length);
+        const fmt = (v: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(v);
+        const axisLabel = this.chartTheme.surface.axisLabel;
 
-        this.valueByPortfolioChart = new Chart(ctx, {
-            type: 'bar',
-            data: { labels: names, datasets: [{ label: 'Valor Actual', data: values, backgroundColor: colors }] },
-            options: {
-                indexAxis: 'y',
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: (tooltipItem) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(tooltipItem.raw))
-                        }
-                    }
-                },
-                scales: { x: { beginAtZero: true } }
-            }
-        });
+        this.valueByPortfolioOptions = {
+            grid: { left: 100, right: 30, top: 20, bottom: 30 },
+            tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, ...this.chartTheme.tooltipDefaults(), valueFormatter: (v: unknown) => fmt(Number(v)) },
+            xAxis: { type: 'value', axisLabel: { color: axisLabel, formatter: (v: number) => fmt(v) }, splitLine: { lineStyle: { color: this.chartTheme.surface.splitLine } } },
+            yAxis: { type: 'category', data: names, axisLabel: { color: axisLabel }, axisLine: { lineStyle: { color: this.chartTheme.surface.axisLine } } },
+            series: [{
+                type: 'bar',
+                data: values,
+                itemStyle: { color: (p: any) => this.chartTheme.colorAt(p.dataIndex) },
+            }],
+        };
     }
 
     private renderDistribution(): void {
-        const ctx = document.getElementById('portfolioDistributionChart') as HTMLCanvasElement;
-        if (!ctx) return;
-        this.distributionChart?.destroy();
-
         const names = this.portfolios.map(p => p.portfolioName);
         const values = this.portfolios.map(p => p.actualValue);
-        const colors = this.generateControlledColors(values.length);
-
-        this.distributionChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: { labels: names, datasets: [{ data: values, backgroundColor: colors, hoverOffset: 4 }] },
-            options: {
-                plugins: {
-                    legend: { display: true, position: 'bottom' },
-                    tooltip: {
-                        callbacks: {
-                            label: (tooltipItem) => {
-                                const total = values.reduce((a, b) => a + b, 0);
-                                const pct = total ? ((Number(tooltipItem.raw) / total) * 100).toFixed(2) : '0.00';
-                                return `${names[tooltipItem.dataIndex]}: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(tooltipItem.raw))} (${pct}%)`;
-                            }
-                        }
-                    },
-                    datalabels: {
-                        display: true, color: 'white', align: 'center', anchor: 'center', font: { weight: 'bold' },
-                        formatter: (value, context) => {
-                            const total = (context.chart.data.datasets[0].data as number[]).reduce((a, b) => a + b, 0);
-                            const pct = total ? ((value / total) * 100).toFixed(2) : '0.00';
-                            return Number(pct) > 5 && context.chart.data.labels ? context.chart.data.labels[context.dataIndex] : '';
-                        }
-                    }
-                }
-            } as ChartConfiguration['options'],
-            plugins: [ChartDataLabels]
-        });
+        this.distributionOptions = this.chartTheme.pieOptions(names, values, { donut: true, showLegend: true });
     }
 
     private renderOriginalVsActual(): void {
-        const ctx = document.getElementById('originalVsActualByPortfolioChart') as HTMLCanvasElement;
-        if (!ctx) return;
-        this.originalVsActualChart?.destroy();
-
         const names = this.portfolios.map(p => p.portfolioName);
+        const fmt = (v: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(v);
+        const axisLabel = this.chartTheme.surface.axisLabel;
 
-        this.originalVsActualChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: names,
-                datasets: [
-                    { label: 'Invertido', data: this.portfolios.map(p => p.originalValue), backgroundColor: 'rgba(255, 99, 132, 0.2)', borderColor: 'rgba(255, 99, 132, 1)', borderWidth: 1 },
-                    { label: 'Valor Actual', data: this.portfolios.map(p => p.actualValue), backgroundColor: 'rgba(75, 192, 192, 0.2)', borderColor: 'rgba(75, 192, 192, 1)', borderWidth: 1 }
-                ]
-            },
-            options: {
-                scales: { y: { beginAtZero: true, ticks: { callback: (v) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(v)) } } }
-            }
-        });
-    }
-
-    private generateControlledColors(quantity: number): string[] {
-        const colors = [];
-        const step = 360 / quantity;
-        for (let i = 0; i < quantity; i++) {
-            const hue = Math.floor(i * step);
-            const saturation = Math.floor(Math.random() * 30 + 70);
-            const lightness = Math.floor(Math.random() * 20 + 40);
-            colors.push(`hsl(${hue}, ${saturation}%, ${lightness}%)`);
-        }
-        return colors;
+        this.originalVsActualOptions = {
+            color: [this.chartTheme.colorAt(1), this.chartTheme.colorAt(0)],
+            legend: { top: 0, textStyle: { color: axisLabel } },
+            grid: { left: 70, right: 20, top: 40, bottom: 40 },
+            tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, ...this.chartTheme.tooltipDefaults(), valueFormatter: (v: unknown) => fmt(Number(v)) },
+            xAxis: { type: 'category', data: names, axisLabel: { color: axisLabel }, axisLine: { lineStyle: { color: this.chartTheme.surface.axisLine } } },
+            yAxis: { type: 'value', axisLabel: { color: axisLabel, formatter: (v: number) => fmt(v) }, splitLine: { lineStyle: { color: this.chartTheme.surface.splitLine } } },
+            series: [
+                { name: 'Invertido', type: 'bar', data: this.portfolios.map(p => p.originalValue) },
+                { name: 'Valor Actual', type: 'bar', data: this.portfolios.map(p => p.actualValue) },
+            ],
+        };
     }
 }

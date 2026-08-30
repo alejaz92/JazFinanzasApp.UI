@@ -29,7 +29,7 @@
                     <div class="card">
                         <div class="card-header">Evolución del Valor de la Criptomoneda (En {{ mainReference?.symbol }})</div>
                         <div class="card-body">
-                            <canvas id="priceEvolutionChart"></canvas>
+                            <app-chart [options]="priceEvolutionOptions" [height]="280"></app-chart>
                         </div>
                     </div>
                 </div>
@@ -38,7 +38,7 @@
                 <div class="card">
                     <div class="card-header">Distribución de Saldos por Cuenta</div>
                     <div class="card-body">
-                        <canvas id="cryptoBalanceChart"></canvas>
+                        <app-chart [options]="balanceOptions" [height]="320"></app-chart>
                     </div>
                 </div>
             </div>

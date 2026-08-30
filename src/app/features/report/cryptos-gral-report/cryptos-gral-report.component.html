@@ -18,7 +18,7 @@
             <div class="card">
                 <div class="card-header">Distribución por Crypto (En {{ mainReference?.symbol }})</div>
                 <div class="card-body">
-                    <canvas id="cryptosGralDistributionChart"></canvas>
+                    <app-chart [options]="distributionOptions" [height]="320"></app-chart>
                 </div>
             </div>
         </div>
@@ -27,7 +27,7 @@
                 <div class="card">
                     <div class="card-header">Evolución del Valor de la Cartera (En {{ mainReference?.symbol }})</div>
                     <div class="card-body">
-                        <canvas id="walletValueEvolutionChart"></canvas>
+                        <app-chart [options]="walletEvolutionOptions" [height]="300"></app-chart>
                     </div>
                 </div>
             </div>
@@ -35,7 +35,7 @@
                 <div class="card">
                     <div class="card-header">Volumen Mensual de Movimientos (En {{ mainReference?.symbol }})</div>
                     <div class="card-body">
-                        <canvas id="buyVolumeEvolutionChart"></canvas>
+                        <app-chart [options]="buyVolumeOptions" [height]="300"></app-chart>
                     </div>
                 </div>
             </div>

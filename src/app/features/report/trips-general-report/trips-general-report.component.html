@@ -28,7 +28,7 @@
                 <div class="card">
                     <div class="card-header">Total por Viaje (En {{ mainReference?.symbol }})</div>
                     <div class="card-body">
-                        <canvas id="totalByTripChart"></canvas>
+                        <app-chart [options]="totalByTripOptions" [height]="320"></app-chart>
                     </div>
                 </div>
             </div>

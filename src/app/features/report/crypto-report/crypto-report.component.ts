@@ -1,9 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { NgIf, NgFor, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Chart, ChartConfiguration, registerables } from 'chart.js';
-Chart.register(...registerables);
-import ChartDataLabels from 'chartjs-plugin-datalabels';
 import type { EChartsOption } from 'echarts';
 
 import { ReportService } from '../services/report.service';
@@ -33,9 +30,8 @@ export class CryptoReportComponent implements OnInit {
     cryptoTransactionsStatsDTO: InvestmentTransactionsStatsDTO[] = [];
     mainReference: Asset | null = null;
     gaugeOptions: EChartsOption = {};
-
-    private db6Graph2: Chart | undefined;
-    private db6Graph3: Chart | undefined;
+    priceEvolutionOptions: EChartsOption = {};
+    balanceOptions: EChartsOption = {};
 
     constructor(
         private reportService: ReportService,
@@ -110,76 +106,14 @@ export class CryptoReportComponent implements OnInit {
     }
 
     private renderPriceEvolution(data: CryptoStatsDTO): void {
-        const ctx = document.getElementById('priceEvolutionChart') as HTMLCanvasElement;
-        if (!ctx) return;
-        this.db6Graph2?.destroy();
-
         const labels = data.cryptoEvolutionStats.map(i => new Date(i.date).toLocaleDateString('es-AR'));
         const values = data.cryptoEvolutionStats.map(i => i.value);
-
-        this.db6Graph2 = new Chart(ctx, {
-            type: 'line',
-            data: { labels, datasets: [{ label: 'Valor de la Criptomoneda', data: values, fill: true, borderColor: 'rgba(75, 192, 192, 1)', borderWidth: 1.5, pointRadius: 0 }] },
-            options: {
-                plugins: {
-                    legend: { display: false },
-                    tooltip: { callbacks: { label: (t) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(t.raw)) } }
-                },
-                scales: {
-                    x: { ticks: { callback: function(value, index) { return index % 2 === 0 ? this.getLabelForValue(Number(value)) : ''; } } },
-                    y: { beginAtZero: false, ticks: { callback: (v) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(v)) } }
-                }
-            }
-        });
+        this.priceEvolutionOptions = this.chartTheme.lineOptions(labels, values, { colorIndex: 2 });
     }
 
     private renderCryptoBalance(data: CryptoStatsDTO): void {
-        const ctx = document.getElementById('cryptoBalanceChart') as HTMLCanvasElement;
-        if (!ctx) return;
-        this.db6Graph3?.destroy();
-
         const cryptoAccounts = data.cryptoBalanceStats.map(i => i.account);
         const currentValues = data.cryptoBalanceStats.map(i => i.balance);
-        const colors = this.generateControlledColors(currentValues.length);
-
-        this.db6Graph3 = new Chart(ctx, {
-            type: 'pie',
-            data: { labels: cryptoAccounts, datasets: [{ data: currentValues, backgroundColor: colors, borderWidth: 1 }] },
-            options: {
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: (tooltipItem) => {
-                                const total = currentValues.reduce((a, b) => a + b, 0);
-                                const pct = ((Number(tooltipItem.raw) / total) * 100).toFixed(2);
-                                return `${cryptoAccounts[tooltipItem.dataIndex]}: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(tooltipItem.raw))} (${pct}%)`;
-                            }
-                        }
-                    },
-                    datalabels: {
-                        display: true, color: 'white', align: 'center', anchor: 'center', font: { weight: 'bold' },
-                        formatter: (value, context) => {
-                            const total = (context.chart.data.datasets[0].data as number[]).reduce((a, b) => a + b, 0);
-                            const pct = total ? ((value / total) * 100).toFixed(2) : '0.00';
-                            return Number(pct) > 5 && context.chart.data.labels ? context.chart.data.labels[context.dataIndex] : '';
-                        }
-                    }
-                }
-            } as ChartConfiguration['options'],
-            plugins: [ChartDataLabels]
-        });
-    }
-
-    private generateControlledColors(quantity: number): string[] {
-        const colors = [];
-        const step = 360 / quantity;
-        for (let i = 0; i < quantity; i++) {
-            const hue = Math.floor(i * step);
-            const saturation = Math.floor(Math.random() * 30 + 70);
-            const lightness = Math.floor(Math.random() * 20 + 40);
-            colors.push(`hsl(${hue}, ${saturation}%, ${lightness}%)`);
-        }
-        return colors;
+        this.balanceOptions = this.chartTheme.pieOptions(cryptoAccounts, currentValues);
     }
 }
