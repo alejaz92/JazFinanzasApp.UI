@@ -63,5 +63,35 @@
 
 <!-- Main content -->
 <main class="reports-content p-3 p-lg-4">
+
+  <!-- Filtro de período y moneda — vale para toda la sección, persiste en la URL (T12) -->
+  <div class="reports-filter-bar d-flex flex-wrap align-items-center gap-2 mb-3 p-2 rounded">
+    <div class="btn-group btn-group-sm" role="group">
+      @for (opt of periodOptions; track opt.value) {
+        <button type="button" class="btn"
+                [class.btn-primary]="reportContext.period().preset === opt.value"
+                [class.btn-outline-secondary]="reportContext.period().preset !== opt.value"
+                (click)="onPeriodChange(opt.value)">{{ opt.label }}</button>
+      }
+    </div>
+
+    @if (reportContext.period().preset === 'custom') {
+      <input type="date" class="form-control form-control-sm w-auto"
+             [value]="reportContext.period().from" (change)="onCustomFromChange($event)">
+      <span class="text-body-secondary small">a</span>
+      <input type="date" class="form-control form-control-sm w-auto"
+             [value]="reportContext.period().to" (change)="onCustomToChange($event)">
+    }
+
+    @if (referenceAssets().length > 0) {
+      <select class="form-select form-select-sm w-auto ms-auto"
+              [value]="reportContext.currencyAssetId()" (change)="onCurrencyChange($event)">
+        @for (asset of referenceAssets(); track asset.id) {
+          <option [value]="asset.id">{{ asset.symbol }}</option>
+        }
+      </select>
+    }
+  </div>
+
   <router-outlet></router-outlet>
 </main>

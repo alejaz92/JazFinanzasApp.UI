@@ -110,6 +110,13 @@ $sidebar-bg-bottom: #1b0f44;
     }
 }
 
+// -- Barra de período y moneda --------------------------------------------------
+
+.reports-filter-bar {
+    background: var(--bs-secondary-bg);
+    border: 1px solid var(--bs-border-color);
+}
+
 // -- Dark mode overrides -------------------------------------------------------
 
 :host-context([data-bs-theme="dark"]) {
