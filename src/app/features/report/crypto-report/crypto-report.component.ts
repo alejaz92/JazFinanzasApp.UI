@@ -4,13 +4,15 @@ import { FormsModule } from '@angular/forms';
 import { Chart, ChartConfiguration, registerables } from 'chart.js';
 Chart.register(...registerables);
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-import * as echarts from 'echarts';
+import type { EChartsOption } from 'echarts';
 
 import { ReportService } from '../services/report.service';
 import { AssetService } from '../../asset/services/asset.service';
 import { Asset } from '../../asset/models/asset.model';
 import { CryptoStatsDTO, InvestmentTransactionsStatsDTO } from '../models/CryptoStats.model';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
+import { ChartComponent } from '../../../shared/components/chart/chart.component';
+import { ChartThemeService } from '../../../shared/services/chart-theme.service';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { MovementTypePipe } from '../../../shared/pipes/movementType/movement-type.pipe';
 import { CommerceTypePipe } from '../../../shared/pipes/commerceType/commerce-type.pipe';
@@ -18,7 +20,7 @@ import { CommerceTypePipe } from '../../../shared/pipes/commerceType/commerce-ty
 @Component({
     selector: 'app-crypto-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, FormsModule, DatePipe, CurrencyFiatFormatPipe, MovementTypePipe, CommerceTypePipe],
+    imports: [LoadingComponent, NgIf, NgFor, FormsModule, DatePipe, ChartComponent, CurrencyFiatFormatPipe, MovementTypePipe, CommerceTypePipe],
     templateUrl: './crypto-report.component.html',
     styleUrl: './crypto-report.component.css'
 })
@@ -30,13 +32,15 @@ export class CryptoReportComponent implements OnInit {
     cryptos: Asset[] = [];
     cryptoTransactionsStatsDTO: InvestmentTransactionsStatsDTO[] = [];
     mainReference: Asset | null = null;
+    gaugeOptions: EChartsOption = {};
 
     private db6Graph2: Chart | undefined;
     private db6Graph3: Chart | undefined;
 
     constructor(
         private reportService: ReportService,
-        private assetService: AssetService
+        private assetService: AssetService,
+        private chartTheme: ChartThemeService
     ) {}
 
     ngOnInit(): void {
@@ -79,20 +83,15 @@ export class CryptoReportComponent implements OnInit {
     }
 
     private renderGauge(data: CryptoStatsDTO): void {
-        const minValue = data.cryptoRangeValuesStats.minValue.toFixed(2);
-        const maxValue = data.cryptoRangeValuesStats.maxValue.toFixed(2);
-        const currentValue = data.cryptoRangeValuesStats.currentValue.toFixed(2);
-        const averageBuyValue = data.cryptoRangeValuesStats.averageBuyValue.toFixed(2);
-        const earnLostLine = (Number(averageBuyValue) - Number(minValue)) / (Number(maxValue) - Number(minValue));
+        const minValue = Number(data.cryptoRangeValuesStats.minValue.toFixed(2));
+        const maxValue = Number(data.cryptoRangeValuesStats.maxValue.toFixed(2));
+        const currentValue = Number(data.cryptoRangeValuesStats.currentValue.toFixed(2));
+        const averageBuyValue = Number(data.cryptoRangeValuesStats.averageBuyValue.toFixed(2));
+        const earnLostLine = (averageBuyValue - minValue) / (maxValue - minValue);
+        const status = this.chartTheme.status;
+        const axisLabel = this.chartTheme.surface.axisLabel;
 
-        const chartDom = document.getElementById('gaugeChart');
-        if (!chartDom) return;
-
-        const existingChart = echarts.getInstanceByDom(chartDom);
-        if (existingChart) existingChart.dispose();
-
-        const myChart = echarts.init(chartDom);
-        myChart.setOption({
+        this.gaugeOptions = {
             series: [{
                 type: 'gauge',
                 startAngle: 200,
@@ -102,14 +101,12 @@ export class CryptoReportComponent implements OnInit {
                 splitNumber: 4,
                 radius: '110%',
                 center: ['50%', '60%'],
-                axisLine: { lineStyle: { width: 15, color: [[earnLostLine, '#fd666d'], [1, '#67e0e3']] } },
+                axisLine: { lineStyle: { width: 15, color: [[earnLostLine, status.critical], [1, status.good]] } },
                 pointer: { length: '80%', width: 6 },
-                detail: { formatter: '{value}', fontSize: 20, offsetCenter: [0, '60%'], color: '#333' },
+                detail: { formatter: '{value}', fontSize: 20, offsetCenter: [0, '60%'], color: axisLabel },
                 data: [{ value: currentValue }]
             }]
-        });
-
-        window.addEventListener('resize', () => myChart.resize());
+        };
     }
 
     private renderPriceEvolution(data: CryptoStatsDTO): void {

@@ -1,0 +1,14 @@
+/*
+ * El host (<app-chart>) es un item flex dentro de contenedores como
+ * .card-body (display:flex): sin ancho propio, se encoge a su contenido
+ * -y su contenido, antes de que ECharts dibuje, mide 0-. Hay que darle
+ * ancho al HOST, no solo al div interno.
+ */
+:host {
+  display: block;
+  width: 100%;
+}
+
+.app-chart {
+  width: 100%;
+}
