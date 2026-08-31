@@ -1,0 +1,31 @@
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mt-3 mb-3">
+        <h1 class="mb-0">Crear Etiqueta</h1>
+        <app-back-button [defaultUrl]="['/management/tag']"></app-back-button>
+    </div>
+    <form #form="ngForm" (ngSubmit)="onFormSubmit()">
+        <div class="mt-2">
+            <label for="tagName" class="form-label">Nombre</label>
+            <input type="text"
+                class="form-control"
+                id="tagName"
+                name="tagName"
+                required
+                [(ngModel)]="model.name">
+        </div>
+
+        <div class="mt-3">
+            <label for="tagColor" class="form-label">Color</label>
+            <input type="color"
+                class="form-control form-control-color"
+                id="tagColor"
+                name="tagColor"
+                [(ngModel)]="model.color">
+        </div>
+
+        <div class="text-end mt-3">
+            <app-submit-button [loading]="isSubmitting" [disabled]="!!form.invalid" label="Insertar" loadingLabel="Insertando..." btnClass="btn btn-primary m-1"></app-submit-button>
+        </div>
+    </form>
+</div>

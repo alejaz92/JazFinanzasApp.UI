@@ -19,12 +19,16 @@ import { ToastService } from '../../../core/services/toast.service';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
 import { SubmitButtonComponent } from '../../../shared/components/submit-button/submit-button.component';
+import { TagPickerComponent } from '../../../shared/components/tag-picker/tag-picker.component';
+import { TagService } from '../../tag/services/tag.service';
+import { forkJoin, of } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 
 @Component({
     selector: 'app-transaction-edit',
     templateUrl: './transaction-edit.component.html',
     styleUrls: ['./transaction-edit.component.css'],
-    imports: [LoadingComponent, NgIf, FormsModule, NgFor, CurrencyInputDirective, SharedExpenseFormComponent, DecimalPipe, DatePipe, BackButtonComponent, ConfirmModalComponent, SubmitButtonComponent]
+    imports: [LoadingComponent, NgIf, FormsModule, NgFor, CurrencyInputDirective, SharedExpenseFormComponent, DecimalPipe, DatePipe, BackButtonComponent, ConfirmModalComponent, SubmitButtonComponent, TagPickerComponent]
 })
 export class TransactionEditComponent implements OnInit, OnDestroy {
   transactionForm!: FormGroup;
@@ -45,6 +49,9 @@ export class TransactionEditComponent implements OnInit, OnDestroy {
   pendingSharedExpenseData: SharedExpenseFormData | null = null;
   sharedExpenseError: string = '';
   sharedExpenseSaving: boolean = false;
+
+  selectedTagIds: number[] = [];
+  private originalTagIds: number[] = [];
 
   @ViewChild('deleteSharedExpenseModal') deleteSharedExpenseModal!: ConfirmModalComponent;
 
@@ -68,6 +75,7 @@ export class TransactionEditComponent implements OnInit, OnDestroy {
     private transactionClassService: TransactionClassService,
     private sharedExpenseService: SharedExpenseService,
     private tripService: TripService,
+    private tagService: TagService,
     private router: Router,
     private toastService: ToastService
   ) { }
@@ -99,6 +107,8 @@ export class TransactionEditComponent implements OnInit, OnDestroy {
               } else {
                 this.sharedExpenseLoaded = true;
               }
+
+              this.loadTags();
 
               this.isLoading = false;
             },
@@ -136,6 +146,14 @@ export class TransactionEditComponent implements OnInit, OnDestroy {
       } else {
         this.transactionClasses = data.filter((x: any) => x.incExp === 'E');
       }
+    });
+  }
+
+  loadTags(): void {
+    if (!this.id) return;
+    this.tagService.getTagsForTransaction(Number(this.id)).subscribe((data) => {
+      this.selectedTagIds = data.map((t) => t.id);
+      this.originalTagIds = [...this.selectedTagIds];
     });
   }
 
@@ -222,7 +240,18 @@ export class TransactionEditComponent implements OnInit, OnDestroy {
 
     if (this.id && this.transaction) {
       this.isSubmitting = true;
-      this.editTransactionSubscription = this.transactionService.updateTransaction(Number(this.id), this.transaction).subscribe({
+      const transactionId = Number(this.id);
+      this.editTransactionSubscription = this.transactionService.updateTransaction(transactionId, this.transaction).pipe(
+        switchMap(() => {
+          const added = this.selectedTagIds.filter((id) => !this.originalTagIds.includes(id));
+          const removed = this.originalTagIds.filter((id) => !this.selectedTagIds.includes(id));
+          const chores = [
+            ...added.map((tagId) => this.tagService.assignToTransaction(tagId, transactionId)),
+            ...removed.map((tagId) => this.tagService.unassignFromTransaction(tagId, transactionId))
+          ];
+          return chores.length ? forkJoin(chores) : of(null);
+        })
+      ).subscribe({
         next: () => {
           this.isSubmitting = false;
           this.toastService.success('Movimiento actualizado correctamente');

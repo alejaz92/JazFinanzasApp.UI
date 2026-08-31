@@ -93,6 +93,21 @@ export const routes: Routes = [
     canActivate: [AuthGuard]
   },
   {
+    path: 'management/tag',
+    loadComponent: () => import('./features/tag/tag-list/tag-list.component').then(m => m.TagListComponent),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'management/tag/add',
+    loadComponent: () => import('./features/tag/tag-add/tag-add.component').then(m => m.TagAddComponent),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'management/tag/:id',
+    loadComponent: () => import('./features/tag/tag-edit/tag-edit.component').then(m => m.TagEditComponent),
+    canActivate: [AuthGuard]
+  },
+  {
     path: 'management/assets',
     loadComponent: () => import('./features/asset/asset-management/asset-management.component').then(m => m.AssetManagementComponent),
     canActivate: [AuthGuard]

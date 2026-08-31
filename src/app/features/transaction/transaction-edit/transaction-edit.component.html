@@ -73,6 +73,12 @@
                     </div>
                 </div>
             </div>
+            <div class="row mb-3">
+                <div class="col">
+                    <label class="form-label">Etiquetas (opcional)</label>
+                    <app-tag-picker [(selectedTagIds)]="selectedTagIds"></app-tag-picker>
+                </div>
+            </div>
             <div class="text-end mt-3">
                 <app-submit-button [loading]="isSubmitting" label="Guardar" loadingLabel="Guardando..." btnClass="btn btn-primary m-1"></app-submit-button>
             </div>

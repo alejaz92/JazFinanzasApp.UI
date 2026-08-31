@@ -21,12 +21,14 @@ import { SharedExpenseFormComponent } from '../../shared-expenses/shared-expense
 import { ToastService } from '../../../core/services/toast.service';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 import { SubmitButtonComponent } from '../../../shared/components/submit-button/submit-button.component';
+import { TagPickerComponent } from '../../../shared/components/tag-picker/tag-picker.component';
+import { TagService } from 'src/app/features/tag/services/tag.service';
 
 @Component({
     selector: 'app-card-transactions-add',
     templateUrl: './card-transactions-add.component.html',
     styleUrls: ['./card-transactions-add.component.css'],
-    imports: [LoadingComponent, NgIf, FormsModule, ReactiveFormsModule, NgFor, CurrencyInputDirective, BankPromotionFormComponent, SharedExpenseFormComponent, BackButtonComponent, DecimalPipe, SubmitButtonComponent]
+    imports: [LoadingComponent, NgIf, FormsModule, ReactiveFormsModule, NgFor, CurrencyInputDirective, BankPromotionFormComponent, SharedExpenseFormComponent, BackButtonComponent, DecimalPipe, SubmitButtonComponent, TagPickerComponent]
 })
 export class CardTransactionsAddComponent implements OnInit {
   isLoading: boolean = true;
@@ -44,6 +46,7 @@ export class CardTransactionsAddComponent implements OnInit {
   bankPromotionData: BankPromotionFormData | null = null;
   sharedExpenseError: string = '';
   bankPromotionError: string = '';
+  selectedTagIds: number[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -54,6 +57,7 @@ export class CardTransactionsAddComponent implements OnInit {
     private sharedExpenseService: SharedExpenseService,
     private cardTransactionDiscountService: CardTransactionDiscountService,
     private tripService: TripService,
+    private tagService: TagService,
     private http: HttpClient,
     private toastService: ToastService
   ) {}
@@ -261,6 +265,14 @@ export class CardTransactionsAddComponent implements OnInit {
           });
         }
 
+        // Etiquetas: recurso independiente igual que gasto compartido y promoción bancaria,
+        // un error acá no debe bloquear el alta ya confirmada del consumo.
+        this.selectedTagIds.forEach((tagId) => {
+          this.tagService.assignToCardTransaction(tagId, response.id).subscribe({
+            error: () => this.toastService.error('Error al asignar una etiqueta al consumo.')
+          });
+        });
+
         this.cardTransactionForm.reset();
         this.cardTransactionForm.controls['totalAmount'].setValue(0);
         this.cardTransactionForm.controls['installments'].setValue(1);
@@ -271,6 +283,7 @@ export class CardTransactionsAddComponent implements OnInit {
         this.bankPromotionData = null;
         this.sharedExpenseError = '';
         this.bankPromotionError = '';
+        this.selectedTagIds = [];
         this.toastService.success('Gasto Tarjeta agregado correctamente');
       },
       error: (err) => {

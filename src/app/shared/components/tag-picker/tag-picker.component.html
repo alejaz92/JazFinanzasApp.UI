@@ -1,0 +1,17 @@
+<div class="tag-picker d-flex flex-wrap align-items-center gap-2">
+    <button type="button"
+        *ngFor="let tag of tags"
+        class="btn btn-sm"
+        [ngClass]="isSelected(tag.id) ? 'text-white' : 'btn-outline-secondary'"
+        [style.background-color]="isSelected(tag.id) ? (tag.color || '#6c757d') : null"
+        [style.border-color]="tag.color || null"
+        (click)="toggle(tag.id)">
+        {{ tag.name }}
+    </button>
+
+    <a class="btn btn-sm btn-outline-primary" [routerLink]="['/management/tag/add']" title="Nueva etiqueta">
+        <i class="bi-plus-lg"></i> Nueva etiqueta
+    </a>
+
+    <span *ngIf="tags.length === 0" class="text-body-secondary small">Todavía no hay etiquetas creadas.</span>
+</div>
