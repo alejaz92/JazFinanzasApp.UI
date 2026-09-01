@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import type { EChartsOption } from 'echarts';
 
 import { NetWorthService } from '../services/net-worth.service';
-import { NetWorthTotal, NetWorthMonthlyPoint } from '../models/net-worth.model';
+import { NetWorthTotal, NetWorthMonthlyPoint, StaleAsset } from '../models/net-worth.model';
 import { ReportContextService } from '../../../shared/services/report-context.service';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
@@ -30,6 +30,7 @@ export class NetWorthGeneralReportComponent implements OnInit {
     isLoadingSeries = false;
     seriesRequested = false;
     totals: NetWorthTotal[] = [];
+    staleAssets: StaleAsset[] = [];
     monthly: NetWorthMonthlyPoint[] = [];
 
     // D-E: bruto por default, apagado — el neto es opt-in, nunca reemplaza al bruto mostrado hoy.
@@ -47,7 +48,8 @@ export class NetWorthGeneralReportComponent implements OnInit {
 
     ngOnInit(): void {
         this.netWorthService.getGeneral().subscribe(data => {
-            this.totals = data;
+            this.totals = data.totals;
+            this.staleAssets = data.staleAssets;
             this.isLoading = false;
         });
     }
@@ -60,14 +62,6 @@ export class NetWorthGeneralReportComponent implements OnInit {
             this.isLoadingSeries = false;
             setTimeout(() => this.renderCharts(), 0);
         });
-    }
-
-    // Fecha de cotización más vieja entre las tenencias usadas para el total de hoy (T9) — si
-    // supera 3 días hábiles se muestra en vez de tratar el número como si fuera de hoy.
-    isStale(total: NetWorthTotal): boolean {
-        if (!total.oldestQuoteDate) return false;
-        const days = (Date.now() - new Date(total.oldestQuoteDate).getTime()) / 86400000;
-        return days > 5; // aproximación simple de "más de 3 días hábiles"
     }
 
     private renderCharts(): void {

@@ -5,7 +5,16 @@ export interface NetWorthTotal {
     grossBalance: number;
     cardDebt: number;
     netBalance: number;
-    oldestQuoteDate: string | null;
+}
+
+export interface StaleAsset {
+    assetName: string;
+    quoteDate: string;
+}
+
+export interface NetWorthGeneral {
+    totals: NetWorthTotal[];
+    staleAssets: StaleAsset[];
 }
 
 export interface NetWorthMonthlyPoint {

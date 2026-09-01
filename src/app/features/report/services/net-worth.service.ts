@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment.development';
-import { NetWorthTotal, NetWorthMonthlyPoint, AccountBalance, CurrencyExposure, MonthlyBalancePoint } from '../models/net-worth.model';
+import { NetWorthGeneral, NetWorthMonthlyPoint, AccountBalance, CurrencyExposure, MonthlyBalancePoint } from '../models/net-worth.model';
 
 @Injectable({
   providedIn: 'root'
@@ -11,8 +11,8 @@ export class NetWorthService {
 
   constructor(private http: HttpClient) { }
 
-  getGeneral(): Observable<NetWorthTotal[]> {
-    return this.http.get<NetWorthTotal[]>(`${environment.apiBaseURL}/api/networth/General`);
+  getGeneral(): Observable<NetWorthGeneral> {
+    return this.http.get<NetWorthGeneral>(`${environment.apiBaseURL}/api/networth/General`);
   }
 
   getMonthlySeries(assetId: number): Observable<NetWorthMonthlyPoint[]> {

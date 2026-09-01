@@ -18,12 +18,16 @@
                     <div class="small" *ngIf="showNet">
                         Bruto {{ t.grossBalance | currencyFiatFormat }} − deuda de tarjeta viva {{ t.cardDebt | currencyFiatFormat }}
                     </div>
-                    <div class="small mt-1" *ngIf="isStale(t)">
-                        <i class="bi-exclamation-triangle"></i> Cotización usada del {{ t.oldestQuoteDate | date:'dd/MM/yyyy' }}, no de hoy.
-                    </div>
                 </div>
             </div>
         </div>
+    </div>
+
+    <div class="alert alert-warning py-2 small" *ngIf="staleAssets.length > 0">
+        <i class="bi-exclamation-triangle"></i>
+        Cotización no actualizada de hoy en: {{ ' ' }}
+        <span *ngFor="let s of staleAssets; let last = last">{{ s.assetName }} ({{ s.quoteDate | date:'dd/MM/yyyy' }}){{ last ? '' : ', ' }}</span>.
+        El resto del total sí usa la cotización de hoy.
     </div>
 
     <p class="text-body-secondary mt-4" *ngIf="!seriesRequested">
