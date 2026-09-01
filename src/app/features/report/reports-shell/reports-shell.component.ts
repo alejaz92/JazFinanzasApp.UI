@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, NavigationEnd, Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { filter } from 'rxjs';
 import { AssetService } from '../../asset/services/asset.service';
@@ -24,7 +25,7 @@ type NavEntry = NavLink | NavCategory;
 @Component({
     selector: 'app-reports-shell',
     standalone: true,
-    imports: [RouterOutlet, RouterLink, RouterLinkActive],
+    imports: [RouterOutlet, RouterLink, RouterLinkActive, FormsModule],
     templateUrl: './reports-shell.component.html',
     styleUrl: './reports-shell.component.scss'
 })
@@ -126,9 +127,8 @@ export class ReportsShellComponent implements OnInit {
         this.reportContext.setPeriod('custom', { from, to });
     }
 
-    onCurrencyChange(event: Event): void {
-        const value = Number((event.target as HTMLSelectElement).value);
-        if (!Number.isNaN(value)) this.reportContext.setCurrency(value);
+    onCurrencyChange(assetId: number): void {
+        this.reportContext.setCurrency(assetId);
     }
 
     toggleSidebar(): void {

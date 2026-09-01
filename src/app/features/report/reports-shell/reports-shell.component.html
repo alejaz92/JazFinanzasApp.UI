@@ -91,9 +91,9 @@
       <div class="d-flex align-items-center gap-2 ms-auto" title="Moneda de referencia de la sección">
         <label for="reportCurrency" class="form-label mb-0 small text-body-secondary">Moneda:</label>
         <select id="reportCurrency" class="form-select form-select-sm w-auto"
-                [value]="reportContext.currencyAssetId()" (change)="onCurrencyChange($event)">
+                [ngModel]="reportContext.currencyAssetId()" (ngModelChange)="onCurrencyChange($event)">
           @for (asset of referenceAssets(); track asset.id) {
-            <option [value]="asset.id">{{ asset.symbol }}</option>
+            <option [ngValue]="asset.id">{{ asset.symbol }}</option>
           }
         </select>
       </div>
