@@ -81,25 +81,26 @@ export class NetWorthGeneralReportComponent implements OnInit {
         });
 
         this.stackedAreaOptions = {
-            color: [this.chartTheme.colorAt(0), this.chartTheme.colorAt(1), this.chartTheme.colorAt(2), this.chartTheme.colorAt(3)],
+            color: [this.chartTheme.colorAt(0), this.chartTheme.colorAt(1), this.chartTheme.colorAt(2), this.chartTheme.colorAt(3), this.chartTheme.colorAt(4)],
             legend: { top: 0, textStyle: { color: axisLabel } },
             grid: { left: 70, right: 20, top: 40, bottom: 40 },
             tooltip: { trigger: 'axis', ...this.chartTheme.tooltipDefaults(), valueFormatter: (v: unknown) => fmt(Number(v)) },
             xAxis: { type: 'category', data: labels, axisLabel: { color: axisLabel }, axisLine: { lineStyle: { color: this.chartTheme.surface.axisLine } } },
             yAxis: { type: 'value', axisLabel: { color: axisLabel, formatter: (v: number) => fmt(v) }, splitLine: { lineStyle: { color: this.chartTheme.surface.splitLine } } },
             series: [
-                series('Cuentas', this.monthly.map(m => m.accounts), 0),
-                series('Bolsa', this.monthly.map(m => m.stocks), 1),
-                series('Cripto', this.monthly.map(m => m.crypto), 2),
-                series('Bonos', this.monthly.map(m => m.bonds), 3),
+                series('Dinero', this.monthly.map(m => m.accounts), 0),
+                series('Bolsa R. Variable', this.monthly.map(m => m.stocks), 1),
+                series('Cripto Volátil', this.monthly.map(m => m.cryptoVolatile), 2),
+                series('Cripto Estable', this.monthly.map(m => m.cryptoStable), 3),
+                series('Bolsa R. Fija', this.monthly.map(m => m.bonds), 4),
             ],
         } as EChartsOption;
     }
 
     private renderSnapshot(): void {
         const last = this.monthly[this.monthly.length - 1];
-        const labels = ['Cuentas', 'Bolsa', 'Cripto', 'Bonos'];
-        const values = [last.accounts, last.stocks, last.crypto, last.bonds];
+        const labels = ['Dinero', 'Bolsa R. Variable', 'Cripto Volátil', 'Cripto Estable', 'Bolsa R. Fija'];
+        const values = [last.accounts, last.stocks, last.cryptoVolatile, last.cryptoStable, last.bonds];
         this.snapshotOptions = this.chartTheme.pieOptions(labels, values, {
             donut: true, showLegend: true,
             formatValue: (v: number) => this.chartTheme.formatNumber(v, { maximumFractionDigits: 0 }),

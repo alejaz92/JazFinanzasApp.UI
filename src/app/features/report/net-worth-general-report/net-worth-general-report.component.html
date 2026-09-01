@@ -68,10 +68,11 @@
                                 <thead class="table-header-brand">
                                     <tr>
                                         <th>Mes</th>
-                                        <th class="text-end">Cuentas</th>
-                                        <th class="text-end">Bolsa</th>
-                                        <th class="text-end">Cripto</th>
-                                        <th class="text-end">Bonos</th>
+                                        <th class="text-end">Dinero</th>
+                                        <th class="text-end">Bolsa R. Variable</th>
+                                        <th class="text-end">Cripto Volátil</th>
+                                        <th class="text-end">Cripto Estable</th>
+                                        <th class="text-end">Bolsa R. Fija</th>
                                         <th class="text-end">Total</th>
                                         <th class="text-end">Variación</th>
                                     </tr>
@@ -81,7 +82,8 @@
                                         <td>{{ monthLabel(m.month) }}</td>
                                         <td class="text-end">{{ m.accounts | currencyFiatFormat }}</td>
                                         <td class="text-end">{{ m.stocks | currencyFiatFormat }}</td>
-                                        <td class="text-end">{{ m.crypto | currencyFiatFormat }}</td>
+                                        <td class="text-end">{{ m.cryptoVolatile | currencyFiatFormat }}</td>
+                                        <td class="text-end">{{ m.cryptoStable | currencyFiatFormat }}</td>
                                         <td class="text-end">{{ m.bonds | currencyFiatFormat }}</td>
                                         <td class="text-end">{{ m.total | currencyFiatFormat }}</td>
                                         <td class="text-end" [class.text-success]="variation(i) >= 0" [class.text-danger]="variation(i) < 0">

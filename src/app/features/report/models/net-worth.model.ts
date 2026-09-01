@@ -21,7 +21,8 @@ export interface NetWorthMonthlyPoint {
     month: string;
     accounts: number;
     stocks: number;
-    crypto: number;
+    cryptoStable: number;
+    cryptoVolatile: number;
     bonds: number;
     total: number;
 }
