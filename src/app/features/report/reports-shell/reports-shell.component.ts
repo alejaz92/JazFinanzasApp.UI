@@ -30,9 +30,9 @@ type NavEntry = NavLink | NavCategory;
 export class ReportsShellComponent implements OnInit {
     sidebarOpen = false;
 
-    // categoría con subitems abierta en el sidebar (null = todas cerradas); "Carteras" arranca abierta
-    // porque hoy es la única categoría con subitems.
-    expandedCategory: string | null = 'Carteras';
+    // categoría con subitems abierta en el sidebar (null = todas cerradas); "Patrimonio" arranca
+    // abierta por ser la primera y la de uso más frecuente (Flujo 2 del plan).
+    expandedCategory: string | null = 'Patrimonio';
 
     private readonly assetService = inject(AssetService);
     protected readonly reportContext = inject(ReportContextService);
@@ -50,6 +50,14 @@ export class ReportsShellComponent implements OnInit {
     ];
 
     readonly navEntries: NavEntry[] = [
+        {
+            type: 'category', label: 'Patrimonio', icon: 'bi-piggy-bank',
+            children: [
+                { type: 'link', label: 'General', icon: 'bi-grid-1x2', route: '/report/networth-general' },
+                { type: 'link', label: 'Por cuenta', icon: 'bi-bank', route: '/report/networth-by-account' },
+                { type: 'link', label: 'Por moneda', icon: 'bi-currency-exchange', route: '/report/networth-by-currency' }
+            ]
+        },
         { type: 'link', label: 'Ingresos y Egresos', icon: 'bi-graph-up-arrow', route: '/report/inc-exp' },
         { type: 'link', label: 'Tarjetas',           icon: 'bi-credit-card',    route: '/report/cards' },
         { type: 'link', label: 'Inv. Bolsa',         icon: 'bi-bar-chart-line', route: '/report/stocks' },

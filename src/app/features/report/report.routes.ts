@@ -8,6 +8,18 @@ export const reportRoutes: Routes = [
         children: [
             { path: '', redirectTo: 'inc-exp', pathMatch: 'full' },
             {
+                path: 'networth-general',
+                loadComponent: () => import('./net-worth-general-report/net-worth-general-report.component').then(m => m.NetWorthGeneralReportComponent)
+            },
+            {
+                path: 'networth-by-account',
+                loadComponent: () => import('./net-worth-by-account-report/net-worth-by-account-report.component').then(m => m.NetWorthByAccountReportComponent)
+            },
+            {
+                path: 'networth-by-currency',
+                loadComponent: () => import('./net-worth-by-currency-report/net-worth-by-currency-report.component').then(m => m.NetWorthByCurrencyReportComponent)
+            },
+            {
                 path: 'inc-exp',
                 loadComponent: () => import('./inc-exp/inc-exp-report.component').then(m => m.IncExpReportComponent)
             },

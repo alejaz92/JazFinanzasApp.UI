@@ -1,0 +1,32 @@
+<div>
+    <h2 class="mb-3">Patrimonio — Por moneda</h2>
+
+    <div class="row">
+        <div class="col-md-6 mt-1">
+            <div class="card">
+                <div class="card-header">Exposición: Pesos vs. Dolarizado</div>
+                <div class="card-body">
+                    <app-loading [isLoading]="isLoading"></app-loading>
+                    <ng-container *ngIf="!isLoading">
+                        <app-chart *ngIf="exposure.length > 0" [options]="exposureOptions" [height]="180"></app-chart>
+                        <ul class="list-unstyled mt-2" *ngIf="exposure.length > 0">
+                            <li *ngFor="let e of exposure">
+                                {{ e.label }}: {{ e.balance | currencyFiatFormat }} ({{ e.percentage }}%)
+                            </li>
+                        </ul>
+                        <p class="text-body-secondary" *ngIf="exposure.length === 0">Todavía no hay movimientos para mostrar.</p>
+                    </ng-container>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mt-1">
+            <div class="card">
+                <div class="card-header">% Dolarizado — últimos 12 meses</div>
+                <div class="card-body">
+                    <app-loading [isLoading]="isLoadingSeries"></app-loading>
+                    <app-chart *ngIf="!isLoadingSeries" [options]="dollarizedSeriesOptions" [height]="180"></app-chart>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

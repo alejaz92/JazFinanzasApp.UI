@@ -1,0 +1,69 @@
+<app-loading [isLoading]="isLoading"></app-loading>
+
+<div *ngIf="!isLoading">
+    <h2 class="mb-3">Patrimonio — Por cuenta</h2>
+
+    <ng-container *ngIf="accounts.length > 0; else emptyState">
+        <div class="row">
+            <div class="col-12 mt-1">
+                <div class="card">
+                    <div class="card-header">Todas las cuentas, de una sola vez</div>
+                    <div class="card-body">
+                        <app-chart [options]="barOptions" [height]="barChartHeight"></app-chart>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12 mt-1">
+                <div class="card">
+                    <div class="card-body p-0">
+                        <div class="accordion accordion-flush">
+                            <div class="accordion-item" *ngFor="let a of accounts">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button" [class.collapsed]="!isExpanded(a.accountId)"
+                                        type="button" (click)="toggle(a.accountId)">
+                                        <span class="flex-grow-1">{{ a.accountName }}</span>
+                                        <strong class="me-3">{{ a.balance | currencyFiatFormat }}</strong>
+                                    </button>
+                                </h2>
+                                <div class="accordion-collapse" [class.collapse]="!isExpanded(a.accountId)" *ngIf="isExpanded(a.accountId)">
+                                    <div class="accordion-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <table class="table table-sm table-striped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Activo</th>
+                                                            <th class="text-end">Saldo</th>
+                                                            <th class="text-end">En moneda de referencia</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr *ngFor="let h of a.holdings">
+                                                            <td>{{ h.assetName }} ({{ h.assetSymbol }})</td>
+                                                            <td class="text-end">{{ h.nativeBalance | currencyInvestmentFormat }}</td>
+                                                            <td class="text-end">{{ h.balanceInReferenceAsset | currencyFiatFormat }}</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <app-chart *ngIf="evolutionOptionsByAccount[a.accountId]" [options]="evolutionOptionsByAccount[a.accountId]" [height]="200"></app-chart>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+
+    <ng-template #emptyState>
+        <p class="text-body-secondary">Todavía no hay movimientos para mostrar por cuenta.</p>
+    </ng-template>
+</div>
