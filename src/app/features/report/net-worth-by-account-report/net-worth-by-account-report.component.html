@@ -1,8 +1,12 @@
+<h2 class="mb-3">Patrimonio — Por cuenta</h2>
+
+<p class="text-body-secondary" *ngIf="!dataRequested">
+    Elegí una moneda arriba para ver el detalle por cuenta.
+</p>
+
 <app-loading [isLoading]="isLoading"></app-loading>
 
-<div *ngIf="!isLoading">
-    <h2 class="mb-3">Patrimonio — Por cuenta</h2>
-
+<div *ngIf="dataRequested && !isLoading">
     <ng-container *ngIf="accounts.length > 0; else emptyState">
         <div class="row">
             <div class="col-12 mt-1">

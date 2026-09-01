@@ -22,7 +22,9 @@ export class NetWorthByCurrencyReportComponent implements OnInit {
     private readonly chartTheme = inject(ChartThemeService);
     protected readonly reportContext = inject(ReportContextService);
 
-    isLoading = true;
+    // Arranca en false: hasta no tener una moneda seleccionada no hay nada pedido al backend.
+    isLoading = false;
+    exposureRequested = false;
     isLoadingSeries = true;
     exposure: CurrencyExposure[] = [];
 
@@ -49,6 +51,7 @@ export class NetWorthByCurrencyReportComponent implements OnInit {
 
     private loadExposure(assetId: number): void {
         this.isLoading = true;
+        this.exposureRequested = true;
         this.netWorthService.getByCurrency(assetId).subscribe(data => {
             this.exposure = data;
             this.isLoading = false;

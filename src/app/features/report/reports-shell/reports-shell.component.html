@@ -31,6 +31,7 @@
                 <li class="nav-item">
                   <a class="nav-link text-white px-3 py-2 d-flex align-items-center sidebar-link sidebar-sublink"
                      [routerLink]="child.route"
+                     queryParamsHandling="preserve"
                      routerLinkActive="active"
                      (click)="sidebarOpen = false">
                     <i class="bi {{ child.icon }} me-2"></i>
@@ -45,6 +46,7 @@
         <li class="nav-item">
           <a class="nav-link text-white px-3 py-2 d-flex align-items-center sidebar-link"
              [routerLink]="entry.route"
+             queryParamsHandling="preserve"
              routerLinkActive="active"
              (click)="sidebarOpen = false">
             <i class="bi {{ entry.icon }} me-2"></i>

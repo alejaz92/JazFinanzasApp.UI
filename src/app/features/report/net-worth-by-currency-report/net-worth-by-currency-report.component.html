@@ -6,8 +6,9 @@
             <div class="card">
                 <div class="card-header">Exposición: Pesos vs. Dolarizado</div>
                 <div class="card-body">
+                    <p class="text-body-secondary" *ngIf="!exposureRequested">Elegí una moneda arriba para ver la exposición.</p>
                     <app-loading [isLoading]="isLoading"></app-loading>
-                    <ng-container *ngIf="!isLoading">
+                    <ng-container *ngIf="exposureRequested && !isLoading">
                         <app-chart *ngIf="exposure.length > 0" [options]="exposureOptions" [height]="180"></app-chart>
                         <ul class="list-unstyled mt-2" *ngIf="exposure.length > 0">
                             <li *ngFor="let e of exposure">

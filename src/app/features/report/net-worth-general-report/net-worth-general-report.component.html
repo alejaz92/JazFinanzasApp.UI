@@ -26,9 +26,13 @@
         </div>
     </div>
 
+    <p class="text-body-secondary mt-4" *ngIf="!seriesRequested">
+        Elegí una moneda arriba para ver la evolución y el detalle mensual.
+    </p>
+
     <app-loading [isLoading]="isLoadingSeries"></app-loading>
 
-    <ng-container *ngIf="!isLoadingSeries && monthly.length > 0">
+    <ng-container *ngIf="seriesRequested && !isLoadingSeries && monthly.length > 0">
         <div class="row mt-4">
             <div class="col-md-8 mt-1">
                 <div class="card">

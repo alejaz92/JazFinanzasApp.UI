@@ -25,7 +25,10 @@ export class NetWorthGeneralReportComponent implements OnInit {
     protected readonly reportContext = inject(ReportContextService);
 
     isLoading = true;
-    isLoadingSeries = true;
+    // Arranca en false: todavía no se sabe si hay una moneda seleccionada para pedir la serie.
+    // Si quedara en true sin que nada la vuelva a false, el spinner gira para siempre sin explicar por qué.
+    isLoadingSeries = false;
+    seriesRequested = false;
     totals: NetWorthTotal[] = [];
     monthly: NetWorthMonthlyPoint[] = [];
 
@@ -51,6 +54,7 @@ export class NetWorthGeneralReportComponent implements OnInit {
 
     private loadSeries(assetId: number): void {
         this.isLoadingSeries = true;
+        this.seriesRequested = true;
         this.netWorthService.getMonthlySeries(assetId).subscribe(data => {
             this.monthly = data;
             this.isLoadingSeries = false;

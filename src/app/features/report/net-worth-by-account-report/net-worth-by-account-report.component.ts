@@ -23,7 +23,9 @@ export class NetWorthByAccountReportComponent implements OnInit {
     private readonly chartTheme = inject(ChartThemeService);
     protected readonly reportContext = inject(ReportContextService);
 
-    isLoading = true;
+    // Arranca en false: hasta no tener una moneda seleccionada no hay nada pedido al backend.
+    isLoading = false;
+    dataRequested = false;
     accounts: AccountBalance[] = [];
     expandedAccountId: number | null = null;
 
@@ -41,6 +43,7 @@ export class NetWorthByAccountReportComponent implements OnInit {
 
     private load(assetId: number): void {
         this.isLoading = true;
+        this.dataRequested = true;
         this.netWorthService.getByAccount(assetId).subscribe(data => {
             this.accounts = data;
             this.isLoading = false;
