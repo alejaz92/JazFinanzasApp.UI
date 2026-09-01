@@ -10,15 +10,15 @@
     </div>
 
     <div class="row">
-        <div class="col-md-6 mt-1" *ngFor="let t of totals">
-            <div class="card">
+        <div class="col-12" [ngClass]="{ 'col-md-12': totals.length === 1, 'col-md-6': totals.length === 2, 'col-md-4': totals.length >= 3 }" *ngFor="let t of totals">
+            <div class="card mb-3 text-center" [style.backgroundColor]="t.color" [style.color]="t.color | contrastText">
                 <div class="card-header">Valor Total en {{ t.symbol }}</div>
                 <div class="card-body">
                     <h4 class="card-title mb-1">{{ (showNet ? t.netBalance : t.grossBalance) | currencyFiatFormat }}</h4>
-                    <div class="text-body-secondary small" *ngIf="showNet">
+                    <div class="small" *ngIf="showNet">
                         Bruto {{ t.grossBalance | currencyFiatFormat }} − deuda de tarjeta viva {{ t.cardDebt | currencyFiatFormat }}
                     </div>
-                    <div class="text-warning small mt-1" *ngIf="isStale(t)">
+                    <div class="small mt-1" *ngIf="isStale(t)">
                         <i class="bi-exclamation-triangle"></i> Cotización usada del {{ t.oldestQuoteDate | date:'dd/MM/yyyy' }}, no de hoy.
                     </div>
                 </div>

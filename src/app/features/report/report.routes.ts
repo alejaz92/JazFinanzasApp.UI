@@ -8,16 +8,21 @@ export const reportRoutes: Routes = [
         children: [
             { path: '', redirectTo: 'inc-exp', pathMatch: 'full' },
             {
+                // Patrimonio es una foto de hoy + una serie fija de 12 meses, no un rango elegible —
+                // el filtro de período de la barra de Reportes no le pega a ninguna de las 3 pantallas.
                 path: 'networth-general',
-                loadComponent: () => import('./net-worth-general-report/net-worth-general-report.component').then(m => m.NetWorthGeneralReportComponent)
+                loadComponent: () => import('./net-worth-general-report/net-worth-general-report.component').then(m => m.NetWorthGeneralReportComponent),
+                data: { usesPeriod: false }
             },
             {
                 path: 'networth-by-account',
-                loadComponent: () => import('./net-worth-by-account-report/net-worth-by-account-report.component').then(m => m.NetWorthByAccountReportComponent)
+                loadComponent: () => import('./net-worth-by-account-report/net-worth-by-account-report.component').then(m => m.NetWorthByAccountReportComponent),
+                data: { usesPeriod: false }
             },
             {
                 path: 'networth-by-currency',
-                loadComponent: () => import('./net-worth-by-currency-report/net-worth-by-currency-report.component').then(m => m.NetWorthByCurrencyReportComponent)
+                loadComponent: () => import('./net-worth-by-currency-report/net-worth-by-currency-report.component').then(m => m.NetWorthByCurrencyReportComponent),
+                data: { usesPeriod: false }
             },
             {
                 path: 'inc-exp',

@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { filter } from 'rxjs';
 import { AssetService } from '../../asset/services/asset.service';
 import { Asset } from '../../asset/models/asset.model';
 import { ReportContextService, PeriodPreset } from '../../../shared/services/report-context.service';
@@ -35,9 +36,15 @@ export class ReportsShellComponent implements OnInit {
     expandedCategory: string | null = 'Patrimonio';
 
     private readonly assetService = inject(AssetService);
+    private readonly router = inject(Router);
+    private readonly route = inject(ActivatedRoute);
     protected readonly reportContext = inject(ReportContextService);
 
     readonly referenceAssets = signal<Asset[]>([]);
+
+    // Algunas pantallas (ej. Patrimonio) son una foto de hoy + una serie fija, no un rango elegible
+    // — el propio hijo declara `data: { usesPeriod: false }` en report.routes.ts y el filtro se oculta.
+    readonly usesPeriod = signal(true);
 
     readonly periodOptions: { value: PeriodPreset; label: string }[] = [
         { value: 'this-month', label: 'Este mes' },
@@ -87,6 +94,15 @@ export class ReportsShellComponent implements OnInit {
                 if (main) this.reportContext.setCurrency(main.id);
             }
         });
+
+        this.updateUsesPeriod();
+        this.router.events
+            .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+            .subscribe(() => this.updateUsesPeriod());
+    }
+
+    private updateUsesPeriod(): void {
+        this.usesPeriod.set(this.route.snapshot.firstChild?.data?.['usesPeriod'] ?? true);
     }
 
     onPeriodChange(preset: PeriodPreset): void {

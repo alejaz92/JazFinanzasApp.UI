@@ -1,5 +1,5 @@
 import { Component, OnInit, effect, inject } from '@angular/core';
-import { NgIf, NgFor, DatePipe, DecimalPipe } from '@angular/common';
+import { NgIf, NgFor, NgClass, DatePipe, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import type { EChartsOption } from 'echarts';
 
@@ -10,11 +10,12 @@ import { LoadingComponent } from '../../../core/components/loading/loading.compo
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
+import { ContrastTextPipe } from '../../../shared/pipes/contrastText/contrast-text.pipe';
 
 @Component({
     selector: 'app-net-worth-general-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, FormsModule, CurrencyFiatFormatPipe, ChartComponent, DatePipe, DecimalPipe],
+    imports: [LoadingComponent, NgIf, NgFor, NgClass, FormsModule, CurrencyFiatFormatPipe, ChartComponent, DatePipe, DecimalPipe, ContrastTextPipe],
     templateUrl: './net-worth-general-report.component.html',
     styleUrl: './net-worth-general-report.component.css'
 })
