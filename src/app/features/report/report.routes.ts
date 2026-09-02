@@ -20,11 +20,6 @@ export const reportRoutes: Routes = [
                 data: { usesPeriod: false }
             },
             {
-                path: 'networth-by-currency',
-                loadComponent: () => import('./net-worth-by-currency-report/net-worth-by-currency-report.component').then(m => m.NetWorthByCurrencyReportComponent),
-                data: { usesPeriod: false }
-            },
-            {
                 path: 'inc-exp',
                 loadComponent: () => import('./inc-exp/inc-exp-report.component').then(m => m.IncExpReportComponent)
             },

@@ -62,8 +62,7 @@ export class ReportsShellComponent implements OnInit {
             type: 'category', label: 'Patrimonio', icon: 'bi-piggy-bank',
             children: [
                 { type: 'link', label: 'General', icon: 'bi-grid-1x2', route: '/report/networth-general' },
-                { type: 'link', label: 'Por cuenta', icon: 'bi-bank', route: '/report/networth-by-account' },
-                { type: 'link', label: 'Por moneda', icon: 'bi-currency-exchange', route: '/report/networth-by-currency' }
+                { type: 'link', label: 'Por cuenta', icon: 'bi-bank', route: '/report/networth-by-account' }
             ]
         },
         { type: 'link', label: 'Ingresos y Egresos', icon: 'bi-graph-up-arrow', route: '/report/inc-exp' },

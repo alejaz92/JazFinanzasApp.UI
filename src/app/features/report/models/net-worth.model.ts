@@ -47,9 +47,3 @@ export interface AccountBalance {
     evolution: MonthlyBalancePoint[];
     holdings: AccountHolding[];
 }
-
-export interface CurrencyExposure {
-    label: string;
-    balance: number;
-    percentage: number;
-}

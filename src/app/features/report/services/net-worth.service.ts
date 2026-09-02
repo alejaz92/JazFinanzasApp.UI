@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment.development';
-import { NetWorthGeneral, NetWorthMonthlyPoint, AccountBalance, CurrencyExposure, MonthlyBalancePoint } from '../models/net-worth.model';
+import { NetWorthGeneral, NetWorthMonthlyPoint, AccountBalance } from '../models/net-worth.model';
 
 @Injectable({
   providedIn: 'root'
@@ -23,11 +23,4 @@ export class NetWorthService {
     return this.http.get<AccountBalance[]>(`${environment.apiBaseURL}/api/networth/ByAccount/${assetId}`);
   }
 
-  getByCurrency(assetId: number): Observable<CurrencyExposure[]> {
-    return this.http.get<CurrencyExposure[]>(`${environment.apiBaseURL}/api/networth/ByCurrency/${assetId}`);
-  }
-
-  getDollarizedSeries(): Observable<MonthlyBalancePoint[]> {
-    return this.http.get<MonthlyBalancePoint[]>(`${environment.apiBaseURL}/api/networth/DollarizedSeries`);
-  }
 }
