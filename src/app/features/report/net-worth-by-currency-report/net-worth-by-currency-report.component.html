@@ -4,7 +4,7 @@
     <div class="row">
         <div class="col-md-6 mt-1">
             <div class="card">
-                <div class="card-header">Exposición: Pesos vs. Dolarizado</div>
+                <div class="card-header">Exposición por moneda a la que está atado cada activo</div>
                 <div class="card-body">
                     <p class="text-body-secondary" *ngIf="!exposureRequested">Elegí una moneda arriba para ver la exposición.</p>
                     <app-loading [isLoading]="isLoading"></app-loading>
@@ -15,6 +15,9 @@
                                 {{ e.label }}: {{ e.balance | currencyFiatFormat }} ({{ e.percentage }}%)
                             </li>
                         </ul>
+                        <p class="text-body-secondary small mt-2 mb-0" *ngIf="exposure.length > 0">
+                            "Sin moneda atada" son los activos que no siguen ni al peso ni al dólar y tienen precio propio, como las cripto volátiles.
+                        </p>
                         <p class="text-body-secondary" *ngIf="exposure.length === 0">Todavía no hay movimientos para mostrar.</p>
                     </ng-container>
                 </div>
@@ -22,7 +25,7 @@
         </div>
         <div class="col-md-6 mt-1">
             <div class="card">
-                <div class="card-header">% Dolarizado — últimos 12 meses</div>
+                <div class="card-header">% atado al dólar — últimos 12 meses</div>
                 <div class="card-body">
                     <app-loading [isLoading]="isLoadingSeries"></app-loading>
                     <app-chart *ngIf="!isLoadingSeries" [options]="dollarizedSeriesOptions" [height]="180"></app-chart>
