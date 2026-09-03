@@ -1,0 +1,32 @@
+<h2 class="mb-3">Ingresos y Egresos — Por etiqueta</h2>
+<p class="text-body-secondary small">Últimos 6 meses. Cortes que ninguna categoría sola responde — ej. cuánto sale el auto entre combustible, seguro y service.</p>
+
+<p class="text-body-secondary" *ngIf="!dataRequested">Elegí una moneda arriba para ver el gasto por etiqueta.</p>
+
+<app-loading [isLoading]="isLoading"></app-loading>
+
+<ng-container *ngIf="dataRequested && !isLoading">
+    <div class="text-center py-5 text-muted" *ngIf="tags.length === 0">
+        <i class="bi bi-bookmark fs-1 d-block mb-3"></i>
+        <p class="mb-0">Todavía no hay movimientos etiquetados. Etiquetá un movimiento o un consumo de tarjeta al cargarlo para verlo acá.</p>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6" *ngFor="let tag of tags">
+            <div class="card mb-3" role="button" (click)="openTag(tag)" title="Ver movimientos">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="bi-bookmark-fill me-1" [style.color]="tag.color ?? undefined"></i>{{ tag.tagName }}</span>
+                    <span class="fw-semibold">{{ tag.totalAmount | currencyFiatFormat }}</span>
+                </div>
+                <div class="card-body">
+                    <app-chart *ngIf="evolutionByTag[tag.tagId]" [options]="evolutionByTag[tag.tagId]" [height]="140"></app-chart>
+                    <div class="mt-2 small">
+                        <span *ngFor="let c of tag.byCategory; let last = last">
+                            {{ c.categoryName }}: {{ c.amount | currencyFiatFormat }}{{ last ? '' : ' · ' }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-container>

@@ -11,6 +11,11 @@
         </a>
     </div>
 
+    <div class="alert alert-info py-2 d-flex align-items-center justify-content-between" *ngIf="filterLabel">
+        <span><i class="bi-funnel me-2"></i>Filtrado por: <strong>{{ filterLabel }}</strong></span>
+        <button class="btn btn-sm btn-outline-secondary" (click)="clearFilter()">Quitar filtro</button>
+    </div>
+
     <!-- tabla de movimientos-->
     <ng-container *ngIf="totalTransactions > 0; else emptyTransactions">
     <div class="table-responsive">

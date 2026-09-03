@@ -1,0 +1,3 @@
+tbody tr[role="button"]:hover {
+    background-color: var(--bs-tertiary-bg);
+}

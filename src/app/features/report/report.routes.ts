@@ -6,7 +6,7 @@ export const reportRoutes: Routes = [
         path: '',
         component: ReportsShellComponent,
         children: [
-            { path: '', redirectTo: 'inc-exp', pathMatch: 'full' },
+            { path: '', redirectTo: 'inc-exp-summary', pathMatch: 'full' },
             {
                 // Patrimonio es una foto de hoy + una serie fija de 12 meses, no un rango elegible —
                 // el filtro de período de la barra de Reportes no le pega a ninguna de las 3 pantallas.
@@ -25,8 +25,31 @@ export const reportRoutes: Routes = [
                 data: { usesPeriod: false }
             },
             {
-                path: 'inc-exp',
-                loadComponent: () => import('./inc-exp/inc-exp-report.component').then(m => m.IncExpReportComponent)
+                // Ingresos y Egresos (Fase 13) — cada pantalla maneja su propio mes/año/ventana,
+                // no el filtro de período compartido de la barra de Reportes (mismo criterio que Patrimonio).
+                path: 'inc-exp-summary',
+                loadComponent: () => import('./inc-exp-summary/inc-exp-summary-report.component').then(m => m.IncExpSummaryReportComponent),
+                data: { usesPeriod: false }
+            },
+            {
+                path: 'inc-exp-evolution',
+                loadComponent: () => import('./inc-exp-evolution/inc-exp-evolution-report.component').then(m => m.IncExpEvolutionReportComponent),
+                data: { usesPeriod: false }
+            },
+            {
+                path: 'inc-exp-by-category',
+                loadComponent: () => import('./inc-exp-by-category/inc-exp-by-category-report.component').then(m => m.IncExpByCategoryReportComponent),
+                data: { usesPeriod: false }
+            },
+            {
+                path: 'inc-exp-by-tag',
+                loadComponent: () => import('./inc-exp-by-tag/inc-exp-by-tag-report.component').then(m => m.IncExpByTagReportComponent),
+                data: { usesPeriod: false }
+            },
+            {
+                path: 'inc-exp-calendar',
+                loadComponent: () => import('./inc-exp-calendar/inc-exp-calendar-report.component').then(m => m.IncExpCalendarReportComponent),
+                data: { usesPeriod: false }
             },
             {
                 path: 'cards',

@@ -4,7 +4,6 @@ import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment.development';
 import { Balance } from '../models/Balance.modelt';
 import { TotalBalance } from '../models/TotalBalance.model';
-import { IncExpStats } from '../models/IncExpStats.model';
 import { CardStats } from '../models/CardStats.model';
 import { StockStatsDTO } from '../models/StockStats.model';
 import { CryptoGralStatsDTO } from '../models/CryptoGralStats.model';
@@ -24,10 +23,6 @@ export class ReportService {
 
   getTotalBalance(): Observable<TotalBalance[]> {
     return this.http.get<TotalBalance[]>(`${environment.apiBaseURL}/api/report/balance`);
-  }
-
-  getIncExpStats(month: string, assetId: number): Observable<IncExpStats> {
-    return this.http.get<IncExpStats>(`${environment.apiBaseURL}/api/report/IncExpStats?month=${month}&assetId=${assetId}`);
   }
 
   getCardStats(cardId: number): Observable<CardStats> {

@@ -66,7 +66,16 @@ export class ReportsShellComponent implements OnInit {
                 { type: 'link', label: 'Por activo', icon: 'bi-currency-exchange', route: '/report/networth-by-asset' }
             ]
         },
-        { type: 'link', label: 'Ingresos y Egresos', icon: 'bi-graph-up-arrow', route: '/report/inc-exp' },
+        {
+            type: 'category', label: 'Ingresos y Egresos', icon: 'bi-graph-up-arrow',
+            children: [
+                { type: 'link', label: 'Resumen del mes', icon: 'bi-bar-chart-steps', route: '/report/inc-exp-summary' },
+                { type: 'link', label: 'Evolución y tendencia', icon: 'bi-graph-up', route: '/report/inc-exp-evolution' },
+                { type: 'link', label: 'Por categoría', icon: 'bi-tags', route: '/report/inc-exp-by-category' },
+                { type: 'link', label: 'Por etiqueta', icon: 'bi-bookmark', route: '/report/inc-exp-by-tag' },
+                { type: 'link', label: 'Calendario de gastos', icon: 'bi-calendar3', route: '/report/inc-exp-calendar' }
+            ]
+        },
         { type: 'link', label: 'Tarjetas',           icon: 'bi-credit-card',    route: '/report/cards' },
         { type: 'link', label: 'Inv. Bolsa',         icon: 'bi-bar-chart-line', route: '/report/stocks' },
         { type: 'link', label: 'Cryptos General',    icon: 'bi-currency-bitcoin', route: '/report/cryptos-gral' },

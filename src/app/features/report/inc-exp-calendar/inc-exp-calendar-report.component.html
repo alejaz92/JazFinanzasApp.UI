@@ -1,0 +1,28 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Ingresos y Egresos — Calendario de gastos</h2>
+    <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-sm btn-outline-secondary" (click)="previousYear()"><i class="bi-chevron-left"></i></button>
+        <span class="fw-semibold">{{ year }}</span>
+        <button class="btn btn-sm btn-outline-secondary" (click)="nextYear()"><i class="bi-chevron-right"></i></button>
+    </div>
+</div>
+
+<p class="text-body-secondary" *ngIf="!dataRequested">Elegí una moneda arriba para ver el calendario de gastos.</p>
+
+<app-loading [isLoading]="isLoading"></app-loading>
+
+<ng-container *ngIf="dataRequested && !isLoading && data">
+    <div class="card mb-3">
+        <div class="card-header">Un cuadradito por día — clic para ver los movimientos</div>
+        <div class="card-body">
+            <app-chart [options]="calendarOptions" [height]="220" (chartClick)="onCalendarClick($event)"></app-chart>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Gasto promedio por día de la semana</div>
+        <div class="card-body">
+            <app-chart [options]="weekdayOptions" [height]="260"></app-chart>
+        </div>
+    </div>
+</ng-container>

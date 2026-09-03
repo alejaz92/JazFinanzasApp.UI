@@ -2,9 +2,11 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
+  EventEmitter,
   Input,
   OnChanges,
   OnDestroy,
+  Output,
   SimpleChanges,
   ViewChild,
 } from '@angular/core';
@@ -31,6 +33,9 @@ export class ChartComponent implements AfterViewInit, OnChanges, OnDestroy {
   /** Alto fijo en píxeles — evita que un gráfico circular crezca sin control en pantallas anchas. */
   @Input() height = 320;
 
+  /** Evento de click de ECharts sin envolver — drill-down universal (sección 7 del plan). */
+  @Output() chartClick = new EventEmitter<echarts.ECElementEvent>();
+
   @ViewChild('chartEl', { static: true }) private readonly chartEl!: ElementRef<HTMLDivElement>;
 
   private instance?: echarts.ECharts;
@@ -46,6 +51,7 @@ export class ChartComponent implements AfterViewInit, OnChanges, OnDestroy {
     this.initFrame = requestAnimationFrame(() => {
       this.instance = echarts.init(this.chartEl.nativeElement);
       this.instance.setOption(this.options);
+      this.instance.on('click', (params) => this.chartClick.emit(params));
     });
 
     this.resizeObserver = new ResizeObserver(() => this.instance?.resize());

@@ -1,0 +1,56 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Ingresos y Egresos — Por categoría</h2>
+    <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-sm btn-outline-secondary" (click)="previousMonth()"><i class="bi-chevron-left"></i></button>
+        <span class="text-capitalize fw-semibold">{{ monthLabel }}</span>
+        <button class="btn btn-sm btn-outline-secondary" (click)="nextMonth()"><i class="bi-chevron-right"></i></button>
+    </div>
+</div>
+
+<p class="text-body-secondary" *ngIf="!dataRequested">Elegí una moneda arriba para ver el gasto por categoría.</p>
+
+<app-loading [isLoading]="isLoading"></app-loading>
+
+<ng-container *ngIf="dataRequested && !isLoading && data">
+    <p class="text-body-secondary small" *ngIf="data.groups.length === 0">No hay gastos categorizados en {{ monthLabel }}.</p>
+
+    <div class="row" *ngFor="let group of data.groups">
+        <div class="col-12">
+            <div class="card mb-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><strong>{{ group.groupName }}</strong></span>
+                    <span>{{ group.amount | currencyFiatFormat }} <span class="text-body-secondary small">({{ groupPct(group) | number:'1.0-0' }}%)</span></span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm mb-0 align-middle">
+                            <thead class="table-header-brand">
+                                <tr>
+                                    <th>Categoría</th>
+                                    <th class="text-end">Monto</th>
+                                    <th>Tendencia</th>
+                                    <th class="text-end">Ranking</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let category of group.categories" (click)="openCategory(category)" role="button" title="Ver movimientos">
+                                    <td>{{ category.categoryName }}</td>
+                                    <td class="text-end">{{ category.amount | currencyFiatFormat }}</td>
+                                    <td style="width: 120px;">
+                                        <app-chart *ngIf="sparklineByCategory[category.categoryId]" [options]="sparklineByCategory[category.categoryId]" [height]="36"></app-chart>
+                                    </td>
+                                    <td class="text-end">
+                                        <span *ngIf="rankDelta(category) === null" class="badge bg-secondary-subtle text-secondary-emphasis">Nuevo</span>
+                                        <span *ngIf="rankDelta(category) !== null && rankDelta(category) === 0" class="text-body-secondary">= #{{ category.rankCurrent }}</span>
+                                        <span *ngIf="rankDelta(category) !== null && rankDelta(category)! > 0" class="text-danger">▲ #{{ category.rankCurrent }}</span>
+                                        <span *ngIf="rankDelta(category) !== null && rankDelta(category)! < 0" class="text-success">▼ #{{ category.rankCurrent }}</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-container>

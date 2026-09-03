@@ -1,0 +1,50 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Ingresos y Egresos — Evolución y tendencia</h2>
+    <div class="btn-group btn-group-sm">
+        <button type="button" class="btn" [class.btn-primary]="months === 12" [class.btn-outline-secondary]="months !== 12" (click)="setMonths(12)">12 meses</button>
+        <button type="button" class="btn" [class.btn-primary]="months === 24" [class.btn-outline-secondary]="months !== 24" (click)="setMonths(24)">24 meses</button>
+    </div>
+</div>
+
+<p class="text-body-secondary" *ngIf="!dataRequested">Elegí una moneda arriba para ver la evolución.</p>
+
+<app-loading [isLoading]="isLoading"></app-loading>
+
+<ng-container *ngIf="dataRequested && !isLoading && points.length > 0">
+    <div class="card mb-3">
+        <div class="card-header">Ingreso, egreso y resultado acumulado</div>
+        <div class="card-body">
+            <app-chart [options]="chartOptions" [height]="380"></app-chart>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Detalle mensual</div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover table-sm">
+                    <thead class="table-header-brand">
+                        <tr>
+                            <th>Mes</th>
+                            <th class="text-end">Ingresos</th>
+                            <th class="text-end">Egresos</th>
+                            <th class="text-end">Resultado</th>
+                            <th class="text-end">Acumulado</th>
+                            <th class="text-end">Prom. móvil de gasto</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let p of points">
+                            <td>{{ monthLabel(p.month) }}</td>
+                            <td class="text-end">{{ p.income | currencyFiatFormat }}</td>
+                            <td class="text-end">{{ p.expense | currencyFiatFormat }}</td>
+                            <td class="text-end" [class.text-success]="p.result >= 0" [class.text-danger]="p.result < 0">{{ p.result | currencyFiatFormat }}</td>
+                            <td class="text-end">{{ p.cumulativeResult | currencyFiatFormat }}</td>
+                            <td class="text-end">{{ p.expenseMovingAverage !== null ? (p.expenseMovingAverage | currencyFiatFormat) : '—' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</ng-container>
