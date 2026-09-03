@@ -23,7 +23,6 @@ export class NetWorthByAccountReportComponent implements OnInit {
     private readonly chartTheme = inject(ChartThemeService);
     protected readonly reportContext = inject(ReportContextService);
 
-    // Arranca en false: hasta no tener una moneda seleccionada no hay nada pedido al backend.
     isLoading = false;
     dataRequested = false;
     accounts: AccountBalance[] = [];

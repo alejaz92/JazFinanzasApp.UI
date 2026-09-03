@@ -20,6 +20,11 @@ export const reportRoutes: Routes = [
                 data: { usesPeriod: false }
             },
             {
+                path: 'networth-by-asset',
+                loadComponent: () => import('./net-worth-by-asset-report/net-worth-by-asset-report.component').then(m => m.NetWorthByAssetReportComponent),
+                data: { usesPeriod: false }
+            },
+            {
                 path: 'inc-exp',
                 loadComponent: () => import('./inc-exp/inc-exp-report.component').then(m => m.IncExpReportComponent)
             },

@@ -1,0 +1,65 @@
+<h2 class="mb-3">Patrimonio — Por activo</h2>
+
+<p class="text-body-secondary" *ngIf="!dataRequested">
+    Elegí una moneda arriba para ver en qué cuentas está cada activo.
+</p>
+
+<app-loading [isLoading]="isLoading"></app-loading>
+
+<div *ngIf="dataRequested && !isLoading">
+    <ng-container *ngIf="allAssets.length > 0; else emptyState">
+        <div class="row">
+            <div class="col-12 mt-1">
+                <div class="card">
+                    <div class="card-body">
+                        <label for="assetSelect" class="form-label">Activo</label>
+                        <select id="assetSelect" class="form-select mb-3" style="max-width: 420px"
+                                [ngModel]="selectedAssetId" (ngModelChange)="onAssetSelected($event)">
+                            <option [ngValue]="null" disabled>Elegí un activo…</option>
+                            <option *ngFor="let a of allAssets" [ngValue]="a.assetId">
+                                {{ a.assetName }} ({{ a.assetSymbol }}) — {{ a.total | currencyFiatFormat }}
+                            </option>
+                        </select>
+
+                        <ng-container *ngIf="selectedAssetId != null">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <table class="table table-sm table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Cuenta</th>
+                                                <th class="text-end">Saldo</th>
+                                                <th class="text-end">En moneda de referencia</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let r of selectedAssetDistribution">
+                                                <td>{{ r.accountName }}</td>
+                                                <td class="text-end">{{ r.nativeBalance | currencyInvestmentFormat }}</td>
+                                                <td class="text-end">{{ r.balanceInReferenceAsset | currencyFiatFormat }}</td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot *ngIf="selectedAsset">
+                                            <tr class="fw-semibold">
+                                                <td>Total</td>
+                                                <td></td>
+                                                <td class="text-end">{{ selectedAsset.total | currencyFiatFormat }}</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <app-chart [options]="distributionOptions" [height]="distributionChartHeight"></app-chart>
+                                </div>
+                            </div>
+                        </ng-container>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+
+    <ng-template #emptyState>
+        <p class="text-body-secondary">Todavía no hay movimientos para mostrar por activo.</p>
+    </ng-template>
+</div>
