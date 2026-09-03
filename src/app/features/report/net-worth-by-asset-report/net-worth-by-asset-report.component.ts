@@ -16,6 +16,7 @@ interface AssetSummary {
     assetId: number;
     assetName: string;
     assetSymbol: string;
+    assetTypeName: string;
     total: number;
 }
 
@@ -47,6 +48,7 @@ export class NetWorthByAssetReportComponent implements OnInit {
     dataRequested = false;
     accounts: AccountBalance[] = [];
 
+    selectedAssetTypeName: string | null = null;
     selectedAssetId: number | null = null;
     distributionOptions: EChartsOption = {};
 
@@ -62,6 +64,7 @@ export class NetWorthByAssetReportComponent implements OnInit {
     private load(assetId: number): void {
         this.isLoading = true;
         this.dataRequested = true;
+        this.selectedAssetTypeName = null;
         this.selectedAssetId = null;
         this.netWorthService.getByAccount(assetId).subscribe(data => {
             this.accounts = data;
@@ -81,6 +84,7 @@ export class NetWorthByAssetReportComponent implements OnInit {
                     assetId: holding.assetId,
                     assetName: holding.assetName,
                     assetSymbol: holding.assetSymbol,
+                    assetTypeName: holding.assetTypeName,
                     total: holding.balanceInReferenceAsset
                 });
             }
@@ -88,8 +92,24 @@ export class NetWorthByAssetReportComponent implements OnInit {
         return Array.from(byAsset.values()).sort((a, b) => b.total - a.total);
     }
 
+    // Igual que la vieja "Saldos" (Tipo de Activo → Activo): filtrar primero por tipo evita un combo
+    // único con decenas de activos mezclados de cualquier tipo.
+    get assetTypeNames(): string[] {
+        return Array.from(new Set(this.allAssets.map(a => a.assetTypeName))).sort();
+    }
+
+    get assetsForSelectedType(): AssetSummary[] {
+        if (this.selectedAssetTypeName == null) return [];
+        return this.allAssets.filter(a => a.assetTypeName === this.selectedAssetTypeName);
+    }
+
     get selectedAsset(): AssetSummary | undefined {
         return this.allAssets.find(a => a.assetId === this.selectedAssetId);
+    }
+
+    onAssetTypeSelected(assetTypeName: string): void {
+        this.selectedAssetTypeName = assetTypeName;
+        this.selectedAssetId = null;
     }
 
     get selectedAssetDistribution(): AssetAccountRow[] {

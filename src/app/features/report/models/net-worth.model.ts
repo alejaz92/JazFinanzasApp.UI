@@ -36,6 +36,7 @@ export interface AccountHolding {
     assetId: number;
     assetName: string;
     assetSymbol: string;
+    assetTypeName: string;
     nativeBalance: number;
     balanceInReferenceAsset: number;
 }

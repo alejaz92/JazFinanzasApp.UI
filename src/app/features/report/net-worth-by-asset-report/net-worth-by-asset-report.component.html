@@ -12,14 +12,27 @@
             <div class="col-12 mt-1">
                 <div class="card">
                     <div class="card-body">
-                        <label for="assetSelect" class="form-label">Activo</label>
-                        <select id="assetSelect" class="form-select mb-3" style="max-width: 420px"
-                                [ngModel]="selectedAssetId" (ngModelChange)="onAssetSelected($event)">
-                            <option [ngValue]="null" disabled>Elegí un activo…</option>
-                            <option *ngFor="let a of allAssets" [ngValue]="a.assetId">
-                                {{ a.assetName }} ({{ a.assetSymbol }}) — {{ a.total | currencyFiatFormat }}
-                            </option>
-                        </select>
+                        <div class="row">
+                            <div class="col-12 col-md-6">
+                                <label for="assetTypeSelect" class="form-label">Tipo de Activo</label>
+                                <select id="assetTypeSelect" class="form-select mb-3"
+                                        [ngModel]="selectedAssetTypeName" (ngModelChange)="onAssetTypeSelected($event)">
+                                    <option [ngValue]="null" disabled>Elegí un tipo…</option>
+                                    <option *ngFor="let t of assetTypeNames" [ngValue]="t">{{ t }}</option>
+                                </select>
+                            </div>
+
+                            <div class="col-12 col-md-6" *ngIf="selectedAssetTypeName != null">
+                                <label for="assetSelect" class="form-label">Activo</label>
+                                <select id="assetSelect" class="form-select mb-3"
+                                        [ngModel]="selectedAssetId" (ngModelChange)="onAssetSelected($event)">
+                                    <option [ngValue]="null" disabled>Elegí un activo…</option>
+                                    <option *ngFor="let a of assetsForSelectedType" [ngValue]="a.assetId">
+                                        {{ a.assetName }} ({{ a.assetSymbol }}) — {{ a.total | currencyFiatFormat }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
 
                         <ng-container *ngIf="selectedAssetId != null">
                             <div class="row">
