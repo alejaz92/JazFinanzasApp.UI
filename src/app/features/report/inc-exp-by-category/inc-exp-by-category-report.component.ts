@@ -71,6 +71,7 @@ export class IncExpByCategoryReportComponent {
     selectedCategory: CategoryDetail | null = null;
     categoryMovements: Transaction[] = [];
     isLoadingMovements = false;
+    detailTrendOptions: EChartsOption = {};
 
     @ViewChild('drawerRef') private drawerRef?: ElementRef<HTMLElement>;
     @ViewChild('modalRef') private modalRef?: ElementRef<HTMLElement>;
@@ -151,9 +152,25 @@ export class IncExpByCategoryReportComponent {
     // pasa por acá, y el modo (panel/modal/inline) decide solo cómo se muestra, no de dónde sale el dato.
     openCategory(category: CategoryDetail): void {
         this.selectedCategory = category;
+        this.renderDetailTrend(category);
         this.loadMovements(category);
         if (this.drilldownMode === 'drawer') this.openDrawer();
         if (this.drilldownMode === 'modal') this.openModal();
+    }
+
+    // El treemap no tiene lugar para una mini-tendencia por bloque (a diferencia de la tabla/tarjetas) —
+    // se muestra acá, en el detalle, que es el momento en que de verdad importa mirarla.
+    private renderDetailTrend(category: CategoryDetail): void {
+        const months = category.monthlyTrend.length;
+        const labels: string[] = [];
+        for (let i = months - 1; i >= 0; i--) {
+            const d = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() - i, 1);
+            labels.push(d.toLocaleDateString('es-AR', { month: 'short', year: '2-digit' }));
+        }
+        this.detailTrendOptions = this.chartTheme.lineOptions(labels, category.monthlyTrend, {
+            formatValue: (v: number) => this.chartTheme.formatNumber(v, { maximumFractionDigits: 0 }),
+            colorIndex: 7,
+        });
     }
 
     closeDetail(): void {
@@ -238,7 +255,10 @@ export class IncExpByCategoryReportComponent {
             series: [{
                 type: 'treemap',
                 roam: false,
-                breadcrumb: { show: false },
+                // Hoy cada rubro tiene una sola categoría adentro, así que nunca se ve nada acá —
+                // pero el día que se clasifiquen categorías bajo un rubro (D-2), el clic en un rubro
+                // hace zoom a sus hijas y esto es lo que deja volver al nivel de arriba.
+                breadcrumb: { show: true, top: 'bottom', itemStyle: { color: this.chartTheme.surface.tooltipBg, borderColor: this.chartTheme.surface.axisLine, textStyle: { color: this.chartTheme.surface.axisLabel } } },
                 label: { show: true, color: '#fff', fontWeight: 'bold', formatter: (p: any) => `${p.name}\n${fmt(p.value)}` },
                 itemStyle: { borderColor: this.chartTheme.surface.tooltipBg, borderWidth: 2, gapWidth: 2 },
                 data,

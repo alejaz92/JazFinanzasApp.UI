@@ -151,6 +151,10 @@
 </div>
 
 <ng-template #movementsContent>
+    <div class="mb-3" *ngIf="selectedCategory">
+        <div class="small text-body-secondary mb-1">Últimos {{ selectedCategory.monthlyTrend.length }} meses</div>
+        <app-chart [options]="detailTrendOptions" [height]="140"></app-chart>
+    </div>
     <app-loading [isLoading]="isLoadingMovements"></app-loading>
     <p class="text-body-secondary small" *ngIf="!isLoadingMovements && categoryMovements.length === 0">
         No hay movimientos para mostrar (o el filtro por categoría todavía no está deployado en producción).
