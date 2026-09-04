@@ -1,6 +1,5 @@
-import { Component, effect, inject } from '@angular/core';
-import { NgIf } from '@angular/common';
-import { Router } from '@angular/router';
+import { Component, ElementRef, ViewChild, effect, inject } from '@angular/core';
+import { NgIf, NgFor, DatePipe } from '@angular/common';
 import type { EChartsOption, ECElementEvent } from 'echarts';
 
 import { IncomeExpenseService } from '../services/income-expense.service';
@@ -9,6 +8,11 @@ import { ReportContextService } from '../../../shared/services/report-context.se
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
+import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
+import { TransactionService } from '../../transaction/services/transaction.service';
+import { Transaction } from '../../transaction/models/transaction.model';
+
+declare const bootstrap: any;
 
 const WEEKDAY_LABELS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 // Lunes a domingo para la lectura habitual de una semana en Argentina; el backend numera 0=domingo.
@@ -17,14 +21,14 @@ const WEEKDAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
 @Component({
     selector: 'app-inc-exp-calendar-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, ChartComponent],
+    imports: [LoadingComponent, NgIf, NgFor, DatePipe, CurrencyFiatFormatPipe, ChartComponent],
     templateUrl: './inc-exp-calendar-report.component.html',
     styleUrl: './inc-exp-calendar-report.component.css'
 })
 export class IncExpCalendarReportComponent {
     private readonly incomeExpenseService = inject(IncomeExpenseService);
     private readonly chartTheme = inject(ChartThemeService);
-    private readonly router = inject(Router);
+    private readonly transactionService = inject(TransactionService);
     protected readonly reportContext = inject(ReportContextService);
 
     isLoading = false;
@@ -34,6 +38,15 @@ export class IncExpCalendarReportComponent {
 
     calendarOptions: EChartsOption = {};
     weekdayOptions: EChartsOption = {};
+
+    // Panel lateral con los movimientos del día — mismo criterio que "Por categoría" (Fase 13,
+    // corrección 2026-09-04): drill-down sin redirigir a /transactions.
+    selectedDate: string | null = null;
+    dayMovements: Transaction[] = [];
+    isLoadingMovements = false;
+
+    @ViewChild('drawerRef') private drawerRef?: ElementRef<HTMLElement>;
+    private drawerInstance: any;
 
     constructor() {
         effect(() => {
@@ -64,7 +77,8 @@ export class IncExpCalendarReportComponent {
         if (assetId != null) this.load(assetId);
     }
 
-    // Drill-down: clic en un día del mapa de calor lleva a sus movimientos de ese día.
+    // Drill-down: clic en un día del mapa de calor abre el panel lateral con sus movimientos
+    // (sin redirigir a /transactions — mismo criterio que "Por categoría").
     onCalendarClick(event: ECElementEvent): void {
         const value = event.value as [string, number] | undefined;
         if (!value) return;
@@ -78,12 +92,31 @@ export class IncExpCalendarReportComponent {
         const next = new Date(Date.UTC(year, month - 1, day + 1));
         const to = `${next.getUTCFullYear()}-${(next.getUTCMonth() + 1).toString().padStart(2, '0')}-${next.getUTCDate().toString().padStart(2, '0')}`;
 
-        this.router.navigate(['/transactions'], {
-            queryParams: {
-                from: date,
-                to,
-                label: `Gastos del ${day}/${month}/${year}`,
-            },
+        this.selectedDate = date;
+        this.loadMovements(date, to);
+        this.openDrawer();
+    }
+
+    closeDetail(): void {
+        this.selectedDate = null;
+        this.dayMovements = [];
+        this.drawerInstance?.hide();
+    }
+
+    private loadMovements(from: string, to: string): void {
+        this.isLoadingMovements = true;
+        this.transactionService.getTransactions(1, 50, { from, to }).subscribe(res => {
+            this.dayMovements = res.transactions;
+            this.isLoadingMovements = false;
+        });
+    }
+
+    private openDrawer(): void {
+        setTimeout(() => {
+            const el = this.drawerRef?.nativeElement;
+            if (!el) return;
+            this.drawerInstance = bootstrap.Offcanvas.getOrCreateInstance(el);
+            this.drawerInstance.show();
         });
     }
 

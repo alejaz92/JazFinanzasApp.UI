@@ -26,3 +26,35 @@
         </div>
     </div>
 </ng-container>
+
+<!-- Detalle: panel lateral con los movimientos del día elegido -->
+<div #drawerRef class="offcanvas offcanvas-end" tabindex="-1">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title">Movimientos — {{ selectedDate | date:'dd/MM/yyyy':'UTC' }}</h5>
+        <button type="button" class="btn-close" (click)="closeDetail()"></button>
+    </div>
+    <div class="offcanvas-body">
+        <app-loading [isLoading]="isLoadingMovements"></app-loading>
+        <p class="text-body-secondary small" *ngIf="!isLoadingMovements && dayMovements.length === 0">
+            No hay movimientos para mostrar.
+        </p>
+        <div class="table-responsive" *ngIf="!isLoadingMovements && dayMovements.length > 0">
+            <table class="table table-sm table-hover">
+                <thead>
+                    <tr>
+                        <th>Detalle</th>
+                        <th>Cuenta</th>
+                        <th class="text-end">Monto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let m of dayMovements">
+                        <td>{{ m.detail }}</td>
+                        <td>{{ m.accountName }}</td>
+                        <td class="text-end" [class.text-danger]="m.amount < 0" [class.text-success]="m.amount >= 0">{{ m.amount | currencyFiatFormat }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
