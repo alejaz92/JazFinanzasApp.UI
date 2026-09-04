@@ -1,3 +1,21 @@
-tbody tr[role="button"]:hover {
+tbody tr[role="button"]:hover,
+.category-card:hover {
     background-color: var(--bs-tertiary-bg);
+}
+
+.category-card {
+    cursor: pointer;
+}
+
+.proportion-bar {
+    height: 6px;
+    border-radius: 3px;
+    background-color: var(--bs-tertiary-bg);
+    overflow: hidden;
+}
+
+.proportion-bar-fill {
+    height: 100%;
+    background-color: var(--bs-danger);
+    border-radius: 3px;
 }

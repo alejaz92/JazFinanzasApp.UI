@@ -1,9 +1,30 @@
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
     <h2 class="mb-0">Ingresos y Egresos — Por categoría</h2>
     <div class="d-flex align-items-center gap-2">
         <button class="btn btn-sm btn-outline-secondary" (click)="previousMonth()"><i class="bi-chevron-left"></i></button>
         <span class="text-capitalize fw-semibold">{{ monthLabel }}</span>
         <button class="btn btn-sm btn-outline-secondary" (click)="nextMonth()"><i class="bi-chevron-right"></i></button>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body d-flex flex-wrap gap-4">
+        <div>
+            <div class="small text-body-secondary mb-1">Estilo</div>
+            <div class="btn-group btn-group-sm">
+                <button *ngFor="let opt of layoutOptions" type="button" class="btn"
+                        [ngClass]="layoutMode === opt.value ? 'btn-primary' : 'btn-outline-secondary'"
+                        (click)="setLayout(opt.value)">{{ opt.label }}</button>
+            </div>
+        </div>
+        <div>
+            <div class="small text-body-secondary mb-1">Ver movimientos</div>
+            <div class="btn-group btn-group-sm">
+                <button *ngFor="let opt of drilldownOptions" type="button" class="btn"
+                        [ngClass]="drilldownMode === opt.value ? 'btn-primary' : 'btn-outline-secondary'"
+                        (click)="setDrilldown(opt.value)">{{ opt.label }}</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -14,8 +35,45 @@
 <ng-container *ngIf="dataRequested && !isLoading && data">
     <p class="text-body-secondary small" *ngIf="data.groups.length === 0">No hay gastos categorizados en {{ monthLabel }}.</p>
 
-    <div class="row" *ngFor="let group of data.groups">
-        <div class="col-12">
+    <!-- Mapa de bloques -->
+    <div class="card mb-3" *ngIf="layoutMode === 'treemap' && data.groups.length > 0">
+        <div class="card-body">
+            <app-chart [options]="treemapOptions" [height]="420" (chartClick)="onTreemapClick($event)"></app-chart>
+        </div>
+    </div>
+
+    <!-- Barras rankeadas -->
+    <div class="card mb-3" *ngIf="layoutMode === 'bars' && data.groups.length > 0">
+        <div class="card-body">
+            <app-chart [options]="barsOptions" [height]="barsHeight" (chartClick)="onBarsClick($event)"></app-chart>
+        </div>
+    </div>
+
+    <!-- Tarjetas -->
+    <div class="row" *ngIf="layoutMode === 'cards'">
+        <div class="col-sm-6 col-lg-4" *ngFor="let category of allCategories">
+            <div class="card mb-3 category-card" role="button" (click)="openCategory(category)">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <span class="fw-semibold">{{ category.categoryName }}</span>
+                        <span *ngIf="rankDelta(category) === null" class="badge bg-secondary-subtle text-secondary-emphasis">Nuevo</span>
+                        <span *ngIf="rankDelta(category) !== null && rankDelta(category) === 0" class="text-body-secondary small">= #{{ category.rankCurrent }}</span>
+                        <span *ngIf="rankDelta(category) !== null && rankDelta(category)! > 0" class="text-danger small">▲ #{{ category.rankCurrent }}</span>
+                        <span *ngIf="rankDelta(category) !== null && rankDelta(category)! < 0" class="text-success small">▼ #{{ category.rankCurrent }}</span>
+                    </div>
+                    <h4 class="mb-2">{{ category.amount | currencyFiatFormat }}</h4>
+                    <div class="proportion-bar mb-2">
+                        <div class="proportion-bar-fill" [style.width.%]="categoryPct(category)"></div>
+                    </div>
+                    <app-chart *ngIf="sparklineByCategory[category.categoryId]" [options]="sparklineByCategory[category.categoryId]" [height]="40"></app-chart>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla (formato actual) -->
+    <div class="row" *ngIf="layoutMode === 'table'">
+        <div class="col-12" *ngFor="let group of data.groups">
             <div class="card mb-3">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <span><strong>{{ group.groupName }}</strong></span>
@@ -53,4 +111,68 @@
             </div>
         </div>
     </div>
+
+    <!-- Detalle "expandir en el lugar" -->
+    <div class="card mb-3 border-primary" *ngIf="drilldownMode === 'inline' && selectedCategory">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Movimientos — {{ selectedCategory.categoryName }}</span>
+            <button class="btn-close" (click)="closeDetail()"></button>
+        </div>
+        <div class="card-body">
+            <ng-container *ngTemplateOutlet="movementsContent"></ng-container>
+        </div>
+    </div>
 </ng-container>
+
+<!-- Detalle "panel lateral" -->
+<div #drawerRef class="offcanvas offcanvas-end" tabindex="-1">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title">Movimientos — {{ selectedCategory?.categoryName }}</h5>
+        <button type="button" class="btn-close" (click)="closeDetail()"></button>
+    </div>
+    <div class="offcanvas-body">
+        <ng-container *ngTemplateOutlet="movementsContent"></ng-container>
+    </div>
+</div>
+
+<!-- Detalle "modal" -->
+<div #modalRef class="modal fade" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Movimientos — {{ selectedCategory?.categoryName }}</h5>
+                <button type="button" class="btn-close" (click)="closeDetail()"></button>
+            </div>
+            <div class="modal-body">
+                <ng-container *ngTemplateOutlet="movementsContent"></ng-container>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ng-template #movementsContent>
+    <app-loading [isLoading]="isLoadingMovements"></app-loading>
+    <p class="text-body-secondary small" *ngIf="!isLoadingMovements && categoryMovements.length === 0">
+        No hay movimientos para mostrar (o el filtro por categoría todavía no está deployado en producción).
+    </p>
+    <div class="table-responsive" *ngIf="!isLoadingMovements && categoryMovements.length > 0">
+        <table class="table table-sm table-hover">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Detalle</th>
+                    <th>Cuenta</th>
+                    <th class="text-end">Monto</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let m of categoryMovements">
+                    <td class="text-nowrap">{{ m.date | date:'dd/MM/yyyy' }}</td>
+                    <td>{{ m.detail }}</td>
+                    <td>{{ m.accountName }}</td>
+                    <td class="text-end" [class.text-danger]="m.amount < 0" [class.text-success]="m.amount >= 0">{{ m.amount | currencyFiatFormat }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</ng-template>
