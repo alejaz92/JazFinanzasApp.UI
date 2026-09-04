@@ -24,20 +24,7 @@
             </div>
         </div>
 
-        <!-- Calendario por categoría -->
-        <div class="card mb-3">
-            <div class="card-header">Calendario por categoría</div>
-            <div class="card-body">
-                <div class="d-flex align-items-center gap-2 mb-3">
-                    <label for="calendarCategory" class="form-label mb-0 small text-body-secondary">Categoría:</label>
-                    <select id="calendarCategory" class="form-select form-select-sm w-auto"
-                            [(ngModel)]="selectedCategoryForCalendar" (ngModelChange)="onCalendarCategoryChange()">
-                        <option *ngFor="let c of categoryNames" [ngValue]="c">{{ c }}</option>
-                    </select>
-                </div>
-                <app-chart [options]="categoryCalendarOptions" [height]="200"></app-chart>
-            </div>
-        </div>
+
 
         <!-- Tabla -->
         <div class="card">
@@ -65,6 +52,21 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+        </div>
+
+                <!-- Calendario por categoría -->
+        <div class="card mb-3">
+            <div class="card-header">Calendario por categoría</div>
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <label for="calendarCategory" class="form-label mb-0 small text-body-secondary">Categoría:</label>
+                    <select id="calendarCategory" class="form-select form-select-sm w-auto"
+                            [(ngModel)]="selectedCategoryForCalendar" (ngModelChange)="onCalendarCategoryChange()">
+                        <option *ngFor="let c of categoryNames" [ngValue]="c">{{ c }}</option>
+                    </select>
+                </div>
+                <app-chart [options]="categoryCalendarOptions" [height]="200"></app-chart>
             </div>
         </div>
     </ng-container>
