@@ -28,60 +28,10 @@
     </div>
 
     <!-- Evolución en el tiempo: secundaria -->
-    <div class="card mb-4" *ngIf="categories.length > 0">
+    <div class="card" *ngIf="categories.length > 0">
         <div class="card-header text-body-secondary">Evolución por categoría — últimos 24 meses</div>
         <div class="card-body">
             <app-chart [options]="evolutionOptions" [height]="260"></app-chart>
-        </div>
-    </div>
-
-    <!-- Días de cobro: 3 variantes en comparación -->
-    <div class="card" *ngIf="dayRows.length > 0">
-        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <span>Días de cobro por categoría — últimos 12 meses</span>
-            <div class="btn-group btn-group-sm">
-                <button *ngFor="let opt of payDayStyleOptions" type="button" class="btn"
-                        [class.btn-primary]="payDayStyle === opt.value" [class.btn-outline-secondary]="payDayStyle !== opt.value"
-                        (click)="setPayDayStyle(opt.value)">{{ opt.label }}</button>
-            </div>
-        </div>
-        <div class="card-body">
-            <!-- Tabla -->
-            <div class="table-responsive" *ngIf="payDayStyle === 'table'">
-                <table class="table table-sm table-hover">
-                    <thead class="table-header-brand">
-                        <tr>
-                            <th>Categoría</th>
-                            <th class="text-end">Día típico</th>
-                            <th class="text-end">Frecuencia</th>
-                            <th class="text-end">Monto promedio</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let s of categoryStats">
-                            <td>{{ s.categoryName }}</td>
-                            <td class="text-end">{{ s.typicalDay }}</td>
-                            <td class="text-end">{{ s.frequencyPct }}%</td>
-                            <td class="text-end">{{ s.averageAmount | currencyFiatFormat }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Timeline -->
-            <app-chart *ngIf="payDayStyle === 'timeline'" [options]="timelineOptions" [height]="280"></app-chart>
-
-            <!-- Calendario por categoría -->
-            <ng-container *ngIf="payDayStyle === 'calendar'">
-                <div class="d-flex align-items-center gap-2 mb-3">
-                    <label for="calendarCategory" class="form-label mb-0 small text-body-secondary">Categoría:</label>
-                    <select id="calendarCategory" class="form-select form-select-sm w-auto"
-                            [(ngModel)]="selectedCategoryForCalendar" (ngModelChange)="onCalendarCategoryChange()">
-                        <option *ngFor="let c of categoryNames" [ngValue]="c">{{ c }}</option>
-                    </select>
-                </div>
-                <app-chart [options]="categoryCalendarOptions" [height]="200"></app-chart>
-            </ng-container>
         </div>
     </div>
 </ng-container>

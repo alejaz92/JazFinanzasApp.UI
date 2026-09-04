@@ -97,6 +97,20 @@ $sidebar-bg-bottom: #1b0f44;
         font-size: 0.92rem;
         opacity: 0.9;
     }
+
+    // Subcategoría dentro de una categoría (ej. "Ingresos"/"Egresos" bajo "Ingresos y Egresos") —
+    // mismo look de sidebar-category (clickeable, chevron) pero un nivel más adentro.
+    .sidebar-sublink.sidebar-category {
+        margin-left: 20px;
+        font-size: 0.92rem;
+        opacity: 0.9;
+    }
+
+    .sidebar-subsublink {
+        margin-left: 38px;
+        font-size: 0.88rem;
+        opacity: 0.85;
+    }
 }
 
 // -- Content -------------------------------------------------------------------

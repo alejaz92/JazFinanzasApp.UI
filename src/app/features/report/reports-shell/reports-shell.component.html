@@ -28,16 +28,45 @@
           @if (expandedCategory === entry.label) {
             <ul class="nav flex-column sidebar-subnav">
               @for (child of entry.children; track child.label) {
-                <li class="nav-item">
-                  <a class="nav-link text-white px-3 py-2 d-flex align-items-center sidebar-link sidebar-sublink"
-                     [routerLink]="child.route"
-                     queryParamsHandling="preserve"
-                     routerLinkActive="active"
-                     (click)="sidebarOpen = false">
-                    <i class="bi {{ child.icon }} me-2"></i>
-                    {{ child.label }}
-                  </a>
-                </li>
+                @if (isSubcategory(child)) {
+                  <li class="nav-item">
+                    <a class="nav-link text-white px-3 py-2 d-flex align-items-center sidebar-link sidebar-sublink sidebar-category"
+                       [class.expanded]="expandedSubcategory === child.label"
+                       role="button"
+                       (click)="toggleSubcategory(child.label)">
+                      <i class="bi {{ child.icon }} me-2"></i>
+                      <span class="flex-grow-1">{{ child.label }}</span>
+                      <i class="bi bi-chevron-down category-chevron"></i>
+                    </a>
+                    @if (expandedSubcategory === child.label) {
+                      <ul class="nav flex-column sidebar-subnav">
+                        @for (grandchild of child.children; track grandchild.label) {
+                          <li class="nav-item">
+                            <a class="nav-link text-white px-3 py-2 d-flex align-items-center sidebar-link sidebar-subsublink"
+                               [routerLink]="grandchild.route"
+                               queryParamsHandling="preserve"
+                               routerLinkActive="active"
+                               (click)="sidebarOpen = false">
+                              <i class="bi {{ grandchild.icon }} me-2"></i>
+                              {{ grandchild.label }}
+                            </a>
+                          </li>
+                        }
+                      </ul>
+                    }
+                  </li>
+                } @else {
+                  <li class="nav-item">
+                    <a class="nav-link text-white px-3 py-2 d-flex align-items-center sidebar-link sidebar-sublink"
+                       [routerLink]="child.route"
+                       queryParamsHandling="preserve"
+                       routerLinkActive="active"
+                       (click)="sidebarOpen = false">
+                      <i class="bi {{ child.icon }} me-2"></i>
+                      {{ child.label }}
+                    </a>
+                  </li>
+                }
               }
             </ul>
           }

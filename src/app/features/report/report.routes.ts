@@ -52,10 +52,17 @@ export const reportRoutes: Routes = [
                 data: { usesPeriod: false }
             },
             {
-                // Ingresos (corrección 2026-09-04 sobre la Fase 13) — evolución por categoría en el
-                // tiempo, en vez de una composición de un mes (sueldo domina cualquier foto puntual).
+                // Ingresos (corrección 2026-09-04 sobre la Fase 13) — composición de un mes elegido
+                // + evolución por categoría como complemento secundario.
                 path: 'inc-income',
                 loadComponent: () => import('./inc-income/inc-income-report.component').then(m => m.IncIncomeReportComponent),
+                data: { usesPeriod: false }
+            },
+            {
+                // Días de cobro — se separó de "Ingresos" a pedido del usuario, con las 3 formas de
+                // comparación (tabla/timeline/calendario) que se probaron ahí.
+                path: 'inc-pay-days',
+                loadComponent: () => import('./inc-pay-days/inc-pay-days-report.component').then(m => m.IncPayDaysReportComponent),
                 data: { usesPeriod: false }
             },
             {

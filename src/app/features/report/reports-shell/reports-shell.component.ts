@@ -13,11 +13,20 @@ interface NavLink {
     route: string;
 }
 
+// Un nivel más de agrupación dentro de una categoría — hoy solo lo usa "Ingresos y Egresos"
+// (corrección 2026-09-04: separar qué reportes son de ingresos, de egresos, o de ambos).
+interface NavSubcategory {
+    type: 'subcategory';
+    label: string;
+    icon: string;
+    children: NavLink[];
+}
+
 interface NavCategory {
     type: 'category';
     label: string;
     icon: string;
-    children: NavLink[];
+    children: (NavLink | NavSubcategory)[];
 }
 
 type NavEntry = NavLink | NavCategory;
@@ -35,6 +44,10 @@ export class ReportsShellComponent implements OnInit {
     // categoría con subitems abierta en el sidebar (null = todas cerradas); "Patrimonio" arranca
     // abierta por ser la primera y la de uso más frecuente (Flujo 2 del plan).
     expandedCategory: string | null = 'Patrimonio';
+
+    // subcategoría abierta dentro de la categoría expandida (ej. "Ingresos" o "Egresos" dentro de
+    // "Ingresos y Egresos") — mismo criterio de a una por vez que expandedCategory.
+    expandedSubcategory: string | null = null;
 
     private readonly assetService = inject(AssetService);
     private readonly router = inject(Router);
@@ -67,14 +80,28 @@ export class ReportsShellComponent implements OnInit {
             ]
         },
         {
+            // Corrección 2026-09-04: "muchos reportes son de egresos y no se entiende que son
+            // egresos" — los que involucran ambos (resumen, evolución) quedan sueltos acá; los que
+            // son de un solo lado bajan un nivel más, agrupados por Ingresos / Egresos.
             type: 'category', label: 'Ingresos y Egresos', icon: 'bi-graph-up-arrow',
             children: [
                 { type: 'link', label: 'Resumen del mes', icon: 'bi-bar-chart-steps', route: '/report/inc-exp-summary' },
                 { type: 'link', label: 'Evolución y tendencia', icon: 'bi-graph-up', route: '/report/inc-exp-evolution' },
-                { type: 'link', label: 'Por categoría', icon: 'bi-tags', route: '/report/inc-exp-by-category' },
-                { type: 'link', label: 'Por etiqueta', icon: 'bi-bookmark', route: '/report/inc-exp-by-tag' },
-                { type: 'link', label: 'Calendario de gastos', icon: 'bi-calendar3', route: '/report/inc-exp-calendar' },
-                { type: 'link', label: 'Ingresos', icon: 'bi-cash-coin', route: '/report/inc-income' }
+                {
+                    type: 'subcategory', label: 'Ingresos', icon: 'bi-cash-coin',
+                    children: [
+                        { type: 'link', label: 'Composición y evolución', icon: 'bi-pie-chart', route: '/report/inc-income' },
+                        { type: 'link', label: 'Días de cobro', icon: 'bi-calendar-check', route: '/report/inc-pay-days' }
+                    ]
+                },
+                {
+                    type: 'subcategory', label: 'Egresos', icon: 'bi-cash-stack',
+                    children: [
+                        { type: 'link', label: 'Por categoría', icon: 'bi-tags', route: '/report/inc-exp-by-category' },
+                        { type: 'link', label: 'Por etiqueta', icon: 'bi-bookmark', route: '/report/inc-exp-by-tag' },
+                        { type: 'link', label: 'Calendario de gastos', icon: 'bi-calendar3', route: '/report/inc-exp-calendar' }
+                    ]
+                }
             ]
         },
         { type: 'link', label: 'Tarjetas',           icon: 'bi-credit-card',    route: '/report/cards' },
@@ -147,9 +174,18 @@ export class ReportsShellComponent implements OnInit {
 
     toggleCategory(label: string): void {
         this.expandedCategory = this.expandedCategory === label ? null : label;
+        this.expandedSubcategory = null;
+    }
+
+    toggleSubcategory(label: string): void {
+        this.expandedSubcategory = this.expandedSubcategory === label ? null : label;
     }
 
     isCategory(entry: NavEntry): entry is NavCategory {
         return entry.type === 'category';
+    }
+
+    isSubcategory(child: NavLink | NavSubcategory): child is NavSubcategory {
+        return child.type === 'subcategory';
     }
 }
