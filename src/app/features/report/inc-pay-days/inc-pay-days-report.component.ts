@@ -13,8 +13,6 @@ import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat
 
 const PAYDAY_MONTHS = 12;
 
-type PayDayStyle = 'table' | 'timeline' | 'calendar';
-
 interface CategoryPayDayStat {
     categoryName: string;
     typicalDay: number;
@@ -47,14 +45,10 @@ export class IncPayDaysReportComponent {
     dataRequested = false;
 
     // Separado de "Ingresos" a pedido del usuario (2026-09-04, cuarta vuelta: "me gustan todos [los
-    // 3 estilos], tal vez lo separaria del resto de ingresos en otro reporte").
+    // 3 estilos], tal vez lo separaria del resto de ingresos en otro reporte"), y luego (quinta
+    // vuelta, mismo día) el selector de estilo se sacó entero: al tener pantalla propia, mostrar las
+    // 3 variantes juntas en vez de obligar a elegir una.
     dayRows: IncomeCategoryDay[] = [];
-    payDayStyle: PayDayStyle = 'table';
-    readonly payDayStyleOptions: { value: PayDayStyle; label: string }[] = [
-        { value: 'table', label: 'Tabla por categoría' },
-        { value: 'timeline', label: 'Timeline por categoría' },
-        { value: 'calendar', label: 'Calendario por categoría' },
-    ];
     categoryStats: CategoryPayDayStat[] = [];
     categoryNames: string[] = [];
 
@@ -87,11 +81,6 @@ export class IncPayDaysReportComponent {
         });
     }
 
-    setPayDayStyle(style: PayDayStyle): void {
-        this.payDayStyle = style;
-        setTimeout(() => this.renderCharts(), 0);
-    }
-
     toggleTimelineCategory(name: string): void {
         if (this.selectedTimelineCategories.has(name)) this.selectedTimelineCategories.delete(name);
         else this.selectedTimelineCategories.add(name);
@@ -103,8 +92,8 @@ export class IncPayDaysReportComponent {
     }
 
     private renderCharts(): void {
-        if (this.payDayStyle === 'timeline') this.renderTimeline();
-        if (this.payDayStyle === 'calendar') this.renderCategoryCalendar();
+        this.renderTimeline();
+        this.renderCategoryCalendar();
     }
 
     // "Día típico" de una categoría: el día del mes donde más veces cayó su ingreso. La frecuencia
