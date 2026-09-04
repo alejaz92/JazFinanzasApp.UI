@@ -1,21 +1,33 @@
 import { Component, effect, inject } from '@angular/core';
-import { NgIf } from '@angular/common';
+import { NgIf, NgFor } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import type { EChartsOption } from 'echarts';
 
 import { IncomeExpenseService } from '../services/income-expense.service';
-import { IncomeCategorySeries, PayDay } from '../models/income-expense.model';
+import { IncomeCategorySeries, IncomeComposition, IncomeCategoryDay } from '../models/income-expense.model';
 import { ReportContextService } from '../../../shared/services/report-context.service';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
+import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 
 const EVOLUTION_MONTHS = 24;
 const PAYDAY_MONTHS = 12;
 
+type PayDayStyle = 'table' | 'timeline' | 'calendar';
+
+interface CategoryPayDayStat {
+    categoryName: string;
+    typicalDay: number;
+    frequencyPct: number;
+    averageAmount: number;
+    occurrences: number;
+}
+
 @Component({
     selector: 'app-inc-income-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, ChartComponent],
+    imports: [LoadingComponent, NgIf, NgFor, FormsModule, CurrencyFiatFormatPipe, ChartComponent],
     templateUrl: './inc-income-report.component.html',
     styleUrl: './inc-income-report.component.css'
 })
@@ -26,11 +38,32 @@ export class IncIncomeReportComponent {
 
     isLoading = false;
     dataRequested = false;
-    categories: IncomeCategorySeries[] = [];
-    payDays: PayDay[] = [];
 
+    // Composición de un mes elegido — lo principal (corrección 2026-09-04, segunda vuelta: el
+    // usuario pidió expresamente poder elegir un mes y ver la composición, no una evolución).
+    currentMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    composition: IncomeComposition | null = null;
+    compositionOptions: EChartsOption = {};
+
+    // Evolución en el tiempo — secundaria, queda como complemento debajo de la composición.
+    categories: IncomeCategorySeries[] = [];
     evolutionOptions: EChartsOption = {};
-    payDaysOptions: EChartsOption = {};
+
+    // Días de cobro — comparación en vivo de 3 formas (2026-09-04, tercera vuelta): la versión
+    // anterior mezclaba todas las categorías en un solo día-del-mes, y el usuario pidió poder ver
+    // el patrón de cada categoría por separado.
+    dayRows: IncomeCategoryDay[] = [];
+    payDayStyle: PayDayStyle = 'table';
+    readonly payDayStyleOptions: { value: PayDayStyle; label: string }[] = [
+        { value: 'table', label: 'Tabla por categoría' },
+        { value: 'timeline', label: 'Timeline por categoría' },
+        { value: 'calendar', label: 'Calendario por categoría' },
+    ];
+    categoryStats: CategoryPayDayStat[] = [];
+    categoryNames: string[] = [];
+    selectedCategoryForCalendar: string | null = null;
+    timelineOptions: EChartsOption = {};
+    categoryCalendarOptions: EChartsOption = {};
 
     constructor() {
         effect(() => {
@@ -43,21 +76,78 @@ export class IncIncomeReportComponent {
         this.isLoading = true;
         this.dataRequested = true;
 
+        this.incomeExpenseService.getIncomeComposition(assetId, this.toMonthParam(this.currentMonth)).subscribe(data => {
+            this.composition = data;
+            this.isLoading = false;
+            this.renderComposition();
+        });
+
         this.incomeExpenseService.getIncomeByCategory(assetId, EVOLUTION_MONTHS).subscribe(data => {
             this.categories = data;
             this.renderEvolution();
         });
 
-        this.incomeExpenseService.getPayDays(assetId, PAYDAY_MONTHS).subscribe(data => {
-            this.payDays = data.days;
-            this.isLoading = false;
-            this.renderPayDays();
+        this.incomeExpenseService.getIncomeByCategoryAndDay(assetId, PAYDAY_MONTHS).subscribe(data => {
+            this.dayRows = data;
+            this.categoryNames = [...new Set(data.map(r => r.categoryName))];
+            this.selectedCategoryForCalendar = this.categoryNames[0] ?? null;
+            this.categoryStats = this.computeCategoryStats();
+            this.renderPayDayCharts();
         });
     }
 
-    // Sueldo + Aporte Familiar explican el 90% del ingreso (relevamiento del plan) — una composición
-    // de un solo mes no cuenta nada, así que este reporte mira la evolución en el tiempo en vez de
-    // la foto de un mes (mismo patrón que "Evolución y tendencia", pero por categoría de ingreso).
+    previousMonth(): void {
+        this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() - 1, 1);
+        const assetId = this.reportContext.currencyAssetId();
+        if (assetId != null) this.loadComposition(assetId);
+    }
+
+    nextMonth(): void {
+        this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() + 1, 1);
+        const assetId = this.reportContext.currencyAssetId();
+        if (assetId != null) this.loadComposition(assetId);
+    }
+
+    private loadComposition(assetId: number): void {
+        this.incomeExpenseService.getIncomeComposition(assetId, this.toMonthParam(this.currentMonth)).subscribe(data => {
+            this.composition = data;
+            this.renderComposition();
+        });
+    }
+
+    get monthLabel(): string {
+        return this.currentMonth.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
+    }
+
+    get compositionTotal(): number {
+        return this.composition?.categories.reduce((sum, c) => sum + c.amount, 0) ?? 0;
+    }
+
+    setPayDayStyle(style: PayDayStyle): void {
+        this.payDayStyle = style;
+        setTimeout(() => this.renderPayDayCharts(), 0);
+    }
+
+    onCalendarCategoryChange(): void {
+        setTimeout(() => this.renderCategoryCalendar(), 0);
+    }
+
+    private toMonthParam(date: Date): string {
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        return `${year}-${month}-01`;
+    }
+
+    private renderComposition(): void {
+        if (!this.composition || this.composition.categories.length === 0) return;
+        const labels = this.composition.categories.map(c => c.categoryName);
+        const values = this.composition.categories.map(c => c.amount);
+        this.compositionOptions = this.chartTheme.pieOptions(labels, values, {
+            donut: true, showLegend: true,
+            formatValue: (v: number) => this.chartTheme.formatNumber(v, { maximumFractionDigits: 0 }),
+        });
+    }
+
     private renderEvolution(): void {
         if (this.categories.length === 0) return;
         const today = new Date();
@@ -94,43 +184,120 @@ export class IncIncomeReportComponent {
         };
     }
 
-    // Barra por día del mes (promedio cuando se cobró) + opacidad según frecuencia — un ingreso
-    // ocasional grande se ve tenue, un día de cobro habitual se ve sólido, sin dos gráficos separados.
-    private renderPayDays(): void {
-        if (this.payDays.length === 0) return;
+    // "Día típico" de una categoría: el día del mes donde más veces cayó su ingreso (no el
+    // promedio ponderado por monto) — la frecuencia es relativa a los propios cobros de esa
+    // categoría, para no diluirla contra meses en que directamente no aplica (ej. un reintegro
+    // ocasional no compite en la misma escala que el sueldo mensual).
+    private computeCategoryStats(): CategoryPayDayStat[] {
+        const byCategory = new Map<string, IncomeCategoryDay[]>();
+        for (const r of this.dayRows) {
+            if (!byCategory.has(r.categoryName)) byCategory.set(r.categoryName, []);
+            byCategory.get(r.categoryName)!.push(r);
+        }
+
+        const stats: CategoryPayDayStat[] = [];
+        for (const [categoryName, rows] of byCategory) {
+            const byDay = new Map<number, IncomeCategoryDay[]>();
+            for (const r of rows) {
+                const day = new Date(r.date).getDate();
+                if (!byDay.has(day)) byDay.set(day, []);
+                byDay.get(day)!.push(r);
+            }
+
+            let typicalDay = 0;
+            let maxCount = 0;
+            for (const [day, dayRows] of byDay) {
+                if (dayRows.length > maxCount) { maxCount = dayRows.length; typicalDay = day; }
+            }
+
+            const typicalRows = byDay.get(typicalDay) ?? [];
+            const averageAmount = typicalRows.reduce((sum, r) => sum + r.amount, 0) / (typicalRows.length || 1);
+            const frequencyPct = Math.round((maxCount / rows.length) * 1000) / 10;
+
+            stats.push({ categoryName, typicalDay, frequencyPct, averageAmount, occurrences: rows.length });
+        }
+
+        return stats.sort((a, b) => b.occurrences - a.occurrences);
+    }
+
+    private renderPayDayCharts(): void {
+        if (this.payDayStyle === 'timeline') this.renderTimeline();
+        if (this.payDayStyle === 'calendar') this.renderCategoryCalendar();
+    }
+
+    private renderTimeline(): void {
+        if (this.dayRows.length === 0) return;
+        const categories = this.categoryNames;
+        const maxAmount = Math.max(...this.dayRows.map(r => r.amount), 1);
         const axisLabel = this.chartTheme.surface.axisLabel;
         const fmt = (v: number) => this.chartTheme.formatNumber(v, { maximumFractionDigits: 0 });
         const color = this.chartTheme.colorAt(2);
 
-        this.payDaysOptions = {
-            grid: { left: 80, right: 20, top: 20, bottom: 30 },
+        const data = this.dayRows.map(r => [new Date(r.date).getDate(), categories.indexOf(r.categoryName), r.amount]);
+
+        this.timelineOptions = {
             tooltip: {
-                trigger: 'axis', axisPointer: { type: 'shadow' }, ...this.chartTheme.tooltipDefaults(),
-                formatter: (params: unknown) => {
-                    const p = (params as any[])[0];
-                    const day: PayDay = this.payDays[p.dataIndex];
-                    return `Día ${day.day}: ${fmt(day.averageAmountWhenReceived)}<br>Cobrado ${day.timesReceived} de ${day.monthsInWindow} meses (${day.frequencyPct}%)`;
+                ...this.chartTheme.tooltipDefaults(),
+                formatter: (p: unknown) => {
+                    const v = (p as { value: number[] }).value;
+                    return `${categories[v[1]]} — día ${v[0]}: ${fmt(v[2])}`;
                 },
             },
+            grid: { left: 150, right: 30, top: 20, bottom: 40 },
             xAxis: {
-                type: 'category', data: this.payDays.map(d => d.day),
+                type: 'value', min: 1, max: 31, interval: 1,
                 axisLabel: { color: axisLabel }, axisLine: { lineStyle: { color: this.chartTheme.surface.axisLine } },
-            },
-            yAxis: {
-                type: 'value',
-                axisLabel: { color: axisLabel, formatter: (v: number) => fmt(v) },
                 splitLine: { lineStyle: { color: this.chartTheme.surface.splitLine } },
             },
+            yAxis: { type: 'category', data: categories, axisLabel: { color: axisLabel }, axisLine: { lineStyle: { color: this.chartTheme.surface.axisLine } } },
             series: [{
-                type: 'bar',
-                // Opacidad por dato según frecuencia: un ingreso ocasional se ve tenue, un día de
-                // cobro habitual se ve sólido — sin necesitar un segundo gráfico.
-                data: this.payDays.map(d => ({
-                    value: d.averageAmountWhenReceived,
-                    // Piso de 0.35: con 0.15 un día raro (4% de frecuencia) quedaba prácticamente
-                    // invisible — la barra tiene que notarse igual, solo más tenue que un día habitual.
-                    itemStyle: { color, opacity: 0.35 + 0.65 * (d.frequencyPct / 100) },
-                })),
+                type: 'scatter',
+                symbolSize: (val: number[]) => 8 + 22 * (val[2] / maxAmount),
+                itemStyle: { color, opacity: 0.75 },
+                data,
+            }],
+        };
+    }
+
+    private renderCategoryCalendar(): void {
+        if (!this.selectedCategoryForCalendar) return;
+        const rows = this.dayRows.filter(r => r.categoryName === this.selectedCategoryForCalendar);
+        const axisLabel = this.chartTheme.surface.axisLabel;
+        const fmt = (v: number) => this.chartTheme.formatNumber(v, { maximumFractionDigits: 0 });
+        const amounts = rows.map(r => r.amount);
+        const max = amounts.length > 0 ? Math.max(...amounts) : 1;
+
+        const today = new Date();
+        const rangeStart = new Date(today.getFullYear(), today.getMonth() - (PAYDAY_MONTHS - 1), 1);
+        const toIso = (d: Date) => `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`;
+
+        this.categoryCalendarOptions = {
+            tooltip: {
+                ...this.chartTheme.tooltipDefaults(),
+                formatter: (p: unknown) => {
+                    const v = (p as { value: [string, number] }).value;
+                    const [y, m, d] = v[0].split('-');
+                    return `${d}/${m}/${y}: ${fmt(v[1])}`;
+                },
+            },
+            visualMap: {
+                min: 0, max, calculable: false, orient: 'horizontal', left: 'center', top: 0,
+                inRange: { color: [this.chartTheme.surface.splitLine, this.chartTheme.colorAt(2)] },
+                textStyle: { color: axisLabel },
+            },
+            calendar: {
+                top: 60,
+                range: [toIso(rangeStart), toIso(today)],
+                cellSize: ['auto', 16],
+                itemStyle: { borderColor: this.chartTheme.surface.axisLine, borderWidth: 1 },
+                yearLabel: { show: false },
+                dayLabel: { color: axisLabel },
+                monthLabel: { color: axisLabel },
+            },
+            series: [{
+                type: 'heatmap',
+                coordinateSystem: 'calendar',
+                data: rows.map(r => [r.date.substring(0, 10), r.amount]),
             }],
         };
     }

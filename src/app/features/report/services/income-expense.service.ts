@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment.development';
-import { IncExpWaterfall, IncExpEvolutionPoint, SpendingByCategory, TagSpending, SpendingCalendar, IncomeCategorySeries, PayDayCalendar } from '../models/income-expense.model';
+import { IncExpWaterfall, IncExpEvolutionPoint, SpendingByCategory, TagSpending, SpendingCalendar, IncomeCategorySeries, IncomeComposition, IncomeCategoryDay } from '../models/income-expense.model';
 
 @Injectable({
     providedIn: 'root'
@@ -31,11 +31,15 @@ export class IncomeExpenseService {
         return this.http.get<SpendingCalendar>(`${environment.apiBaseURL}/api/IncomeExpenseReport/Calendar/${assetId}?year=${year}`);
     }
 
+    getIncomeComposition(assetId: number, month: string): Observable<IncomeComposition> {
+        return this.http.get<IncomeComposition>(`${environment.apiBaseURL}/api/IncomeExpenseReport/IncomeComposition/${assetId}?month=${month}`);
+    }
+
     getIncomeByCategory(assetId: number, months: number): Observable<IncomeCategorySeries[]> {
         return this.http.get<IncomeCategorySeries[]>(`${environment.apiBaseURL}/api/IncomeExpenseReport/IncomeByCategory/${assetId}?months=${months}`);
     }
 
-    getPayDays(assetId: number, months: number): Observable<PayDayCalendar> {
-        return this.http.get<PayDayCalendar>(`${environment.apiBaseURL}/api/IncomeExpenseReport/PayDays/${assetId}?months=${months}`);
+    getIncomeByCategoryAndDay(assetId: number, months: number): Observable<IncomeCategoryDay[]> {
+        return this.http.get<IncomeCategoryDay[]>(`${environment.apiBaseURL}/api/IncomeExpenseReport/IncomeByCategoryAndDay/${assetId}?months=${months}`);
     }
 }

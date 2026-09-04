@@ -83,14 +83,20 @@ export interface IncomeCategorySeries {
     monthlyTrend: number[];
 }
 
-export interface PayDay {
-    day: number;
-    averageAmountWhenReceived: number;
-    timesReceived: number;
-    monthsInWindow: number;
-    frequencyPct: number;
+export interface IncomeCategoryAmount {
+    categoryId: number;
+    categoryName: string;
+    amount: number;
 }
 
-export interface PayDayCalendar {
-    days: PayDay[];
+export interface IncomeComposition {
+    month: string;
+    categories: IncomeCategoryAmount[];
+}
+
+export interface IncomeCategoryDay {
+    categoryId: number;
+    categoryName: string;
+    date: string;
+    amount: number;
 }
