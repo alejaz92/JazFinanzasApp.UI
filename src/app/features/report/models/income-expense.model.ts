@@ -76,3 +76,21 @@ export interface SpendingCalendar {
     days: DaySpending[];
     weekdayAverages: WeekdayAverage[];
 }
+
+export interface IncomeCategorySeries {
+    categoryId: number;
+    categoryName: string;
+    monthlyTrend: number[];
+}
+
+export interface PayDay {
+    day: number;
+    averageAmountWhenReceived: number;
+    timesReceived: number;
+    monthsInWindow: number;
+    frequencyPct: number;
+}
+
+export interface PayDayCalendar {
+    days: PayDay[];
+}

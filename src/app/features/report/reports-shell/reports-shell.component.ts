@@ -73,7 +73,8 @@ export class ReportsShellComponent implements OnInit {
                 { type: 'link', label: 'Evolución y tendencia', icon: 'bi-graph-up', route: '/report/inc-exp-evolution' },
                 { type: 'link', label: 'Por categoría', icon: 'bi-tags', route: '/report/inc-exp-by-category' },
                 { type: 'link', label: 'Por etiqueta', icon: 'bi-bookmark', route: '/report/inc-exp-by-tag' },
-                { type: 'link', label: 'Calendario de gastos', icon: 'bi-calendar3', route: '/report/inc-exp-calendar' }
+                { type: 'link', label: 'Calendario de gastos', icon: 'bi-calendar3', route: '/report/inc-exp-calendar' },
+                { type: 'link', label: 'Ingresos', icon: 'bi-cash-coin', route: '/report/inc-income' }
             ]
         },
         { type: 'link', label: 'Tarjetas',           icon: 'bi-credit-card',    route: '/report/cards' },

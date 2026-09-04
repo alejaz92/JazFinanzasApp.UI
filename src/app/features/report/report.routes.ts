@@ -52,6 +52,13 @@ export const reportRoutes: Routes = [
                 data: { usesPeriod: false }
             },
             {
+                // Ingresos (corrección 2026-09-04 sobre la Fase 13) — evolución por categoría en el
+                // tiempo, en vez de una composición de un mes (sueldo domina cualquier foto puntual).
+                path: 'inc-income',
+                loadComponent: () => import('./inc-income/inc-income-report.component').then(m => m.IncIncomeReportComponent),
+                data: { usesPeriod: false }
+            },
+            {
                 path: 'cards',
                 loadComponent: () => import('./cards-report/cards-report.component').then(m => m.CardsReportComponent)
             },

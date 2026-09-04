@@ -1,0 +1,23 @@
+<h2 class="mb-3">Ingresos</h2>
+
+<p class="text-body-secondary" *ngIf="!dataRequested">Elegí una moneda arriba para ver tus ingresos.</p>
+
+<app-loading [isLoading]="isLoading"></app-loading>
+
+<ng-container *ngIf="dataRequested && !isLoading">
+    <p class="text-body-secondary small" *ngIf="categories.length === 0">No hay ingresos categorizados en los últimos meses.</p>
+
+    <div class="card mb-3" *ngIf="categories.length > 0">
+        <div class="card-header">Evolución por categoría — últimos 24 meses</div>
+        <div class="card-body">
+            <app-chart [options]="evolutionOptions" [height]="360"></app-chart>
+        </div>
+    </div>
+
+    <div class="card" *ngIf="payDays.length > 0">
+        <div class="card-header">Días de cobro — promedio de los últimos 12 meses, más sólido cuanto más frecuente</div>
+        <div class="card-body">
+            <app-chart [options]="payDaysOptions" [height]="300"></app-chart>
+        </div>
+    </div>
+</ng-container>
