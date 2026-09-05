@@ -28,44 +28,52 @@
         <p class="text-body-secondary">Todavía no hay consumos de tarjeta en los últimos 12 meses.</p>
     </ng-template>
 
-    <div class="mt-4" *ngIf="currentMonthSummary.length > 0">
+    <div class="mt-4">
         <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">Resumen del mes actual</h5>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Resumen del mes</h5>
+                <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-sm btn-outline-secondary" (click)="previousMonth()"><i class="bi-chevron-left"></i></button>
+                    <span class="text-capitalize fw-semibold">{{ summaryMonthLabel }}</span>
+                    <button class="btn btn-sm btn-outline-secondary" (click)="nextMonth()"><i class="bi-chevron-right"></i></button>
+                </div>
             </div>
             <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover table-sm">
-                        <thead class="table-header-brand">
-                            <tr>
-                                <th>Tarjeta</th>
-                                <th>Moneda</th>
-                                <th>Fecha</th>
-                                <th>Categoría</th>
-                                <th>Detalle</th>
-                                <th>Cuota</th>
-                                <th class="text-end">Monto Cuota</th>
-                                <th class="text-end">Valor Pesos</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let transaction of currentMonthSummary">
-                                <td>{{ transaction.card }}</td>
-                                <td>{{ transaction.asset }}</td>
-                                <td>{{ transaction.date | date: 'dd/MM/yyyy' }}</td>
-                                <td>{{ transaction.transactionClass }}</td>
-                                <td>{{ transaction.detail }}</td>
-                                <td>{{ transaction.installment }}</td>
-                                <td class="text-end">{{ transaction.installmentAmount | currencyFiatFormat }}</td>
-                                <td class="text-end">{{ transaction.valueInPesos | currencyFiatFormat }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                <app-loading [isLoading]="isLoadingSummary"></app-loading>
+                <ng-container *ngIf="!isLoadingSummary">
+                    <div class="table-responsive" *ngIf="monthSummary.length > 0; else noSummary">
+                        <table class="table table-hover table-sm">
+                            <thead class="table-header-brand">
+                                <tr>
+                                    <th>Tarjeta</th>
+                                    <th>Moneda</th>
+                                    <th>Fecha</th>
+                                    <th>Categoría</th>
+                                    <th>Detalle</th>
+                                    <th>Cuota</th>
+                                    <th class="text-end">Monto Cuota</th>
+                                    <th class="text-end">Valor Pesos</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let transaction of monthSummary">
+                                    <td>{{ transaction.card }}</td>
+                                    <td>{{ transaction.asset }}</td>
+                                    <td>{{ transaction.date | date: 'dd/MM/yyyy' }}</td>
+                                    <td>{{ transaction.transactionClass }}</td>
+                                    <td>{{ transaction.detail }}</td>
+                                    <td>{{ transaction.installment }}</td>
+                                    <td class="text-end">{{ transaction.installmentAmount | currencyFiatFormat }}</td>
+                                    <td class="text-end">{{ transaction.valueInPesos | currencyFiatFormat }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <ng-template #noSummary>
+                        <p class="text-body-secondary mb-0">No hay consumos vigentes para pagar en {{ summaryMonthLabel }}.</p>
+                    </ng-template>
+                </ng-container>
             </div>
         </div>
     </div>
-    <p class="text-body-secondary mt-4" *ngIf="currentMonthSummary.length === 0">
-        No hay consumos vigentes para pagar este mes.
-    </p>
 </div>

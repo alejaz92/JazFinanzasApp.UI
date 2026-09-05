@@ -25,8 +25,10 @@ export class CardsGeneralReportComponent implements OnInit {
     private readonly chartTheme = inject(ChartThemeService);
 
     isLoading = true;
+    isLoadingSummary = false;
     monthlySeries: CardMonthlySeriesPoint[] = [];
-    currentMonthSummary: CardTransactionPaymentList[] = [];
+    summaryMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    monthSummary: CardTransactionPaymentList[] = [];
 
     pesosChartOptions: EChartsOption = {};
     dollarsChartOptions: EChartsOption = {};
@@ -34,9 +36,33 @@ export class CardsGeneralReportComponent implements OnInit {
     ngOnInit(): void {
         this.cardReportService.getGeneral().subscribe(data => {
             this.monthlySeries = data.monthlySeries;
-            this.currentMonthSummary = data.currentMonthSummary;
+            this.monthSummary = data.currentMonthSummary;
             this.isLoading = false;
             setTimeout(() => this.renderCharts(), 0);
+        });
+    }
+
+    previousMonth(): void {
+        this.summaryMonth = new Date(this.summaryMonth.getFullYear(), this.summaryMonth.getMonth() - 1, 1);
+        this.loadSummary();
+    }
+
+    nextMonth(): void {
+        this.summaryMonth = new Date(this.summaryMonth.getFullYear(), this.summaryMonth.getMonth() + 1, 1);
+        this.loadSummary();
+    }
+
+    get summaryMonthLabel(): string {
+        return this.summaryMonth.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
+    }
+
+    private loadSummary(): void {
+        this.isLoadingSummary = true;
+        const year = this.summaryMonth.getFullYear();
+        const month = (this.summaryMonth.getMonth() + 1).toString().padStart(2, '0');
+        this.cardReportService.getMonthSummary(`${year}-${month}-01`).subscribe(data => {
+            this.monthSummary = data;
+            this.isLoadingSummary = false;
         });
     }
 

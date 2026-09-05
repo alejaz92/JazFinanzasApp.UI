@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment.development';
 import { CardGeneralReport, CardDetailReport, CardFutureCommitment, CardPromotionsReport } from '../models/card-report.model';
+import { CardTransactionPaymentList } from '../../cardTransactions/models/CardTransactionPayment-List.model';
 
 @Injectable({
   providedIn: 'root'
@@ -25,5 +26,9 @@ export class CardReportService {
 
   getPromotions(): Observable<CardPromotionsReport> {
     return this.http.get<CardPromotionsReport>(`${environment.apiBaseURL}/api/cardreport/Promotions`);
+  }
+
+  getMonthSummary(month: string): Observable<CardTransactionPaymentList[]> {
+    return this.http.get<CardTransactionPaymentList[]>(`${environment.apiBaseURL}/api/cardreport/MonthSummary?month=${month}`);
   }
 }
