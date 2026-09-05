@@ -30,10 +30,25 @@ describe('ChartThemeService', () => {
     expect(service.colorAt(1)).not.toBe(service.colorAt(0));
   });
 
-  it('colorAt hace wrap-around al superar el largo de la paleta', () => {
+  // Corrección 2026-09-05: antes repetía el color exacto (paletteLength === índice 0), lo que en un
+  // reporte con más de 8 categorías (Tarjetas → Compromiso futuro) daba pares indistinguibles en la
+  // leyenda. Ahora reusa la misma familia de hue pero corrida en luminosidad — sigue siendo
+  // determinista, pero ya no es un color idéntico.
+  it('colorAt no repite el color exacto al superar el largo de la paleta — reusa el hue con otra luminosidad', () => {
     const paletteLength = service.palette.length;
-    expect(service.colorAt(paletteLength)).toBe(service.colorAt(0));
-    expect(service.colorAt(paletteLength + 2)).toBe(service.colorAt(2));
+    expect(service.colorAt(paletteLength)).not.toBe(service.colorAt(0));
+    expect(service.colorAt(paletteLength + 2)).not.toBe(service.colorAt(2));
+  });
+
+  it('colorAt sigue siendo determinista más allá del largo de la paleta', () => {
+    const paletteLength = service.palette.length;
+    expect(service.colorAt(paletteLength)).toBe(service.colorAt(paletteLength));
+    expect(service.colorAt(paletteLength + 5)).toBe(service.colorAt(paletteLength + 5));
+  });
+
+  it('colorAt da colores distintos entre sí para 16 categorías seguidas (dos vueltas de paleta)', () => {
+    const colors = Array.from({ length: 16 }, (_, i) => service.colorAt(i));
+    expect(new Set(colors).size).toBe(16);
   });
 
   it('la paleta tiene 8 colores fijos, sin repetidos', () => {

@@ -87,13 +87,68 @@ export class ChartThemeService {
 
   /**
    * Color determinista para el índice `i`: siempre el mismo color para el
-   * mismo índice, y vuelve a empezar (wrap-around) al superar el largo de
-   * la paleta — nunca `undefined` ni depende de cuántos elementos haya en total.
+   * mismo índice, nunca `undefined` ni depende de cuántos elementos haya en
+   * total. Los primeros 8 índices son la paleta validada tal cual (contraste,
+   * CVD); a partir de ahí ya no repite el mismo color exacto (corrección
+   * 2026-09-05: un reporte con 10 categorías —"Compromiso futuro"— mostraba
+   * dos pares de colores idénticos e ilegibles en la leyenda) — reusa la misma
+   * familia de hue pero con la luminosidad corrida, alternando más clara/más
+   * oscura y agrandando el corrimiento en cada vuelta.
    */
   colorAt(i: number): string {
     const palette = this.palette;
     const n = palette.length;
-    return palette[((i % n) + n) % n];
+    const baseIndex = ((i % n) + n) % n;
+    const cycle = Math.floor(i / n);
+    const base = palette[baseIndex];
+    return cycle === 0 ? base : this.shiftLightness(base, cycle);
+  }
+
+  private shiftLightness(hex: string, cycle: number): string {
+    const { h, s, l } = this.hexToHsl(hex);
+    const magnitude = (Math.floor((Math.abs(cycle) - 1) / 2) + 1) * 20;
+    const direction = Math.abs(cycle) % 2 === 1 ? 1 : -1;
+    const newL = Math.min(85, Math.max(15, l + direction * magnitude));
+    return this.hslToHex(h, s, newL);
+  }
+
+  private hexToHsl(hex: string): { h: number; s: number; l: number } {
+    const r = parseInt(hex.slice(1, 3), 16) / 255;
+    const g = parseInt(hex.slice(3, 5), 16) / 255;
+    const b = parseInt(hex.slice(5, 7), 16) / 255;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const l = (max + min) / 2;
+    let h = 0;
+    let s = 0;
+    if (max !== min) {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+        case g: h = (b - r) / d + 2; break;
+        default: h = (r - g) / d + 4; break;
+      }
+      h /= 6;
+    }
+    return { h: h * 360, s: s * 100, l: l * 100 };
+  }
+
+  private hslToHex(h: number, s: number, l: number): string {
+    s /= 100;
+    l /= 100;
+    const c = (1 - Math.abs(2 * l - 1)) * s;
+    const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+    const m = l - c / 2;
+    let r = 0, g = 0, b = 0;
+    if (h < 60) { r = c; g = x; b = 0; }
+    else if (h < 120) { r = x; g = c; b = 0; }
+    else if (h < 180) { r = 0; g = c; b = x; }
+    else if (h < 240) { r = 0; g = x; b = c; }
+    else if (h < 300) { r = x; g = 0; b = c; }
+    else { r = c; g = 0; b = x; }
+    const toHex = (v: number) => Math.round((v + m) * 255).toString(16).padStart(2, '0');
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
   }
 
   /** Colores de estado fijos (good/warning/serious/critical) — no siguen el tema. */
