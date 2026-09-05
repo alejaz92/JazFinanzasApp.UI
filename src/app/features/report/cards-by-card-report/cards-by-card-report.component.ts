@@ -5,6 +5,7 @@ import type { EChartsOption } from 'echarts';
 
 import { CardReportService } from '../services/card-report.service';
 import { CardDetailReport } from '../models/card-report.model';
+import { CardTransactionPaymentList } from '../../cardTransactions/models/CardTransactionPayment-List.model';
 import { CardService } from '../../card/services/card.service';
 import { Card } from '../../card/models/card.model';
 import { ReportContextService } from '../../../shared/services/report-context.service';
@@ -41,6 +42,12 @@ export class CardsByCardReportComponent {
     categoryChartOptions: EChartsOption = {};
     evolutionChartOptions: EChartsOption = {};
 
+    // Resumen del mes de esta tarjeta (corrección 2026-09-05, segunda ronda): mismo patrón de
+    // navegación que Tarjetas → General, filtrado a `selectedCardId` en vez de traer todas.
+    isLoadingSummary = false;
+    summaryMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    monthSummary: CardTransactionPaymentList[] = [];
+
     constructor() {
         this.cardService.getAllCards().subscribe(cards => {
             this.cards = cards;
@@ -48,6 +55,7 @@ export class CardsByCardReportComponent {
             if (cards.length > 0) {
                 this.selectedCardId = cards[0].id;
                 this.tryLoad();
+                this.loadSummary();
             }
         });
 
@@ -59,6 +67,7 @@ export class CardsByCardReportComponent {
 
     onCardChange(): void {
         this.tryLoad();
+        this.loadSummary();
     }
 
     private tryLoad(): void {
@@ -75,6 +84,31 @@ export class CardsByCardReportComponent {
             this.detail = data;
             this.isLoading = false;
             setTimeout(() => this.renderCharts(), 0);
+        });
+    }
+
+    previousMonth(): void {
+        this.summaryMonth = new Date(this.summaryMonth.getFullYear(), this.summaryMonth.getMonth() - 1, 1);
+        this.loadSummary();
+    }
+
+    nextMonth(): void {
+        this.summaryMonth = new Date(this.summaryMonth.getFullYear(), this.summaryMonth.getMonth() + 1, 1);
+        this.loadSummary();
+    }
+
+    get summaryMonthLabel(): string {
+        return this.summaryMonth.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
+    }
+
+    private loadSummary(): void {
+        if (this.selectedCardId == null) return;
+        this.isLoadingSummary = true;
+        const year = this.summaryMonth.getFullYear();
+        const month = (this.summaryMonth.getMonth() + 1).toString().padStart(2, '0');
+        this.cardReportService.getMonthSummary(`${year}-${month}-01`, this.selectedCardId).subscribe(data => {
+            this.monthSummary = data;
+            this.isLoadingSummary = false;
         });
     }
 

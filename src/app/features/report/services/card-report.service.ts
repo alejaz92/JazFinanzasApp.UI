@@ -28,7 +28,7 @@ export class CardReportService {
     return this.http.get<CardPromotionsReport>(`${environment.apiBaseURL}/api/cardreport/Promotions/${assetId}`);
   }
 
-  getMonthSummary(month: string): Observable<CardTransactionPaymentList[]> {
-    return this.http.get<CardTransactionPaymentList[]>(`${environment.apiBaseURL}/api/cardreport/MonthSummary?month=${month}`);
+  getMonthSummary(month: string, cardId: number = 0): Observable<CardTransactionPaymentList[]> {
+    return this.http.get<CardTransactionPaymentList[]>(`${environment.apiBaseURL}/api/cardreport/MonthSummary?month=${month}&cardId=${cardId}`);
   }
 }
