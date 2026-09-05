@@ -1,0 +1,71 @@
+<app-loading [isLoading]="isLoadingCards"></app-loading>
+
+<div *ngIf="!isLoadingCards">
+    <h2 class="mb-3">Tarjetas — Por tarjeta</h2>
+
+    <div class="row mb-3" *ngIf="cards.length > 0; else noCards">
+        <div class="col-md-6">
+            <select class="form-select" [(ngModel)]="selectedCardId" (change)="load()">
+                <option *ngFor="let card of cards" [ngValue]="card.id">{{ card.name }}</option>
+            </select>
+        </div>
+    </div>
+
+    <app-loading [isLoading]="isLoading"></app-loading>
+
+    <div *ngIf="!isLoading && detail">
+        <div class="d-flex flex-wrap gap-3 align-items-center mb-3">
+            <h4 class="mb-0">{{ detail.cardName }}</h4>
+            <span class="text-body-secondary small" *ngIf="detail.nextClosingDate">Próximo cierre: {{ detail.nextClosingDate | date:'dd/MM/yyyy' }}</span>
+            <span class="text-body-secondary small" *ngIf="detail.nextDueDate">Próximo vencimiento: {{ detail.nextDueDate | date:'dd/MM/yyyy' }}</span>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-3 text-center">
+                    <div class="card-header">Consumo del mes en pesos</div>
+                    <div class="card-body">
+                        <h4 class="mb-0">{{ detail.currentMonthPesos | currencyFiatFormat }}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mb-3 text-center">
+                    <div class="card-header">Consumo del mes en dólares</div>
+                    <div class="card-body">
+                        <h4 class="mb-0">{{ detail.currentMonthDollars | currencyFiatFormat }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <ng-container *ngIf="hasCategories; else emptyState">
+            <div class="row mt-2">
+                <div class="col-md-6 mt-1">
+                    <div class="card">
+                        <div class="card-header">Composición por categoría (últimos 12 meses, pesos)</div>
+                        <div class="card-body">
+                            <app-chart [options]="categoryChartOptions" [height]="280"></app-chart>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mt-1">
+                    <div class="card">
+                        <div class="card-header">Evolución mensual</div>
+                        <div class="card-body">
+                            <app-chart [options]="evolutionChartOptions" [height]="280"></app-chart>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ng-container>
+
+        <ng-template #emptyState>
+            <p class="text-body-secondary mt-3">Esta tarjeta no tiene consumos en los últimos 12 meses.</p>
+        </ng-template>
+    </div>
+
+    <ng-template #noCards>
+        <p class="text-body-secondary">Todavía no cargaste ninguna tarjeta.</p>
+    </ng-template>
+</div>

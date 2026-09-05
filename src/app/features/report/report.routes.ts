@@ -66,8 +66,26 @@ export const reportRoutes: Routes = [
                 data: { usesPeriod: false }
             },
             {
-                path: 'cards',
-                loadComponent: () => import('./cards-report/cards-report.component').then(m => m.CardsReportComponent)
+                // Tarjetas (Fase 15) — reemplaza a la vieja pantalla única "cards" (dada de baja),
+                // ver Flujo 4 del plan.
+                path: 'cards-general',
+                loadComponent: () => import('./cards-general-report/cards-general-report.component').then(m => m.CardsGeneralReportComponent),
+                data: { usesPeriod: false }
+            },
+            {
+                path: 'cards-by-card',
+                loadComponent: () => import('./cards-by-card-report/cards-by-card-report.component').then(m => m.CardsByCardReportComponent),
+                data: { usesPeriod: false }
+            },
+            {
+                path: 'cards-future-commitment',
+                loadComponent: () => import('./cards-future-commitment-report/cards-future-commitment-report.component').then(m => m.CardsFutureCommitmentReportComponent),
+                data: { usesPeriod: false }
+            },
+            {
+                path: 'cards-promotions',
+                loadComponent: () => import('./cards-promotions-report/cards-promotions-report.component').then(m => m.CardsPromotionsReportComponent),
+                data: { usesPeriod: false }
             },
             {
                 path: 'stocks',

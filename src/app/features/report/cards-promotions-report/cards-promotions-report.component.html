@@ -1,0 +1,91 @@
+<app-loading [isLoading]="isLoading"></app-loading>
+
+<div *ngIf="!isLoading && data">
+    <h2 class="mb-3">Tarjetas — Promociones y reintegros</h2>
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card mb-3 text-center">
+                <div class="card-header">Ahorrado en pesos</div>
+                <div class="card-body">
+                    <h4 class="mb-0">{{ data.totalSavedPesos | currencyFiatFormat }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card mb-3 text-center">
+                <div class="card-header">Ahorrado en dólares</div>
+                <div class="card-body">
+                    <h4 class="mb-0">{{ data.totalSavedDollars | currencyFiatFormat }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card mb-3 text-center">
+                <div class="card-header">% sobre consumo (pesos)</div>
+                <div class="card-body">
+                    <h4 class="mb-0">{{ data.percentOfConsumptionPesos != null ? (data.percentOfConsumptionPesos | number:'1.1-1') + '%' : '—' }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card mb-3 text-center">
+                <div class="card-header">% sobre consumo (dólares)</div>
+                <div class="card-body">
+                    <h4 class="mb-0">{{ data.percentOfConsumptionDollars != null ? (data.percentOfConsumptionDollars | number:'1.1-1') + '%' : '—' }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-2" *ngIf="hasMonthlyData">
+        <div class="col-12 mt-1">
+            <div class="card">
+                <div class="card-header">Ahorro por mes, últimos 12 meses</div>
+                <div class="card-body">
+                    <app-chart [options]="monthlyOptions" [height]="300"></app-chart>
+                </div>
+            </div>
+        </div>
+    </div>
+    <p class="text-body-secondary mt-3" *ngIf="!hasMonthlyData">
+        Todavía no hay reintegros acreditados en los últimos 12 meses.
+    </p>
+
+    <div class="mt-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Pendientes de acreditar o de aplicar</h5>
+            </div>
+            <div class="card-body">
+                <ng-container *ngIf="data.pending.length > 0; else noPending">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm">
+                            <thead class="table-header-brand">
+                                <tr>
+                                    <th>Fecha de acreditación</th>
+                                    <th>Tarjeta</th>
+                                    <th>Detalle</th>
+                                    <th class="text-end">Pendiente de acreditar</th>
+                                    <th class="text-end">Pendiente de aplicar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let p of data.pending">
+                                    <td>{{ p.creditDate | date:'dd/MM/yyyy' }}</td>
+                                    <td>{{ p.cardName }}</td>
+                                    <td>{{ p.detail }}</td>
+                                    <td class="text-end">{{ p.pendingToCredit | currencyFiatFormat }}</td>
+                                    <td class="text-end">{{ p.pendingToApply | currencyFiatFormat }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </ng-container>
+                <ng-template #noPending>
+                    <p class="text-body-secondary mb-0">No hay reintegros pendientes de acreditar ni de aplicar.</p>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+</div>

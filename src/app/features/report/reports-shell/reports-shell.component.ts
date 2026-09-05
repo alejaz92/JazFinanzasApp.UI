@@ -104,7 +104,15 @@ export class ReportsShellComponent implements OnInit {
                 }
             ]
         },
-        { type: 'link', label: 'Tarjetas',           icon: 'bi-credit-card',    route: '/report/cards' },
+        {
+            type: 'category', label: 'Tarjetas', icon: 'bi-credit-card',
+            children: [
+                { type: 'link', label: 'General', icon: 'bi-grid-1x2', route: '/report/cards-general' },
+                { type: 'link', label: 'Por tarjeta', icon: 'bi-credit-card-2-front', route: '/report/cards-by-card' },
+                { type: 'link', label: 'Compromiso futuro', icon: 'bi-calendar-range', route: '/report/cards-future-commitment' },
+                { type: 'link', label: 'Promociones y reintegros', icon: 'bi-gift', route: '/report/cards-promotions' }
+            ]
+        },
         { type: 'link', label: 'Inv. Bolsa',         icon: 'bi-bar-chart-line', route: '/report/stocks' },
         { type: 'link', label: 'Cryptos General',    icon: 'bi-currency-bitcoin', route: '/report/cryptos-gral' },
         { type: 'link', label: 'Crypto Individual',  icon: 'bi-coin',           route: '/report/crypto' },
