@@ -73,14 +73,18 @@ export const reportRoutes: Routes = [
                 data: { usesPeriod: false }
             },
             {
+                // Corrección 2026-09-05: el selector de tarjeta pasa a la barra de filtros de la
+                // sección (cardFilter: 'required' — esta pantalla no admite "todas").
                 path: 'cards-by-card',
                 loadComponent: () => import('./cards-by-card-report/cards-by-card-report.component').then(m => m.CardsByCardReportComponent),
-                data: { usesPeriod: false }
+                data: { usesPeriod: false, cardFilter: 'required' }
             },
             {
+                // Corrección 2026-09-05: selector de tarjeta (opcional, admite "todas") y el toggle
+                // de incluir recurrentes pasan a la barra de filtros de la sección.
                 path: 'cards-future-commitment',
                 loadComponent: () => import('./cards-future-commitment-report/cards-future-commitment-report.component').then(m => m.CardsFutureCommitmentReportComponent),
-                data: { usesPeriod: false }
+                data: { usesPeriod: false, cardFilter: 'optional', showRecurringFilter: true }
             },
             {
                 path: 'cards-promotions',

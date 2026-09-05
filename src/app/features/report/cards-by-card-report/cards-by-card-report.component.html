@@ -3,15 +3,8 @@
 <div *ngIf="!isLoadingCards">
     <h2 class="mb-3">Tarjetas — Por tarjeta</h2>
 
-    <div class="row mb-3" *ngIf="cards.length > 0; else noCards">
-        <div class="col-md-6">
-            <select class="form-select" [(ngModel)]="selectedCardId" (change)="onCardChange()">
-                <option *ngFor="let card of cards" [ngValue]="card.id">{{ card.name }}</option>
-            </select>
-        </div>
-    </div>
-
-    <p class="text-body-secondary" *ngIf="cards.length > 0 && !dataRequested">Elegí una moneda arriba para ver el detalle.</p>
+    <ng-container *ngIf="hasCards; else noCards">
+    <p class="text-body-secondary" *ngIf="!dataRequested">Elegí una tarjeta y una moneda arriba para ver el detalle.</p>
 
     <app-loading [isLoading]="isLoading"></app-loading>
 
@@ -133,6 +126,7 @@
             </div>
         </div>
     </div>
+    </ng-container>
 
     <ng-template #noCards>
         <p class="text-body-secondary">Todavía no cargaste ninguna tarjeta.</p>

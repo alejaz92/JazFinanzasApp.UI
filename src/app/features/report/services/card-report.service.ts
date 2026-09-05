@@ -20,8 +20,8 @@ export class CardReportService {
     return this.http.get<CardDetailReport>(`${environment.apiBaseURL}/api/cardreport/ByCard/${cardId}/${assetId}`);
   }
 
-  getFutureCommitment(assetId: number, includeRecurring: boolean = true): Observable<CardFutureCommitment> {
-    return this.http.get<CardFutureCommitment>(`${environment.apiBaseURL}/api/cardreport/FutureCommitment/${assetId}?includeRecurring=${includeRecurring}`);
+  getFutureCommitment(assetId: number, includeRecurring: boolean = true, cardId: number = 0): Observable<CardFutureCommitment> {
+    return this.http.get<CardFutureCommitment>(`${environment.apiBaseURL}/api/cardreport/FutureCommitment/${assetId}?includeRecurring=${includeRecurring}&cardId=${cardId}`);
   }
 
   getPromotions(assetId: number): Observable<CardPromotionsReport> {

@@ -1,6 +1,5 @@
 import { Component, ElementRef, ViewChild, effect, inject } from '@angular/core';
 import { NgIf, NgFor } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import type { EChartsOption, ECElementEvent } from 'echarts';
 
 import { CardReportService } from '../services/card-report.service';
@@ -24,7 +23,7 @@ declare const bootstrap: any;
 @Component({
     selector: 'app-cards-future-commitment-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, FormsModule, CurrencyFiatFormatPipe, ChartComponent],
+    imports: [LoadingComponent, NgIf, NgFor, CurrencyFiatFormatPipe, ChartComponent],
     templateUrl: './cards-future-commitment-report.component.html',
     styleUrl: './cards-future-commitment-report.component.css'
 })
@@ -41,11 +40,6 @@ export class CardsFutureCommitmentReportComponent {
     ganttOptions: EChartsOption = {};
     private stackedCategoryIds: number[] = [];
 
-    // Corrección 2026-09-05, quinta ronda: filtro para sacar los gastos recurrentes de la proyección
-    // — una vez que se corrigió el bug de abajo (se proyectan en TODOS los meses, no solo el próximo),
-    // uno solo puede dominar el gráfico y tapar las compras en cuotas puntuales que son el foco del reporte.
-    includeRecurring = true;
-
     // Panel lateral de detalle (clic en un segmento del gráfico apilado).
     selectedCategoryName: string | null = null;
     selectedMonthLabel = '';
@@ -56,19 +50,16 @@ export class CardsFutureCommitmentReportComponent {
     constructor() {
         effect(() => {
             const assetId = this.reportContext.currencyAssetId();
-            if (assetId != null) this.load(assetId);
+            const includeRecurring = this.reportContext.includeRecurringExpenses();
+            const cardId = this.reportContext.selectedCardId() ?? 0;
+            if (assetId != null) this.load(assetId, includeRecurring, cardId);
         });
     }
 
-    onIncludeRecurringChange(): void {
-        const assetId = this.reportContext.currencyAssetId();
-        if (assetId != null) this.load(assetId);
-    }
-
-    private load(assetId: number): void {
+    private load(assetId: number, includeRecurring: boolean, cardId: number): void {
         this.isLoading = true;
         this.dataRequested = true;
-        this.cardReportService.getFutureCommitment(assetId, this.includeRecurring).subscribe(data => {
+        this.cardReportService.getFutureCommitment(assetId, includeRecurring, cardId).subscribe(data => {
             this.data = data;
             this.isLoading = false;
             setTimeout(() => this.renderCharts(), 0);
@@ -167,7 +158,7 @@ export class CardsFutureCommitmentReportComponent {
         }));
 
         this.ganttOptions = {
-            grid: { left: 200, right: 30, top: 20, bottom: 40 },
+            grid: { left: 220, right: 30, top: 20, bottom: 40 },
             tooltip: {
                 trigger: 'item',
                 ...this.chartTheme.tooltipDefaults(),
@@ -181,7 +172,15 @@ export class CardsFutureCommitmentReportComponent {
                 axisLabel: { color: axisLabel, formatter: (v: number) => monthLabels[Math.round(v)] ?? '' },
                 splitLine: { lineStyle: { color: this.chartTheme.surface.splitLine } },
             },
-            yAxis: { type: 'category', data: rows.map(r => r.label), axisLabel: { color: axisLabel }, axisLine: { lineStyle: { color: this.chartTheme.surface.axisLine } } },
+            // Corrección 2026-09-05, séptima ronda: antes el label quedaba cortado en seco sin
+            // aviso — ahora entra en dos líneas (width + overflow: 'break') y, si igual no alcanza,
+            // el tooltip ["label"] siempre tiene el texto completo.
+            yAxis: {
+                type: 'category',
+                data: rows.map(r => r.label),
+                axisLabel: { color: axisLabel, width: 200, overflow: 'break', lineHeight: 14 },
+                axisLine: { lineStyle: { color: this.chartTheme.surface.axisLine } },
+            },
             series: [
                 { name: 'offset', type: 'bar', stack: 'gantt', silent: true, itemStyle: { color: 'transparent' }, data: rows.map(r => r.start) },
                 { name: 'duración', type: 'bar', stack: 'gantt', data: rows.map(r => r.duration), itemStyle: { color: (p: any) => this.chartTheme.colorAt(p.dataIndex) } },
@@ -190,7 +189,7 @@ export class CardsFutureCommitmentReportComponent {
     }
 
     get ganttHeight(): number {
-        return Math.max(200, (this.data?.timeline.length ?? 0) * 40);
+        return Math.max(200, (this.data?.timeline.length ?? 0) * 50);
     }
 
     get panelTotal(): number {

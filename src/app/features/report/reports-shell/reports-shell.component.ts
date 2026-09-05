@@ -4,7 +4,11 @@ import { ActivatedRoute, NavigationEnd, Router, RouterOutlet, RouterLink, Router
 import { filter } from 'rxjs';
 import { AssetService } from '../../asset/services/asset.service';
 import { Asset } from '../../asset/models/asset.model';
+import { CardService } from '../../card/services/card.service';
+import { Card } from '../../card/models/card.model';
 import { ReportContextService, PeriodPreset } from '../../../shared/services/report-context.service';
+
+type CardFilterMode = 'none' | 'required' | 'optional';
 
 interface NavLink {
     type: 'link';
@@ -50,15 +54,23 @@ export class ReportsShellComponent implements OnInit {
     expandedSubcategory: string | null = null;
 
     private readonly assetService = inject(AssetService);
+    private readonly cardService = inject(CardService);
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
     protected readonly reportContext = inject(ReportContextService);
 
     readonly referenceAssets = signal<Asset[]>([]);
+    readonly cards = signal<Card[]>([]);
 
     // Algunas pantallas (ej. Patrimonio) son una foto de hoy + una serie fija, no un rango elegible
     // — el propio hijo declara `data: { usesPeriod: false }` en report.routes.ts y el filtro se oculta.
     readonly usesPeriod = signal(true);
+
+    // Corrección 2026-09-05: selector de tarjeta y toggle de recurrentes, antes sueltos dentro de
+    // cada pantalla de Tarjetas — mismo criterio que usesPeriod, el hijo declara qué necesita en
+    // report.routes.ts y esta barra se encarga de mostrarlo y de mantenerlo en la URL.
+    readonly cardFilterMode = signal<CardFilterMode>('none');
+    readonly showRecurringFilter = signal(false);
 
     readonly periodOptions: { value: PeriodPreset; label: string }[] = [
         { value: 'this-month', label: 'Este mes' },
@@ -141,14 +153,35 @@ export class ReportsShellComponent implements OnInit {
             }
         });
 
-        this.updateUsesPeriod();
+        this.cardService.getAllCards().subscribe(cards => {
+            this.cards.set(cards);
+            this.ensureCardSelected();
+        });
+
+        this.updateRouteFlags();
         this.router.events
             .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
-            .subscribe(() => this.updateUsesPeriod());
+            .subscribe(() => {
+                this.updateRouteFlags();
+                this.ensureCardSelected();
+            });
     }
 
-    private updateUsesPeriod(): void {
-        this.usesPeriod.set(this.route.snapshot.firstChild?.data?.['usesPeriod'] ?? true);
+    private updateRouteFlags(): void {
+        const data = this.route.snapshot.firstChild?.data;
+        this.usesPeriod.set(data?.['usesPeriod'] ?? true);
+        this.cardFilterMode.set(data?.['cardFilter'] ?? 'none');
+        this.showRecurringFilter.set(data?.['showRecurringFilter'] ?? false);
+    }
+
+    // Si la pantalla activa exige una tarjeta (cardFilter: 'required') y todavía no hay ninguna
+    // elegida —o la de la URL ya no existe—, se cae a la primera. "optional" (Compromiso futuro)
+    // no fuerza nada: sin selección ahí significa "todas".
+    private ensureCardSelected(): void {
+        if (this.cardFilterMode() !== 'required' || this.cards().length === 0) return;
+        const current = this.reportContext.selectedCardId();
+        const stillExists = current != null && this.cards().some(c => c.id === current);
+        if (!stillExists) this.reportContext.setCardId(this.cards()[0].id);
     }
 
     onPeriodChange(preset: PeriodPreset): void {
@@ -174,6 +207,14 @@ export class ReportsShellComponent implements OnInit {
 
     onCurrencyChange(assetId: number): void {
         this.reportContext.setCurrency(assetId);
+    }
+
+    onCardFilterChange(cardId: number): void {
+        this.reportContext.setCardId(cardId);
+    }
+
+    onIncludeRecurringChange(value: boolean): void {
+        this.reportContext.setIncludeRecurring(value);
     }
 
     toggleSidebar(): void {

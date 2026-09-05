@@ -7,7 +7,6 @@ import { CardReportService } from '../services/card-report.service';
 import { CardDetailReport } from '../models/card-report.model';
 import { CardTransactionPaymentList } from '../../cardTransactions/models/CardTransactionPayment-List.model';
 import { CardService } from '../../card/services/card.service';
-import { Card } from '../../card/models/card.model';
 import { ReportContextService } from '../../../shared/services/report-context.service';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
@@ -32,11 +31,14 @@ export class CardsByCardReportComponent {
     private readonly chartTheme = inject(ChartThemeService);
     protected readonly reportContext = inject(ReportContextService);
 
+    // Corrección 2026-09-05, sexta ronda: la tarjeta elegida pasó a vivir en la barra de filtros de
+    // la sección (ReportContextService.selectedCardId, cardFilter: 'required' en report.routes.ts) —
+    // este componente ya no maneja su propio <select> ni la lista completa de tarjetas, solo necesita
+    // saber si el usuario tiene alguna cargada para el estado vacío.
     isLoadingCards = true;
+    hasCards = false;
     isLoading = false;
     dataRequested = false;
-    cards: Card[] = [];
-    selectedCardId: number | null = null;
     detail: CardDetailReport | null = null;
 
     categoryChartOptions: EChartsOption = {};
@@ -61,30 +63,23 @@ export class CardsByCardReportComponent {
 
     constructor() {
         this.cardService.getAllCards().subscribe(cards => {
-            this.cards = cards;
+            this.hasCards = cards.length > 0;
             this.isLoadingCards = false;
-            if (cards.length > 0) {
-                this.selectedCardId = cards[0].id;
-                this.tryLoad();
-                this.loadSummary();
-            }
         });
 
         effect(() => {
             this.reportContext.currencyAssetId(); // dependencia reactiva
+            this.reportContext.selectedCardId(); // dependencia reactiva (la fija la barra de filtros)
             this.tryLoad();
+            this.loadSummary();
         });
-    }
-
-    onCardChange(): void {
-        this.tryLoad();
-        this.loadSummary();
     }
 
     private tryLoad(): void {
         const assetId = this.reportContext.currencyAssetId();
-        if (assetId == null || this.selectedCardId == null) return;
-        this.load(this.selectedCardId, assetId);
+        const cardId = this.reportContext.selectedCardId();
+        if (assetId == null || cardId == null) return;
+        this.load(cardId, assetId);
     }
 
     private load(cardId: number, assetId: number): void {
@@ -113,11 +108,12 @@ export class CardsByCardReportComponent {
     }
 
     private loadSummary(): void {
-        if (this.selectedCardId == null) return;
+        const cardId = this.reportContext.selectedCardId();
+        if (cardId == null) return;
         this.isLoadingSummary = true;
         const year = this.summaryMonth.getFullYear();
         const month = (this.summaryMonth.getMonth() + 1).toString().padStart(2, '0');
-        this.cardReportService.getMonthSummary(`${year}-${month}-01`, this.selectedCardId).subscribe(data => {
+        this.cardReportService.getMonthSummary(`${year}-${month}-01`, cardId).subscribe(data => {
             this.monthSummary = data;
             this.isLoadingSummary = false;
         });

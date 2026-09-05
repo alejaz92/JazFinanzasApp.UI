@@ -30,6 +30,14 @@ export class ReportContextService {
   private readonly customTo = signal<string | null>(null);
   private readonly currency = signal<number | null>(null);
 
+  // Corrección 2026-09-05: filtros propios de Tarjetas (Por tarjeta / Compromiso futuro), en la
+  // misma barra y con el mismo criterio de "vive en la URL, se puede compartir como enlace" que
+  // período y moneda (T12) — antes cada reporte los mostraba dentro del cuerpo, inconsistente con
+  // el resto de la sección. selectedCardId en null significa "todavía no se eligió/no aplica";
+  // 0 en la URL significa "Todas las tarjetas" (Compromiso futuro lo admite, Por tarjeta no).
+  private readonly cardId = signal<number | null>(null);
+  private readonly includeRecurring = signal<boolean>(true);
+
   readonly period = computed<ReportPeriod>(() => ({
     preset: this.periodPreset(),
     from: this.customFrom() ?? undefined,
@@ -37,6 +45,8 @@ export class ReportContextService {
   }));
 
   readonly currencyAssetId = this.currency.asReadonly();
+  readonly selectedCardId = this.cardId.asReadonly();
+  readonly includeRecurringExpenses = this.includeRecurring.asReadonly();
 
   constructor() {
     this.readFromUrl(this.router.url);
@@ -57,12 +67,23 @@ export class ReportContextService {
     this.navigate({ currency: assetId });
   }
 
+  setCardId(cardId: number): void {
+    this.navigate({ cardId });
+  }
+
+  setIncludeRecurring(value: boolean): void {
+    // Se omite de la URL en su valor default (true) para no ensuciar el enlace en el caso común.
+    this.navigate({ includeRecurring: value ? null : 'false' });
+  }
+
   private readFromUrl(url: string): void {
     const qp = this.router.parseUrl(url).queryParams;
     this.periodPreset.set(this.isPreset(qp['period']) ? qp['period'] : DEFAULT_PERIOD);
     this.customFrom.set(qp['from'] ?? null);
     this.customTo.set(qp['to'] ?? null);
     this.currency.set(qp['currency'] ? Number(qp['currency']) : null);
+    this.cardId.set(qp['cardId'] != null ? Number(qp['cardId']) : null);
+    this.includeRecurring.set(qp['includeRecurring'] !== 'false');
   }
 
   private isPreset(value: unknown): value is PeriodPreset {

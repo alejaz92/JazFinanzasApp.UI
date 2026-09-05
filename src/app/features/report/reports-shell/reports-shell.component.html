@@ -116,6 +116,29 @@
       }
     }
 
+    @if (cardFilterMode() !== 'none' && cards().length > 0) {
+      <div class="d-flex align-items-center gap-2" title="Tarjeta">
+        <label for="reportCardFilter" class="form-label mb-0 small text-body-secondary">Tarjeta:</label>
+        <select id="reportCardFilter" class="form-select form-select-sm w-auto"
+                [ngModel]="reportContext.selectedCardId() ?? 0" (ngModelChange)="onCardFilterChange($event)">
+          @if (cardFilterMode() === 'optional') {
+            <option [ngValue]="0">Todas</option>
+          }
+          @for (card of cards(); track card.id) {
+            <option [ngValue]="card.id">{{ card.name }}</option>
+          }
+        </select>
+      </div>
+    }
+
+    @if (showRecurringFilter()) {
+      <div class="form-check form-switch mb-0" title="Incluir gastos recurrentes sin fin (suscripciones) en la proyección">
+        <input class="form-check-input" type="checkbox" id="reportIncludeRecurring"
+               [ngModel]="reportContext.includeRecurringExpenses()" (ngModelChange)="onIncludeRecurringChange($event)">
+        <label class="form-check-label small" for="reportIncludeRecurring">Incluir recurrentes</label>
+      </div>
+    }
+
     @if (referenceAssets().length > 0) {
       <div class="d-flex align-items-center gap-2 ms-auto" title="Moneda de referencia de la sección">
         <label for="reportCurrency" class="form-label mb-0 small text-body-secondary">Moneda:</label>
