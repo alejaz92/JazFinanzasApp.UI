@@ -1,4 +1,4 @@
 export const environment = {
      //apiBaseURL: 'https://localhost:7203'
-    apiBaseURL: 'http://localhost:5297'
+    apiBaseURL: 'https://jazfinanzasappapi20241128105007.azurewebsites.net'
 };
