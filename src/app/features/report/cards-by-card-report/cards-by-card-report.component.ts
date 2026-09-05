@@ -42,6 +42,17 @@ export class CardsByCardReportComponent {
     categoryChartOptions: EChartsOption = {};
     evolutionChartOptions: EChartsOption = {};
 
+    // Corrección 2026-09-05, tercera ronda: el usuario pidió ver la evolución mensual unificada
+    // (pesos + dólares ya convertidos a la misma moneda de referencia — sumarlos es válido, a
+    // diferencia de sumar montos nativos sin convertir). Toggle en vez de agregar una tercera línea
+    // al gráfico de por moneda: mezclar "por moneda" y "total" en el mismo gráfico es más difícil de
+    // leer que elegir uno de los dos.
+    showCombinedEvolution = false;
+
+    onEvolutionViewChange(): void {
+        this.renderEvolutionChart();
+    }
+
     // Resumen del mes de esta tarjeta (corrección 2026-09-05, segunda ronda): mismo patrón de
     // navegación que Tarjetas → General, filtrado a `selectedCardId` en vez de traer todas.
     isLoadingSummary = false;
@@ -145,21 +156,38 @@ export class CardsByCardReportComponent {
         const axisLabel = this.chartTheme.surface.axisLabel;
         const fmt = (v: number) => this.chartTheme.formatNumber(v, { maximumFractionDigits: 0 });
 
+        // Sumar es válido acá porque los dos ya vienen convertidos a la misma moneda de referencia
+        // (corrección 2026-09-05, segunda ronda) — no se están mezclando montos nativos sin convertir.
+        const series = this.showCombinedEvolution
+            ? [{
+                name: `Total en ${this.detail!.referenceAssetSymbol}`,
+                type: 'line', showSymbol: false,
+                data: evolution.map(e => Math.round((e.pesosAmount + e.dollarsAmount) * 100) / 100),
+            }]
+            : [
+                { name: this.detail!.pesoAssetSymbol, type: 'line', showSymbol: false, data: evolution.map(e => e.pesosAmount) },
+                { name: this.detail!.dollarAssetSymbol, type: 'line', showSymbol: false, data: evolution.map(e => e.dollarsAmount) },
+            ];
+
         this.evolutionChartOptions = {
-            color: [this.detail!.pesoAssetColor, this.detail!.dollarAssetColor],
-            legend: { top: 0, data: [this.detail!.pesoAssetSymbol, this.detail!.dollarAssetSymbol], textStyle: { color: axisLabel } },
+            color: this.showCombinedEvolution ? [this.chartTheme.colorAt(6)] : [this.detail!.pesoAssetColor, this.detail!.dollarAssetColor],
+            legend: { top: 0, data: series.map(s => s.name), textStyle: { color: axisLabel } },
             grid: { left: 70, right: 20, top: 40, bottom: 40 },
             tooltip: { trigger: 'axis', ...this.chartTheme.tooltipDefaults(), valueFormatter: (v: unknown) => fmt(Number(v)) },
             xAxis: { type: 'category', data: labels, axisLabel: { color: axisLabel }, axisLine: { lineStyle: { color: this.chartTheme.surface.axisLine } } },
             yAxis: { type: 'value', axisLabel: { color: axisLabel, formatter: (v: number) => fmt(v) }, splitLine: { lineStyle: { color: this.chartTheme.surface.splitLine } } },
-            series: [
-                { name: this.detail!.pesoAssetSymbol, type: 'line', showSymbol: false, data: evolution.map(e => e.pesosAmount) },
-                { name: this.detail!.dollarAssetSymbol, type: 'line', showSymbol: false, data: evolution.map(e => e.dollarsAmount) },
-            ],
+            series,
         } as EChartsOption;
     }
 
     get hasCategories(): boolean {
         return (this.detail?.byCategory.length ?? 0) > 0;
+    }
+
+    // Corrección 2026-09-05, tercera ronda: total del mes en la moneda de referencia — válido porque
+    // currentMonthPesos/Dollars ya vienen convertidos a la misma moneda.
+    get currentMonthTotal(): number {
+        if (!this.detail) return 0;
+        return Math.round((this.detail.currentMonthPesos + this.detail.currentMonthDollars) * 100) / 100;
     }
 }

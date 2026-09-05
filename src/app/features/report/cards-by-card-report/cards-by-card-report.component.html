@@ -23,7 +23,7 @@
         </div>
 
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="card mb-3 text-center">
                     <div class="card-header" [style.backgroundColor]="detail.pesoAssetColor" [style.color]="detail.pesoAssetColor | contrastText">
                         Consumo del mes en {{ detail.pesoAssetSymbol }}, en {{ detail.referenceAssetSymbol }}
@@ -33,13 +33,23 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="card mb-3 text-center">
                     <div class="card-header" [style.backgroundColor]="detail.dollarAssetColor" [style.color]="detail.dollarAssetColor | contrastText">
                         Consumo del mes en {{ detail.dollarAssetSymbol }}, en {{ detail.referenceAssetSymbol }}
                     </div>
                     <div class="card-body">
                         <h4 class="mb-0">{{ detail.currentMonthDollars | currencyFiatFormat }}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card mb-3 text-center">
+                    <div class="card-header">
+                        Consumo del mes total, en {{ detail.referenceAssetSymbol }}
+                    </div>
+                    <div class="card-body">
+                        <h4 class="mb-0">{{ currentMonthTotal | currencyFiatFormat }}</h4>
                     </div>
                 </div>
             </div>
@@ -57,7 +67,13 @@
                 </div>
                 <div class="col-md-6 mt-1">
                     <div class="card">
-                        <div class="card-header">Evolución mensual, en {{ detail.referenceAssetSymbol }}</div>
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span>Evolución mensual, en {{ detail.referenceAssetSymbol }}</span>
+                            <div class="form-check form-switch mb-0">
+                                <input class="form-check-input" type="checkbox" id="combinedEvolutionToggle" [(ngModel)]="showCombinedEvolution" (change)="onEvolutionViewChange()">
+                                <label class="form-check-label small" for="combinedEvolutionToggle">Total combinado</label>
+                            </div>
+                        </div>
                         <div class="card-body">
                             <app-chart [options]="evolutionChartOptions" [height]="280"></app-chart>
                         </div>
