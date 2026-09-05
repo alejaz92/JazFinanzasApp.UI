@@ -9,9 +9,9 @@
         <div class="row">
             <div class="col-12 mt-1">
                 <div class="card">
-                    <div class="card-header">Cuotas por vencer, próximos meses, en {{ data.referenceAssetSymbol }}</div>
+                    <div class="card-header">Cuotas por vencer, próximos meses, en {{ data.referenceAssetSymbol }} — agrupado por categoría</div>
                     <div class="card-body">
-                        <app-chart [options]="stackedOptions" [height]="320"></app-chart>
+                        <app-chart [options]="stackedOptions" [height]="320" (chartClick)="onStackedClick($event)"></app-chart>
                     </div>
                 </div>
             </div>
@@ -36,4 +36,38 @@
             <p class="mb-0">Este reporte se llena solo el día que aparezca una compra grande a pagar en varias cuotas.</p>
         </div>
     </ng-template>
+</div>
+
+<!-- Detalle: panel lateral con las compras que arman el segmento clickeado (categoría + mes) -->
+<div #drawerRef class="offcanvas offcanvas-end" tabindex="-1">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title">{{ selectedCategoryName }} — {{ selectedMonthLabel }}</h5>
+        <button type="button" class="btn-close" (click)="closeDetail()"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div class="table-responsive" *ngIf="panelPurchases.length > 0">
+            <table class="table table-sm table-hover">
+                <thead>
+                    <tr>
+                        <th>Detalle</th>
+                        <th>Tarjeta</th>
+                        <th class="text-end">Cuota</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let p of panelPurchases">
+                        <td>{{ p.detail }}</td>
+                        <td>{{ p.cardName }}</td>
+                        <td class="text-end">{{ p.amount | currencyFiatFormat }}</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr class="fw-semibold">
+                        <td colspan="2">Total</td>
+                        <td class="text-end">{{ panelTotal | currencyFiatFormat }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
 </div>

@@ -57,6 +57,8 @@ export interface FutureCommitmentPurchaseAmount {
     detail: string;
     cardName: string;
     assetName: string;
+    transactionClassId: number;
+    transactionClassName: string;
     amount: number;
 }
 

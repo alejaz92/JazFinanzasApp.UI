@@ -1,25 +1,29 @@
-import { Component, effect, inject } from '@angular/core';
-import { NgIf } from '@angular/common';
-import type { EChartsOption } from 'echarts';
+import { Component, ElementRef, ViewChild, effect, inject } from '@angular/core';
+import { NgIf, NgFor } from '@angular/common';
+import type { EChartsOption, ECElementEvent } from 'echarts';
 
 import { CardReportService } from '../services/card-report.service';
-import { CardFutureCommitment } from '../models/card-report.model';
+import { CardFutureCommitment, FutureCommitmentPurchaseAmount } from '../models/card-report.model';
 import { ReportContextService } from '../../../shared/services/report-context.service';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
+import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
+
+declare const bootstrap: any;
 
 // Tarjetas — Compromiso futuro (Fase 15): cuánta plata de los próximos meses ya está comprometida
 // en cuotas (CardReportController.GetFutureCommitmentAsync, T8 extendido). El checkpoint de esta
 // fase pide explícitamente un estado vacío con sentido cuando no hay nada por vencer — no es un
 // detalle cosmético, es la respuesta correcta la mayoría de los meses (sección 6, Flujo 4).
 // Corrección 2026-09-05: los montos vienen convertidos a la moneda elegida en la barra de Reportes.
-// El color acá sigue siendo por compra (no por moneda) — es lo que deja distinguir qué compra
-// explica el bulto en un mes puntual, que es el propósito central de este reporte.
+// Corrección 2026-09-05, cuarta ronda: el color de "Cuotas por vencer" pasó de una compra a una
+// categoría (con varias compras vivas a la vez, un color por compra era ilegible) y el clic en un
+// segmento abre el panel lateral con el detalle — mismo patrón que Ingresos y Egresos → Por categoría.
 @Component({
     selector: 'app-cards-future-commitment-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, ChartComponent],
+    imports: [LoadingComponent, NgIf, NgFor, CurrencyFiatFormatPipe, ChartComponent],
     templateUrl: './cards-future-commitment-report.component.html',
     styleUrl: './cards-future-commitment-report.component.css'
 })
@@ -34,6 +38,14 @@ export class CardsFutureCommitmentReportComponent {
 
     stackedOptions: EChartsOption = {};
     ganttOptions: EChartsOption = {};
+    private stackedCategoryIds: number[] = [];
+
+    // Panel lateral de detalle (clic en un segmento del gráfico apilado).
+    selectedCategoryName: string | null = null;
+    selectedMonthLabel = '';
+    panelPurchases: FutureCommitmentPurchaseAmount[] = [];
+    @ViewChild('drawerRef') private drawerRef?: ElementRef<HTMLElement>;
+    private drawerInstance: any;
 
     constructor() {
         effect(() => {
@@ -62,36 +74,72 @@ export class CardsFutureCommitmentReportComponent {
         this.renderGantt();
     }
 
-    // Columnas apiladas hacia adelante: cada compra en cuotas es una serie propia (un color), para
-    // que se vea de una qué compra explica el bulto en un mes puntual.
+    // Columnas apiladas hacia adelante, agrupadas por categoría (no por compra — con varias compras
+    // vivas a la vez un color por compra dejaba de leerse). Clic en un segmento abre el detalle.
     private renderStacked(): void {
         const months = this.data!.monthlySeries;
         const labels = months.map(m => new Date(m.month).toLocaleDateString('es-AR', { month: 'short', year: 'numeric' }));
         const axisLabel = this.chartTheme.surface.axisLabel;
         const fmt = (v: number) => this.chartTheme.formatNumber(v, { maximumFractionDigits: 0 });
 
-        const purchaseIds = Array.from(new Set(months.flatMap(m => m.purchases.map(p => p.cardTransactionId))));
-        const labelById = new Map(months.flatMap(m => m.purchases).map(p => [p.cardTransactionId, `${p.detail} (${p.cardName})`]));
+        const categoryIds = Array.from(new Set(months.flatMap(m => m.purchases.map(p => p.transactionClassId))));
+        const nameById = new Map(months.flatMap(m => m.purchases).map(p => [p.transactionClassId, p.transactionClassName]));
+        this.stackedCategoryIds = categoryIds;
 
         this.stackedOptions = {
-            color: purchaseIds.map((_, i) => this.chartTheme.colorAt(i)),
+            color: categoryIds.map((_, i) => this.chartTheme.colorAt(i)),
             legend: { top: 0, type: 'scroll', textStyle: { color: axisLabel } },
             grid: { left: 70, right: 20, top: 50, bottom: 40 },
             tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, ...this.chartTheme.tooltipDefaults(), valueFormatter: (v: unknown) => fmt(Number(v)) },
             xAxis: { type: 'category', data: labels, axisLabel: { color: axisLabel }, axisLine: { lineStyle: { color: this.chartTheme.surface.axisLine } } },
             yAxis: { type: 'value', axisLabel: { color: axisLabel, formatter: (v: number) => fmt(v) }, splitLine: { lineStyle: { color: this.chartTheme.surface.splitLine } } },
-            series: purchaseIds.map((id, i) => ({
-                name: labelById.get(id),
+            series: categoryIds.map((id, i) => ({
+                name: nameById.get(id),
                 type: 'bar',
                 stack: 'total',
                 itemStyle: { color: this.chartTheme.colorAt(i) },
-                data: months.map(m => m.purchases.find(p => p.cardTransactionId === id)?.amount ?? 0),
+                data: months.map(m => {
+                    const total = m.purchases.filter(p => p.transactionClassId === id).reduce((sum, p) => sum + p.amount, 0);
+                    return Math.round(total * 100) / 100;
+                }),
             })),
         } as EChartsOption;
     }
 
+    // Clic en un segmento (categoría, mes): las compras que arman ese número ya están en memoria
+    // (vinieron con la respuesta), no hace falta pedirle nada nuevo al backend.
+    onStackedClick(event: ECElementEvent): void {
+        if (event.seriesIndex == null || event.dataIndex == null || !this.data) return;
+        const categoryId = this.stackedCategoryIds[event.seriesIndex];
+        const month = this.data.monthlySeries[event.dataIndex];
+        const purchases = month.purchases.filter(p => p.transactionClassId === categoryId);
+        if (purchases.length === 0) return;
+
+        this.selectedCategoryName = purchases[0].transactionClassName;
+        this.selectedMonthLabel = new Date(month.month).toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
+        this.panelPurchases = purchases;
+        this.openDrawer();
+    }
+
+    closeDetail(): void {
+        this.selectedCategoryName = null;
+        this.panelPurchases = [];
+        this.drawerInstance?.hide();
+    }
+
+    private openDrawer(): void {
+        setTimeout(() => {
+            const el = this.drawerRef?.nativeElement;
+            if (!el) return;
+            this.drawerInstance = bootstrap.Offcanvas.getOrCreateInstance(el);
+            this.drawerInstance.show();
+        });
+    }
+
     // Cronograma: gantt horizontal armado con el truco estándar de ECharts (barra invisible de
     // offset + barra visible de duración, ambas apiladas) — no hay tipo de serie "gantt" nativo.
+    // Sigue coloreado por compra individual (no por categoría): acá el propósito es distinguir cada
+    // compra viva, no agrupar.
     private renderGantt(): void {
         const timeline = [...this.data!.timeline].sort((a, b) => a.startMonth.localeCompare(b.startMonth));
         const months = this.data!.monthlySeries.map(m => m.month.substring(0, 7));
@@ -132,5 +180,9 @@ export class CardsFutureCommitmentReportComponent {
 
     get ganttHeight(): number {
         return Math.max(200, (this.data?.timeline.length ?? 0) * 40);
+    }
+
+    get panelTotal(): number {
+        return Math.round(this.panelPurchases.reduce((sum, p) => sum + p.amount, 0) * 100) / 100;
     }
 }
