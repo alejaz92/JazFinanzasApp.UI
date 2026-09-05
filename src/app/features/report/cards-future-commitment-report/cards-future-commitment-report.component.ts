@@ -1,9 +1,10 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
 import { NgIf } from '@angular/common';
 import type { EChartsOption } from 'echarts';
 
 import { CardReportService } from '../services/card-report.service';
 import { CardFutureCommitment } from '../models/card-report.model';
+import { ReportContextService } from '../../../shared/services/report-context.service';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
@@ -12,6 +13,9 @@ import { ChartThemeService } from '../../../shared/services/chart-theme.service'
 // en cuotas (CardReportController.GetFutureCommitmentAsync, T8 extendido). El checkpoint de esta
 // fase pide explícitamente un estado vacío con sentido cuando no hay nada por vencer — no es un
 // detalle cosmético, es la respuesta correcta la mayoría de los meses (sección 6, Flujo 4).
+// Corrección 2026-09-05: los montos vienen convertidos a la moneda elegida en la barra de Reportes.
+// El color acá sigue siendo por compra (no por moneda) — es lo que deja distinguir qué compra
+// explica el bulto en un mes puntual, que es el propósito central de este reporte.
 @Component({
     selector: 'app-cards-future-commitment-report',
     standalone: true,
@@ -19,18 +23,29 @@ import { ChartThemeService } from '../../../shared/services/chart-theme.service'
     templateUrl: './cards-future-commitment-report.component.html',
     styleUrl: './cards-future-commitment-report.component.css'
 })
-export class CardsFutureCommitmentReportComponent implements OnInit {
+export class CardsFutureCommitmentReportComponent {
     private readonly cardReportService = inject(CardReportService);
     private readonly chartTheme = inject(ChartThemeService);
+    protected readonly reportContext = inject(ReportContextService);
 
-    isLoading = true;
+    isLoading = false;
+    dataRequested = false;
     data: CardFutureCommitment | null = null;
 
     stackedOptions: EChartsOption = {};
     ganttOptions: EChartsOption = {};
 
-    ngOnInit(): void {
-        this.cardReportService.getFutureCommitment().subscribe(data => {
+    constructor() {
+        effect(() => {
+            const assetId = this.reportContext.currencyAssetId();
+            if (assetId != null) this.load(assetId);
+        });
+    }
+
+    private load(assetId: number): void {
+        this.isLoading = true;
+        this.dataRequested = true;
+        this.cardReportService.getFutureCommitment(assetId).subscribe(data => {
             this.data = data;
             this.isLoading = false;
             setTimeout(() => this.renderCharts(), 0);

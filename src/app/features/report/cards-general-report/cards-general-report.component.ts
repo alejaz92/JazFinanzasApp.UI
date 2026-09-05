@@ -1,42 +1,68 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
 import { NgIf, NgFor, DatePipe } from '@angular/common';
 import type { EChartsOption } from 'echarts';
 
 import { CardReportService } from '../services/card-report.service';
 import { CardMonthlySeriesPoint } from '../models/card-report.model';
 import { CardTransactionPaymentList } from '../../cardTransactions/models/CardTransactionPayment-List.model';
+import { ReportContextService } from '../../../shared/services/report-context.service';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
+import { ContrastTextPipe } from '../../../shared/pipes/contrastText/contrast-text.pipe';
 
 // Tarjetas — General (Fase 15): reemplaza a la vieja pantalla "Tarjetas" (features/report/cards-report,
-// dada de baja). Consumo devengado (CardTransaction.Date/TotalAmount), apilado por mes y por tarjeta,
-// pesos y dólares siempre por separado — mismo criterio que ya traía CardReportService (Fase 14).
+// dada de baja). Consumo devengado (CardTransaction.Date/TotalAmount), apilado por mes y por tarjeta.
+// Corrección 2026-09-05: monthlySeries ahora se pide convertida a la moneda elegida en la barra de
+// Reportes (antes el selector no hacía nada acá), y el encabezado de cada gráfico usa el mismo color
+// por moneda que Patrimonio → General (NetWorthTotal.color) en vez de un texto plano.
 @Component({
     selector: 'app-cards-general-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, DatePipe, CurrencyFiatFormatPipe, ChartComponent],
+    imports: [LoadingComponent, NgIf, NgFor, DatePipe, CurrencyFiatFormatPipe, ContrastTextPipe, ChartComponent],
     templateUrl: './cards-general-report.component.html',
     styleUrl: './cards-general-report.component.css'
 })
-export class CardsGeneralReportComponent implements OnInit {
+export class CardsGeneralReportComponent {
     private readonly cardReportService = inject(CardReportService);
     private readonly chartTheme = inject(ChartThemeService);
+    protected readonly reportContext = inject(ReportContextService);
 
-    isLoading = true;
+    isLoading = false;
+    dataRequested = false;
     isLoadingSummary = false;
     monthlySeries: CardMonthlySeriesPoint[] = [];
     summaryMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
     monthSummary: CardTransactionPaymentList[] = [];
 
+    referenceAssetSymbol = '';
+    pesoAssetSymbol = '';
+    pesoAssetColor = '';
+    dollarAssetSymbol = '';
+    dollarAssetColor = '';
+
     pesosChartOptions: EChartsOption = {};
     dollarsChartOptions: EChartsOption = {};
 
-    ngOnInit(): void {
-        this.cardReportService.getGeneral().subscribe(data => {
+    constructor() {
+        effect(() => {
+            const assetId = this.reportContext.currencyAssetId();
+            if (assetId != null) this.load(assetId);
+        });
+    }
+
+    private load(assetId: number): void {
+        this.isLoading = true;
+        this.dataRequested = true;
+        this.cardReportService.getGeneral(assetId).subscribe(data => {
             this.monthlySeries = data.monthlySeries;
             this.monthSummary = data.currentMonthSummary;
+            this.referenceAssetSymbol = data.referenceAssetSymbol;
+            this.pesoAssetSymbol = data.pesoAssetSymbol;
+            this.pesoAssetColor = data.pesoAssetColor;
+            this.dollarAssetSymbol = data.dollarAssetSymbol;
+            this.dollarAssetColor = data.dollarAssetColor;
             this.isLoading = false;
             setTimeout(() => this.renderCharts(), 0);
         });

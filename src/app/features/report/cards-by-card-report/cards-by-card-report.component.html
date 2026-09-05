@@ -5,15 +5,17 @@
 
     <div class="row mb-3" *ngIf="cards.length > 0; else noCards">
         <div class="col-md-6">
-            <select class="form-select" [(ngModel)]="selectedCardId" (change)="load()">
+            <select class="form-select" [(ngModel)]="selectedCardId" (change)="onCardChange()">
                 <option *ngFor="let card of cards" [ngValue]="card.id">{{ card.name }}</option>
             </select>
         </div>
     </div>
 
+    <p class="text-body-secondary" *ngIf="cards.length > 0 && !dataRequested">Elegí una moneda arriba para ver el detalle.</p>
+
     <app-loading [isLoading]="isLoading"></app-loading>
 
-    <div *ngIf="!isLoading && detail">
+    <div *ngIf="dataRequested && !isLoading && detail">
         <div class="d-flex flex-wrap gap-3 align-items-center mb-3">
             <h4 class="mb-0">{{ detail.cardName }}</h4>
             <span class="text-body-secondary small" *ngIf="detail.nextClosingDate">Próximo cierre: {{ detail.nextClosingDate | date:'dd/MM/yyyy' }}</span>
@@ -23,7 +25,9 @@
         <div class="row">
             <div class="col-md-6">
                 <div class="card mb-3 text-center">
-                    <div class="card-header">Consumo del mes en pesos</div>
+                    <div class="card-header" [style.backgroundColor]="detail.pesoAssetColor" [style.color]="detail.pesoAssetColor | contrastText">
+                        Consumo del mes en {{ detail.pesoAssetSymbol }}, en {{ detail.referenceAssetSymbol }}
+                    </div>
                     <div class="card-body">
                         <h4 class="mb-0">{{ detail.currentMonthPesos | currencyFiatFormat }}</h4>
                     </div>
@@ -31,7 +35,9 @@
             </div>
             <div class="col-md-6">
                 <div class="card mb-3 text-center">
-                    <div class="card-header">Consumo del mes en dólares</div>
+                    <div class="card-header" [style.backgroundColor]="detail.dollarAssetColor" [style.color]="detail.dollarAssetColor | contrastText">
+                        Consumo del mes en {{ detail.dollarAssetSymbol }}, en {{ detail.referenceAssetSymbol }}
+                    </div>
                     <div class="card-body">
                         <h4 class="mb-0">{{ detail.currentMonthDollars | currencyFiatFormat }}</h4>
                     </div>
@@ -43,7 +49,7 @@
             <div class="row mt-2">
                 <div class="col-md-6 mt-1">
                     <div class="card">
-                        <div class="card-header">Composición por categoría (últimos 12 meses, pesos)</div>
+                        <div class="card-header">Composición por categoría (últimos 12 meses, en {{ detail.referenceAssetSymbol }})</div>
                         <div class="card-body">
                             <app-chart [options]="categoryChartOptions" [height]="280"></app-chart>
                         </div>
@@ -51,7 +57,7 @@
                 </div>
                 <div class="col-md-6 mt-1">
                     <div class="card">
-                        <div class="card-header">Evolución mensual</div>
+                        <div class="card-header">Evolución mensual, en {{ detail.referenceAssetSymbol }}</div>
                         <div class="card-body">
                             <app-chart [options]="evolutionChartOptions" [height]="280"></app-chart>
                         </div>

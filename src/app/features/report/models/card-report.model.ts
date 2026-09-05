@@ -1,5 +1,16 @@
 import { CardTransactionPaymentList } from '../../cardTransactions/models/CardTransactionPayment-List.model';
 
+// Corrección 2026-09-05: los 4 reportes de Tarjetas devuelven estos 5 campos — de qué moneda de
+// referencia se trata y los colores por moneda de origen (mismo criterio que NetWorthTotal.color
+// en Patrimonio → General), para no repetirlos sueltos en cada interfaz.
+export interface CardCurrencyMeta {
+    referenceAssetSymbol: string;
+    pesoAssetSymbol: string;
+    pesoAssetColor: string;
+    dollarAssetSymbol: string;
+    dollarAssetColor: string;
+}
+
 export interface CardMonthAmount {
     cardId: number;
     cardName: string;
@@ -12,7 +23,7 @@ export interface CardMonthlySeriesPoint {
     cards: CardMonthAmount[];
 }
 
-export interface CardGeneralReport {
+export interface CardGeneralReport extends CardCurrencyMeta {
     monthlySeries: CardMonthlySeriesPoint[];
     currentMonthSummary: CardTransactionPaymentList[];
 }
@@ -30,7 +41,7 @@ export interface CardSimpleMonthlyPoint {
     dollarsAmount: number;
 }
 
-export interface CardDetailReport {
+export interface CardDetailReport extends CardCurrencyMeta {
     cardId: number;
     cardName: string;
     nextClosingDate: string | null;
@@ -65,7 +76,7 @@ export interface FutureCommitmentPurchase {
     remainingInstallments: number;
 }
 
-export interface CardFutureCommitment {
+export interface CardFutureCommitment extends CardCurrencyMeta {
     monthlySeries: FutureCommitmentMonth[];
     timeline: FutureCommitmentPurchase[];
 }
@@ -81,12 +92,13 @@ export interface PendingReimbursement {
     cardTransactionId: number;
     detail: string;
     cardName: string;
+    assetName: string;
     pendingToCredit: number;
     pendingToApply: number;
     creditDate: string;
 }
 
-export interface CardPromotionsReport {
+export interface CardPromotionsReport extends CardCurrencyMeta {
     totalSavedPesos: number;
     totalSavedDollars: number;
     percentOfConsumptionPesos: number | null;

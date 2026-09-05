@@ -12,20 +12,20 @@ export class CardReportService {
 
   constructor(private http: HttpClient) { }
 
-  getGeneral(): Observable<CardGeneralReport> {
-    return this.http.get<CardGeneralReport>(`${environment.apiBaseURL}/api/cardreport/General`);
+  getGeneral(assetId: number): Observable<CardGeneralReport> {
+    return this.http.get<CardGeneralReport>(`${environment.apiBaseURL}/api/cardreport/General/${assetId}`);
   }
 
-  getByCard(cardId: number): Observable<CardDetailReport> {
-    return this.http.get<CardDetailReport>(`${environment.apiBaseURL}/api/cardreport/ByCard/${cardId}`);
+  getByCard(cardId: number, assetId: number): Observable<CardDetailReport> {
+    return this.http.get<CardDetailReport>(`${environment.apiBaseURL}/api/cardreport/ByCard/${cardId}/${assetId}`);
   }
 
-  getFutureCommitment(): Observable<CardFutureCommitment> {
-    return this.http.get<CardFutureCommitment>(`${environment.apiBaseURL}/api/cardreport/FutureCommitment`);
+  getFutureCommitment(assetId: number): Observable<CardFutureCommitment> {
+    return this.http.get<CardFutureCommitment>(`${environment.apiBaseURL}/api/cardreport/FutureCommitment/${assetId}`);
   }
 
-  getPromotions(): Observable<CardPromotionsReport> {
-    return this.http.get<CardPromotionsReport>(`${environment.apiBaseURL}/api/cardreport/Promotions`);
+  getPromotions(assetId: number): Observable<CardPromotionsReport> {
+    return this.http.get<CardPromotionsReport>(`${environment.apiBaseURL}/api/cardreport/Promotions/${assetId}`);
   }
 
   getMonthSummary(month: string): Observable<CardTransactionPaymentList[]> {
