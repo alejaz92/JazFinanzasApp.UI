@@ -1,4 +1,10 @@
-<h2 class="mb-3">Tarjetas — Compromiso futuro</h2>
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <h2 class="mb-0">Tarjetas — Compromiso futuro</h2>
+    <div class="form-check form-switch mb-0">
+        <input class="form-check-input" type="checkbox" id="includeRecurringToggle" [(ngModel)]="includeRecurring" (change)="onIncludeRecurringChange()">
+        <label class="form-check-label" for="includeRecurringToggle">Incluir gastos recurrentes</label>
+    </div>
+</div>
 
 <p class="text-body-secondary" *ngIf="!dataRequested">Elegí una moneda arriba para ver el compromiso futuro.</p>
 

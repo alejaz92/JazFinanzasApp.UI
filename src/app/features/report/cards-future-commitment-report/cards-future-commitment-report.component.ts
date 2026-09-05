@@ -1,5 +1,6 @@
 import { Component, ElementRef, ViewChild, effect, inject } from '@angular/core';
 import { NgIf, NgFor } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import type { EChartsOption, ECElementEvent } from 'echarts';
 
 import { CardReportService } from '../services/card-report.service';
@@ -23,7 +24,7 @@ declare const bootstrap: any;
 @Component({
     selector: 'app-cards-future-commitment-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, CurrencyFiatFormatPipe, ChartComponent],
+    imports: [LoadingComponent, NgIf, NgFor, FormsModule, CurrencyFiatFormatPipe, ChartComponent],
     templateUrl: './cards-future-commitment-report.component.html',
     styleUrl: './cards-future-commitment-report.component.css'
 })
@@ -40,6 +41,11 @@ export class CardsFutureCommitmentReportComponent {
     ganttOptions: EChartsOption = {};
     private stackedCategoryIds: number[] = [];
 
+    // Corrección 2026-09-05, quinta ronda: filtro para sacar los gastos recurrentes de la proyección
+    // — una vez que se corrigió el bug de abajo (se proyectan en TODOS los meses, no solo el próximo),
+    // uno solo puede dominar el gráfico y tapar las compras en cuotas puntuales que son el foco del reporte.
+    includeRecurring = true;
+
     // Panel lateral de detalle (clic en un segmento del gráfico apilado).
     selectedCategoryName: string | null = null;
     selectedMonthLabel = '';
@@ -54,10 +60,15 @@ export class CardsFutureCommitmentReportComponent {
         });
     }
 
+    onIncludeRecurringChange(): void {
+        const assetId = this.reportContext.currencyAssetId();
+        if (assetId != null) this.load(assetId);
+    }
+
     private load(assetId: number): void {
         this.isLoading = true;
         this.dataRequested = true;
-        this.cardReportService.getFutureCommitment(assetId).subscribe(data => {
+        this.cardReportService.getFutureCommitment(assetId, this.includeRecurring).subscribe(data => {
             this.data = data;
             this.isLoading = false;
             setTimeout(() => this.renderCharts(), 0);
