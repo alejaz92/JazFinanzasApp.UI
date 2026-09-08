@@ -22,8 +22,13 @@ export class TransactionService {
 
   constructor(private http: HttpClient) { }
   
+  // Bug real encontrado en la Fase 18 (plan-rediseno-reportes-v2.md): el backend espera `pageSize`
+  // (TransactionController.GetPaginatedTransactions), no `itemsPerPage` — el nombre no coincidía y
+  // el backend caía siempre a su default de 20, silenciosamente. No se notaba en la lista general
+  // (siempre pide 20) pero sí truncaba a 20 los drill-down de "Por categoría" y "Calendario"
+  // (Fase 13), que piden 50.
   getTransactions(page: number, itemsPerPage: number, filters?: TransactionListFilters): Observable<{ transactions: Transaction[], totalCount: number}> {
-    let url = `${environment.apiBaseURL}/api/transaction?page=${page}&itemsPerPage=${itemsPerPage}`;
+    let url = `${environment.apiBaseURL}/api/transaction?page=${page}&pageSize=${itemsPerPage}`;
     if (filters?.classId != null) url += `&classId=${filters.classId}`;
     if (filters?.tagId != null) url += `&tagId=${filters.tagId}`;
     if (filters?.from) url += `&from=${filters.from}`;

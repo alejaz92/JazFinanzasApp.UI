@@ -5,11 +5,12 @@ import { forkJoin } from 'rxjs';
 import type { EChartsOption } from 'echarts';
 
 import { DashboardService } from '../services/dashboard.service';
-import { Dashboard, DashboardPendingItem, DashboardPendingKind } from '../models/dashboard.model';
+import { Dashboard, DashboardPendingItem } from '../models/dashboard.model';
 import { NetWorthService } from '../services/net-worth.service';
 import { NetWorthTotal, NetWorthMonthlyPoint } from '../models/net-worth.model';
 import { IncomeExpenseService } from '../services/income-expense.service';
 import { IncExpEvolutionPoint } from '../models/income-expense.model';
+import { pendingIcon, pendingAction, pendingRoute } from '../utils/dashboard-pending.util';
 import { ReportContextService } from '../../../shared/services/report-context.service';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
@@ -23,12 +24,6 @@ import { ContrastTextPipe } from '../../../shared/pipes/contrastText/contrast-te
 // serie mensual para la línea y el anillo) e IncomeExpenseService.getEvolution (el promedio móvil de
 // 6 meses ya calculado por Ingresos y Egresos → Evolución, D-A — reutilizado acá para "gasto del mes
 // contra el promedio" en vez de duplicar ese cálculo).
-const PENDING_META: Record<DashboardPendingKind, { icon: string; action: string }> = {
-    CardDue: { icon: 'bi-credit-card', action: 'Pagar' },
-    PendingReimbursement: { icon: 'bi-gift', action: 'Ver tarjeta' },
-    OpenSharedEvent: { icon: 'bi-people', action: 'Ver evento' },
-    TripWithoutRecentExpense: { icon: 'bi-airplane', action: 'Cargar gasto' },
-};
 
 @Component({
     selector: 'app-panorama',
@@ -151,23 +146,7 @@ export class PanoramaComponent {
         return this.lastEvolutionPoint?.expenseMovingAverage ?? null;
     }
 
-    pendingIcon(kind: DashboardPendingKind): string {
-        return PENDING_META[kind].icon;
-    }
-
-    pendingAction(kind: DashboardPendingKind): string {
-        return PENDING_META[kind].action;
-    }
-
-    // Cada tipo de pendiente resuelve a la pantalla donde se atiende (sección 5.3): tarjeta a pagar,
-    // reintegro de tarjeta y viaje tienen pantalla propia fuera de Reportes; el evento compartido
-    // vive en /shared-events/:id.
-    pendingRoute(item: DashboardPendingItem): string[] {
-        switch (item.kind) {
-            case 'CardDue': return ['/cardTransactions/pay'];
-            case 'PendingReimbursement': return ['/report/cards-promotions'];
-            case 'OpenSharedEvent': return ['/shared-events', String(item.linkId)];
-            case 'TripWithoutRecentExpense': return ['/management/trips', String(item.linkId), 'detail'];
-        }
-    }
+    protected readonly pendingIcon = pendingIcon;
+    protected readonly pendingAction = pendingAction;
+    protected readonly pendingRoute = pendingRoute;
 }

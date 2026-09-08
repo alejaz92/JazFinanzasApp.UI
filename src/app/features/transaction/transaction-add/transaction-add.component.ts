@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TransactionService } from '../services/transaction.service';
 import { AccountService } from '../../account/services/account.service';
@@ -49,6 +50,7 @@ export class TransactionAddComponent implements OnInit, OnDestroy {
 
   constructor(
     private fb: FormBuilder,
+    private route: ActivatedRoute,
     private transactionService: TransactionService,
     private accountService: AccountService,
     private assetService: AssetService,
@@ -79,6 +81,14 @@ export class TransactionAddComponent implements OnInit, OnDestroy {
     this.loadAssets();
     this.loadTransactionClasses();
     this.loadTrips();
+
+    // Acciones rápidas de Inicio (sección 5.1 del plan): "Ingreso"/"Egreso" llegan acá con
+    // ?type=I|E para no dejar al usuario en un formulario en blanco igual que entrando por el menú.
+    const type = this.route.snapshot.queryParamMap.get('type');
+    if (type === 'I' || type === 'E') {
+      this.transactionForm.patchValue({ movementType: type });
+      this.selectedMovementType = type;
+    }
 
     this.amountSub = this.transactionForm.get('amount')?.valueChanges.subscribe(value => {
       this.transactionAmountForForm = this.parseFormAmount(value);
