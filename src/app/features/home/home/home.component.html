@@ -106,10 +106,10 @@
                 <div class="list-group list-group-flush" *ngIf="pending.length > 0">
                     <a class="list-group-item d-flex justify-content-between align-items-center" *ngFor="let item of pending" [routerLink]="pendingRoute(item)">
                         <span>
-                            <i class="bi me-2" [ngClass]="pendingIcon(item.kind)"></i>{{ pendingLabel(item) }}
+                            <i class="bi me-2" [ngClass]="[pendingIcon(item.kind), pendingIconClass(item)]"></i>{{ pendingLabel(item) }}
                             <span class="text-body-secondary" *ngIf="item.kind === 'PendingReimbursement' && item.amount != null"> ({{ fmt(item.amount) }} {{ item.assetSymbol }})</span>
                         </span>
-                        <span class="badge bg-primary">{{ pendingAction(item.kind) }}</span>
+                        <span class="badge" [ngClass]="pendingBadgeClass(item)">{{ pendingAction(item.kind) }}</span>
                     </a>
                 </div>
             </div>

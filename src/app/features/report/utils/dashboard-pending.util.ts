@@ -1,4 +1,4 @@
-import { DashboardPendingItem, DashboardPendingKind } from '../models/dashboard.model';
+import { DashboardPendingItem, DashboardPendingKind, DashboardPendingSeverity } from '../models/dashboard.model';
 
 // Metadatos y ruteo de cada tipo de pendiente del `DashboardService` (Fase 16) — un único lugar
 // para las dos pantallas que muestran la bandeja "Requiere tu atención"/"Lo que necesita atención"
@@ -16,6 +16,29 @@ export function pendingIcon(kind: DashboardPendingKind): string {
 
 export function pendingAction(kind: DashboardPendingKind): string {
     return PENDING_META[kind].action;
+}
+
+// Color del badge/ícono según urgencia (`Severity` del backend, Fase 16 corrección): una tarjeta ya
+// vencida se distingue de una que solo vence pronto, mismo criterio que la pantalla vieja de Inicio
+// (alert-danger/alert-warning) — el resto de los tipos no tiene grados, quedan en "info".
+const SEVERITY_CLASS: Record<DashboardPendingSeverity, string> = {
+    info: 'bg-primary',
+    warning: 'bg-warning text-dark',
+    danger: 'bg-danger',
+};
+
+export function pendingBadgeClass(item: DashboardPendingItem): string {
+    return SEVERITY_CLASS[item.severity];
+}
+
+const SEVERITY_ICON_CLASS: Record<DashboardPendingSeverity, string> = {
+    info: '',
+    warning: 'text-warning',
+    danger: 'text-danger',
+};
+
+export function pendingIconClass(item: DashboardPendingItem): string {
+    return SEVERITY_ICON_CLASS[item.severity];
 }
 
 // El título de un `PendingReimbursement` es la descripción de la COMPRA que generó el reintegro

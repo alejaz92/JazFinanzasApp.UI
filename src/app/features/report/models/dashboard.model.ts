@@ -27,6 +27,7 @@ export interface DashboardThermometer {
 }
 
 export type DashboardPendingKind = 'CardDue' | 'PendingReimbursement' | 'OpenSharedEvent' | 'TripWithoutRecentExpense';
+export type DashboardPendingSeverity = 'info' | 'warning' | 'danger';
 
 export interface DashboardPendingItem {
     kind: DashboardPendingKind;
@@ -36,6 +37,7 @@ export interface DashboardPendingItem {
     assetSymbol: string | null;
     date: string | null;
     linkId: number | null;
+    severity: DashboardPendingSeverity;
 }
 
 export interface Dashboard {

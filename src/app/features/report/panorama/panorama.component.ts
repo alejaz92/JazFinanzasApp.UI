@@ -10,7 +10,7 @@ import { NetWorthService } from '../services/net-worth.service';
 import { NetWorthTotal, NetWorthMonthlyPoint } from '../models/net-worth.model';
 import { IncomeExpenseService } from '../services/income-expense.service';
 import { IncExpEvolutionPoint } from '../models/income-expense.model';
-import { pendingIcon, pendingAction, pendingRoute, pendingLabel } from '../utils/dashboard-pending.util';
+import { pendingIcon, pendingAction, pendingRoute, pendingLabel, pendingBadgeClass, pendingIconClass } from '../utils/dashboard-pending.util';
 import { ReportContextService } from '../../../shared/services/report-context.service';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
@@ -150,4 +150,6 @@ export class PanoramaComponent {
     protected readonly pendingAction = pendingAction;
     protected readonly pendingRoute = pendingRoute;
     protected readonly pendingLabel = pendingLabel;
+    protected readonly pendingBadgeClass = pendingBadgeClass;
+    protected readonly pendingIconClass = pendingIconClass;
 }
