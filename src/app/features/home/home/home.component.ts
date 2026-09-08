@@ -51,6 +51,12 @@ export class HomeComponent implements OnInit {
     isLoading = true;
     userName = '';
 
+    // TEMPORAL — comparación en vivo de 3 variantes de densidad, pedida por el usuario tras ver la
+    // Fase 18 ("hay demasiado texto e información, debería ser algo más simple"). Se saca en cuanto
+    // se elige una (ver [[feedback_comparar-opciones-de-ui-en-vivo]] en memoria: comparar sobre datos
+    // reales en vez de describir).
+    layoutVariant: 'full' | 'compact' | 'minimal' = 'compact';
+
     // Sin movimientos cargados (5.8): en vez del resto de la pantalla, se muestra la guía de 3 pasos.
     isFirstUse = false;
 
