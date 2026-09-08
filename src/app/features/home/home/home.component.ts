@@ -9,9 +9,7 @@ import { AssetService } from '../../asset/services/asset.service';
 import { DashboardService } from '../../report/services/dashboard.service';
 import { Dashboard, DashboardPendingItem } from '../../report/models/dashboard.model';
 import { NetWorthService } from '../../report/services/net-worth.service';
-import { NetWorthMonthlyPoint, AccountBalance } from '../../report/models/net-worth.model';
-import { TransactionService } from '../../transaction/services/transaction.service';
-import { Transaction } from '../../transaction/models/transaction.model';
+import { NetWorthMonthlyPoint } from '../../report/models/net-worth.model';
 import { pendingIcon, pendingAction, pendingRoute } from '../../report/utils/dashboard-pending.util';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
@@ -19,23 +17,23 @@ import { ChartThemeService } from '../../../shared/services/chart-theme.service'
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { ToastService } from '../../../core/services/toast.service';
 
-// Cada Transaction de pago de tarjeta se crea con esta categoría del sistema (seedeada por
-// AuthService al registrar el usuario, CardTransactionService.cs) — es la forma de distinguir
-// "vino de una tarjeta" sin pedirle al backend un campo nuevo (sección 5.6 del plan).
-const CARD_PAYMENT_CLASS_NAME = 'Gastos Tarjeta';
+// Ocultar montos (pedido del usuario tras ver la Fase 18): Inicio se ve sin ningún clic de por
+// medio al abrir la app, a diferencia de Reportes donde entrar ya es una decisión — mismo patrón
+// que las apps bancarias, un ícono de ojo que enmascara los números. Preferencia por dispositivo,
+// no por usuario: no hace falta backend.
+const HIDE_AMOUNTS_STORAGE_KEY = 'jaz-hide-amounts';
+const AMOUNT_MASK = '••••';
 
-const RECENT_ACTIVITY_LIMIT = 8;
-
-// Inicio (Fase 18, sección 5 del plan): se arma de cero sobre la misma regla que Panorama (Fase
-// 17) — todo lo que está en pantalla o dice cómo estoy, o me deja hacer algo — pero sin selector de
-// moneda ni de período (principio 5: "Inicio responde por hoy... no se filtra ni se configura"), así
-// que usa siempre la moneda de referencia principal del usuario. Compone las mismas fuentes que
-// Panorama (DashboardService de la Fase 16, NetWorthService) más los saldos por cuenta y los
-// movimientos recientes, sin recalcular nada.
+// Inicio (Fase 18, sección 5 del plan, versión "Mínimo" tras la comparación en vivo de 3
+// variantes): saludo y acciones rápidas, indicadores, bandeja de pendientes y patrimonio (línea +
+// composición) — sin selector de moneda ni de período (principio 5: "Inicio responde por hoy... no
+// se filtra ni se configura"), así que usa siempre la moneda de referencia principal del usuario.
+// "Mis cuentas" y "Actividad reciente" (5.5/5.6) se sacaron: ya están a un clic (Patrimonio → Por
+// cuenta, Movimientos) y hacían que la pantalla no entrara en un solo scroll.
 @Component({
     selector: 'app-home',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, NgClass, RouterLink, DatePipe, CurrencyFiatFormatPipe, ChartComponent],
+    imports: [LoadingComponent, NgIf, NgFor, NgClass, RouterLink, DatePipe, ChartComponent],
     templateUrl: './home.component.html',
     styleUrl: './home.component.css'
 })
@@ -44,18 +42,13 @@ export class HomeComponent implements OnInit {
     private readonly assetService = inject(AssetService);
     private readonly dashboardService = inject(DashboardService);
     private readonly netWorthService = inject(NetWorthService);
-    private readonly transactionService = inject(TransactionService);
     private readonly chartTheme = inject(ChartThemeService);
     private readonly toastService = inject(ToastService);
+    private readonly currencyPipe = new CurrencyFiatFormatPipe();
 
     isLoading = true;
     userName = '';
-
-    // TEMPORAL — comparación en vivo de 3 variantes de densidad, pedida por el usuario tras ver la
-    // Fase 18 ("hay demasiado texto e información, debería ser algo más simple"). Se saca en cuanto
-    // se elige una (ver [[feedback_comparar-opciones-de-ui-en-vivo]] en memoria: comparar sobre datos
-    // reales en vez de describir).
-    layoutVariant: 'full' | 'compact' | 'minimal' = 'compact';
+    amountsHidden = false;
 
     // Sin movimientos cargados (5.8): en vez del resto de la pantalla, se muestra la guía de 3 pasos.
     isFirstUse = false;
@@ -63,8 +56,6 @@ export class HomeComponent implements OnInit {
     indicators: Dashboard['indicators'] | null = null;
     pending: DashboardPendingItem[] = [];
     monthly: NetWorthMonthlyPoint[] = [];
-    accounts: AccountBalance[] = [];
-    recentActivity: Transaction[] = [];
 
     netWorthLineOptions: EChartsOption = {};
     compositionOptions: EChartsOption = {};
@@ -74,6 +65,12 @@ export class HomeComponent implements OnInit {
     protected readonly pendingRoute = pendingRoute;
 
     ngOnInit(): void {
+        try {
+            this.amountsHidden = localStorage.getItem(HIDE_AMOUNTS_STORAGE_KEY) === 'true';
+        } catch {
+            // localStorage puede no estar disponible (navegación privada) — se queda visible.
+        }
+
         this.userService.getUserData().subscribe(user => this.userName = user.name);
 
         this.assetService.getReferenceAssets().subscribe({
@@ -93,15 +90,12 @@ export class HomeComponent implements OnInit {
         forkJoin({
             dashboard: this.dashboardService.getDashboard(assetId),
             monthly: this.netWorthService.getMonthlySeries(assetId),
-            accounts: this.netWorthService.getByAccount(assetId),
-            recentActivity: this.transactionService.getTransactions(1, RECENT_ACTIVITY_LIMIT)
+            accounts: this.netWorthService.getByAccount(assetId)
         }).subscribe({
-            next: ({ dashboard, monthly, accounts, recentActivity }) => {
+            next: ({ dashboard, monthly, accounts }) => {
                 this.indicators = dashboard.indicators;
                 this.pending = dashboard.pending;
                 this.monthly = monthly;
-                this.accounts = [...accounts].sort((a, b) => b.balance - a.balance);
-                this.recentActivity = recentActivity.transactions;
                 // GetAccountBalancesAsync (backend) solo trae cuentas con al menos un movimiento — sin
                 // ninguna, no hay nada que mostrar en el resto de la pantalla (5.8).
                 this.isFirstUse = accounts.length === 0;
@@ -115,6 +109,21 @@ export class HomeComponent implements OnInit {
         });
     }
 
+    toggleAmountsHidden(): void {
+        this.amountsHidden = !this.amountsHidden;
+        try {
+            localStorage.setItem(HIDE_AMOUNTS_STORAGE_KEY, String(this.amountsHidden));
+        } catch {
+            // Sin localStorage la preferencia simplemente no persiste entre recargas.
+        }
+        this.renderCharts();
+    }
+
+    // Único punto por el que pasa cada monto de la pantalla — así ocultar es no perderse ninguno.
+    fmt(value: number): string {
+        return this.amountsHidden ? AMOUNT_MASK : this.currencyPipe.transform(value);
+    }
+
     private renderCharts(): void {
         if (this.monthly.length === 0) return;
         this.renderNetWorthLine();
@@ -124,7 +133,7 @@ export class HomeComponent implements OnInit {
     private renderNetWorthLine(): void {
         const labels = this.monthly.map(m => new Date(m.month).toLocaleDateString('es-AR', { month: 'short', year: 'numeric' }));
         const axisLabel = this.chartTheme.surface.axisLabel;
-        const fmt = (v: number) => this.chartTheme.formatNumber(v, { maximumFractionDigits: 0 });
+        const fmt = (v: number) => this.amountsHidden ? AMOUNT_MASK : this.chartTheme.formatNumber(v, { maximumFractionDigits: 0 });
 
         this.netWorthLineOptions = {
             color: [this.chartTheme.colorAt(0)],
@@ -144,7 +153,7 @@ export class HomeComponent implements OnInit {
         const last = this.monthly[this.monthly.length - 1];
         const labels = ['Dinero', 'Bolsa R. Variable', 'Cripto Volátil', 'Cripto Estable', 'Bolsa R. Fija'];
         const values = [last.accounts, last.stocks, last.cryptoVolatile, last.cryptoStable, last.bonds];
-        const fmt = (v: number) => this.chartTheme.formatNumber(v, { maximumFractionDigits: 0 });
+        const fmt = (v: number) => this.amountsHidden ? AMOUNT_MASK : this.chartTheme.formatNumber(v, { maximumFractionDigits: 0 });
 
         this.compositionOptions = {
             ...this.chartTheme.pieOptions(labels, values, { donut: true, showLegend: true, formatValue: fmt }),
@@ -167,11 +176,5 @@ export class HomeComponent implements OnInit {
 
     get monthResultIsPositive(): boolean {
         return (this.indicators?.monthResult ?? 0) >= 0;
-    }
-
-    // "Vino de una tarjeta" (5.6): las Transactions de pago de tarjeta se cargan con la categoría del
-    // sistema "Gastos Tarjeta" (CardTransactionService.cs) — no hace falta un campo nuevo del backend.
-    activityIcon(t: Transaction): string {
-        return t.transactionClassName === CARD_PAYMENT_CLASS_NAME ? 'bi-credit-card' : 'bi-bank';
     }
 }
