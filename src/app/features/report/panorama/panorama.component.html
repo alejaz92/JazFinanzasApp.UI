@@ -129,6 +129,7 @@
                         <i class="bi me-2" [ngClass]="[pendingIcon(item.kind), pendingIconClass(item)]"></i>
                         {{ item.title }}
                         <span class="text-body-secondary" *ngIf="item.detail"> — {{ item.detail }}</span>
+                        <span class="text-body-secondary" *ngIf="item.amount != null"> {{ item.amount | currencyFiatFormat }} {{ item.assetSymbol }}</span>
                     </span>
                     <span class="badge" [ngClass]="pendingBadgeClass(item)">{{ pendingAction(item.kind) }}</span>
                 </a>
