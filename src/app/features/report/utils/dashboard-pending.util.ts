@@ -18,6 +18,13 @@ export function pendingAction(kind: DashboardPendingKind): string {
     return PENDING_META[kind].action;
 }
 
+// El título de un `PendingReimbursement` es la descripción de la COMPRA que generó el reintegro
+// (`CardTransaction.Detail` en el backend), no el nombre de una promoción — mostrarlo solo ("Comida
+// Post Tenis") se leía como si el gasto en sí necesitara atención. Se antepone la palabra que falta.
+export function pendingLabel(item: DashboardPendingItem): string {
+    return item.kind === 'PendingReimbursement' ? `Reintegro pendiente — ${item.title}` : item.title;
+}
+
 // Cada tipo de pendiente resuelve a la pantalla donde se atiende (sección 5.3 del plan): tarjeta a
 // pagar, reintegro de tarjeta y viaje tienen pantalla propia fuera de Reportes; el evento compartido
 // vive en /shared-events/:id.
