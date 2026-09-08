@@ -10,7 +10,7 @@ import { DashboardService } from '../../report/services/dashboard.service';
 import { Dashboard, DashboardPendingItem } from '../../report/models/dashboard.model';
 import { NetWorthService } from '../../report/services/net-worth.service';
 import { NetWorthMonthlyPoint } from '../../report/models/net-worth.model';
-import { pendingIcon, pendingAction, pendingRoute, pendingLabel, pendingBadgeClass, pendingIconClass } from '../../report/utils/dashboard-pending.util';
+import { pendingIcon, pendingAction, pendingRoute, pendingBadgeClass, pendingIconClass } from '../../report/utils/dashboard-pending.util';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
@@ -63,7 +63,6 @@ export class HomeComponent implements OnInit {
     protected readonly pendingIcon = pendingIcon;
     protected readonly pendingAction = pendingAction;
     protected readonly pendingRoute = pendingRoute;
-    protected readonly pendingLabel = pendingLabel;
     protected readonly pendingBadgeClass = pendingBadgeClass;
     protected readonly pendingIconClass = pendingIconClass;
 
