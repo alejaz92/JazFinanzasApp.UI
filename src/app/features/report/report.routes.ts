@@ -6,7 +6,15 @@ export const reportRoutes: Routes = [
         path: '',
         component: ReportsShellComponent,
         children: [
-            { path: '', redirectTo: 'inc-exp-summary', pathMatch: 'full' },
+            // Fase 17: Panorama pasa a ser la pantalla de entrada de la sección (Flujo 1 del plan).
+            { path: '', redirectTo: 'panorama', pathMatch: 'full' },
+            {
+                // Foto de hoy (indicadores, termómetro, línea de 12 meses) — no un rango elegible,
+                // mismo criterio que Patrimonio.
+                path: 'panorama',
+                loadComponent: () => import('./panorama/panorama.component').then(m => m.PanoramaComponent),
+                data: { usesPeriod: false }
+            },
             {
                 // Patrimonio es una foto de hoy + una serie fija de 12 meses, no un rango elegible —
                 // el filtro de período de la barra de Reportes no le pega a ninguna de las 3 pantallas.

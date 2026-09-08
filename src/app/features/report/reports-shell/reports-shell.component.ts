@@ -83,6 +83,9 @@ export class ReportsShellComponent implements OnInit {
     ];
 
     readonly navEntries: NavEntry[] = [
+        // Fase 17: pantalla de entrada de la sección (Flujo 1 del plan) — primera entrada, suelta,
+        // como Panorama no tiene sub-reportes.
+        { type: 'link', label: 'Panorama', icon: 'bi-speedometer2', route: '/report/panorama' },
         {
             type: 'category', label: 'Patrimonio', icon: 'bi-piggy-bank',
             children: [

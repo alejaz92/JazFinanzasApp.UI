@@ -1,0 +1,139 @@
+<h2 class="mb-3">Panorama</h2>
+
+<app-loading [isLoading]="isLoadingTotals"></app-loading>
+
+<div class="row" *ngIf="!isLoadingTotals">
+    <div class="col-12" [ngClass]="{ 'col-md-12': totals.length === 1, 'col-md-6': totals.length >= 2 }" *ngFor="let t of totals">
+        <a class="card mb-3 text-center text-decoration-none" [routerLink]="['/report/networth-general']" queryParamsHandling="preserve"
+           [style.backgroundColor]="t.color" [style.color]="t.color | contrastText">
+            <div class="card-header">Valor Total en {{ t.symbol }}</div>
+            <div class="card-body">
+                <h4 class="card-title mb-0">{{ t.grossBalance | currencyFiatFormat }}</h4>
+            </div>
+        </a>
+    </div>
+</div>
+
+<p class="text-body-secondary" *ngIf="!isLoadingTotals && !dashboardRequested">Elegí una moneda arriba para ver el resto del panorama.</p>
+
+<app-loading [isLoading]="isLoadingDashboard"></app-loading>
+
+<ng-container *ngIf="!isLoadingTotals && dashboardRequested && !isLoadingDashboard && indicators && thermometer">
+    <!-- Fila de indicadores -->
+    <div class="row">
+        <div class="col-6 col-md-4 col-lg mb-3">
+            <a class="card h-100 text-decoration-none text-reset" [routerLink]="['/report/networth-general']" queryParamsHandling="preserve">
+                <div class="card-body">
+                    <div class="text-body-secondary small">Patrimonio</div>
+                    <div class="fs-5 fw-semibold">{{ indicators.netWorthGross | currencyFiatFormat }}</div>
+                    <div class="small" [class.text-success]="netWorthChangeIsPositive" [class.text-danger]="!netWorthChangeIsPositive">
+                        <i class="bi" [ngClass]="netWorthChangeIsPositive ? 'bi-arrow-up-right' : 'bi-arrow-down-right'"></i>
+                        {{ indicators.netWorthChangeVsPreviousMonth | currencyFiatFormat }} vs mes pasado
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg mb-3">
+            <a class="card h-100 text-decoration-none text-reset" [routerLink]="['/report/inc-exp-summary']" queryParamsHandling="preserve">
+                <div class="card-body">
+                    <div class="text-body-secondary small">Resultado del mes</div>
+                    <div class="fs-5 fw-semibold" [class.text-success]="monthResultIsPositive" [class.text-danger]="!monthResultIsPositive">
+                        {{ indicators.monthResult | currencyFiatFormat }}
+                    </div>
+                    <div class="small text-body-secondary">Mes pasado: {{ indicators.monthResultPreviousMonth | currencyFiatFormat }}</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg mb-3">
+            <a class="card h-100 text-decoration-none text-reset" [routerLink]="['/report/inc-exp-evolution']" queryParamsHandling="preserve">
+                <div class="card-body">
+                    <div class="text-body-secondary small">Gasto del mes</div>
+                    <div class="fs-5 fw-semibold">{{ (lastEvolutionPoint?.expense ?? 0) | currencyFiatFormat }}</div>
+                    <div class="small text-body-secondary" *ngIf="lastExpenseMovingAverage != null">
+                        Promedio 6 meses: {{ lastExpenseMovingAverage | currencyFiatFormat }}
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg mb-3">
+            <a class="card h-100 text-decoration-none text-reset" [routerLink]="['/report/cards-general']" queryParamsHandling="preserve">
+                <div class="card-body">
+                    <div class="text-body-secondary small">Tarjetas a pagar</div>
+                    <div class="fs-5 fw-semibold">{{ indicators.cardsDueAmountInPesos | currencyFiatFormat }}</div>
+                    <div class="small text-body-secondary">
+                        {{ indicators.cardsNextDueDate ? ('Vence ' + (indicators.cardsNextDueDate | date:'dd/MM/yyyy')) : 'Sin vencimientos próximos' }}
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg mb-3">
+            <a class="card h-100 text-decoration-none text-reset" [routerLink]="['/shared-events']">
+                <div class="card-body">
+                    <div class="text-body-secondary small">Saldo compartido</div>
+                    <ng-container *ngIf="indicators.sharedBalances.length > 0; else noSharedBalance">
+                        <div class="fs-5 fw-semibold" *ngFor="let b of indicators.sharedBalances">
+                            {{ b.net | currencyFiatFormat }} <span class="small text-body-secondary">{{ b.assetSymbol }}</span>
+                        </div>
+                    </ng-container>
+                    <ng-template #noSharedBalance>
+                        <div class="fs-5 fw-semibold">{{ 0 | currencyFiatFormat }}</div>
+                    </ng-template>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Termómetro del mes -->
+    <div class="card mb-3">
+        <div class="card-header">Termómetro del mes</div>
+        <div class="card-body">
+            <div class="progress mb-2" style="height: 10px;">
+                <div class="progress-bar" role="progressbar" [style.width.%]="thermometerPct"></div>
+            </div>
+            <div class="d-flex flex-wrap justify-content-between small text-body-secondary">
+                <span>Llevo gastado: <strong class="text-body">{{ thermometer.monthToDateAmount | currencyFiatFormat }}</strong> (día {{ thermometer.daysElapsed }} de {{ thermometer.daysInMonth }})</span>
+                <span>Mismo día mes pasado: <strong class="text-body">{{ thermometer.previousMonthSameDayAmount | currencyFiatFormat }}</strong></span>
+                <span>Proyección de cierre: <strong class="text-body">{{ thermometer.projectedMonthEndAmount | currencyFiatFormat }}</strong></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Línea de patrimonio + Anillo de composición -->
+    <div class="row" *ngIf="monthly.length > 0">
+        <div class="col-md-8 mb-3">
+            <a class="card text-decoration-none text-reset" [routerLink]="['/report/networth-general']" queryParamsHandling="preserve">
+                <div class="card-header">Patrimonio — últimos 12 meses</div>
+                <div class="card-body">
+                    <app-chart [options]="netWorthLineOptions" [height]="280"></app-chart>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4 mb-3">
+            <a class="card text-decoration-none text-reset" [routerLink]="['/report/networth-general']" queryParamsHandling="preserve">
+                <div class="card-header">Composición de hoy</div>
+                <div class="card-body">
+                    <app-chart [options]="compositionOptions" [height]="280"></app-chart>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Lo que necesita atención -->
+    <div class="card mb-3">
+        <div class="card-header">Lo que necesita atención</div>
+        <div class="card-body p-0">
+            <p class="text-body-secondary p-3 mb-0" *ngIf="pending.length === 0">Todo al día.</p>
+            <div class="list-group list-group-flush" *ngIf="pending.length > 0">
+                <a class="list-group-item d-flex justify-content-between align-items-center" *ngFor="let item of pending" [routerLink]="pendingRoute(item)">
+                    <span>
+                        <i class="bi me-2" [ngClass]="pendingIcon(item.kind)"></i>
+                        {{ item.title }}
+                        <span class="text-body-secondary" *ngIf="item.detail"> — {{ item.detail }}</span>
+                        <span class="text-body-secondary" *ngIf="item.amount != null"> ({{ item.amount | currencyFiatFormat }} {{ item.assetSymbol }})</span>
+                    </span>
+                    <span class="badge bg-primary">{{ pendingAction(item.kind) }}</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</ng-container>
