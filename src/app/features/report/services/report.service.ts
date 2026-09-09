@@ -4,10 +4,6 @@ import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment.development';
 import { Balance } from '../models/Balance.modelt';
 import { TotalBalance } from '../models/TotalBalance.model';
-import { StockStatsDTO } from '../models/StockStats.model';
-import { CryptoGralStatsDTO } from '../models/CryptoGralStats.model';
-import { CryptoStatsDTO } from '../models/CryptoStats.model';
-import { HomeStatsDTO } from '../models/HomeStats.model';
 
 @Injectable({
   providedIn: 'root'
@@ -22,21 +18,5 @@ export class ReportService {
 
   getTotalBalance(): Observable<TotalBalance[]> {
     return this.http.get<TotalBalance[]>(`${environment.apiBaseURL}/api/report/balance`);
-  }
-
-  getStockStats(assetTypeId: number): Observable<StockStatsDTO> {
-    return this.http.get<StockStatsDTO>(`${environment.apiBaseURL}/api/report/StockStats/${assetTypeId}`);
-  }
-
-  getCryptoGralStats(includeStables: boolean): Observable<CryptoGralStatsDTO> {
-    return this.http.get<CryptoGralStatsDTO>(`${environment.apiBaseURL}/api/report/CryptoGralStats?includeStables=${includeStables}`);
-  }
-
-  getCryptoStats(cryptoId: number): Observable<CryptoStatsDTO> {
-    return this.http.get<CryptoStatsDTO>(`${environment.apiBaseURL}/api/report/CryptoStats/${cryptoId}`);
-  }
-
-  getHomeStats():Observable<HomeStatsDTO> {
-    return this.http.get<HomeStatsDTO>(`${environment.apiBaseURL}/api/report/HomeStats`);
   }
 }

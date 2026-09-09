@@ -229,6 +229,100 @@ export class ChartThemeService {
   }
 
   /**
+   * Color determinista por ganancia/pérdida (Fase 20, Inversiones): gris neutro en 0, interpolado
+   * hacia `status.good` (positivo) o `status.critical` (negativo), saturado a partir de ±50% —
+   * no hace falta un rojo/verde más intenso para leer "ganó mucho"/"perdió mucho". `null`
+   * (sin OriginalValue, ver InvestmentReportService.GainLossPercent) es el mismo gris que 0%.
+   */
+  gainLossColor(pct: number | null): string {
+    const neutral = this.mode === 'dark' ? '#5b5678' : '#c9c5dc';
+    if (pct == null || pct === 0) return neutral;
+    const magnitude = Math.min(Math.abs(pct) / 50, 1);
+    const target = pct > 0 ? this.status.good : this.status.critical;
+    return this.lerpHex(neutral, target, magnitude);
+  }
+
+  private lerpHex(from: string, to: string, t: number): string {
+    const f = this.hexToRgb(from);
+    const g = this.hexToRgb(to);
+    const lerp = (a: number, b: number) => Math.round(a + (b - a) * t);
+    const toHex = (v: number) => v.toString(16).padStart(2, '0');
+    return `#${toHex(lerp(f.r, g.r))}${toHex(lerp(f.g, g.g))}${toHex(lerp(f.b, g.b))}`;
+  }
+
+  private hexToRgb(hex: string): { r: number; g: number; b: number } {
+    return {
+      r: parseInt(hex.slice(1, 3), 16),
+      g: parseInt(hex.slice(3, 5), 16),
+      b: parseInt(hex.slice(5, 7), 16),
+    };
+  }
+
+  /**
+   * Mapa de bloques coloreado por ganancia/pérdida (Panorama, Carteras — Detalle): el tamaño de
+   * cada bloque es su valor actual, el color es `gainLossColor`. Un solo nivel (sin breadcrumb ni
+   * drill dentro del propio treemap — el drill-down real es navegar a otro reporte, sección 7).
+   */
+  treemapOptions(
+    items: { name: string; value: number; gainLossPercent: number | null }[],
+    opts?: { formatValue?: (v: number) => string }
+  ): EChartsOption {
+    const formatValue = opts?.formatValue ?? ((v: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(v));
+
+    return {
+      tooltip: {
+        ...this.tooltipDefaults(),
+        formatter: (p: any) => {
+          const pct = p.data?.gainLossPercent;
+          const pctText = pct == null ? '' : ` (${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%)`;
+          return `${p.name}: ${formatValue(p.value)}${pctText}`;
+        },
+      },
+      series: [{
+        type: 'treemap',
+        roam: false,
+        nodeClick: false,
+        breadcrumb: { show: false },
+        label: { show: true, color: '#fff', fontWeight: 'bold' },
+        upperLabel: { show: false },
+        itemStyle: { borderColor: this.surface.tooltipBg, borderWidth: 2, gapWidth: 2 },
+        data: items.map(i => ({
+          name: i.name,
+          value: i.value,
+          gainLossPercent: i.gainLossPercent,
+          itemStyle: { color: this.gainLossColor(i.gainLossPercent) },
+        })),
+      }],
+    } as EChartsOption;
+  }
+
+  /**
+   * Barras horizontales divergentes de ganancia/pérdida (Bolsa): una barra por ticker, color por
+   * signo (`status.good`/`status.critical`), eje de valor cruzando por 0.
+   */
+  divergingBarOptions(
+    labels: string[],
+    values: number[],
+    opts?: { formatValue?: (v: number) => string }
+  ): EChartsOption {
+    const formatValue = opts?.formatValue ?? ((v: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(v));
+    const axisLabel = this.surface.axisLabel;
+    const status = this.status;
+
+    return {
+      grid: { left: 90, right: 30, top: 20, bottom: 30 },
+      tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, ...this.tooltipDefaults(), valueFormatter: (v: unknown) => formatValue(Number(v)) },
+      xAxis: { type: 'value', axisLabel: { color: axisLabel, formatter: (v: number) => formatValue(v) }, splitLine: { lineStyle: { color: this.surface.splitLine } } },
+      yAxis: { type: 'category', data: labels, axisLabel: { color: axisLabel }, axisLine: { lineStyle: { color: this.surface.axisLine } } },
+      series: [{
+        type: 'bar',
+        data: values,
+        itemStyle: { color: (p: any) => (Number(p.value) >= 0 ? status.good : status.critical) },
+      }],
+    } as EChartsOption;
+  }
+
+  /**
    * Línea de evolución de un solo valor en el tiempo (precio, valor de
    * cartera/tenencia): área rellena, sin marcadores, eje X salteando
    * etiquetas cuando hay muchos puntos. Mismo patrón repetido en varios

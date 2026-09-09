@@ -100,24 +100,41 @@ export const reportRoutes: Routes = [
                 data: { usesPeriod: false }
             },
             {
+                // Inversiones (Fase 20, Flujo 5) — foto de hoy + serie fija de 12 meses, no un rango
+                // elegible (mismo criterio que Patrimonio/Tarjetas).
+                path: 'investments-overview',
+                loadComponent: () => import('./investments-overview/investments-overview.component').then(m => m.InvestmentsOverviewComponent),
+                data: { usesPeriod: false }
+            },
+            {
                 path: 'stocks',
-                loadComponent: () => import('./stocks-report/stocks-report.component').then(m => m.StocksReportComponent)
+                loadComponent: () => import('./stocks-report/stocks-report.component').then(m => m.StocksReportComponent),
+                data: { usesPeriod: false }
             },
             {
                 path: 'cryptos-gral',
-                loadComponent: () => import('./cryptos-gral-report/cryptos-gral-report.component').then(m => m.CryptosGralReportComponent)
+                loadComponent: () => import('./cryptos-gral-report/cryptos-gral-report.component').then(m => m.CryptosGralReportComponent),
+                data: { usesPeriod: false }
             },
             {
                 path: 'crypto',
-                loadComponent: () => import('./crypto-report/crypto-report.component').then(m => m.CryptoReportComponent)
+                loadComponent: () => import('./crypto-report/crypto-report.component').then(m => m.CryptoReportComponent),
+                data: { usesPeriod: false }
             },
             {
                 path: 'portfolio-general',
-                loadComponent: () => import('./portfolio-general-report/portfolio-general-report.component').then(m => m.PortfolioGeneralReportComponent)
+                loadComponent: () => import('./portfolio-general-report/portfolio-general-report.component').then(m => m.PortfolioGeneralReportComponent),
+                data: { usesPeriod: false }
             },
             {
                 path: 'portfolio-detail',
-                loadComponent: () => import('./portfolio-report/portfolio-report.component').then(m => m.PortfolioReportComponent)
+                loadComponent: () => import('./portfolio-report/portfolio-report.component').then(m => m.PortfolioReportComponent),
+                data: { usesPeriod: false }
+            },
+            {
+                path: 'contributions-vs-performance',
+                loadComponent: () => import('./contributions-vs-performance/contributions-vs-performance.component').then(m => m.ContributionsVsPerformanceComponent),
+                data: { usesPeriod: false }
             },
             {
                 path: 'trips-general',

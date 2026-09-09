@@ -1,120 +1,107 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
 import { NgIf, NgFor } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import type { EChartsOption } from 'echarts';
 
-import { ReportService } from '../services/report.service';
-import { AssetTypeService } from '../../assetType/services/asset-type.service';
-import { AssetService } from '../../asset/services/asset.service';
-import { Asset } from '../../asset/models/asset.model';
-import { AssetType } from '../../account/models/assetType.model';
-import { StockStatsDTO, StockStatsListDTO } from '../models/StockStats.model';
+import { InvestmentReportService } from '../services/investment-report.service';
+import { StockTickerReport } from '../models/investment-report.model';
+import { ReportContextService } from '../../../shared/services/report-context.service';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { CurrencyInvestmentFormatPipe } from '../../../shared/pipes/currencyInvestmentFormat/currency-investment-format.pipe';
 
+// Bolsa (Fase 20, Flujo 5): reescrita sobre InvestmentReportController (Fase 19). A diferencia de
+// la pantalla vieja, ya no hay que elegir un AssetType — GetStocksAsync junta Acción Argentina,
+// CEDEAR, FCI y Acción USA en un solo reporte por ticker (un solo reporte, no uno por tipo, como
+// describe el Flujo 5). Reemplaza las dos tortas y la barra agrupada por barras divergentes de
+// ganancia/pérdida + dispersión rendimiento vs peso en la cartera.
 @Component({
     selector: 'app-stocks-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, FormsModule, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, ChartComponent],
+    imports: [LoadingComponent, NgIf, NgFor, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, ChartComponent],
     templateUrl: './stocks-report.component.html',
     styleUrl: './stocks-report.component.css'
 })
-export class StocksReportComponent implements OnInit {
+export class StocksReportComponent {
+    private readonly investmentReportService = inject(InvestmentReportService);
+    private readonly chartTheme = inject(ChartThemeService);
+    protected readonly reportContext = inject(ReportContextService);
+
     isLoading = true;
-    isLoadingGraph = false;
-    viewAux = false;
-    selectedAssetTypeDB4 = 0;
-    assetTypes: AssetType[] = [];
-    stocksStatsDTO: StockStatsListDTO[] = [];
-    mainReference: Asset | null = null;
-    distributionByTickerOptions: EChartsOption = {};
-    origVsActualOptions: EChartsOption = {};
-    stocksGralOptions: EChartsOption = {};
+    referenceAssetSymbol = '';
+    totalOriginalValue = 0;
+    totalActualValue = 0;
+    tickers: StockTickerReport[] = [];
 
-    constructor(
-        private reportService: ReportService,
-        private assetTypeService: AssetTypeService,
-        private assetService: AssetService,
-        private chartTheme: ChartThemeService
-    ) {}
+    gainLossOptions: EChartsOption = {};
+    dispersionOptions: EChartsOption = {};
 
-    ngOnInit(): void {
-        this.loadAssetTypes();
-        this.loadMainReference();
+    constructor() {
+        effect(() => {
+            const assetId = this.reportContext.currencyAssetId();
+            if (assetId != null) this.load(assetId);
+        });
     }
 
-    loadAssetTypes(): void {
-        this.assetTypeService.getAssetTypes('BOLSA').subscribe(response => {
-            this.assetTypes = response;
+    get totalGainLossPct(): number | null {
+        return this.totalOriginalValue > 0 ? (this.totalActualValue / this.totalOriginalValue * 100) - 100 : null;
+    }
+
+    private load(assetId: number): void {
+        this.isLoading = true;
+        this.investmentReportService.getStocks(assetId).subscribe(data => {
+            this.referenceAssetSymbol = data.referenceAssetSymbol;
+            this.totalOriginalValue = data.totalOriginalValue;
+            this.totalActualValue = data.totalActualValue;
+            this.tickers = data.tickers;
             this.isLoading = false;
+            setTimeout(() => this.renderCharts(), 0);
         });
     }
 
-    loadMainReference(): void {
-        this.assetService.getReferenceAssets().subscribe((data: Asset[]) => {
-            this.mainReference = data.find(x => x.isMainReference) ?? null;
-        });
+    private renderCharts(): void {
+        if (this.tickers.length === 0) return;
+        this.renderGainLoss();
+        this.renderDispersion();
     }
 
-    loadStockStats(): void {
-        if (this.selectedAssetTypeDB4 == 0) {
-            this.viewAux = false;
-            return;
-        }
-        this.stocksStatsDTO = [];
-        this.viewAux = false;
-        this.isLoadingGraph = true;
-
-        this.reportService.getStockStats(this.selectedAssetTypeDB4).subscribe(response => {
-            this.isLoadingGraph = false;
-            this.viewAux = true;
-            setTimeout(() => {
-                this.renderCharts(response);
-                this.stocksStatsDTO = response.stockStatsInd;
-            }, 0);
-        });
+    private renderGainLoss(): void {
+        const sorted = [...this.tickers].sort((a, b) => a.gainLossAmount - b.gainLossAmount);
+        const labels = sorted.map(t => t.symbol);
+        const values = sorted.map(t => t.gainLossAmount);
+        const fmt = (v: number) => this.chartTheme.formatNumber(v, { maximumFractionDigits: 0 });
+        this.gainLossOptions = this.chartTheme.divergingBarOptions(labels, values, { formatValue: fmt });
     }
 
-    private renderCharts(data: StockStatsDTO): void {
-        this.renderDistributionByTicker(data);
-        this.renderOrigVsActual(data);
-        this.renderStocksGral(data);
-    }
-
-    private renderDistributionByTicker(data: StockStatsDTO): void {
-        const tickers = data.stockStatsInd.map(i => i.assetName);
-        const symbols = data.stockStatsInd.map(i => i.symbol);
-        const currentValues = data.stockStatsInd.map(i => i.actualValue);
-        this.distributionByTickerOptions = this.chartTheme.pieOptions(symbols, currentValues, {
-            formatTooltipName: (symbol, i) => `${tickers[i]} (${symbol})`,
-        });
-    }
-
-    private renderOrigVsActual(data: StockStatsDTO): void {
-        const symbols = data.stockStatsInd.map(i => i.symbol);
-        const fmt = (v: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(v);
+    private renderDispersion(): void {
         const axisLabel = this.chartTheme.surface.axisLabel;
+        const fmt = (v: number) => this.chartTheme.formatNumber(v, { maximumFractionDigits: 1 });
 
-        this.origVsActualOptions = {
-            color: [this.chartTheme.colorAt(1), this.chartTheme.colorAt(0)],
-            legend: { top: 0, textStyle: { color: axisLabel } },
-            grid: { left: 70, right: 20, top: 40, bottom: 40 },
-            tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, ...this.chartTheme.tooltipDefaults(), valueFormatter: (v: unknown) => fmt(Number(v)) },
-            xAxis: { type: 'category', data: symbols, axisLabel: { color: axisLabel }, axisLine: { lineStyle: { color: this.chartTheme.surface.axisLine } } },
-            yAxis: { type: 'value', axisLabel: { color: axisLabel, formatter: (v: number) => fmt(v) }, splitLine: { lineStyle: { color: this.chartTheme.surface.splitLine } } },
-            series: [
-                { name: 'Valores Originales Promedio', type: 'bar', data: data.stockStatsInd.map(i => i.originalValue) },
-                { name: 'Valores Actuales', type: 'bar', data: data.stockStatsInd.map(i => i.actualValue) },
-            ],
-        };
-    }
-
-    private renderStocksGral(data: StockStatsDTO): void {
-        const assetTypes = data.stockStatsGral.map(i => i.assetType);
-        const gralValues = data.stockStatsGral.map(i => i.actualValue);
-        this.stocksGralOptions = this.chartTheme.pieOptions(assetTypes, gralValues);
+        this.dispersionOptions = {
+            grid: { left: 60, right: 30, top: 20, bottom: 40 },
+            tooltip: {
+                ...this.chartTheme.tooltipDefaults(),
+                formatter: (p: any) => `${p.data[2]}<br/>Peso: ${fmt(p.data[0])}%<br/>Rendimiento: ${fmt(p.data[1])}%`,
+            },
+            xAxis: {
+                type: 'value', name: 'Peso en la cartera de Bolsa (%)', nameLocation: 'middle', nameGap: 28,
+                axisLabel: { color: axisLabel, formatter: (v: number) => `${fmt(v)}%` },
+                splitLine: { lineStyle: { color: this.chartTheme.surface.splitLine } },
+                nameTextStyle: { color: axisLabel },
+            },
+            yAxis: {
+                type: 'value', name: 'Rendimiento (%)', nameLocation: 'middle', nameGap: 45,
+                axisLabel: { color: axisLabel, formatter: (v: number) => `${fmt(v)}%` },
+                splitLine: { lineStyle: { color: this.chartTheme.surface.splitLine } },
+                nameTextStyle: { color: axisLabel },
+            },
+            series: [{
+                type: 'scatter',
+                symbolSize: 16,
+                data: this.tickers.map(t => ({ value: [t.weightPercent, t.gainLossPercent ?? 0, t.symbol], itemStyle: { color: this.chartTheme.gainLossColor(t.gainLossPercent) } })),
+                label: { show: true, formatter: (p: any) => p.data.value[2], position: 'top', color: axisLabel, fontSize: 11 },
+            }],
+        } as EChartsOption;
     }
 }

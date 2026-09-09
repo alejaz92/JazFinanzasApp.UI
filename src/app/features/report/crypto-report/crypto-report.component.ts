@@ -1,119 +1,116 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
 import { NgIf, NgFor, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import type { EChartsOption } from 'echarts';
 
-import { ReportService } from '../services/report.service';
+import { InvestmentReportService } from '../services/investment-report.service';
+import { CryptoDetailReport } from '../models/investment-report.model';
 import { AssetService } from '../../asset/services/asset.service';
 import { Asset } from '../../asset/models/asset.model';
-import { CryptoStatsDTO, InvestmentTransactionsStatsDTO } from '../models/CryptoStats.model';
+import { ReportContextService } from '../../../shared/services/report-context.service';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
+import { CurrencyInvestmentFormatPipe } from '../../../shared/pipes/currencyInvestmentFormat/currency-investment-format.pipe';
 import { MovementTypePipe } from '../../../shared/pipes/movementType/movement-type.pipe';
 import { CommerceTypePipe } from '../../../shared/pipes/commerceType/commerce-type.pipe';
 
+// Cryptos — Detalle (Fase 20, Flujo 5): reemplaza el gauge de la pantalla vieja por la línea de
+// cotización con las compras/ventas marcadas encima y el precio promedio de compra como línea
+// horizontal — "se ve de una si compré caro o barato" (Flujo 5, sección 6). `assetId` de la cripto
+// vive en el query param `cryptoAssetId` (T12), igual que `portfolioId` en Carteras — Detalle.
 @Component({
     selector: 'app-crypto-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, FormsModule, DatePipe, ChartComponent, CurrencyFiatFormatPipe, MovementTypePipe, CommerceTypePipe],
+    imports: [LoadingComponent, NgIf, NgFor, FormsModule, DatePipe, ChartComponent, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, MovementTypePipe, CommerceTypePipe],
     templateUrl: './crypto-report.component.html',
     styleUrl: './crypto-report.component.css'
 })
-export class CryptoReportComponent implements OnInit {
+export class CryptoReportComponent {
+    private readonly investmentReportService = inject(InvestmentReportService);
+    private readonly assetService = inject(AssetService);
+    private readonly chartTheme = inject(ChartThemeService);
+    private readonly route = inject(ActivatedRoute);
+    private readonly router = inject(Router);
+    protected readonly reportContext = inject(ReportContextService);
+
     isLoading = true;
-    isLoadingGraph = false;
-    viewAux = false;
-    selectedCryptoDB6 = 0;
+    isLoadingDetail = false;
     cryptos: Asset[] = [];
-    cryptoTransactionsStatsDTO: InvestmentTransactionsStatsDTO[] = [];
-    mainReference: Asset | null = null;
-    gaugeOptions: EChartsOption = {};
-    priceEvolutionOptions: EChartsOption = {};
-    balanceOptions: EChartsOption = {};
+    selectedCryptoAssetId = 0;
+    detail: CryptoDetailReport | null = null;
 
-    constructor(
-        private reportService: ReportService,
-        private assetService: AssetService,
-        private chartTheme: ChartThemeService
-    ) {}
+    priceOptions: EChartsOption = {};
 
-    ngOnInit(): void {
-        this.loadCryptos();
-        this.loadMainReference();
-    }
+    private currentAssetId: number | null = null;
 
-    loadCryptos(): void {
+    constructor() {
         this.assetService.getAssetsByTypeName('Criptomoneda').subscribe(response => {
             this.cryptos = response;
             this.isLoading = false;
         });
-    }
 
-    loadMainReference(): void {
-        this.assetService.getReferenceAssets().subscribe((data: Asset[]) => {
-            this.mainReference = data.find(x => x.isMainReference) ?? null;
+        effect(() => {
+            const assetId = this.reportContext.currencyAssetId();
+            if (assetId == null) return;
+            this.currentAssetId = assetId;
+            this.loadDetailIfReady();
+        });
+
+        this.route.queryParamMap.subscribe(params => {
+            this.selectedCryptoAssetId = Number(params.get('cryptoAssetId') ?? 0);
+            this.loadDetailIfReady();
         });
     }
 
-    loadCryptoStats(): void {
-        if (this.selectedCryptoDB6 == 0) {
-            this.viewAux = false;
+    onCryptoChange(): void {
+        this.router.navigate([], { queryParams: { cryptoAssetId: this.selectedCryptoAssetId || null }, queryParamsHandling: 'merge', replaceUrl: true });
+    }
+
+    private loadDetailIfReady(): void {
+        if (this.selectedCryptoAssetId === 0 || this.currentAssetId == null) {
+            this.detail = null;
             return;
         }
-        this.isLoadingGraph = true;
 
-        this.reportService.getCryptoStats(this.selectedCryptoDB6).subscribe(response => {
-            this.cryptoTransactionsStatsDTO = response.cryptoTransactionsStats;
-            this.viewAux = true;
-            this.isLoadingGraph = false;
-            setTimeout(() => this.renderCharts(response), 0);
+        this.isLoadingDetail = true;
+        this.investmentReportService.getCryptoDetail(this.selectedCryptoAssetId, this.currentAssetId).subscribe(detail => {
+            this.isLoadingDetail = false;
+            this.detail = detail;
+            setTimeout(() => this.renderPriceChart(detail), 0);
         });
     }
 
-    private renderCharts(data: CryptoStatsDTO): void {
-        this.renderGauge(data);
-        this.renderPriceEvolution(data);
-        this.renderCryptoBalance(data);
-    }
-
-    private renderGauge(data: CryptoStatsDTO): void {
-        const minValue = Number(data.cryptoRangeValuesStats.minValue.toFixed(2));
-        const maxValue = Number(data.cryptoRangeValuesStats.maxValue.toFixed(2));
-        const currentValue = Number(data.cryptoRangeValuesStats.currentValue.toFixed(2));
-        const averageBuyValue = Number(data.cryptoRangeValuesStats.averageBuyValue.toFixed(2));
-        const earnLostLine = (averageBuyValue - minValue) / (maxValue - minValue);
-        const status = this.chartTheme.status;
+    private renderPriceChart(detail: CryptoDetailReport): void {
         const axisLabel = this.chartTheme.surface.axisLabel;
+        const fmt = (v: number) => this.chartTheme.formatNumber(v, { maximumFractionDigits: 2 });
+        const status = this.chartTheme.status;
 
-        this.gaugeOptions = {
-            series: [{
-                type: 'gauge',
-                startAngle: 200,
-                endAngle: -20,
-                min: minValue,
-                max: maxValue,
-                splitNumber: 4,
-                radius: '110%',
-                center: ['50%', '60%'],
-                axisLine: { lineStyle: { width: 15, color: [[earnLostLine, status.critical], [1, status.good]] } },
-                pointer: { length: '80%', width: 6 },
-                detail: { formatter: '{value}', fontSize: 20, offsetCenter: [0, '60%'], color: axisLabel },
-                data: [{ value: currentValue }]
-            }]
-        };
-    }
+        const priceData = detail.priceEvolution.map(p => [new Date(p.month).getTime(), p.value]);
+        const buys = detail.transactions.filter(t => t.movementType === 'I').map(t => [new Date(t.date).getTime(), t.quotePrice]);
+        const sells = detail.transactions.filter(t => t.movementType === 'E').map(t => [new Date(t.date).getTime(), t.quotePrice]);
 
-    private renderPriceEvolution(data: CryptoStatsDTO): void {
-        const labels = data.cryptoEvolutionStats.map(i => new Date(i.date).toLocaleDateString('es-AR'));
-        const values = data.cryptoEvolutionStats.map(i => i.value);
-        this.priceEvolutionOptions = this.chartTheme.lineOptions(labels, values, { colorIndex: 2 });
-    }
-
-    private renderCryptoBalance(data: CryptoStatsDTO): void {
-        const cryptoAccounts = data.cryptoBalanceStats.map(i => i.account);
-        const currentValues = data.cryptoBalanceStats.map(i => i.balance);
-        this.balanceOptions = this.chartTheme.pieOptions(cryptoAccounts, currentValues);
+        this.priceOptions = {
+            color: [this.chartTheme.colorAt(2)],
+            grid: { left: 70, right: 20, top: 20, bottom: 40 },
+            tooltip: { trigger: 'axis', ...this.chartTheme.tooltipDefaults(), valueFormatter: (v: unknown) => fmt(Number(v)) },
+            xAxis: { type: 'time', axisLabel: { color: axisLabel }, axisLine: { lineStyle: { color: this.chartTheme.surface.axisLine } } },
+            yAxis: { type: 'value', scale: true, axisLabel: { color: axisLabel, formatter: (v: number) => fmt(v) }, splitLine: { lineStyle: { color: this.chartTheme.surface.splitLine } } },
+            series: [
+                {
+                    name: 'Cotización', type: 'line', data: priceData, showSymbol: false, lineStyle: { width: 1.5 }, areaStyle: { opacity: 0.1 },
+                    markLine: {
+                        silent: true, symbol: 'none',
+                        data: [{ yAxis: detail.averageBuyPrice, name: 'Precio promedio de compra' }],
+                        lineStyle: { color: axisLabel, type: 'dashed' },
+                        label: { formatter: `Promedio de compra: ${fmt(detail.averageBuyPrice)}`, color: axisLabel },
+                    },
+                },
+                { name: 'Compras', type: 'scatter', data: buys, symbol: 'triangle', symbolSize: 12, itemStyle: { color: status.good } },
+                { name: 'Ventas', type: 'scatter', data: sells, symbol: 'diamond', symbolSize: 12, itemStyle: { color: status.critical } },
+            ],
+        } as EChartsOption;
     }
 }

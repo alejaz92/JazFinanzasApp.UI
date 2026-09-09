@@ -1,73 +1,90 @@
 <app-loading [isLoading]="isLoading"></app-loading>
 
 <div *ngIf="!isLoading">
-    <h2 class="mb-3">Inversiones en Bolsa</h2>
+    <h2 class="mb-3">Bolsa</h2>
 
-    <div class="row">
-        <div class="col-md-6">
-            <label for="assetType">Tipo de Activo</label>
-            <select id="assetType" class="form-select" [(ngModel)]="selectedAssetTypeDB4" (change)="loadStockStats()">
-                <option value="0" selected disabled>Seleccione</option>
-                <option *ngFor="let assetType of assetTypes" [value]="assetType.id">{{ assetType.name }}</option>
-            </select>
+    <p class="text-body-secondary" *ngIf="tickers.length === 0">Todavía no hay tenencias en bolsa.</p>
+
+    <ng-container *ngIf="tickers.length > 0">
+        <div class="row">
+            <div class="col-md-4 mt-1">
+                <div class="card">
+                    <div class="card-header">Valor Actual (En {{ referenceAssetSymbol }})</div>
+                    <div class="card-body">
+                        <h4 class="card-title mb-0">{{ totalActualValue | currencyFiatFormat }}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mt-1">
+                <div class="card">
+                    <div class="card-header">Invertido (En {{ referenceAssetSymbol }})</div>
+                    <div class="card-body">
+                        <h4 class="card-title mb-0">{{ totalOriginalValue | currencyFiatFormat }}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mt-1">
+                <div class="card">
+                    <div class="card-header">Ganancia / Pérdida</div>
+                    <div class="card-body">
+                        <h4 class="card-title mb-0" *ngIf="totalGainLossPct != null; else noPct"
+                            [class.text-success]="totalGainLossPct >= 0" [class.text-danger]="totalGainLossPct < 0">
+                            {{ totalGainLossPct | currencyInvestmentFormat }} %
+                        </h4>
+                        <ng-template #noPct><h4 class="card-title mb-0 text-body-secondary">—</h4></ng-template>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
 
-    <app-loading [isLoading]="isLoadingGraph"></app-loading>
-
-    <div *ngIf="viewAux && !isLoadingGraph">
         <div class="row mt-4">
             <div class="col-md-6 mt-1">
                 <div class="card">
-                    <div class="card-header">Distribución por Tipo de Activo (En {{ mainReference?.symbol }})</div>
+                    <div class="card-header">Ganancia / Pérdida por Ticker (En {{ referenceAssetSymbol }})</div>
                     <div class="card-body">
-                        <app-chart [options]="stocksGralOptions" [height]="300"></app-chart>
+                        <app-chart [options]="gainLossOptions" [height]="320"></app-chart>
                     </div>
                 </div>
             </div>
             <div class="col-md-6 mt-1">
                 <div class="card">
-                    <div class="card-header">Distribución por Ticker (En {{ mainReference?.symbol }})</div>
+                    <div class="card-header">Rendimiento contra Peso en la Cartera</div>
                     <div class="card-body">
-                        <app-chart [options]="distributionByTickerOptions" [height]="300"></app-chart>
+                        <app-chart [options]="dispersionOptions" [height]="320"></app-chart>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="row mt-4">
-            <div class="col-md-6 mt-1">
-                <div class="card">
-                    <div class="card-header">Valores Originales Promedio vs Valores Actuales (En {{ mainReference?.symbol }})</div>
-                    <div class="card-body">
-                        <app-chart [options]="origVsActualOptions" [height]="320"></app-chart>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 mt-1" *ngIf="stocksStatsDTO.length > 0">
+            <div class="col-12 mt-1">
                 <div class="card">
                     <div class="card-header">
-                        <h5>Tenencias Actuales (En {{ mainReference?.name }})</h5>
+                        <h5 class="mb-0">Tenencias (En {{ referenceAssetSymbol }})</h5>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table class="table table-hover table-sm">
+                            <table class="table table-hover table-sm mb-0">
                                 <thead class="table-header-brand">
                                     <tr>
                                         <th>Ticker</th>
                                         <th class="text-end">Cantidad</th>
-                                        <th class="text-end">Valor Origen Promedio</th>
+                                        <th class="text-end">Invertido</th>
                                         <th class="text-end">Valor Actual</th>
+                                        <th class="text-end">Peso</th>
                                         <th class="text-end">%</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr *ngFor="let stock of stocksStatsDTO">
-                                        <td>{{ stock.symbol }}</td>
-                                        <td class="text-end">{{ stock.quantity }}</td>
-                                        <td class="text-end">{{ stock.originalValue | currencyFiatFormat }}</td>
-                                        <td class="text-end">{{ stock.actualValue | currencyFiatFormat }}</td>
-                                        <td class="text-end">{{ (stock.actualValue / stock.originalValue * 100) - 100 | currencyInvestmentFormat }} %</td>
+                                    <tr *ngFor="let t of tickers">
+                                        <td>{{ t.assetName }} <span class="text-body-secondary">({{ t.symbol }})</span></td>
+                                        <td class="text-end">{{ t.quantity | currencyInvestmentFormat }}</td>
+                                        <td class="text-end">{{ t.originalValue | currencyFiatFormat }}</td>
+                                        <td class="text-end">{{ t.actualValue | currencyFiatFormat }}</td>
+                                        <td class="text-end">{{ t.weightPercent | currencyInvestmentFormat }} %</td>
+                                        <td class="text-end" [class.text-success]="(t.gainLossPercent ?? 0) >= 0" [class.text-danger]="(t.gainLossPercent ?? 0) < 0">
+                                            {{ t.gainLossPercent != null ? (t.gainLossPercent | currencyInvestmentFormat) + ' %' : '—' }}
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -76,5 +93,5 @@
                 </div>
             </div>
         </div>
-    </div>
+    </ng-container>
 </div>

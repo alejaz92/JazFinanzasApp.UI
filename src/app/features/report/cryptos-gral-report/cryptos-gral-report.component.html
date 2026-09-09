@@ -1,78 +1,116 @@
-<h2 class="mb-3">Cryptos General</h2>
+<app-loading [isLoading]="isLoading"></app-loading>
 
-<div class="row">
-    <div class="col-md-6">
-        <label for="includeStables">Incluir Monedas Estables</label>
-        <select id="includeStables" class="form-select" [(ngModel)]="includeStables" (change)="loadCryptoGralStats()">
-            <option [ngValue]="false" selected>No Incluir</option>
-            <option [ngValue]="true">Incluir</option>
-        </select>
-    </div>
-</div>
+<div *ngIf="!isLoading">
+    <h2 class="mb-3">Cryptos — General</h2>
 
-<app-loading [isLoading]="isLoadingGraph"></app-loading>
-
-<div *ngIf="!isLoadingGraph">
-    <div class="row mt-4">
-        <div class="col-md-6 mt-1">
-            <div class="card">
-                <div class="card-header">Distribución por Crypto (En {{ mainReference?.symbol }})</div>
-                <div class="card-body">
-                    <app-chart [options]="distributionOptions" [height]="320"></app-chart>
-                </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" role="switch" id="includeStables"
+                       [(ngModel)]="includeStables" (change)="onIncludeStablesChange()">
+                <label class="form-check-label" for="includeStables">Incluir monedas estables (USDT, USDC, DAI)</label>
             </div>
         </div>
-        <div class="col-md-6 mt-1">
-            <div class="row">
+    </div>
+
+    <p class="text-body-secondary mt-3" *ngIf="holdings.length === 0">Todavía no hay tenencias en cripto{{ includeStables ? '' : ' volátil' }}.</p>
+
+    <ng-container *ngIf="holdings.length > 0">
+        <div class="row mt-3">
+            <div class="col-md-4 mt-1">
                 <div class="card">
-                    <div class="card-header">Evolución del Valor de la Cartera (En {{ mainReference?.symbol }})</div>
+                    <div class="card-header">Valor Actual (En {{ referenceAssetSymbol }})</div>
                     <div class="card-body">
-                        <app-chart [options]="walletEvolutionOptions" [height]="300"></app-chart>
+                        <h4 class="card-title mb-0">{{ totalActualValue | currencyFiatFormat }}</h4>
                     </div>
                 </div>
             </div>
-            <div class="row mt-2">
+            <div class="col-md-4 mt-1">
                 <div class="card">
-                    <div class="card-header">Volumen Mensual de Movimientos (En {{ mainReference?.symbol }})</div>
+                    <div class="card-header">Invertido (En {{ referenceAssetSymbol }})</div>
                     <div class="card-body">
-                        <app-chart [options]="buyVolumeOptions" [height]="300"></app-chart>
+                        <h4 class="card-title mb-0">{{ totalOriginalValue | currencyFiatFormat }}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mt-1">
+                <div class="card">
+                    <div class="card-header">Ganancia / Pérdida</div>
+                    <div class="card-body">
+                        <h4 class="card-title mb-0" *ngIf="totalGainLossPct != null; else noPct"
+                            [class.text-success]="totalGainLossPct >= 0" [class.text-danger]="totalGainLossPct < 0">
+                            {{ totalGainLossPct | currencyInvestmentFormat }} %
+                        </h4>
+                        <ng-template #noPct><h4 class="card-title mb-0 text-body-secondary">—</h4></ng-template>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="row mt-4" *ngIf="cryptoGralStatsDTO.length > 0">
-        <div class="card">
-            <div class="card-header">
-                <h5>Tenencias Actuales (En {{ mainReference?.name }})</h5>
+        <div class="row mt-4">
+            <div class="col-md-6 mt-1">
+                <div class="card">
+                    <div class="card-header">Distribución por Crypto (En {{ referenceAssetSymbol }})</div>
+                    <div class="card-body">
+                        <app-chart [options]="distributionOptions" [height]="320"></app-chart>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover table-sm">
-                        <thead class="table-header-brand">
-                            <tr>
-                                <th>Crypto</th>
-                                <th>Nombre</th>
-                                <th class="text-end">Cantidad</th>
-                                <th class="text-end">Valor Origen Promedio</th>
-                                <th class="text-end">Valor Actual</th>
-                                <th class="text-end">%</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let stock of cryptoGralStatsDTO">
-                                <td>{{ stock.symbol }}</td>
-                                <td>{{ stock.assetName }}</td>
-                                <td class="text-end">{{ stock.quantity }}</td>
-                                <td class="text-end">{{ stock.originalValue | currencyFiatFormat }}</td>
-                                <td class="text-end">{{ stock.actualValue | currencyFiatFormat }}</td>
-                                <td class="text-end">{{ (stock.actualValue / stock.originalValue * 100) - 100 | currencyInvestmentFormat }} %</td>
-                            </tr>
-                        </tbody>
-                    </table>
+            <div class="col-md-6 mt-1">
+                <div class="row">
+                    <div class="card">
+                        <div class="card-header">Evolución del Valor de la Cartera (En {{ referenceAssetSymbol }})</div>
+                        <div class="card-body">
+                            <app-chart [options]="walletEvolutionOptions" [height]="150"></app-chart>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="card">
+                        <div class="card-header">Volumen Mensual de Movimientos (En {{ referenceAssetSymbol }})</div>
+                        <div class="card-body">
+                            <app-chart *ngIf="hasPurchasesByMonth" [options]="buyVolumeOptions" [height]="150"></app-chart>
+                            <p class="text-body-secondary mb-0" *ngIf="!hasPurchasesByMonth">Sin movimientos en los últimos 12 meses.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+
+        <div class="row mt-4">
+            <div class="col-12 mt-1">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Tenencias (En {{ referenceAssetSymbol }})</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm mb-0">
+                                <thead class="table-header-brand">
+                                    <tr>
+                                        <th>Crypto</th>
+                                        <th class="text-end">Cantidad</th>
+                                        <th class="text-end">Invertido</th>
+                                        <th class="text-end">Valor Actual</th>
+                                        <th class="text-end">%</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let h of holdings">
+                                        <td>{{ h.assetName }} <span class="text-body-secondary">({{ h.symbol }})</span></td>
+                                        <td class="text-end">{{ h.quantity | currencyInvestmentFormat }}</td>
+                                        <td class="text-end">{{ h.originalValue | currencyFiatFormat }}</td>
+                                        <td class="text-end">{{ h.actualValue | currencyFiatFormat }}</td>
+                                        <td class="text-end" [class.text-success]="(h.gainLossPercent ?? 0) >= 0" [class.text-danger]="(h.gainLossPercent ?? 0) < 0">
+                                            {{ h.gainLossPercent != null ? (h.gainLossPercent | currencyInvestmentFormat) + ' %' : '—' }}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ng-container>
 </div>

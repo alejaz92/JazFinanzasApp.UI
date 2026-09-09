@@ -1,87 +1,119 @@
 <app-loading [isLoading]="isLoading"></app-loading>
 
 <div *ngIf="!isLoading">
-    <h2 class="mb-3">Crypto Individual</h2>
+    <h2 class="mb-3">Cryptos — Detalle</h2>
 
     <div class="row">
         <div class="col-md-6">
-            <select id="asset" class="form-select" [(ngModel)]="selectedCryptoDB6" (change)="loadCryptoStats()">
-                <option value="0" selected disabled>Seleccione</option>
+            <select id="asset" class="form-select" [(ngModel)]="selectedCryptoAssetId" (change)="onCryptoChange()">
+                <option [value]="0" disabled>Seleccione</option>
                 <option *ngFor="let crypto of cryptos" [value]="crypto.id">{{ crypto.name }}</option>
             </select>
         </div>
     </div>
 
-    <app-loading [isLoading]="isLoadingGraph"></app-loading>
+    <app-loading [isLoading]="isLoadingDetail"></app-loading>
 
-    <div *ngIf="viewAux && !isLoadingGraph">
-        <div class="row mt-4 report-container">
-            <div class="col-md-6 graph">
-                <div class="row mt-1">
-                    <div class="card">
-                        <div class="card-header">Estado de Valuación (En {{ mainReference?.symbol }})</div>
-                        <div class="card-body">
-                            <app-chart [options]="gaugeOptions" [height]="300"></app-chart>
-                        </div>
-                    </div>
-                </div>
-                <div class="row mt-1">
-                    <div class="card">
-                        <div class="card-header">Evolución del Valor de la Criptomoneda (En {{ mainReference?.symbol }})</div>
-                        <div class="card-body">
-                            <app-chart [options]="priceEvolutionOptions" [height]="280"></app-chart>
-                        </div>
+    <div *ngIf="selectedCryptoAssetId !== 0 && !isLoadingDetail && detail">
+        <div class="row mt-4">
+            <div class="col-md-3 mt-1">
+                <div class="card">
+                    <div class="card-header">Cotización Actual</div>
+                    <div class="card-body">
+                        <h4 class="card-title mb-0">{{ detail.currentPrice | currencyFiatFormat }}</h4>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 graph">
+            <div class="col-md-3 mt-1">
                 <div class="card">
-                    <div class="card-header">Distribución de Saldos por Cuenta</div>
+                    <div class="card-header">Precio Promedio de Compra</div>
                     <div class="card-body">
-                        <app-chart [options]="balanceOptions" [height]="320"></app-chart>
+                        <h4 class="card-title mb-0">{{ detail.averageBuyPrice | currencyFiatFormat }}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mt-1">
+                <div class="card">
+                    <div class="card-header">Mínimo (12 meses)</div>
+                    <div class="card-body">
+                        <h4 class="card-title mb-0">{{ detail.minPrice | currencyFiatFormat }}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mt-1">
+                <div class="card">
+                    <div class="card-header">Máximo (12 meses)</div>
+                    <div class="card-body">
+                        <h4 class="card-title mb-0">{{ detail.maxPrice | currencyFiatFormat }}</h4>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="row mt-4">
-            <div class="col-md-12">
-                <div *ngIf="cryptoTransactionsStatsDTO.length > 0">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>Ultimos Movimientos (En {{ mainReference?.symbol }})</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-hover table-sm">
-                                    <thead class="table-header-brand">
-                                        <tr>
-                                            <th>Fecha</th>
-                                            <th>Cuenta</th>
-                                            <th>Tipo Movimiento</th>
-                                            <th>Tipo Comercio</th>
-                                            <th class="text-end">Cantidad</th>
-                                            <th class="text-end">Cotización</th>
-                                            <th class="text-end">Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr *ngFor="let transaction of cryptoTransactionsStatsDTO">
-                                            <td>{{ transaction.date | date: 'dd/MM/yyyy' }}</td>
-                                            <td>{{ transaction.account }}</td>
-                                            <td>{{ transaction.movementType | movementType }}</td>
-                                            <td>{{ transaction.commerceType | commerceType }}</td>
-                                            <td class="text-end">{{ transaction.quantity }}</td>
-                                            <td class="text-end">{{ transaction.quotePrice | currencyFiatFormat }}</td>
-                                            <td class="text-end">{{ transaction.total | currencyFiatFormat }}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+            <div class="col-12 mt-1">
+                <div class="card">
+                    <div class="card-header">Cotización, con compras (▲) y ventas (◆) marcadas (En {{ detail.referenceAssetSymbol }})</div>
+                    <div class="card-body">
+                        <app-chart [options]="priceOptions" [height]="360"></app-chart>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-4 mt-1" *ngIf="detail.balanceByAccount.length > 0">
+                <div class="card">
+                    <div class="card-header">Saldo por Cuenta</div>
+                    <div class="card-body p-0">
+                        <table class="table table-sm mb-0">
+                            <tbody>
+                                <tr *ngFor="let b of detail.balanceByAccount">
+                                    <td>{{ b.account }}</td>
+                                    <td class="text-end">{{ b.balance | currencyInvestmentFormat }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8 mt-1" *ngIf="detail.transactions.length > 0">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Movimientos (En {{ detail.referenceAssetSymbol }})</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm mb-0">
+                                <thead class="table-header-brand">
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Cuenta</th>
+                                        <th>Movimiento</th>
+                                        <th>Comercio</th>
+                                        <th class="text-end">Cantidad</th>
+                                        <th class="text-end">Cotización</th>
+                                        <th class="text-end">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let t of detail.transactions">
+                                        <td>{{ t.date | date: 'dd/MM/yyyy' }}</td>
+                                        <td>{{ t.account }}</td>
+                                        <td>{{ t.movementType | movementType }}</td>
+                                        <td>{{ t.commerceType | commerceType }}</td>
+                                        <td class="text-end">{{ t.quantity | currencyInvestmentFormat }}</td>
+                                        <td class="text-end">{{ t.quotePrice | currencyFiatFormat }}</td>
+                                        <td class="text-end">{{ t.total | currencyFiatFormat }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <p class="text-body-secondary mt-3" *ngIf="selectedCryptoAssetId === 0">Elegí una crypto para ver su detalle.</p>
 </div>

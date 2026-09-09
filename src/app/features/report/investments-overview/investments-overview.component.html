@@ -1,0 +1,89 @@
+<app-loading [isLoading]="isLoading"></app-loading>
+
+<div *ngIf="!isLoading && overview">
+    <h2 class="mb-3">Panorama de Inversiones</h2>
+
+    <div class="row">
+        <div class="col-md-4 mt-1">
+            <div class="card">
+                <div class="card-header">Valor Actual (En {{ overview.referenceAssetSymbol }})</div>
+                <div class="card-body">
+                    <h4 class="card-title mb-0">{{ overview.totalActualValue | currencyFiatFormat }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mt-1">
+            <div class="card">
+                <div class="card-header">Invertido (En {{ overview.referenceAssetSymbol }})</div>
+                <div class="card-body">
+                    <h4 class="card-title mb-0">{{ overview.totalOriginalValue | currencyFiatFormat }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mt-1">
+            <div class="card">
+                <div class="card-header">Ganancia / Pérdida</div>
+                <div class="card-body">
+                    <h4 class="card-title mb-0" *ngIf="overview.gainLossPercent != null; else noPct"
+                        [class.text-success]="overview.gainLossPercent >= 0" [class.text-danger]="overview.gainLossPercent < 0">
+                        {{ overview.gainLossPercent | currencyInvestmentFormat }} %
+                    </h4>
+                    <ng-template #noPct><h4 class="card-title mb-0 text-body-secondary">—</h4></ng-template>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <p class="text-body-secondary mt-3" *ngIf="overview.holdings.length === 0">
+        Todavía no hay nada invertido (bolsa, cripto o bonos) — el efectivo no cuenta acá, se ve en Patrimonio.
+    </p>
+
+    <ng-container *ngIf="overview.holdings.length > 0">
+        <div class="row mt-3">
+            <div class="col-md-6 mt-1">
+                <div class="card">
+                    <div class="card-header">Composición (En {{ overview.referenceAssetSymbol }}) — coloreado por ganancia/pérdida</div>
+                    <div class="card-body">
+                        <app-chart [options]="treemapOptions" [height]="320"></app-chart>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mt-1">
+                <div class="card">
+                    <div class="card-header">Valor Total — últimos 12 meses, con aportes marcados</div>
+                    <div class="card-body">
+                        <app-chart [options]="valueLineOptions" [height]="320"></app-chart>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">Ver en detalle</div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        <a class="list-group-item d-flex justify-content-between align-items-center" [routerLink]="['/report/portfolio-general']" queryParamsHandling="preserve">
+                            <span><i class="bi bi-briefcase me-2"></i>Carteras</span>
+                            <i class="bi bi-chevron-right text-body-secondary"></i>
+                        </a>
+                        <a class="list-group-item d-flex justify-content-between align-items-center" [routerLink]="['/report/stocks']" queryParamsHandling="preserve">
+                            <span><i class="bi bi-bar-chart-line me-2"></i>Bolsa</span>
+                            <i class="bi bi-chevron-right text-body-secondary"></i>
+                        </a>
+                        <a class="list-group-item d-flex justify-content-between align-items-center" [routerLink]="['/report/cryptos-gral']" queryParamsHandling="preserve">
+                            <span><i class="bi bi-currency-bitcoin me-2"></i>Cryptos</span>
+                            <i class="bi bi-chevron-right text-body-secondary"></i>
+                        </a>
+                        <a class="list-group-item d-flex justify-content-between align-items-center" [routerLink]="['/report/contributions-vs-performance']" queryParamsHandling="preserve">
+                            <span><i class="bi bi-bar-chart-steps me-2"></i>Aportes vs rendimiento</span>
+                            <i class="bi bi-chevron-right text-body-secondary"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

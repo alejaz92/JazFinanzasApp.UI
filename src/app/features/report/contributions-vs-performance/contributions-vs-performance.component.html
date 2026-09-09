@@ -1,0 +1,49 @@
+<app-loading [isLoading]="isLoading"></app-loading>
+
+<div *ngIf="!isLoading && data">
+    <h2 class="mb-3">Aportes vs Rendimiento</h2>
+
+    <p class="text-body-secondary">
+        Desde {{ data.startMonth | date: 'MMMM yyyy' }} — los movimientos anteriores son ajustes de saldo, no aportes reales.
+    </p>
+
+    <div class="row">
+        <div class="col-md-4 mt-1">
+            <div class="card">
+                <div class="card-header">Aportes (En {{ data.referenceAssetSymbol }})</div>
+                <div class="card-body">
+                    <h4 class="card-title mb-0 text-success">+{{ data.contributed | currencyFiatFormat }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mt-1">
+            <div class="card">
+                <div class="card-header">Retiros (En {{ data.referenceAssetSymbol }})</div>
+                <div class="card-body">
+                    <h4 class="card-title mb-0 text-danger">-{{ data.withdrawn | currencyFiatFormat }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mt-1">
+            <div class="card">
+                <div class="card-header">Valorización (En {{ data.referenceAssetSymbol }})</div>
+                <div class="card-body">
+                    <h4 class="card-title mb-0" [class.text-success]="data.valuation >= 0" [class.text-danger]="data.valuation < 0">
+                        {{ data.valuation >= 0 ? '+' : '' }}{{ data.valuation | currencyFiatFormat }}
+                    </h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">Valor inicial → Aportes → Retiros → Valorización → Valor final (En {{ data.referenceAssetSymbol }})</div>
+                <div class="card-body">
+                    <app-chart [options]="waterfallOptions" [height]="360"></app-chart>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

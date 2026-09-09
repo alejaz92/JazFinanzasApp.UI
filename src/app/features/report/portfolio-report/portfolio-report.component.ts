@@ -1,144 +1,145 @@
-import { Component, OnInit } from '@angular/core';
-import { NgIf, NgFor } from '@angular/common';
+import { Component, effect, inject } from '@angular/core';
+import { NgIf, NgFor, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { forkJoin, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { ActivatedRoute, Router } from '@angular/router';
 import type { EChartsOption } from 'echarts';
 
-import { PortfolioService } from '../../portfolios/services/portfolio.service';
-import { AssetService } from '../../asset/services/asset.service';
-import { Asset } from '../../asset/models/asset.model';
-import { PortfolioStatsDTO, PortfolioDetailStatsDTO, PortfolioHoldingDTO, PortfolioValueByDateDTO } from '../../portfolios/models/portfolio-stats.model';
+import { InvestmentReportService } from '../services/investment-report.service';
+import { PortfolioOverviewItem, PortfolioDetailReport, PortfolioHoldingItem, InvestmentValuePoint } from '../models/investment-report.model';
+import { ReportContextService } from '../../../shared/services/report-context.service';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { CurrencyInvestmentFormatPipe } from '../../../shared/pipes/currencyInvestmentFormat/currency-investment-format.pipe';
 
+interface HoldingGroup {
+    key: string;
+    assetType: string;
+    assetName: string;
+    symbol: string;
+    quantity: number;
+    originalValue: number;
+    actualValue: number;
+    gainLossPercent: number | null;
+    accounts: PortfolioHoldingItem[];
+}
+
+// Carteras — Detalle (Fase 20, Flujo 5): reescrita sobre InvestmentReportController (Fase 19).
+// El interruptor de agregado/desagregado desaparece (sección 8 del plan): la tabla siempre agrupa
+// por activo, y cada fila se abre con un clic para ver el desglose por cuenta — mismo patrón que
+// SharedExpenseDashboardComponent.toggleExpand. `portfolioId` vive en el query param de la URL
+// (T12: enlace que se puede compartir), no en un estado local suelto.
 @Component({
     selector: 'app-portfolio-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, FormsModule, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, ChartComponent],
+    imports: [LoadingComponent, NgIf, NgFor, NgClass, FormsModule, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, ChartComponent],
     templateUrl: './portfolio-report.component.html',
     styleUrl: './portfolio-report.component.css'
 })
-export class PortfolioReportComponent implements OnInit {
+export class PortfolioReportComponent {
+    private readonly investmentReportService = inject(InvestmentReportService);
+    private readonly chartTheme = inject(ChartThemeService);
+    private readonly route = inject(ActivatedRoute);
+    private readonly router = inject(Router);
+    protected readonly reportContext = inject(ReportContextService);
+
     isLoading = true;
     isLoadingDetail = false;
-    viewAux = false;
+    referenceAssetSymbol = '';
+    portfolios: PortfolioOverviewItem[] = [];
     selectedPortfolioId = 0;
-    portfolios: PortfolioStatsDTO[] = [];
-    detail: PortfolioDetailStatsDTO | null = null;
-    mainReference: Asset | null = null;
+    detail: PortfolioDetailReport | null = null;
+    holdingGroups: HoldingGroup[] = [];
+    expandedKey: string | null = null;
 
-    // false = agrupado por activo (sin desglosar por cuenta); true = una fila por activo + cuenta
-    disaggregateByAccount = false;
-    displayedHoldings: PortfolioHoldingDTO[] = [];
     compositionOptions: EChartsOption = {};
     evolutionOptions: EChartsOption = {};
 
-    constructor(
-        private portfolioService: PortfolioService,
-        private assetService: AssetService,
-        private chartTheme: ChartThemeService
-    ) {}
+    private currentAssetId: number | null = null;
 
-    ngOnInit(): void {
-        this.loadPortfolios();
-        this.loadMainReference();
+    constructor() {
+        effect(() => {
+            const assetId = this.reportContext.currencyAssetId();
+            if (assetId == null) return;
+            this.currentAssetId = assetId;
+            this.loadPortfolios(assetId);
+            this.loadDetailIfReady();
+        });
+
+        this.route.queryParamMap.subscribe(params => {
+            this.selectedPortfolioId = Number(params.get('portfolioId') ?? 0);
+            this.loadDetailIfReady();
+        });
     }
 
-    loadPortfolios(): void {
-        this.portfolioService.getPortfolioStats().subscribe(response => {
-            this.portfolios = response;
+    private loadPortfolios(assetId: number): void {
+        this.isLoading = true;
+        this.investmentReportService.getPortfoliosOverview(assetId).subscribe(data => {
+            this.referenceAssetSymbol = data.referenceAssetSymbol;
+            this.portfolios = data.portfolios;
             this.isLoading = false;
         });
     }
 
-    loadMainReference(): void {
-        this.assetService.getReferenceAssets().subscribe((data: Asset[]) => {
-            this.mainReference = data.find(x => x.isMainReference) ?? null;
-        });
+    onPortfolioChange(): void {
+        this.router.navigate([], { queryParams: { portfolioId: this.selectedPortfolioId || null }, queryParamsHandling: 'merge', replaceUrl: true });
     }
 
-    loadPortfolioDetail(): void {
-        if (this.selectedPortfolioId == 0) {
-            this.viewAux = false;
+    private loadDetailIfReady(): void {
+        if (this.selectedPortfolioId === 0 || this.currentAssetId == null) {
+            this.detail = null;
+            this.holdingGroups = [];
             return;
         }
-        this.detail = null;
-        this.viewAux = false;
+
         this.isLoadingDetail = true;
-
-        // Combinados: si cada uno renderizara su gráfico desde su propio subscribe con un setTimeout
-        // independiente, el de evolución podía correr antes de que "viewAux" pasara a true (todavía no
-        // hay <canvas> en el DOM) si esa respuesta llegaba primero — quedaba con la tarjeta vacía sin
-        // ningún reintento. Con forkJoin ambos gráficos se renderizan recién cuando los dos datos están
-        // listos, en el mismo ciclo que "viewAux".
-        forkJoin({
-            detail: this.portfolioService.getPortfolioDetailStats(this.selectedPortfolioId),
-            // si el historial falla (ej. deploy del endpoint todavía no propagado), no debe tirar abajo
-            // el resto de la pestaña -- se degrada a "sin evolución" en vez de romper todo.
-            history: this.portfolioService.getPortfolioValueHistory(this.selectedPortfolioId).pipe(
-                catchError(() => of([] as PortfolioValueByDateDTO[]))
-            )
-        }).subscribe(({ detail, history }) => {
+        this.investmentReportService.getPortfolioDetail(this.selectedPortfolioId, this.currentAssetId).subscribe(detail => {
             this.isLoadingDetail = false;
-            this.viewAux = true;
             this.detail = detail;
-            this.updateDisplayedHoldings();
-            setTimeout(() => {
-                this.renderCompositionChart(detail.holdings);
-                this.renderEvolutionChart(history);
-            }, 0);
+            this.holdingGroups = this.groupByAsset(detail.holdings);
+            this.expandedKey = null;
+            setTimeout(() => this.renderCharts(detail), 0);
         });
     }
 
-    onToggleDisaggregate(): void {
-        this.updateDisplayedHoldings();
+    toggleExpand(key: string): void {
+        this.expandedKey = this.expandedKey === key ? null : key;
     }
 
-    // sin desagregar: agrupa por activo (tipo + nombre + símbolo), sumando cantidad/valores entre cuentas.
-    // Con desagregar: la fila tal cual la devuelve el backend (una por activo + cuenta).
-    private updateDisplayedHoldings(): void {
-        if (!this.detail) {
-            this.displayedHoldings = [];
-            return;
-        }
-        if (this.disaggregateByAccount) {
-            this.displayedHoldings = this.detail.holdings;
-            return;
-        }
-
-        const byAsset = new Map<string, PortfolioHoldingDTO>();
-        for (const h of this.detail.holdings) {
+    private groupByAsset(holdings: PortfolioHoldingItem[]): HoldingGroup[] {
+        const map = new Map<string, HoldingGroup>();
+        for (const h of holdings) {
             const key = `${h.assetType}|${h.assetName}|${h.symbol}`;
-            const existing = byAsset.get(key);
-            if (existing) {
-                existing.quantity += h.quantity;
-                existing.originalValue += h.originalValue;
-                existing.actualValue += h.actualValue;
-            } else {
-                byAsset.set(key, { ...h, accountName: '' });
+            let group = map.get(key);
+            if (!group) {
+                group = { key, assetType: h.assetType, assetName: h.assetName, symbol: h.symbol, quantity: 0, originalValue: 0, actualValue: 0, gainLossPercent: null, accounts: [] };
+                map.set(key, group);
             }
+            group.quantity += h.quantity;
+            group.originalValue += h.originalValue;
+            group.actualValue += h.actualValue;
+            group.accounts.push(h);
         }
-        this.displayedHoldings = Array.from(byAsset.values());
+
+        const groups = Array.from(map.values());
+        for (const g of groups) g.gainLossPercent = g.originalValue > 0 ? (g.actualValue / g.originalValue * 100) - 100 : null;
+        return groups.sort((a, b) => b.actualValue - a.actualValue);
     }
 
-    private renderCompositionChart(holdings: PortfolioHoldingDTO[]): void {
-        // el frontend agrupa por AssetType (incluye "Moneda" como una categoría más) — el backend
-        // devuelve una fila por activo + cuenta, sin agrupar (ver docs/plans/activos/portfolios-estadisticas.md)
-        const byAssetType = new Map<string, number>();
-        holdings.forEach(h => byAssetType.set(h.assetType, (byAssetType.get(h.assetType) ?? 0) + h.actualValue));
-
-        const assetTypes = Array.from(byAssetType.keys());
-        const values = Array.from(byAssetType.values());
-        this.compositionOptions = this.chartTheme.pieOptions(assetTypes, values);
+    private renderCharts(detail: PortfolioDetailReport): void {
+        this.renderComposition();
+        this.renderEvolution(detail.valueSeries);
     }
 
-    private renderEvolutionChart(history: PortfolioValueByDateDTO[]): void {
-        const labels = history.map(h => new Date(h.date).toLocaleDateString('es-AR', { month: 'short', year: 'numeric' }));
-        const values = history.map(h => h.value);
+    private renderComposition(): void {
+        const items = this.holdingGroups.map(g => ({ name: g.symbol, value: g.actualValue, gainLossPercent: g.gainLossPercent }));
+        this.compositionOptions = this.chartTheme.treemapOptions(items, { formatValue: v => this.chartTheme.formatNumber(v, { maximumFractionDigits: 0 }) });
+    }
+
+    private renderEvolution(series: InvestmentValuePoint[]): void {
+        const labels = series.map(s => new Date(s.month).toLocaleDateString('es-AR', { month: 'short', year: 'numeric' }));
+        const values = series.map(s => s.value);
         this.evolutionOptions = this.chartTheme.lineOptions(labels, values, { colorIndex: 6, smooth: true, skipLabels: false });
     }
 }

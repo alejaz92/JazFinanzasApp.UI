@@ -128,14 +128,29 @@ export class ReportsShellComponent implements OnInit {
                 { type: 'link', label: 'Promociones y reintegros', icon: 'bi-gift', route: '/report/cards-promotions' }
             ]
         },
-        { type: 'link', label: 'Inv. Bolsa',         icon: 'bi-bar-chart-line', route: '/report/stocks' },
-        { type: 'link', label: 'Cryptos General',    icon: 'bi-currency-bitcoin', route: '/report/cryptos-gral' },
-        { type: 'link', label: 'Crypto Individual',  icon: 'bi-coin',           route: '/report/crypto' },
         {
-            type: 'category', label: 'Carteras', icon: 'bi-briefcase',
+            // Fase 20: las cinco pantallas del Flujo 5 pasan a vivir bajo una sola categoría
+            // "Inversiones" (antes tres entradas sueltas — Inv. Bolsa, Cryptos General, Crypto
+            // Individual — más la categoría aparte "Carteras"), siguiendo el mindmap de la sección 4.
+            type: 'category', label: 'Inversiones', icon: 'bi-graph-up',
             children: [
-                { type: 'link', label: 'General', icon: 'bi-grid-1x2', route: '/report/portfolio-general' },
-                { type: 'link', label: 'Detalle',  icon: 'bi-list-ul', route: '/report/portfolio-detail' }
+                { type: 'link', label: 'Panorama', icon: 'bi-pie-chart', route: '/report/investments-overview' },
+                {
+                    type: 'subcategory', label: 'Carteras', icon: 'bi-briefcase',
+                    children: [
+                        { type: 'link', label: 'General', icon: 'bi-grid-1x2', route: '/report/portfolio-general' },
+                        { type: 'link', label: 'Detalle', icon: 'bi-list-ul', route: '/report/portfolio-detail' }
+                    ]
+                },
+                { type: 'link', label: 'Bolsa', icon: 'bi-bar-chart-line', route: '/report/stocks' },
+                {
+                    type: 'subcategory', label: 'Cryptos', icon: 'bi-currency-bitcoin',
+                    children: [
+                        { type: 'link', label: 'General', icon: 'bi-grid-1x2', route: '/report/cryptos-gral' },
+                        { type: 'link', label: 'Detalle', icon: 'bi-coin', route: '/report/crypto' }
+                    ]
+                },
+                { type: 'link', label: 'Aportes vs rendimiento', icon: 'bi-bar-chart-steps', route: '/report/contributions-vs-performance' }
             ]
         },
         {
