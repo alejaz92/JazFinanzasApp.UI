@@ -29,7 +29,11 @@ export interface DashboardThermometer {
 // Corrección 2026-09-08: se sacó 'PendingReimbursement' — un reintegro ya acreditado (lo único que
 // ese ítem mostraba) es plata que ya es del usuario, sin nada pendiente de su parte; el usuario pidió
 // acotar la bandeja a tarjetas por vencer y deudas/saldos que lo involucran directamente.
-export type DashboardPendingKind = 'CardDue' | 'OpenSharedEvent' | 'TripWithoutRecentExpense';
+//
+// Corrección 2026-09-08 (segunda vuelta): se sumó 'PersonDebt' — deudas de gastos sueltos
+// (SharedExpense V1, sin Evento) que antes no entraban a la bandeja pese a ser "deuda relacionada
+// conmigo" (lo que el usuario pidió en la ronda anterior).
+export type DashboardPendingKind = 'CardDue' | 'OpenSharedEvent' | 'PersonDebt' | 'TripWithoutRecentExpense';
 export type DashboardPendingSeverity = 'info' | 'warning' | 'danger';
 
 export interface DashboardPendingItem {

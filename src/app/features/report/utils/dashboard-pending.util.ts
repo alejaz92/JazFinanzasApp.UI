@@ -6,6 +6,7 @@ import { DashboardPendingItem, DashboardPendingKind, DashboardPendingSeverity } 
 const PENDING_META: Record<DashboardPendingKind, { icon: string; action: string }> = {
     CardDue: { icon: 'bi-credit-card', action: 'Pagar' },
     OpenSharedEvent: { icon: 'bi-people', action: 'Ver evento' },
+    PersonDebt: { icon: 'bi-person', action: 'Ver deuda' },
     TripWithoutRecentExpense: { icon: 'bi-airplane', action: 'Cargar gasto' },
 };
 
@@ -42,11 +43,14 @@ export function pendingIconClass(item: DashboardPendingItem): string {
 
 // Cada tipo de pendiente resuelve a la pantalla donde se atiende (sección 5.3 del plan): tarjeta a
 // pagar y viaje tienen pantalla propia fuera de Reportes; el evento compartido vive en
-// /shared-events/:id.
+// /shared-events/:id. PersonDebt (gastos sueltos, sin Evento) no tiene una pantalla por persona —
+// /shared-expenses es la misma para las tres personas de la bandeja, igual que ya hacía el
+// HomeComponent viejo con "Ver detalle de gastos compartidos".
 export function pendingRoute(item: DashboardPendingItem): string[] {
     switch (item.kind) {
         case 'CardDue': return ['/cardTransactions/pay'];
         case 'OpenSharedEvent': return ['/shared-events', String(item.linkId)];
+        case 'PersonDebt': return ['/shared-expenses'];
         case 'TripWithoutRecentExpense': return ['/management/trips', String(item.linkId), 'detail'];
     }
 }
