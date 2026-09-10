@@ -38,6 +38,12 @@ export class ReportContextService {
   private readonly cardId = signal<number | null>(null);
   private readonly includeRecurring = signal<boolean>(true);
 
+  // Corrección 2026-09-10: mismo criterio que cardId — el selector de Cartera (Carteras — Detalle)
+  // y de Crypto (Cryptos — Detalle) vivían sueltos dentro de cada pantalla en vez de en la barra de
+  // filtros compartida, así que quedaban visualmente fuera de esa barra.
+  private readonly portfolioId = signal<number | null>(null);
+  private readonly cryptoAssetId = signal<number | null>(null);
+
   readonly period = computed<ReportPeriod>(() => ({
     preset: this.periodPreset(),
     from: this.customFrom() ?? undefined,
@@ -47,6 +53,8 @@ export class ReportContextService {
   readonly currencyAssetId = this.currency.asReadonly();
   readonly selectedCardId = this.cardId.asReadonly();
   readonly includeRecurringExpenses = this.includeRecurring.asReadonly();
+  readonly selectedPortfolioId = this.portfolioId.asReadonly();
+  readonly selectedCryptoAssetId = this.cryptoAssetId.asReadonly();
 
   constructor() {
     this.readFromUrl(this.router.url);
@@ -76,6 +84,14 @@ export class ReportContextService {
     this.navigate({ includeRecurring: value ? null : 'false' });
   }
 
+  setPortfolioId(portfolioId: number): void {
+    this.navigate({ portfolioId });
+  }
+
+  setCryptoAssetId(cryptoAssetId: number): void {
+    this.navigate({ cryptoAssetId });
+  }
+
   private readFromUrl(url: string): void {
     const qp = this.router.parseUrl(url).queryParams;
     this.periodPreset.set(this.isPreset(qp['period']) ? qp['period'] : DEFAULT_PERIOD);
@@ -84,6 +100,8 @@ export class ReportContextService {
     this.currency.set(qp['currency'] ? Number(qp['currency']) : null);
     this.cardId.set(qp['cardId'] != null ? Number(qp['cardId']) : null);
     this.includeRecurring.set(qp['includeRecurring'] !== 'false');
+    this.portfolioId.set(qp['portfolioId'] != null ? Number(qp['portfolioId']) : null);
+    this.cryptoAssetId.set(qp['cryptoAssetId'] != null ? Number(qp['cryptoAssetId']) : null);
   }
 
   private isPreset(value: unknown): value is PeriodPreset {

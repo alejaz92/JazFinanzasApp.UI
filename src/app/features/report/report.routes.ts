@@ -117,9 +117,11 @@ export const reportRoutes: Routes = [
                 data: { usesPeriod: false }
             },
             {
+                // Corrección 2026-09-10: el selector de crypto pasa a la barra de filtros de la
+                // sección, mismo criterio que "Por tarjeta" (cardFilter: 'required').
                 path: 'crypto',
                 loadComponent: () => import('./crypto-report/crypto-report.component').then(m => m.CryptoReportComponent),
-                data: { usesPeriod: false }
+                data: { usesPeriod: false, cryptoFilter: 'required' }
             },
             {
                 path: 'portfolio-general',
@@ -127,9 +129,11 @@ export const reportRoutes: Routes = [
                 data: { usesPeriod: false }
             },
             {
+                // Corrección 2026-09-10: el selector de cartera pasa a la barra de filtros de la
+                // sección, mismo criterio que "Por tarjeta" (cardFilter: 'required').
                 path: 'portfolio-detail',
                 loadComponent: () => import('./portfolio-report/portfolio-report.component').then(m => m.PortfolioReportComponent),
-                data: { usesPeriod: false }
+                data: { usesPeriod: false, portfolioFilter: 'required' }
             },
             {
                 path: 'contributions-vs-performance',

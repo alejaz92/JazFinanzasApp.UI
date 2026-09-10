@@ -1,20 +1,8 @@
-<app-loading [isLoading]="isLoading"></app-loading>
+<h2 class="mb-3">Cryptos — Detalle</h2>
 
-<div *ngIf="!isLoading">
-    <h2 class="mb-3">Cryptos — Detalle</h2>
+<app-loading [isLoading]="isLoadingDetail"></app-loading>
 
-    <div class="row">
-        <div class="col-md-6">
-            <select id="asset" class="form-select" [(ngModel)]="selectedCryptoAssetId" (change)="onCryptoChange()">
-                <option [value]="0" disabled>Seleccione</option>
-                <option *ngFor="let crypto of cryptos" [value]="crypto.id">{{ crypto.name }}</option>
-            </select>
-        </div>
-    </div>
-
-    <app-loading [isLoading]="isLoadingDetail"></app-loading>
-
-    <div *ngIf="selectedCryptoAssetId !== 0 && !isLoadingDetail && detail">
+<div *ngIf="!isLoadingDetail && detail">
         <div class="row mt-4">
             <div class="col-md-3 mt-1">
                 <div class="card">
@@ -114,6 +102,3 @@
             </div>
         </div>
     </div>
-
-    <p class="text-body-secondary mt-3" *ngIf="selectedCryptoAssetId === 0">Elegí una crypto para ver su detalle.</p>
-</div>

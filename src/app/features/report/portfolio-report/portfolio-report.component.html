@@ -1,118 +1,102 @@
-<app-loading [isLoading]="isLoading"></app-loading>
+<h2 class="mb-3">Carteras — Detalle</h2>
 
-<div *ngIf="!isLoading">
-    <h2 class="mb-3">Carteras — Detalle</h2>
+<app-loading [isLoading]="isLoadingDetail"></app-loading>
 
+<div *ngIf="!isLoadingDetail && detail">
     <div class="row">
-        <div class="col-md-6">
-            <label for="portfolio">Cartera</label>
-            <select id="portfolio" class="form-select" [(ngModel)]="selectedPortfolioId" (change)="onPortfolioChange()">
-                <option [value]="0" disabled>Seleccione</option>
-                <option *ngFor="let p of portfolios" [value]="p.portfolioId">{{ p.portfolioName }}</option>
-            </select>
+        <div class="col-md-6 mt-1">
+            <div class="card">
+                <div class="card-header">Valor Total (En {{ detail.referenceAssetSymbol }})</div>
+                <div class="card-body">
+                    <h4 class="card-title">{{ detail.actualValue | currencyFiatFormat }}</h4>
+                    <p class="mb-0">
+                        Invertido: {{ detail.originalValue | currencyFiatFormat }}
+                        <ng-container *ngIf="detail.gainLossPercent != null">
+                            — <span [class.text-success]="detail.gainLossPercent >= 0" [class.text-danger]="detail.gainLossPercent < 0">{{ detail.gainLossPercent | currencyInvestmentFormat }} %</span>
+                        </ng-container>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mt-1">
+            <div class="card">
+                <div class="card-header">Composición (En {{ detail.referenceAssetSymbol }}) — coloreado por ganancia/pérdida</div>
+                <div class="card-body">
+                    <app-chart [options]="compositionOptions" [height]="300"></app-chart>
+                </div>
+            </div>
         </div>
     </div>
 
-    <app-loading [isLoading]="isLoadingDetail"></app-loading>
-
-    <div *ngIf="selectedPortfolioId !== 0 && !isLoadingDetail && detail">
-        <div class="row mt-4">
-            <div class="col-md-6 mt-1">
-                <div class="card">
-                    <div class="card-header">Valor Total (En {{ referenceAssetSymbol }})</div>
-                    <div class="card-body">
-                        <h4 class="card-title">{{ detail.actualValue | currencyFiatFormat }}</h4>
-                        <p class="mb-0">
-                            Invertido: {{ detail.originalValue | currencyFiatFormat }}
-                            <ng-container *ngIf="detail.gainLossPercent != null">
-                                — <span [class.text-success]="detail.gainLossPercent >= 0" [class.text-danger]="detail.gainLossPercent < 0">{{ detail.gainLossPercent | currencyInvestmentFormat }} %</span>
-                            </ng-container>
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 mt-1">
-                <div class="card">
-                    <div class="card-header">Composición (En {{ referenceAssetSymbol }}) — coloreado por ganancia/pérdida</div>
-                    <div class="card-body">
-                        <app-chart [options]="compositionOptions" [height]="300"></app-chart>
-                    </div>
+    <div class="row mt-4">
+        <div class="col-12 mt-1">
+            <div class="card">
+                <div class="card-header">Evolución del Valor (En {{ detail.referenceAssetSymbol }}, últimos 12 meses)</div>
+                <div class="card-body">
+                    <app-chart [options]="evolutionOptions" [height]="300"></app-chart>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="row mt-4">
-            <div class="col-12 mt-1">
-                <div class="card">
-                    <div class="card-header">Evolución del Valor (En {{ referenceAssetSymbol }}, últimos 12 meses)</div>
-                    <div class="card-body">
-                        <app-chart [options]="evolutionOptions" [height]="300"></app-chart>
-                    </div>
+    <div class="row mt-4" *ngIf="holdingGroups.length > 0">
+        <div class="col-12 mt-1">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Tenencias (En {{ detail.referenceAssetSymbol }})</h5>
                 </div>
-            </div>
-        </div>
-
-        <div class="row mt-4" *ngIf="holdingGroups.length > 0">
-            <div class="col-12 mt-1">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">Tenencias (En {{ referenceAssetSymbol }})</h5>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover table-sm mb-0">
-                                <thead class="table-header-brand">
-                                    <tr>
-                                        <th>Tipo</th>
-                                        <th>Activo</th>
-                                        <th class="text-end">Cantidad</th>
-                                        <th class="text-end">Valor Original</th>
-                                        <th class="text-end">Valor Actual</th>
-                                        <th class="text-end">%</th>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm mb-0">
+                            <thead class="table-header-brand">
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th>Activo</th>
+                                    <th class="text-end">Cantidad</th>
+                                    <th class="text-end">Valor Original</th>
+                                    <th class="text-end">Valor Actual</th>
+                                    <th class="text-end">%</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <ng-container *ngFor="let g of holdingGroups">
+                                    <tr style="cursor: pointer;" (click)="toggleExpand(g.key)">
+                                        <td>{{ g.assetType }}</td>
+                                        <td>
+                                            <i class="bi me-1" [ngClass]="expandedKey === g.key ? 'bi-chevron-down' : 'bi-chevron-right'"></i>
+                                            {{ g.symbol }}
+                                            <span class="text-body-secondary small" *ngIf="g.accounts.length > 1">({{ g.accounts.length }} cuentas)</span>
+                                        </td>
+                                        <td class="text-end">{{ g.quantity | currencyInvestmentFormat }}</td>
+                                        <td class="text-end">{{ g.originalValue | currencyFiatFormat }}</td>
+                                        <td class="text-end">{{ g.actualValue | currencyFiatFormat }}</td>
+                                        <td class="text-end" [class.text-success]="(g.gainLossPercent ?? 0) >= 0" [class.text-danger]="(g.gainLossPercent ?? 0) < 0">
+                                            {{ g.gainLossPercent != null ? (g.gainLossPercent | currencyInvestmentFormat) + ' %' : '—' }}
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    <ng-container *ngFor="let g of holdingGroups">
-                                        <tr style="cursor: pointer;" (click)="toggleExpand(g.key)">
-                                            <td>{{ g.assetType }}</td>
-                                            <td>
-                                                <i class="bi me-1" [ngClass]="expandedKey === g.key ? 'bi-chevron-down' : 'bi-chevron-right'"></i>
-                                                {{ g.symbol }}
-                                                <span class="text-body-secondary small" *ngIf="g.accounts.length > 1">({{ g.accounts.length }} cuentas)</span>
-                                            </td>
-                                            <td class="text-end">{{ g.quantity | currencyInvestmentFormat }}</td>
-                                            <td class="text-end">{{ g.originalValue | currencyFiatFormat }}</td>
-                                            <td class="text-end">{{ g.actualValue | currencyFiatFormat }}</td>
-                                            <td class="text-end" [class.text-success]="(g.gainLossPercent ?? 0) >= 0" [class.text-danger]="(g.gainLossPercent ?? 0) < 0">
-                                                {{ g.gainLossPercent != null ? (g.gainLossPercent | currencyInvestmentFormat) + ' %' : '—' }}
-                                            </td>
-                                        </tr>
-                                        <tr *ngIf="expandedKey === g.key" class="table-secondary">
-                                            <td colspan="6" class="p-0">
-                                                <table class="table table-sm mb-0">
-                                                    <tbody>
-                                                        <tr *ngFor="let a of g.accounts">
-                                                            <td class="ps-4 text-body-secondary">{{ a.accountName }}</td>
-                                                            <td class="text-end">{{ a.quantity | currencyInvestmentFormat }}</td>
-                                                            <td class="text-end">{{ a.originalValue | currencyFiatFormat }}</td>
-                                                            <td class="text-end">{{ a.actualValue | currencyFiatFormat }}</td>
-                                                            <td class="text-end" style="width: 90px;" [class.text-success]="(a.gainLossPercent ?? 0) >= 0" [class.text-danger]="(a.gainLossPercent ?? 0) < 0">
-                                                                {{ a.gainLossPercent != null ? (a.gainLossPercent | currencyInvestmentFormat) + ' %' : '—' }}
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </td>
-                                        </tr>
-                                    </ng-container>
-                                </tbody>
-                            </table>
-                        </div>
+                                    <tr *ngIf="expandedKey === g.key" class="table-secondary">
+                                        <td colspan="6" class="p-0">
+                                            <table class="table table-sm mb-0">
+                                                <tbody>
+                                                    <tr *ngFor="let a of g.accounts">
+                                                        <td class="ps-4 text-body-secondary">{{ a.accountName }}</td>
+                                                        <td class="text-end">{{ a.quantity | currencyInvestmentFormat }}</td>
+                                                        <td class="text-end">{{ a.originalValue | currencyFiatFormat }}</td>
+                                                        <td class="text-end">{{ a.actualValue | currencyFiatFormat }}</td>
+                                                        <td class="text-end" style="width: 90px;" [class.text-success]="(a.gainLossPercent ?? 0) >= 0" [class.text-danger]="(a.gainLossPercent ?? 0) < 0">
+                                                            {{ a.gainLossPercent != null ? (a.gainLossPercent | currencyInvestmentFormat) + ' %' : '—' }}
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </ng-container>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <p class="text-body-secondary mt-3" *ngIf="selectedPortfolioId === 0">Elegí una cartera para ver su detalle.</p>
 </div>

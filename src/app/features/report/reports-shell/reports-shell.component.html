@@ -131,6 +131,30 @@
       </div>
     }
 
+    @if (portfolioFilterMode() !== 'none' && portfolios().length > 0) {
+      <div class="d-flex align-items-center gap-2" title="Cartera">
+        <label for="reportPortfolioFilter" class="form-label mb-0 small text-body-secondary">Cartera:</label>
+        <select id="reportPortfolioFilter" class="form-select form-select-sm w-auto"
+                [ngModel]="reportContext.selectedPortfolioId() ?? 0" (ngModelChange)="onPortfolioFilterChange($event)">
+          @for (portfolio of portfolios(); track portfolio.id) {
+            <option [ngValue]="portfolio.id">{{ portfolio.name }}</option>
+          }
+        </select>
+      </div>
+    }
+
+    @if (cryptoFilterMode() !== 'none' && cryptos().length > 0) {
+      <div class="d-flex align-items-center gap-2" title="Crypto">
+        <label for="reportCryptoFilter" class="form-label mb-0 small text-body-secondary">Crypto:</label>
+        <select id="reportCryptoFilter" class="form-select form-select-sm w-auto"
+                [ngModel]="reportContext.selectedCryptoAssetId() ?? 0" (ngModelChange)="onCryptoFilterChange($event)">
+          @for (crypto of cryptos(); track crypto.id) {
+            <option [ngValue]="crypto.id">{{ crypto.name }}</option>
+          }
+        </select>
+      </div>
+    }
+
     @if (showRecurringFilter()) {
       <div class="form-check form-switch mb-0" title="Incluir gastos recurrentes sin fin (suscripciones) en la proyección">
         <input class="form-check-input" type="checkbox" id="reportIncludeRecurring"

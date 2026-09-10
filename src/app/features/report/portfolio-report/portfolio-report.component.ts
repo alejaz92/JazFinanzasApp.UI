@@ -1,11 +1,9 @@
 import { Component, effect, inject } from '@angular/core';
 import { NgIf, NgFor, NgClass } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
 import type { EChartsOption } from 'echarts';
 
 import { InvestmentReportService } from '../services/investment-report.service';
-import { PortfolioOverviewItem, PortfolioDetailReport, PortfolioHoldingItem, InvestmentValuePoint } from '../models/investment-report.model';
+import { PortfolioDetailReport, PortfolioHoldingItem, InvestmentValuePoint } from '../models/investment-report.model';
 import { ReportContextService } from '../../../shared/services/report-context.service';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
@@ -25,30 +23,24 @@ interface HoldingGroup {
     accounts: PortfolioHoldingItem[];
 }
 
-// Carteras — Detalle (Fase 20, Flujo 5): reescrita sobre InvestmentReportController (Fase 19).
-// El interruptor de agregado/desagregado desaparece (sección 8 del plan): la tabla siempre agrupa
-// por activo, y cada fila se abre con un clic para ver el desglose por cuenta — mismo patrón que
-// SharedExpenseDashboardComponent.toggleExpand. `portfolioId` vive en el query param de la URL
-// (T12: enlace que se puede compartir), no en un estado local suelto.
+// Carteras — Detalle (Fase 20, Flujo 5; selector de cartera movido a la barra de filtros compartida
+// el 2026-09-10, mismo criterio que "Por tarjeta" — antes vivía suelto en el cuerpo de esta pantalla,
+// fuera de la barra). El interruptor de agregado/desagregado desaparece (sección 8 del plan): la
+// tabla siempre agrupa por activo, y cada fila se abre con un clic para ver el desglose por cuenta —
+// mismo patrón que SharedExpenseDashboardComponent.toggleExpand.
 @Component({
     selector: 'app-portfolio-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, NgClass, FormsModule, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, ChartComponent],
+    imports: [LoadingComponent, NgIf, NgFor, NgClass, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, ChartComponent],
     templateUrl: './portfolio-report.component.html',
     styleUrl: './portfolio-report.component.css'
 })
 export class PortfolioReportComponent {
     private readonly investmentReportService = inject(InvestmentReportService);
     private readonly chartTheme = inject(ChartThemeService);
-    private readonly route = inject(ActivatedRoute);
-    private readonly router = inject(Router);
     protected readonly reportContext = inject(ReportContextService);
 
-    isLoading = true;
-    isLoadingDetail = false;
-    referenceAssetSymbol = '';
-    portfolios: PortfolioOverviewItem[] = [];
-    selectedPortfolioId = 0;
+    isLoadingDetail = true;
     detail: PortfolioDetailReport | null = null;
     holdingGroups: HoldingGroup[] = [];
     expandedKey: string | null = null;
@@ -56,45 +48,18 @@ export class PortfolioReportComponent {
     compositionOptions: EChartsOption = {};
     evolutionOptions: EChartsOption = {};
 
-    private currentAssetId: number | null = null;
-
     constructor() {
         effect(() => {
             const assetId = this.reportContext.currencyAssetId();
-            if (assetId == null) return;
-            this.currentAssetId = assetId;
-            this.loadPortfolios(assetId);
-            this.loadDetailIfReady();
-        });
-
-        this.route.queryParamMap.subscribe(params => {
-            this.selectedPortfolioId = Number(params.get('portfolioId') ?? 0);
-            this.loadDetailIfReady();
+            const portfolioId = this.reportContext.selectedPortfolioId();
+            if (assetId == null || portfolioId == null) return;
+            this.loadDetail(portfolioId, assetId);
         });
     }
 
-    private loadPortfolios(assetId: number): void {
-        this.isLoading = true;
-        this.investmentReportService.getPortfoliosOverview(assetId).subscribe(data => {
-            this.referenceAssetSymbol = data.referenceAssetSymbol;
-            this.portfolios = data.portfolios;
-            this.isLoading = false;
-        });
-    }
-
-    onPortfolioChange(): void {
-        this.router.navigate([], { queryParams: { portfolioId: this.selectedPortfolioId || null }, queryParamsHandling: 'merge', replaceUrl: true });
-    }
-
-    private loadDetailIfReady(): void {
-        if (this.selectedPortfolioId === 0 || this.currentAssetId == null) {
-            this.detail = null;
-            this.holdingGroups = [];
-            return;
-        }
-
+    private loadDetail(portfolioId: number, assetId: number): void {
         this.isLoadingDetail = true;
-        this.investmentReportService.getPortfolioDetail(this.selectedPortfolioId, this.currentAssetId).subscribe(detail => {
+        this.investmentReportService.getPortfolioDetail(portfolioId, assetId).subscribe(detail => {
             this.isLoadingDetail = false;
             this.detail = detail;
             this.holdingGroups = this.groupByAsset(detail.holdings);

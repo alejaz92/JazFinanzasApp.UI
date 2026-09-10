@@ -1,13 +1,9 @@
 import { Component, effect, inject } from '@angular/core';
 import { NgIf, NgFor, DatePipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
 import type { EChartsOption } from 'echarts';
 
 import { InvestmentReportService } from '../services/investment-report.service';
 import { CryptoDetailReport } from '../models/investment-report.model';
-import { AssetService } from '../../asset/services/asset.service';
-import { Asset } from '../../asset/models/asset.model';
 import { ReportContextService } from '../../../shared/services/report-context.service';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
@@ -17,66 +13,40 @@ import { CurrencyInvestmentFormatPipe } from '../../../shared/pipes/currencyInve
 import { MovementTypePipe } from '../../../shared/pipes/movementType/movement-type.pipe';
 import { CommerceTypePipe } from '../../../shared/pipes/commerceType/commerce-type.pipe';
 
-// Cryptos — Detalle (Fase 20, Flujo 5): reemplaza el gauge de la pantalla vieja por la línea de
-// cotización con las compras/ventas marcadas encima y el precio promedio de compra como línea
-// horizontal — "se ve de una si compré caro o barato" (Flujo 5, sección 6). `assetId` de la cripto
-// vive en el query param `cryptoAssetId` (T12), igual que `portfolioId` en Carteras — Detalle.
+// Cryptos — Detalle (Fase 20, Flujo 5; selector de crypto movido a la barra de filtros compartida
+// el 2026-09-10, mismo criterio que "Por tarjeta" — antes vivía suelto en el cuerpo de esta
+// pantalla, fuera de la barra): reemplaza el gauge de la pantalla vieja por la línea de cotización
+// con las compras/ventas marcadas encima y el precio promedio de compra como línea horizontal — "se
+// ve de una si compré caro o barato" (Flujo 5, sección 6).
 @Component({
     selector: 'app-crypto-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, FormsModule, DatePipe, ChartComponent, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, MovementTypePipe, CommerceTypePipe],
+    imports: [LoadingComponent, NgIf, NgFor, DatePipe, ChartComponent, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, MovementTypePipe, CommerceTypePipe],
     templateUrl: './crypto-report.component.html',
     styleUrl: './crypto-report.component.css'
 })
 export class CryptoReportComponent {
     private readonly investmentReportService = inject(InvestmentReportService);
-    private readonly assetService = inject(AssetService);
     private readonly chartTheme = inject(ChartThemeService);
-    private readonly route = inject(ActivatedRoute);
-    private readonly router = inject(Router);
     protected readonly reportContext = inject(ReportContextService);
 
-    isLoading = true;
-    isLoadingDetail = false;
-    cryptos: Asset[] = [];
-    selectedCryptoAssetId = 0;
+    isLoadingDetail = true;
     detail: CryptoDetailReport | null = null;
 
     priceOptions: EChartsOption = {};
 
-    private currentAssetId: number | null = null;
-
     constructor() {
-        this.assetService.getAssetsByTypeName('Criptomoneda').subscribe(response => {
-            this.cryptos = response;
-            this.isLoading = false;
-        });
-
         effect(() => {
             const assetId = this.reportContext.currencyAssetId();
-            if (assetId == null) return;
-            this.currentAssetId = assetId;
-            this.loadDetailIfReady();
-        });
-
-        this.route.queryParamMap.subscribe(params => {
-            this.selectedCryptoAssetId = Number(params.get('cryptoAssetId') ?? 0);
-            this.loadDetailIfReady();
+            const cryptoAssetId = this.reportContext.selectedCryptoAssetId();
+            if (assetId == null || cryptoAssetId == null) return;
+            this.loadDetail(cryptoAssetId, assetId);
         });
     }
 
-    onCryptoChange(): void {
-        this.router.navigate([], { queryParams: { cryptoAssetId: this.selectedCryptoAssetId || null }, queryParamsHandling: 'merge', replaceUrl: true });
-    }
-
-    private loadDetailIfReady(): void {
-        if (this.selectedCryptoAssetId === 0 || this.currentAssetId == null) {
-            this.detail = null;
-            return;
-        }
-
+    private loadDetail(cryptoAssetId: number, assetId: number): void {
         this.isLoadingDetail = true;
-        this.investmentReportService.getCryptoDetail(this.selectedCryptoAssetId, this.currentAssetId).subscribe(detail => {
+        this.investmentReportService.getCryptoDetail(cryptoAssetId, assetId).subscribe(detail => {
             this.isLoadingDetail = false;
             this.detail = detail;
             setTimeout(() => this.renderPriceChart(detail), 0);

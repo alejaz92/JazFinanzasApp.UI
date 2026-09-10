@@ -6,9 +6,13 @@ import { AssetService } from '../../asset/services/asset.service';
 import { Asset } from '../../asset/models/asset.model';
 import { CardService } from '../../card/services/card.service';
 import { Card } from '../../card/models/card.model';
+import { PortfolioService } from '../../portfolios/services/portfolio.service';
+import { Portfolio } from '../../portfolios/models/portfolio.model';
 import { ReportContextService, PeriodPreset } from '../../../shared/services/report-context.service';
 
 type CardFilterMode = 'none' | 'required' | 'optional';
+type PortfolioFilterMode = 'none' | 'required';
+type CryptoFilterMode = 'none' | 'required';
 
 interface NavLink {
     type: 'link';
@@ -55,12 +59,15 @@ export class ReportsShellComponent implements OnInit {
 
     private readonly assetService = inject(AssetService);
     private readonly cardService = inject(CardService);
+    private readonly portfolioService = inject(PortfolioService);
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
     protected readonly reportContext = inject(ReportContextService);
 
     readonly referenceAssets = signal<Asset[]>([]);
     readonly cards = signal<Card[]>([]);
+    readonly portfolios = signal<Portfolio[]>([]);
+    readonly cryptos = signal<Asset[]>([]);
 
     // Algunas pantallas (ej. Patrimonio) son una foto de hoy + una serie fija, no un rango elegible
     // — el propio hijo declara `data: { usesPeriod: false }` en report.routes.ts y el filtro se oculta.
@@ -71,6 +78,11 @@ export class ReportsShellComponent implements OnInit {
     // report.routes.ts y esta barra se encarga de mostrarlo y de mantenerlo en la URL.
     readonly cardFilterMode = signal<CardFilterMode>('none');
     readonly showRecurringFilter = signal(false);
+
+    // Corrección 2026-09-10: mismo criterio para Carteras — Detalle y Cryptos — Detalle, cuyos
+    // selectores (Cartera / Crypto) vivían sueltos en el cuerpo de cada pantalla, fuera de la barra.
+    readonly portfolioFilterMode = signal<PortfolioFilterMode>('none');
+    readonly cryptoFilterMode = signal<CryptoFilterMode>('none');
 
     readonly periodOptions: { value: PeriodPreset; label: string }[] = [
         { value: 'this-month', label: 'Este mes' },
@@ -176,12 +188,24 @@ export class ReportsShellComponent implements OnInit {
             this.ensureCardSelected();
         });
 
+        this.portfolioService.getAllPortfolios().subscribe(portfolios => {
+            this.portfolios.set(portfolios);
+            this.ensurePortfolioSelected();
+        });
+
+        this.assetService.getAssetsByTypeName('Criptomoneda').subscribe(cryptos => {
+            this.cryptos.set(cryptos);
+            this.ensureCryptoSelected();
+        });
+
         this.updateRouteFlags();
         this.router.events
             .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
             .subscribe(() => {
                 this.updateRouteFlags();
                 this.ensureCardSelected();
+                this.ensurePortfolioSelected();
+                this.ensureCryptoSelected();
             });
     }
 
@@ -190,6 +214,8 @@ export class ReportsShellComponent implements OnInit {
         this.usesPeriod.set(data?.['usesPeriod'] ?? true);
         this.cardFilterMode.set(data?.['cardFilter'] ?? 'none');
         this.showRecurringFilter.set(data?.['showRecurringFilter'] ?? false);
+        this.portfolioFilterMode.set(data?.['portfolioFilter'] ?? 'none');
+        this.cryptoFilterMode.set(data?.['cryptoFilter'] ?? 'none');
     }
 
     // Si la pantalla activa exige una tarjeta (cardFilter: 'required') y todavía no hay ninguna
@@ -200,6 +226,22 @@ export class ReportsShellComponent implements OnInit {
         const current = this.reportContext.selectedCardId();
         const stillExists = current != null && this.cards().some(c => c.id === current);
         if (!stillExists) this.reportContext.setCardId(this.cards()[0].id);
+    }
+
+    // Mismo criterio que ensureCardSelected, para Carteras — Detalle.
+    private ensurePortfolioSelected(): void {
+        if (this.portfolioFilterMode() !== 'required' || this.portfolios().length === 0) return;
+        const current = this.reportContext.selectedPortfolioId();
+        const stillExists = current != null && this.portfolios().some(p => p.id === current);
+        if (!stillExists) this.reportContext.setPortfolioId(this.portfolios()[0].id);
+    }
+
+    // Mismo criterio que ensureCardSelected, para Cryptos — Detalle.
+    private ensureCryptoSelected(): void {
+        if (this.cryptoFilterMode() !== 'required' || this.cryptos().length === 0) return;
+        const current = this.reportContext.selectedCryptoAssetId();
+        const stillExists = current != null && this.cryptos().some(c => c.id === current);
+        if (!stillExists) this.reportContext.setCryptoAssetId(this.cryptos()[0].id);
     }
 
     onPeriodChange(preset: PeriodPreset): void {
@@ -229,6 +271,14 @@ export class ReportsShellComponent implements OnInit {
 
     onCardFilterChange(cardId: number): void {
         this.reportContext.setCardId(cardId);
+    }
+
+    onPortfolioFilterChange(portfolioId: number): void {
+        this.reportContext.setPortfolioId(portfolioId);
+    }
+
+    onCryptoFilterChange(cryptoAssetId: number): void {
+        this.reportContext.setCryptoAssetId(cryptoAssetId);
     }
 
     onIncludeRecurringChange(value: boolean): void {
