@@ -23,12 +23,12 @@ export class InvestmentReportService {
     return this.http.get<InvestmentOverview>(`${environment.apiBaseURL}/api/investmentreport/Overview/${assetId}`);
   }
 
-  getPortfoliosOverview(assetId: number): Observable<PortfoliosOverview> {
-    return this.http.get<PortfoliosOverview>(`${environment.apiBaseURL}/api/investmentreport/Portfolios/${assetId}`);
+  getPortfoliosOverview(assetId: number, includeCash: boolean = true): Observable<PortfoliosOverview> {
+    return this.http.get<PortfoliosOverview>(`${environment.apiBaseURL}/api/investmentreport/Portfolios/${assetId}?includeCash=${includeCash}`);
   }
 
-  getPortfolioDetail(portfolioId: number, assetId: number): Observable<PortfolioDetailReport> {
-    return this.http.get<PortfolioDetailReport>(`${environment.apiBaseURL}/api/investmentreport/Portfolios/${portfolioId}/Detail/${assetId}`);
+  getPortfolioDetail(portfolioId: number, assetId: number, includeCash: boolean = true): Observable<PortfolioDetailReport> {
+    return this.http.get<PortfolioDetailReport>(`${environment.apiBaseURL}/api/investmentreport/Portfolios/${portfolioId}/Detail/${assetId}?includeCash=${includeCash}`);
   }
 
   getStocks(assetId: number): Observable<StocksReport> {

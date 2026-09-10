@@ -1,5 +1,6 @@
 import { Component, effect, inject } from '@angular/core';
 import { NgIf, NgFor, NgClass } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import type { EChartsOption } from 'echarts';
 
 import { InvestmentReportService } from '../services/investment-report.service';
@@ -31,7 +32,7 @@ interface HoldingGroup {
 @Component({
     selector: 'app-portfolio-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, NgClass, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, ChartComponent],
+    imports: [LoadingComponent, NgIf, NgFor, NgClass, FormsModule, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, ChartComponent],
     templateUrl: './portfolio-report.component.html',
     styleUrl: './portfolio-report.component.css'
 })
@@ -41,6 +42,9 @@ export class PortfolioReportComponent {
     protected readonly reportContext = inject(ReportContextService);
 
     isLoadingDetail = true;
+    // Switch de Carteras — General/Detalle (2026-09-10): ver comentario homólogo en
+    // PortfolioGeneralReportComponent.
+    includeCash = true;
     detail: PortfolioDetailReport | null = null;
     holdingGroups: HoldingGroup[] = [];
     expandedKey: string | null = null;
@@ -48,18 +52,29 @@ export class PortfolioReportComponent {
     compositionOptions: EChartsOption = {};
     evolutionOptions: EChartsOption = {};
 
+    private currentPortfolioId: number | null = null;
+    private currentAssetId: number | null = null;
+
     constructor() {
         effect(() => {
             const assetId = this.reportContext.currencyAssetId();
             const portfolioId = this.reportContext.selectedPortfolioId();
             if (assetId == null || portfolioId == null) return;
+            this.currentAssetId = assetId;
+            this.currentPortfolioId = portfolioId;
             this.loadDetail(portfolioId, assetId);
         });
     }
 
+    onIncludeCashChange(): void {
+        if (this.currentPortfolioId != null && this.currentAssetId != null) {
+            this.loadDetail(this.currentPortfolioId, this.currentAssetId);
+        }
+    }
+
     private loadDetail(portfolioId: number, assetId: number): void {
         this.isLoadingDetail = true;
-        this.investmentReportService.getPortfolioDetail(portfolioId, assetId).subscribe(detail => {
+        this.investmentReportService.getPortfolioDetail(portfolioId, assetId, this.includeCash).subscribe(detail => {
             this.isLoadingDetail = false;
             this.detail = detail;
             this.holdingGroups = this.groupByAsset(detail.holdings);
