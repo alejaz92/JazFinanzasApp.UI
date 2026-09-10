@@ -44,6 +44,10 @@ export class ReportContextService {
   private readonly portfolioId = signal<number | null>(null);
   private readonly cryptoAssetId = signal<number | null>(null);
 
+  // Corrección 2026-09-10: switch de Carteras — General/Detalle para incluir o no el efectivo en
+  // cuentas — mismo criterio que includeRecurring (vive en la barra de filtros y en la URL).
+  private readonly includeCashFlag = signal<boolean>(true);
+
   readonly period = computed<ReportPeriod>(() => ({
     preset: this.periodPreset(),
     from: this.customFrom() ?? undefined,
@@ -55,6 +59,7 @@ export class ReportContextService {
   readonly includeRecurringExpenses = this.includeRecurring.asReadonly();
   readonly selectedPortfolioId = this.portfolioId.asReadonly();
   readonly selectedCryptoAssetId = this.cryptoAssetId.asReadonly();
+  readonly includeCash = this.includeCashFlag.asReadonly();
 
   constructor() {
     this.readFromUrl(this.router.url);
@@ -92,6 +97,11 @@ export class ReportContextService {
     this.navigate({ cryptoAssetId });
   }
 
+  setIncludeCash(value: boolean): void {
+    // Se omite de la URL en su valor default (true) para no ensuciar el enlace en el caso común.
+    this.navigate({ includeCash: value ? null : 'false' });
+  }
+
   private readFromUrl(url: string): void {
     const qp = this.router.parseUrl(url).queryParams;
     this.periodPreset.set(this.isPreset(qp['period']) ? qp['period'] : DEFAULT_PERIOD);
@@ -102,6 +112,7 @@ export class ReportContextService {
     this.includeRecurring.set(qp['includeRecurring'] !== 'false');
     this.portfolioId.set(qp['portfolioId'] != null ? Number(qp['portfolioId']) : null);
     this.cryptoAssetId.set(qp['cryptoAssetId'] != null ? Number(qp['cryptoAssetId']) : null);
+    this.includeCashFlag.set(qp['includeCash'] !== 'false');
   }
 
   private isPreset(value: unknown): value is PeriodPreset {

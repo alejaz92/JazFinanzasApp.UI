@@ -126,14 +126,14 @@ export const reportRoutes: Routes = [
             {
                 path: 'portfolio-general',
                 loadComponent: () => import('./portfolio-general-report/portfolio-general-report.component').then(m => m.PortfolioGeneralReportComponent),
-                data: { usesPeriod: false }
+                data: { usesPeriod: false, includeCashFilter: true }
             },
             {
                 // Corrección 2026-09-10: el selector de cartera pasa a la barra de filtros de la
                 // sección, mismo criterio que "Por tarjeta" (cardFilter: 'required').
                 path: 'portfolio-detail',
                 loadComponent: () => import('./portfolio-report/portfolio-report.component').then(m => m.PortfolioReportComponent),
-                data: { usesPeriod: false, portfolioFilter: 'required' }
+                data: { usesPeriod: false, portfolioFilter: 'required', includeCashFilter: true }
             },
             {
                 path: 'contributions-vs-performance',

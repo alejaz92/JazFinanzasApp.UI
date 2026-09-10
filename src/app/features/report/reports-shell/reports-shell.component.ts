@@ -84,6 +84,10 @@ export class ReportsShellComponent implements OnInit {
     readonly portfolioFilterMode = signal<PortfolioFilterMode>('none');
     readonly cryptoFilterMode = signal<CryptoFilterMode>('none');
 
+    // Corrección 2026-09-10: switch de Carteras — General/Detalle para incluir o no el efectivo en
+    // cuentas — mismo criterio que showRecurringFilter, vivía suelto en el cuerpo de cada pantalla.
+    readonly showIncludeCashFilter = signal(false);
+
     readonly periodOptions: { value: PeriodPreset; label: string }[] = [
         { value: 'this-month', label: 'Este mes' },
         { value: 'last-month', label: 'Mes pasado' },
@@ -216,6 +220,7 @@ export class ReportsShellComponent implements OnInit {
         this.showRecurringFilter.set(data?.['showRecurringFilter'] ?? false);
         this.portfolioFilterMode.set(data?.['portfolioFilter'] ?? 'none');
         this.cryptoFilterMode.set(data?.['cryptoFilter'] ?? 'none');
+        this.showIncludeCashFilter.set(data?.['includeCashFilter'] ?? false);
     }
 
     // Si la pantalla activa exige una tarjeta (cardFilter: 'required') y todavía no hay ninguna
@@ -283,6 +288,10 @@ export class ReportsShellComponent implements OnInit {
 
     onIncludeRecurringChange(value: boolean): void {
         this.reportContext.setIncludeRecurring(value);
+    }
+
+    onIncludeCashChange(value: boolean): void {
+        this.reportContext.setIncludeCash(value);
     }
 
     toggleSidebar(): void {

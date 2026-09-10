@@ -1,6 +1,5 @@
 import { Component, effect, inject } from '@angular/core';
 import { NgIf, NgFor } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import type { EChartsOption } from 'echarts';
 
@@ -21,7 +20,7 @@ import { CurrencyInvestmentFormatPipe } from '../../../shared/pipes/currencyInve
 @Component({
     selector: 'app-portfolio-general-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, FormsModule, RouterLink, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, ChartComponent],
+    imports: [LoadingComponent, NgIf, NgFor, RouterLink, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, ChartComponent],
     templateUrl: './portfolio-general-report.component.html',
     styleUrl: './portfolio-general-report.component.css'
 })
@@ -31,10 +30,6 @@ export class PortfolioGeneralReportComponent {
     protected readonly reportContext = inject(ReportContextService);
 
     isLoading = true;
-    // Switch de Carteras — General/Detalle (2026-09-10): una cartera mezcla efectivo e inversión por
-    // diseño (1.3 del plan) — apagarlo muestra solo lo realmente invertido, mismo criterio que ya
-    // usan Panorama/Bolsa/Cryptos. Arranca prendido para no cambiar el comportamiento existente.
-    includeCash = true;
     referenceAssetSymbol = '';
     portfolios: PortfolioOverviewItem[] = [];
     totalActualValue = 0;
@@ -43,25 +38,23 @@ export class PortfolioGeneralReportComponent {
     distributionOptions: EChartsOption = {};
     originalVsActualOptions: EChartsOption = {};
 
-    private currentAssetId: number | null = null;
-
     constructor() {
+        // Switch "Incluir efectivo" (2026-09-10): vive en la barra de filtros de reports-shell
+        // (includeCashFilter: true en la ruta), no en el cuerpo de la pantalla — mismo criterio que
+        // moneda/tarjeta/cartera. Una cartera mezcla efectivo e inversión por diseño (1.3 del plan);
+        // apagarlo muestra solo lo realmente invertido, mismo criterio que ya usan Panorama/Bolsa/Cryptos.
         effect(() => {
             const assetId = this.reportContext.currencyAssetId();
+            this.reportContext.includeCash();
             if (assetId != null) {
-                this.currentAssetId = assetId;
                 this.load(assetId);
             }
         });
     }
 
-    onIncludeCashChange(): void {
-        if (this.currentAssetId != null) this.load(this.currentAssetId);
-    }
-
     private load(assetId: number): void {
         this.isLoading = true;
-        this.investmentReportService.getPortfoliosOverview(assetId, this.includeCash).subscribe(data => {
+        this.investmentReportService.getPortfoliosOverview(assetId, this.reportContext.includeCash()).subscribe(data => {
             this.referenceAssetSymbol = data.referenceAssetSymbol;
             this.portfolios = [...data.portfolios].sort((a, b) => b.actualValue - a.actualValue);
             this.totalActualValue = this.portfolios.reduce((sum, p) => sum + p.actualValue, 0);

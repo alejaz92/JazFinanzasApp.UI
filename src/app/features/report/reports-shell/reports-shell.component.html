@@ -163,6 +163,14 @@
       </div>
     }
 
+    @if (showIncludeCashFilter()) {
+      <div class="form-check form-switch mb-0" title="Incluir dinero en cuentas (efectivo) en el cálculo">
+        <input class="form-check-input" type="checkbox" id="reportIncludeCash"
+               [ngModel]="reportContext.includeCash()" (ngModelChange)="onIncludeCashChange($event)">
+        <label class="form-check-label small" for="reportIncludeCash">Incluir efectivo</label>
+      </div>
+    }
+
     @if (referenceAssets().length > 0) {
       <div class="d-flex align-items-center gap-2 ms-auto" title="Moneda de referencia de la sección">
         <label for="reportCurrency" class="form-label mb-0 small text-body-secondary">Moneda:</label>
