@@ -77,7 +77,10 @@ export class PortfolioGeneralReportComponent {
     private renderDistribution(): void {
         const names = this.portfolios.map(p => p.portfolioName);
         const values = this.portfolios.map(p => p.actualValue);
-        this.distributionOptions = this.chartTheme.pieOptions(names, values, { donut: true, showLegend: true });
+        // formatValue explícito (2026-09-10): sin esto, pieOptions cae a su formateador default en
+        // "en-US" (coma como separador de miles) en vez de la convención es-AR del resto de la sección.
+        const fmt = (v: number) => this.chartTheme.formatNumber(v, { maximumFractionDigits: 0 });
+        this.distributionOptions = this.chartTheme.pieOptions(names, values, { donut: true, showLegend: true, formatValue: fmt });
     }
 
     private renderOriginalVsActual(): void {

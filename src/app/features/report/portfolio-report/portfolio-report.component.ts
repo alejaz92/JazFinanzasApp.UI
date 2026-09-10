@@ -108,8 +108,11 @@ export class PortfolioReportComponent {
     private renderEvolution(series: InvestmentValuePoint[]): void {
         const labels = series.map(s => new Date(s.month).toLocaleDateString('es-AR', { month: 'short', year: 'numeric' }));
         const values = series.map(s => s.value);
+        // formatValue explícito (2026-09-10): sin esto, lineOptions cae a su formateador default en
+        // "en-US" (coma como separador de miles) en vez de la convención es-AR del resto de la sección.
+        const fmt = (v: number) => this.chartTheme.formatNumber(v, { maximumFractionDigits: 0 });
         // Ahora comparte fila con la composición (mitad de ancho, ver corrección 2026-09-10): 12
         // etiquetas de mes se superponen si se muestran todas — mismo ajuste que Panorama.
-        this.evolutionOptions = this.chartTheme.lineOptions(labels, values, { colorIndex: 6, smooth: true });
+        this.evolutionOptions = this.chartTheme.lineOptions(labels, values, { colorIndex: 6, smooth: true, formatValue: fmt });
     }
 }

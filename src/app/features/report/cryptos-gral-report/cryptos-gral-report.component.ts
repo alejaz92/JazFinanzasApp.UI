@@ -85,8 +85,12 @@ export class CryptosGralReportComponent {
         const tickers = this.holdings.map(h => h.assetName);
         const symbols = this.holdings.map(h => h.symbol);
         const values = this.holdings.map(h => h.actualValue);
+        // formatValue explícito (2026-09-10): sin esto, pieOptions cae a su formateador default en
+        // "en-US" (coma como separador de miles) en vez de la convención es-AR del resto de la sección.
+        const fmt = (v: number) => this.chartTheme.formatNumber(v, { maximumFractionDigits: 0 });
         this.distributionOptions = this.chartTheme.pieOptions(symbols, values, {
             formatTooltipName: (symbol, i) => `${tickers[i]} (${symbol})`,
+            formatValue: fmt,
         });
     }
 
@@ -94,7 +98,8 @@ export class CryptosGralReportComponent {
         if (series.length === 0) { this.walletEvolutionOptions = {}; return; }
         const labels = series.map(s => new Date(s.month).toLocaleDateString('es-AR'));
         const values = series.map(s => s.value);
-        this.walletEvolutionOptions = this.chartTheme.lineOptions(labels, values, { colorIndex: 2 });
+        const fmt = (v: number) => this.chartTheme.formatNumber(v, { maximumFractionDigits: 0 });
+        this.walletEvolutionOptions = this.chartTheme.lineOptions(labels, values, { colorIndex: 2, formatValue: fmt });
     }
 
     private renderBuyVolume(purchasesByMonth: CryptoPurchaseMonth[]): void {
