@@ -14,7 +14,7 @@
         </div>
         <div class="col-md-4 mt-1">
             <div class="card">
-                <div class="card-header">Invertido (En {{ referenceAssetSymbol }})</div>
+                <div class="card-header">Valor de Origen (En {{ referenceAssetSymbol }})</div>
                 <div class="card-body">
                     <h4 class="card-title mb-0">{{ totalOriginalValue | currencyFiatFormat }}</h4>
                 </div>
@@ -48,7 +48,7 @@
             </div>
             <div class="col-md-6 mt-1">
                 <div class="card">
-                    <div class="card-header">Invertido vs Valor Actual por Cartera (En {{ referenceAssetSymbol }})</div>
+                    <div class="card-header">Valor de Origen vs Valor Actual por Cartera (En {{ referenceAssetSymbol }})</div>
                     <div class="card-body">
                         <app-chart [options]="originalVsActualOptions" [height]="320"></app-chart>
                     </div>
@@ -68,10 +68,10 @@
                                 <thead class="table-header-brand">
                                     <tr>
                                         <th>Cartera</th>
-                                        <th class="text-end">Invertido</th>
+                                        <th class="text-end">Valor de Origen</th>
                                         <th class="text-end">Valor Actual</th>
-                                        <th class="text-end">Distribución</th>
                                         <th class="text-end">%</th>
+                                        <th class="text-end">Distribución</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -81,10 +81,10 @@
                                         <td>{{ p.portfolioName }} <span class="badge bg-secondary-subtle text-secondary-emphasis" *ngIf="p.isDefault">default</span></td>
                                         <td class="text-end">{{ p.originalValue | currencyFiatFormat }}</td>
                                         <td class="text-end">{{ p.actualValue | currencyFiatFormat }}</td>
-                                        <td class="text-end">{{ p.sharePercent | currencyInvestmentFormat }} %</td>
                                         <td class="text-end" [class.text-success]="(p.gainLossPercent ?? 0) >= 0" [class.text-danger]="(p.gainLossPercent ?? 0) < 0">
                                             {{ p.gainLossPercent != null ? (p.gainLossPercent | currencyInvestmentFormat) + ' %' : '—' }}
                                         </td>
+                                        <td class="text-end">{{ p.sharePercent | currencyInvestmentFormat }} %</td>
                                     </tr>
                                 </tbody>
                             </table>

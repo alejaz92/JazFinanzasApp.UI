@@ -10,7 +10,7 @@
                 <div class="card-body">
                     <h4 class="card-title">{{ detail.actualValue | currencyFiatFormat }}</h4>
                     <p class="mb-0">
-                        Invertido: {{ detail.originalValue | currencyFiatFormat }}
+                        Valor de Origen: {{ detail.originalValue | currencyFiatFormat }}
                         <ng-container *ngIf="detail.gainLossPercent != null">
                             — <span [class.text-success]="detail.gainLossPercent >= 0" [class.text-danger]="detail.gainLossPercent < 0">{{ detail.gainLossPercent | currencyInvestmentFormat }} %</span>
                         </ng-container>
@@ -53,7 +53,7 @@
                                     <th>Tipo</th>
                                     <th>Activo</th>
                                     <th class="text-end">Cantidad</th>
-                                    <th class="text-end">Valor Original</th>
+                                    <th class="text-end">Valor de Origen</th>
                                     <th class="text-end">Valor Actual</th>
                                     <th class="text-end">%</th>
                                 </tr>

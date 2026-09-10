@@ -86,7 +86,7 @@ export class PortfolioGeneralReportComponent {
             xAxis: { type: 'category', data: names, axisLabel: { color: axisLabel }, axisLine: { lineStyle: { color: this.chartTheme.surface.axisLine } } },
             yAxis: { type: 'value', axisLabel: { color: axisLabel, formatter: (v: number) => fmt(v) }, splitLine: { lineStyle: { color: this.chartTheme.surface.splitLine } } },
             series: [
-                { name: 'Invertido', type: 'bar', data: this.portfolios.map(p => p.originalValue) },
+                { name: 'Valor de Origen', type: 'bar', data: this.portfolios.map(p => p.originalValue) },
                 { name: 'Valor Actual', type: 'bar', data: this.portfolios.map(p => p.actualValue) },
             ],
         };
