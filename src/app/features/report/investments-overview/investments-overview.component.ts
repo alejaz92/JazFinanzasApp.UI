@@ -1,6 +1,5 @@
 import { Component, effect, inject } from '@angular/core';
 import { NgIf } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import type { EChartsOption } from 'echarts';
 
 import { InvestmentReportService } from '../services/investment-report.service';
@@ -20,7 +19,7 @@ import { CurrencyInvestmentFormatPipe } from '../../../shared/pipes/currencyInve
 @Component({
     selector: 'app-investments-overview',
     standalone: true,
-    imports: [LoadingComponent, NgIf, RouterLink, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, ChartComponent],
+    imports: [LoadingComponent, NgIf, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, ChartComponent],
     templateUrl: './investments-overview.component.html',
     styleUrl: './investments-overview.component.css'
 })
