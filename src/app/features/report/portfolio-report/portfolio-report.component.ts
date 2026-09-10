@@ -102,7 +102,12 @@ export class PortfolioReportComponent {
             g.gainLossPercent = g.originalValue > 0 ? (g.actualValue / g.originalValue * 100) - 100 : null;
             g.visibleAccounts = g.accounts.filter(a => a.quantity !== 0);
         }
-        return groups.sort((a, b) => b.actualValue - a.actualValue);
+        // Mismo criterio que visibleAccounts, un nivel más arriba (2026-09-10): si TODAS las cuentas
+        // de un activo están cerradas, la cantidad neta del grupo también da 0 — esa fila ya no
+        // representa ninguna tenencia (Cotización "—", Valor Actual $0, -100% fijo) y su Valor de
+        // Origen/Actual realizado sigue sumado en los totales de arriba (detail.originalValue/
+        // actualValue, que no salen de holdingGroups), así que no se pierde nada al no listarla acá.
+        return groups.filter(g => g.quantity !== 0).sort((a, b) => b.actualValue - a.actualValue);
     }
 
     private renderCharts(detail: PortfolioDetailReport): void {
