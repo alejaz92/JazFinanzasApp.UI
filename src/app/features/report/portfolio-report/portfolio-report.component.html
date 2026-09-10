@@ -67,7 +67,9 @@
                                     <th>Tipo</th>
                                     <th>Activo</th>
                                     <th class="text-end">Cantidad</th>
+                                    <th class="text-end">Cotización de Origen</th>
                                     <th class="text-end">Valor de Origen</th>
+                                    <th class="text-end">Cotización Actual</th>
                                     <th class="text-end">Valor Actual</th>
                                     <th class="text-end">%</th>
                                 </tr>
@@ -82,20 +84,24 @@
                                             <span class="text-body-secondary small" *ngIf="g.accounts.length > 1">({{ g.accounts.length }} cuentas)</span>
                                         </td>
                                         <td class="text-end">{{ g.quantity | currencyInvestmentFormat }}</td>
+                                        <td class="text-end">{{ g.quantity !== 0 ? (g.originalValue / g.quantity | currencyQuoteFormat) : '—' }}</td>
                                         <td class="text-end">{{ g.originalValue | currencyFiatFormat }}</td>
+                                        <td class="text-end">{{ g.quantity !== 0 ? (g.actualValue / g.quantity | currencyQuoteFormat) : '—' }}</td>
                                         <td class="text-end">{{ g.actualValue | currencyFiatFormat }}</td>
                                         <td class="text-end" [class.text-success]="(g.gainLossPercent ?? 0) >= 0" [class.text-danger]="(g.gainLossPercent ?? 0) < 0">
                                             {{ g.gainLossPercent != null ? (g.gainLossPercent | currencyInvestmentFormat) + ' %' : '—' }}
                                         </td>
                                     </tr>
                                     <tr *ngIf="expandedKey === g.key" class="table-secondary">
-                                        <td colspan="6" class="p-0">
+                                        <td colspan="8" class="p-0">
                                             <table class="table table-sm mb-0">
                                                 <tbody>
                                                     <tr *ngFor="let a of g.accounts">
                                                         <td class="ps-4 text-body-secondary">{{ a.accountName }}</td>
                                                         <td class="text-end">{{ a.quantity | currencyInvestmentFormat }}</td>
+                                                        <td class="text-end">{{ a.quantity !== 0 ? (a.originalValue / a.quantity | currencyQuoteFormat) : '—' }}</td>
                                                         <td class="text-end">{{ a.originalValue | currencyFiatFormat }}</td>
+                                                        <td class="text-end">{{ a.quantity !== 0 ? (a.actualValue / a.quantity | currencyQuoteFormat) : '—' }}</td>
                                                         <td class="text-end">{{ a.actualValue | currencyFiatFormat }}</td>
                                                         <td class="text-end" style="width: 90px;" [class.text-success]="(a.gainLossPercent ?? 0) >= 0" [class.text-danger]="(a.gainLossPercent ?? 0) < 0">
                                                             {{ a.gainLossPercent != null ? (a.gainLossPercent | currencyInvestmentFormat) + ' %' : '—' }}

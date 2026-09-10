@@ -10,6 +10,7 @@ import { ChartComponent } from '../../../shared/components/chart/chart.component
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { CurrencyInvestmentFormatPipe } from '../../../shared/pipes/currencyInvestmentFormat/currency-investment-format.pipe';
+import { CurrencyQuoteFormatPipe } from '../../../shared/pipes/currencyQuoteFormat/currency-quote-format.pipe';
 
 interface HoldingGroup {
     key: string;
@@ -31,7 +32,7 @@ interface HoldingGroup {
 @Component({
     selector: 'app-portfolio-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, NgClass, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, ChartComponent],
+    imports: [LoadingComponent, NgIf, NgFor, NgClass, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, CurrencyQuoteFormatPipe, ChartComponent],
     templateUrl: './portfolio-report.component.html',
     styleUrl: './portfolio-report.component.css'
 })

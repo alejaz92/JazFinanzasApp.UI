@@ -90,7 +90,9 @@
                                     <tr>
                                         <th>Crypto</th>
                                         <th class="text-end">Cantidad</th>
+                                        <th class="text-end">Cotización de Origen</th>
                                         <th class="text-end">Invertido</th>
+                                        <th class="text-end">Cotización Actual</th>
                                         <th class="text-end">Valor Actual</th>
                                         <th class="text-end">%</th>
                                     </tr>
@@ -99,7 +101,9 @@
                                     <tr *ngFor="let h of holdings">
                                         <td>{{ h.assetName }} <span class="text-body-secondary">({{ h.symbol }})</span></td>
                                         <td class="text-end">{{ h.quantity | currencyInvestmentFormat }}</td>
+                                        <td class="text-end">{{ h.quantity !== 0 ? (h.originalValue / h.quantity | currencyQuoteFormat) : '—' }}</td>
                                         <td class="text-end">{{ h.originalValue | currencyFiatFormat }}</td>
+                                        <td class="text-end">{{ h.quantity !== 0 ? (h.actualValue / h.quantity | currencyQuoteFormat) : '—' }}</td>
                                         <td class="text-end">{{ h.actualValue | currencyFiatFormat }}</td>
                                         <td class="text-end" [class.text-success]="(h.gainLossPercent ?? 0) >= 0" [class.text-danger]="(h.gainLossPercent ?? 0) < 0">
                                             {{ h.gainLossPercent != null ? (h.gainLossPercent | currencyInvestmentFormat) + ' %' : '—' }}

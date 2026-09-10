@@ -69,7 +69,9 @@
                                     <tr>
                                         <th>Ticker</th>
                                         <th class="text-end">Cantidad</th>
+                                        <th class="text-end">Cotización de Origen</th>
                                         <th class="text-end">Invertido</th>
+                                        <th class="text-end">Cotización Actual</th>
                                         <th class="text-end">Valor Actual</th>
                                         <th class="text-end">Peso</th>
                                         <th class="text-end">%</th>
@@ -79,7 +81,9 @@
                                     <tr *ngFor="let t of tickers">
                                         <td>{{ t.assetName }} <span class="text-body-secondary">({{ t.symbol }})</span></td>
                                         <td class="text-end">{{ t.quantity | currencyInvestmentFormat }}</td>
+                                        <td class="text-end">{{ t.quantity !== 0 ? (t.originalValue / t.quantity | currencyQuoteFormat) : '—' }}</td>
                                         <td class="text-end">{{ t.originalValue | currencyFiatFormat }}</td>
+                                        <td class="text-end">{{ t.quantity !== 0 ? (t.actualValue / t.quantity | currencyQuoteFormat) : '—' }}</td>
                                         <td class="text-end">{{ t.actualValue | currencyFiatFormat }}</td>
                                         <td class="text-end">{{ t.weightPercent | currencyInvestmentFormat }} %</td>
                                         <td class="text-end" [class.text-success]="(t.gainLossPercent ?? 0) >= 0" [class.text-danger]="(t.gainLossPercent ?? 0) < 0">

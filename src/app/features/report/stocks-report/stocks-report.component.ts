@@ -10,6 +10,7 @@ import { ChartComponent } from '../../../shared/components/chart/chart.component
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { CurrencyInvestmentFormatPipe } from '../../../shared/pipes/currencyInvestmentFormat/currency-investment-format.pipe';
+import { CurrencyQuoteFormatPipe } from '../../../shared/pipes/currencyQuoteFormat/currency-quote-format.pipe';
 
 // Bolsa (Fase 20, Flujo 5): reescrita sobre InvestmentReportController (Fase 19). A diferencia de
 // la pantalla vieja, ya no hay que elegir un AssetType — GetStocksAsync junta Acción Argentina,
@@ -19,7 +20,7 @@ import { CurrencyInvestmentFormatPipe } from '../../../shared/pipes/currencyInve
 @Component({
     selector: 'app-stocks-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, ChartComponent],
+    imports: [LoadingComponent, NgIf, NgFor, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, CurrencyQuoteFormatPipe, ChartComponent],
     templateUrl: './stocks-report.component.html',
     styleUrl: './stocks-report.component.css'
 })
