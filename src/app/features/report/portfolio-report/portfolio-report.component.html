@@ -4,36 +4,50 @@
 
 <div *ngIf="!isLoadingDetail && detail">
     <div class="row">
-        <div class="col-md-6 mt-1">
+        <div class="col-md-4 mt-1">
             <div class="card">
-                <div class="card-header">Valor Total (En {{ detail.referenceAssetSymbol }})</div>
+                <div class="card-header">Valor Actual (En {{ detail.referenceAssetSymbol }})</div>
                 <div class="card-body">
-                    <h4 class="card-title">{{ detail.actualValue | currencyFiatFormat }}</h4>
-                    <p class="mb-0">
-                        Valor de Origen: {{ detail.originalValue | currencyFiatFormat }}
-                        <ng-container *ngIf="detail.gainLossPercent != null">
-                            — <span [class.text-success]="detail.gainLossPercent >= 0" [class.text-danger]="detail.gainLossPercent < 0">{{ detail.gainLossPercent | currencyInvestmentFormat }} %</span>
-                        </ng-container>
-                    </p>
+                    <h4 class="card-title mb-0">{{ detail.actualValue | currencyFiatFormat }}</h4>
                 </div>
             </div>
         </div>
-        <div class="col-md-6 mt-1">
+        <div class="col-md-4 mt-1">
             <div class="card">
-                <div class="card-header">Composición (En {{ detail.referenceAssetSymbol }}) — coloreado por ganancia/pérdida</div>
+                <div class="card-header">Valor de Origen (En {{ detail.referenceAssetSymbol }})</div>
                 <div class="card-body">
-                    <app-chart [options]="compositionOptions" [height]="300"></app-chart>
+                    <h4 class="card-title mb-0">{{ detail.originalValue | currencyFiatFormat }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mt-1">
+            <div class="card">
+                <div class="card-header">Ganancia / Pérdida</div>
+                <div class="card-body">
+                    <h4 class="card-title mb-0" *ngIf="detail.gainLossPercent != null; else noPct"
+                        [class.text-success]="detail.gainLossPercent >= 0" [class.text-danger]="detail.gainLossPercent < 0">
+                        {{ detail.gainLossPercent | currencyInvestmentFormat }} %
+                    </h4>
+                    <ng-template #noPct><h4 class="card-title mb-0 text-body-secondary">—</h4></ng-template>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="row mt-4">
-        <div class="col-12 mt-1">
+        <div class="col-md-6 mt-1">
+            <div class="card">
+                <div class="card-header">Composición (En {{ detail.referenceAssetSymbol }}) — coloreado por ganancia/pérdida</div>
+                <div class="card-body">
+                    <app-chart [options]="compositionOptions" [height]="320"></app-chart>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mt-1">
             <div class="card">
                 <div class="card-header">Evolución del Valor (En {{ detail.referenceAssetSymbol }}, últimos 12 meses)</div>
                 <div class="card-body">
-                    <app-chart [options]="evolutionOptions" [height]="300"></app-chart>
+                    <app-chart [options]="evolutionOptions" [height]="320"></app-chart>
                 </div>
             </div>
         </div>

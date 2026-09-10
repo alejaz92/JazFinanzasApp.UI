@@ -105,6 +105,8 @@ export class PortfolioReportComponent {
     private renderEvolution(series: InvestmentValuePoint[]): void {
         const labels = series.map(s => new Date(s.month).toLocaleDateString('es-AR', { month: 'short', year: 'numeric' }));
         const values = series.map(s => s.value);
-        this.evolutionOptions = this.chartTheme.lineOptions(labels, values, { colorIndex: 6, smooth: true, skipLabels: false });
+        // Ahora comparte fila con la composición (mitad de ancho, ver corrección 2026-09-10): 12
+        // etiquetas de mes se superponen si se muestran todas — mismo ajuste que Panorama.
+        this.evolutionOptions = this.chartTheme.lineOptions(labels, values, { colorIndex: 6, smooth: true });
     }
 }
