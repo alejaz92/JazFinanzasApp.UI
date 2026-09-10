@@ -22,6 +22,12 @@ interface HoldingGroup {
     actualValue: number;
     gainLossPercent: number | null;
     accounts: PortfolioHoldingItem[];
+    // Cuentas con Cantidad 0 (posición totalmente cerrada, ver GetPortfolioHoldingsAsync): se
+    // mantienen en `accounts` porque el total del grupo necesita su Valor de Origen/Actual
+    // realizado (corrección 2026-09-10), pero desagregadas por cuenta ya no representan ninguna
+    // tenencia actual — mostrarlas ahí solo agrega filas con "Cotización" en "—" y porcentajes de
+    // "-100%" sin ninguna cuenta real detrás. El desglose por cuenta solo muestra estas.
+    visibleAccounts: PortfolioHoldingItem[];
 }
 
 // Carteras — Detalle (Fase 20, Flujo 5; selector de cartera movido a la barra de filtros compartida
@@ -82,7 +88,7 @@ export class PortfolioReportComponent {
             const key = `${h.assetType}|${h.assetName}|${h.symbol}`;
             let group = map.get(key);
             if (!group) {
-                group = { key, assetType: h.assetType, assetName: h.assetName, symbol: h.symbol, quantity: 0, originalValue: 0, actualValue: 0, gainLossPercent: null, accounts: [] };
+                group = { key, assetType: h.assetType, assetName: h.assetName, symbol: h.symbol, quantity: 0, originalValue: 0, actualValue: 0, gainLossPercent: null, accounts: [], visibleAccounts: [] };
                 map.set(key, group);
             }
             group.quantity += h.quantity;
@@ -92,7 +98,10 @@ export class PortfolioReportComponent {
         }
 
         const groups = Array.from(map.values());
-        for (const g of groups) g.gainLossPercent = g.originalValue > 0 ? (g.actualValue / g.originalValue * 100) - 100 : null;
+        for (const g of groups) {
+            g.gainLossPercent = g.originalValue > 0 ? (g.actualValue / g.originalValue * 100) - 100 : null;
+            g.visibleAccounts = g.accounts.filter(a => a.quantity !== 0);
+        }
         return groups.sort((a, b) => b.actualValue - a.actualValue);
     }
 
