@@ -58,6 +58,11 @@ export interface PortfolioHoldingItem {
     originalValue: number;
     actualValue: number;
     gainLossPercent: number | null;
+    // Calculadas en el backend sobre valores sin redondear (2026-09-10) — dividir originalValue/
+    // actualValue (ya redondeados a 2 decimales) acá en el frontend daba una cotización levemente
+    // distinta por cuenta para un mismo activo el mismo día. Null si quantity es 0.
+    originQuote: number | null;
+    currentQuote: number | null;
 }
 
 export interface PortfolioDetailReport {

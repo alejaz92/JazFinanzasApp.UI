@@ -7,7 +7,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 @Pipe({ name: 'currencyQuoteFormat' })
 export class CurrencyQuoteFormatPipe implements PipeTransform {
 
-  transform(value: number): string {
+  transform(value: number | null | undefined): string {
     if (value === null || value === undefined) return '';
 
     const abs = Math.abs(value);

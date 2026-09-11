@@ -86,7 +86,10 @@
                                         <td class="text-end">{{ g.quantity | currencyInvestmentFormat }}</td>
                                         <td class="text-end">{{ g.quantity !== 0 ? (g.originalValue / g.quantity | currencyQuoteFormat) : '—' }}</td>
                                         <td class="text-end">{{ g.originalValue | currencyFiatFormat }}</td>
-                                        <td class="text-end">{{ g.quantity !== 0 ? (g.actualValue / g.quantity | currencyQuoteFormat) : '—' }}</td>
+                                        <!-- La cotización ACTUAL de un activo es un único hecho de mercado (no un promedio como
+                                             la de origen) — se toma de cualquier cuenta abierta en vez de dividir el total del
+                                             grupo, para no reintroducir el mismo problema de redondeo por cuenta (2026-09-10). -->
+                                        <td class="text-end">{{ g.visibleAccounts.length > 0 ? (g.visibleAccounts[0].currentQuote | currencyQuoteFormat) : '—' }}</td>
                                         <td class="text-end">{{ g.actualValue | currencyFiatFormat }}</td>
                                         <td class="text-end" [class.text-success]="(g.gainLossPercent ?? 0) >= 0" [class.text-danger]="(g.gainLossPercent ?? 0) < 0">
                                             {{ g.gainLossPercent != null ? (g.gainLossPercent | currencyInvestmentFormat) + ' %' : '—' }}
@@ -99,9 +102,9 @@
                                             <td></td>
                                             <td class="ps-4 text-body-secondary">{{ a.accountName }}</td>
                                             <td class="text-end">{{ a.quantity | currencyInvestmentFormat }}</td>
-                                            <td class="text-end">{{ a.originalValue / a.quantity | currencyQuoteFormat }}</td>
+                                            <td class="text-end">{{ a.originQuote != null ? (a.originQuote | currencyQuoteFormat) : '—' }}</td>
                                             <td class="text-end">{{ a.originalValue | currencyFiatFormat }}</td>
-                                            <td class="text-end">{{ a.actualValue / a.quantity | currencyQuoteFormat }}</td>
+                                            <td class="text-end">{{ a.currentQuote != null ? (a.currentQuote | currencyQuoteFormat) : '—' }}</td>
                                             <td class="text-end">{{ a.actualValue | currencyFiatFormat }}</td>
                                             <td class="text-end" [class.text-success]="(a.gainLossPercent ?? 0) >= 0" [class.text-danger]="(a.gainLossPercent ?? 0) < 0">
                                                 {{ a.gainLossPercent != null ? (a.gainLossPercent | currencyInvestmentFormat) + ' %' : '—' }}
