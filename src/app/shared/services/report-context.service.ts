@@ -48,6 +48,14 @@ export class ReportContextService {
   // cuentas — mismo criterio que includeRecurring (vive en la barra de filtros y en la URL).
   private readonly includeCashFlag = signal<boolean>(true);
 
+  // Revisión de Bolsa (2026-09-12, D-11/D-14/D-15): mismo criterio que cardId/portfolioId/
+  // cryptoAssetId — filtro de tipo de activo (null = "Todos", D-11), ticker elegido para Bolsa —
+  // Detalle, e interruptor de posiciones cerradas (D-14), los tres en la barra de la sección y en
+  // la URL, no sueltos dentro de cada pantalla.
+  private readonly stockTypeId = signal<number | null>(null);
+  private readonly stockAssetId = signal<number | null>(null);
+  private readonly includeClosedFlag = signal<boolean>(false);
+
   readonly period = computed<ReportPeriod>(() => ({
     preset: this.periodPreset(),
     from: this.customFrom() ?? undefined,
@@ -60,6 +68,9 @@ export class ReportContextService {
   readonly selectedPortfolioId = this.portfolioId.asReadonly();
   readonly selectedCryptoAssetId = this.cryptoAssetId.asReadonly();
   readonly includeCash = this.includeCashFlag.asReadonly();
+  readonly selectedStockTypeId = this.stockTypeId.asReadonly();
+  readonly selectedStockAssetId = this.stockAssetId.asReadonly();
+  readonly includeClosedPositions = this.includeClosedFlag.asReadonly();
 
   constructor() {
     this.readFromUrl(this.router.url);
@@ -102,6 +113,20 @@ export class ReportContextService {
     this.navigate({ includeCash: value ? null : 'false' });
   }
 
+  setStockTypeId(stockTypeId: number): void {
+    // 0 ("Todos", D-11) se omite de la URL — es el default, igual que includeCash/includeRecurring.
+    this.navigate({ stockTypeId: stockTypeId === 0 ? null : stockTypeId });
+  }
+
+  setStockAssetId(stockAssetId: number): void {
+    this.navigate({ stockAssetId });
+  }
+
+  setIncludeClosedPositions(value: boolean): void {
+    // Se omite de la URL en su valor default (false, D-14) para no ensuciar el enlace en el caso común.
+    this.navigate({ includeClosed: value ? 'true' : null });
+  }
+
   private readFromUrl(url: string): void {
     const qp = this.router.parseUrl(url).queryParams;
     this.periodPreset.set(this.isPreset(qp['period']) ? qp['period'] : DEFAULT_PERIOD);
@@ -113,6 +138,9 @@ export class ReportContextService {
     this.portfolioId.set(qp['portfolioId'] != null ? Number(qp['portfolioId']) : null);
     this.cryptoAssetId.set(qp['cryptoAssetId'] != null ? Number(qp['cryptoAssetId']) : null);
     this.includeCashFlag.set(qp['includeCash'] !== 'false');
+    this.stockTypeId.set(qp['stockTypeId'] != null ? Number(qp['stockTypeId']) : null);
+    this.stockAssetId.set(qp['stockAssetId'] != null ? Number(qp['stockAssetId']) : null);
+    this.includeClosedFlag.set(qp['includeClosed'] === 'true');
   }
 
   private isPreset(value: unknown): value is PeriodPreset {

@@ -107,9 +107,19 @@ export const reportRoutes: Routes = [
                 data: { usesPeriod: false }
             },
             {
+                // Bolsa — General (revisión 2026-09-12, D-11/D-14): el filtro de tipo de activo y el
+                // interruptor de posiciones cerradas pasan a la barra de filtros de la sección, mismo
+                // criterio que Tarjetas/Carteras.
                 path: 'stocks',
                 loadComponent: () => import('./stocks-report/stocks-report.component').then(m => m.StocksReportComponent),
-                data: { usesPeriod: false }
+                data: { usesPeriod: false, showAssetTypeFilter: true, showIncludeClosedFilter: true }
+            },
+            {
+                // Bolsa — Detalle (revisión 2026-09-12, D-15): el selector de ticker pasa a la barra
+                // de filtros de la sección, mismo criterio que "Por tarjeta" (cardFilter: 'required').
+                path: 'stocks-detail',
+                loadComponent: () => import('./asset-detail-report/asset-detail-report.component').then(m => m.AssetDetailReportComponent),
+                data: { usesPeriod: false, stockFilter: 'required' }
             },
             {
                 path: 'cryptos-gral',

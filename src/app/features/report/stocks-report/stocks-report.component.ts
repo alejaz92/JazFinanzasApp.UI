@@ -1,26 +1,38 @@
 import { Component, effect, inject } from '@angular/core';
-import { NgIf, NgFor } from '@angular/common';
+import { NgIf, NgFor, NgClass, DatePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import type { EChartsOption } from 'echarts';
 
 import { InvestmentReportService } from '../services/investment-report.service';
-import { StockTickerReport } from '../models/investment-report.model';
+import { StockTickerReport, ClosedPosition } from '../models/investment-report.model';
 import { ReportContextService } from '../../../shared/services/report-context.service';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { CurrencyInvestmentFormatPipe } from '../../../shared/pipes/currencyInvestmentFormat/currency-investment-format.pipe';
-import { CurrencyQuoteFormatPipe } from '../../../shared/pipes/currencyQuoteFormat/currency-quote-format.pipe';
 
-// Bolsa (Fase 20, Flujo 5): reescrita sobre InvestmentReportController (Fase 19). A diferencia de
-// la pantalla vieja, ya no hay que elegir un AssetType — GetStocksAsync junta Acción Argentina,
-// CEDEAR, FCI y Acción USA en un solo reporte por ticker (un solo reporte, no uno por tipo, como
-// describe el Flujo 5). Reemplaza las dos tortas y la barra agrupada por barras divergentes de
-// ganancia/pérdida + dispersión rendimiento vs peso en la cartera.
+type SortColumn = 'assetTypeName' | 'tickerCount' | 'actualValue' | 'gainLossPercent';
+
+interface TypeGroup {
+    key: string;
+    assetTypeName: string;
+    tickerCount: number;
+    originalValue: number;
+    actualValue: number;
+    gainLossPercent: number | null;
+    tickers: StockTickerReport[];
+}
+
+// Bolsa — General (revisión 2026-09-12, Fase 20b, Flujo 5): reescrita sobre las Fase 19/20a.
+// Reemplaza las barras divergentes + dispersión de 30 tickers por el corte que la pantalla vieja
+// tenía y la reescritura de la Fase 20 había perdido — el tipo de activo — con un mapa de bloques
+// en dos niveles, una evolución de 12 meses por tipo, rendimiento por tipo y una tabla agrupada con
+// filas que se abren, en vez de una lista plana. D-10: cubre todo el entorno BOLSA (con los bonos).
 @Component({
     selector: 'app-stocks-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, CurrencyQuoteFormatPipe, ChartComponent],
+    imports: [LoadingComponent, NgIf, NgFor, NgClass, DatePipe, RouterLink, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, ChartComponent],
     templateUrl: './stocks-report.component.html',
     styleUrl: './stocks-report.component.css'
 })
@@ -34,14 +46,24 @@ export class StocksReportComponent {
     totalOriginalValue = 0;
     totalActualValue = 0;
     tickers: StockTickerReport[] = [];
+    closedPositions: ClosedPosition[] = [];
+    groups: TypeGroup[] = [];
+    expandedKey: string | null = null;
 
-    gainLossOptions: EChartsOption = {};
-    dispersionOptions: EChartsOption = {};
+    sortColumn: SortColumn = 'actualValue';
+    sortDirection: 'asc' | 'desc' = 'desc';
+
+    treemapOptions: EChartsOption = {};
+    evolutionOptions: EChartsOption = {};
+    typeGainLossOptions: EChartsOption = {};
+    tickerGainLossOptions: EChartsOption = {};
 
     constructor() {
         effect(() => {
             const assetId = this.reportContext.currencyAssetId();
-            if (assetId != null) this.load(assetId);
+            const assetTypeId = this.reportContext.selectedStockTypeId() ?? 0;
+            const includeClosed = this.reportContext.includeClosedPositions();
+            if (assetId != null) this.load(assetId, assetTypeId, includeClosed);
         });
     }
 
@@ -49,60 +71,108 @@ export class StocksReportComponent {
         return this.totalOriginalValue > 0 ? (this.totalActualValue / this.totalOriginalValue * 100) - 100 : null;
     }
 
-    private load(assetId: number): void {
+    private load(assetId: number, assetTypeId: number, includeClosed: boolean): void {
         this.isLoading = true;
-        this.investmentReportService.getStocks(assetId).subscribe(data => {
+        this.investmentReportService.getStocks(assetId, assetTypeId, includeClosed).subscribe(data => {
             this.referenceAssetSymbol = data.referenceAssetSymbol;
             this.totalOriginalValue = data.totalOriginalValue;
             this.totalActualValue = data.totalActualValue;
             this.tickers = data.tickers;
+            this.closedPositions = data.closedPositions;
+            this.groups = this.buildGroups(data.tickers);
+            this.applySort();
+            this.expandedKey = null;
             this.isLoading = false;
-            setTimeout(() => this.renderCharts(), 0);
+            setTimeout(() => {
+                this.renderTreemap();
+                this.renderEvolution(data.valueSeries);
+                this.renderTypeGainLoss(data.types);
+                this.renderTickerGainLoss();
+            }, 0);
         });
     }
 
-    private renderCharts(): void {
-        if (this.tickers.length === 0) return;
-        this.renderGainLoss();
-        this.renderDispersion();
+    toggleExpand(key: string): void {
+        this.expandedKey = this.expandedKey === key ? null : key;
     }
 
-    private renderGainLoss(): void {
-        const sorted = [...this.tickers].sort((a, b) => a.gainLossAmount - b.gainLossAmount);
-        const labels = sorted.map(t => t.symbol);
-        const values = sorted.map(t => t.gainLossAmount);
+    sortBy(column: SortColumn): void {
+        if (this.sortColumn === column) {
+            this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            this.sortColumn = column;
+            this.sortDirection = column === 'assetTypeName' ? 'asc' : 'desc';
+        }
+        this.applySort();
+    }
+
+    private applySort(): void {
+        const dir = this.sortDirection === 'asc' ? 1 : -1;
+        const col = this.sortColumn;
+        this.groups = [...this.groups].sort((a, b) => {
+            if (col === 'assetTypeName') return a.assetTypeName.localeCompare(b.assetTypeName) * dir;
+            const av = a[col] ?? -Infinity;
+            const bv = b[col] ?? -Infinity;
+            return (av - bv) * dir;
+        });
+    }
+
+    private buildGroups(tickers: StockTickerReport[]): TypeGroup[] {
+        const map = new Map<string, TypeGroup>();
+        for (const t of tickers) {
+            let group = map.get(t.assetTypeName);
+            if (!group) {
+                group = { key: t.assetTypeName, assetTypeName: t.assetTypeName, tickerCount: 0, originalValue: 0, actualValue: 0, gainLossPercent: null, tickers: [] };
+                map.set(t.assetTypeName, group);
+            }
+            group.tickerCount++;
+            group.originalValue += t.originalValue;
+            group.actualValue += t.actualValue;
+            group.tickers.push(t);
+        }
+        const groups = Array.from(map.values());
+        for (const g of groups) g.gainLossPercent = g.originalValue > 0 ? (g.actualValue / g.originalValue * 100) - 100 : null;
+        return groups;
+    }
+
+    private renderTreemap(): void {
+        if (this.groups.length === 0) { this.treemapOptions = {}; return; }
+        const groups = this.groups.map(g => ({
+            name: g.assetTypeName,
+            items: g.tickers.map(t => ({ name: t.symbol, value: t.actualValue, gainLossPercent: t.gainLossPercent })),
+        }));
+        this.treemapOptions = this.chartTheme.groupedTreemapOptions(groups, { formatValue: v => this.chartTheme.formatNumber(v, { maximumFractionDigits: 0 }) });
+    }
+
+    private renderEvolution(series: { month: string; byType: { assetTypeName: string; value: number }[] }[]): void {
+        if (series.length === 0) { this.evolutionOptions = {}; return; }
+        const labels = series.map(p => new Date(p.month).toLocaleDateString('es-AR', { month: 'short', year: 'numeric' }));
+        const typeNames = Array.from(new Set(series.flatMap(p => p.byType.map(t => t.assetTypeName))));
+        const chartSeries = typeNames.map(name => ({
+            name,
+            values: series.map(p => p.byType.find(t => t.assetTypeName === name)?.value ?? 0),
+        }));
         const fmt = (v: number) => this.chartTheme.formatNumber(v, { maximumFractionDigits: 0 });
-        this.gainLossOptions = this.chartTheme.divergingBarOptions(labels, values, { formatValue: fmt });
+        this.evolutionOptions = this.chartTheme.stackedAreaOptions(labels, chartSeries, { formatValue: fmt });
     }
 
-    private renderDispersion(): void {
-        const axisLabel = this.chartTheme.surface.axisLabel;
-        const fmt = (v: number) => this.chartTheme.formatNumber(v, { maximumFractionDigits: 1 });
+    private renderTypeGainLoss(types: { assetTypeName: string; gainLossPercent: number | null }[]): void {
+        if (types.length === 0) { this.typeGainLossOptions = {}; return; }
+        const sorted = [...types].sort((a, b) => (a.gainLossPercent ?? 0) - (b.gainLossPercent ?? 0));
+        const labels = sorted.map(t => t.assetTypeName);
+        const values = sorted.map(t => t.gainLossPercent ?? 0);
+        const fmt = (v: number) => `${this.chartTheme.formatNumber(v, { maximumFractionDigits: 1 })} %`;
+        this.typeGainLossOptions = this.chartTheme.divergingBarOptions(labels, values, { formatValue: fmt });
+    }
 
-        this.dispersionOptions = {
-            grid: { left: 60, right: 30, top: 20, bottom: 40 },
-            tooltip: {
-                ...this.chartTheme.tooltipDefaults(),
-                formatter: (p: any) => `${p.data[2]}<br/>Peso: ${fmt(p.data[0])}%<br/>Rendimiento: ${fmt(p.data[1])}%`,
-            },
-            xAxis: {
-                type: 'value', name: 'Peso en la cartera de Bolsa (%)', nameLocation: 'middle', nameGap: 28,
-                axisLabel: { color: axisLabel, formatter: (v: number) => `${fmt(v)}%` },
-                splitLine: { lineStyle: { color: this.chartTheme.surface.splitLine } },
-                nameTextStyle: { color: axisLabel },
-            },
-            yAxis: {
-                type: 'value', name: 'Rendimiento (%)', nameLocation: 'middle', nameGap: 45,
-                axisLabel: { color: axisLabel, formatter: (v: number) => `${fmt(v)}%` },
-                splitLine: { lineStyle: { color: this.chartTheme.surface.splitLine } },
-                nameTextStyle: { color: axisLabel },
-            },
-            series: [{
-                type: 'scatter',
-                symbolSize: 16,
-                data: this.tickers.map(t => ({ value: [t.weightPercent, t.gainLossPercent ?? 0, t.symbol], itemStyle: { color: this.chartTheme.gainLossColor(t.gainLossPercent) } })),
-                label: { show: true, formatter: (p: any) => p.data.value[2], position: 'top', color: axisLabel, fontSize: 11 },
-            }],
-        } as EChartsOption;
+    private renderTickerGainLoss(): void {
+        if (this.tickers.length === 0) { this.tickerGainLossOptions = {}; return; }
+        const sorted = [...this.tickers].sort((a, b) => a.gainLossAmount - b.gainLossAmount);
+        // D-12: las 5 mejores y las 5 peores, no las 30 — con 10 o menos, se muestran todas.
+        const picked = sorted.length > 10 ? [...sorted.slice(0, 5), ...sorted.slice(-5)] : sorted;
+        const labels = picked.map(t => t.symbol);
+        const values = picked.map(t => t.gainLossAmount);
+        const fmt = (v: number) => this.chartTheme.formatNumber(v, { maximumFractionDigits: 0 });
+        this.tickerGainLossOptions = this.chartTheme.divergingBarOptions(labels, values, { formatValue: fmt });
     }
 }

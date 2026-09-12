@@ -1,9 +1,11 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, NavigationEnd, Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
-import { filter } from 'rxjs';
+import { filter, forkJoin, of, switchMap } from 'rxjs';
 import { AssetService } from '../../asset/services/asset.service';
 import { Asset } from '../../asset/models/asset.model';
+import { AssetTypeService } from '../../assetType/services/asset-type.service';
+import { AssetType } from '../../account/models/assetType.model';
 import { CardService } from '../../card/services/card.service';
 import { Card } from '../../card/models/card.model';
 import { PortfolioService } from '../../portfolios/services/portfolio.service';
@@ -13,6 +15,7 @@ import { ReportContextService, PeriodPreset } from '../../../shared/services/rep
 type CardFilterMode = 'none' | 'required' | 'optional';
 type PortfolioFilterMode = 'none' | 'required';
 type CryptoFilterMode = 'none' | 'required';
+type StockFilterMode = 'none' | 'required';
 
 interface NavLink {
     type: 'link';
@@ -58,6 +61,7 @@ export class ReportsShellComponent implements OnInit {
     expandedSubcategory: string | null = null;
 
     private readonly assetService = inject(AssetService);
+    private readonly assetTypeService = inject(AssetTypeService);
     private readonly cardService = inject(CardService);
     private readonly portfolioService = inject(PortfolioService);
     private readonly router = inject(Router);
@@ -68,6 +72,11 @@ export class ReportsShellComponent implements OnInit {
     readonly cards = signal<Card[]>([]);
     readonly portfolios = signal<Portfolio[]>([]);
     readonly cryptos = signal<Asset[]>([]);
+    // Revisión de Bolsa (2026-09-12): tipos del entorno BOLSA (filtro de Bolsa — General, D-11) y
+    // los activos de esos tipos asignados al usuario (selector obligatorio de Bolsa — Detalle,
+    // D-15) — mismo mecanismo que `cryptos`, sumando los seis tipos en vez de un único nombre.
+    readonly stockAssetTypes = signal<AssetType[]>([]);
+    readonly stocks = signal<Asset[]>([]);
 
     // Algunas pantallas (ej. Patrimonio) son una foto de hoy + una serie fija, no un rango elegible
     // — el propio hijo declara `data: { usesPeriod: false }` en report.routes.ts y el filtro se oculta.
@@ -87,6 +96,13 @@ export class ReportsShellComponent implements OnInit {
     // Corrección 2026-09-10: switch de Carteras — General/Detalle para incluir o no el efectivo en
     // cuentas — mismo criterio que showRecurringFilter, vivía suelto en el cuerpo de cada pantalla.
     readonly showIncludeCashFilter = signal(false);
+
+    // Revisión de Bolsa (2026-09-12): filtro de tipo de activo y toggle de posiciones cerradas
+    // (Bolsa — General, D-11/D-14), selector de ticker (Bolsa — Detalle, D-15) — mismo criterio que
+    // el resto: el hijo declara qué necesita en report.routes.ts.
+    readonly showStockTypeFilter = signal(false);
+    readonly showIncludeClosedFilter = signal(false);
+    readonly stockFilterMode = signal<StockFilterMode>('none');
 
     readonly periodOptions: { value: PeriodPreset; label: string }[] = [
         { value: 'this-month', label: 'Este mes' },
@@ -158,7 +174,15 @@ export class ReportsShellComponent implements OnInit {
                         { type: 'link', label: 'Detalle', icon: 'bi-list-ul', route: '/report/portfolio-detail' }
                     ]
                 },
-                { type: 'link', label: 'Bolsa', icon: 'bi-bar-chart-line', route: '/report/stocks' },
+                {
+                    // Revisión de Bolsa (2026-09-12): pasa de link suelto a subcategoría con General
+                    // y Detalle, como Carteras y Cryptos (D-15).
+                    type: 'subcategory', label: 'Bolsa', icon: 'bi-bar-chart-line',
+                    children: [
+                        { type: 'link', label: 'General', icon: 'bi-grid-1x2', route: '/report/stocks' },
+                        { type: 'link', label: 'Detalle', icon: 'bi-graph-up', route: '/report/stocks-detail' }
+                    ]
+                },
                 {
                     type: 'subcategory', label: 'Cryptos', icon: 'bi-currency-bitcoin',
                     children: [
@@ -202,6 +226,21 @@ export class ReportsShellComponent implements OnInit {
             this.ensureCryptoSelected();
         });
 
+        // Revisión de Bolsa (2026-09-12): Bolsa no es un solo tipo de activo como cripto (D-10), así
+        // que primero se traen los tipos del entorno y recién después, encadenado, los activos
+        // asignados de cada uno — mismo mecanismo que `cryptos`, sumando las seis listas en una sola.
+        this.assetTypeService.getAssetTypes('BOLSA').pipe(
+            switchMap((types: AssetType[]) => {
+                this.stockAssetTypes.set(types);
+                return types.length > 0
+                    ? forkJoin(types.map(t => this.assetService.getAssetsByTypeName(t.name)))
+                    : of([] as Asset[][]);
+            })
+        ).subscribe(lists => {
+            this.stocks.set(lists.flat());
+            this.ensureStockSelected();
+        });
+
         this.updateRouteFlags();
         this.router.events
             .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
@@ -210,6 +249,7 @@ export class ReportsShellComponent implements OnInit {
                 this.ensureCardSelected();
                 this.ensurePortfolioSelected();
                 this.ensureCryptoSelected();
+                this.ensureStockSelected();
             });
     }
 
@@ -221,6 +261,9 @@ export class ReportsShellComponent implements OnInit {
         this.portfolioFilterMode.set(data?.['portfolioFilter'] ?? 'none');
         this.cryptoFilterMode.set(data?.['cryptoFilter'] ?? 'none');
         this.showIncludeCashFilter.set(data?.['includeCashFilter'] ?? false);
+        this.showStockTypeFilter.set(data?.['showAssetTypeFilter'] ?? false);
+        this.showIncludeClosedFilter.set(data?.['showIncludeClosedFilter'] ?? false);
+        this.stockFilterMode.set(data?.['stockFilter'] ?? 'none');
     }
 
     // Si la pantalla activa exige una tarjeta (cardFilter: 'required') y todavía no hay ninguna
@@ -247,6 +290,14 @@ export class ReportsShellComponent implements OnInit {
         const current = this.reportContext.selectedCryptoAssetId();
         const stillExists = current != null && this.cryptos().some(c => c.id === current);
         if (!stillExists) this.reportContext.setCryptoAssetId(this.cryptos()[0].id);
+    }
+
+    // Mismo criterio que ensureCardSelected, para Bolsa — Detalle (revisión 2026-09-12, D-15).
+    private ensureStockSelected(): void {
+        if (this.stockFilterMode() !== 'required' || this.stocks().length === 0) return;
+        const current = this.reportContext.selectedStockAssetId();
+        const stillExists = current != null && this.stocks().some(s => s.id === current);
+        if (!stillExists) this.reportContext.setStockAssetId(this.stocks()[0].id);
     }
 
     onPeriodChange(preset: PeriodPreset): void {
@@ -284,6 +335,18 @@ export class ReportsShellComponent implements OnInit {
 
     onCryptoFilterChange(cryptoAssetId: number): void {
         this.reportContext.setCryptoAssetId(cryptoAssetId);
+    }
+
+    onStockTypeFilterChange(stockTypeId: number): void {
+        this.reportContext.setStockTypeId(stockTypeId);
+    }
+
+    onStockFilterChange(stockAssetId: number): void {
+        this.reportContext.setStockAssetId(stockAssetId);
+    }
+
+    onIncludeClosedChange(value: boolean): void {
+        this.reportContext.setIncludeClosedPositions(value);
     }
 
     onIncludeRecurringChange(value: boolean): void {

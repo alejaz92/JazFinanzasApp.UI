@@ -1,0 +1,121 @@
+<h2 class="mb-3">Bolsa — Detalle</h2>
+
+<app-loading [isLoading]="isLoadingDetail"></app-loading>
+
+<div *ngIf="!isLoadingDetail && detail">
+    <div class="row mt-4">
+        <div class="col-md-3 mt-1">
+            <div class="card">
+                <div class="card-header">Cotización Actual</div>
+                <div class="card-body">
+                    <h4 class="card-title mb-0">{{ detail.currentPrice | currencyFiatFormat }}</h4>
+                    <p class="text-body-secondary small mb-0 mt-1">Mín. 12m: {{ detail.minPrice | currencyFiatFormat }} · Máx. 12m: {{ detail.maxPrice | currencyFiatFormat }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mt-1">
+            <div class="card">
+                <div class="card-header">Precio Promedio de Compra</div>
+                <div class="card-body">
+                    <h4 class="card-title mb-0">{{ detail.averageBuyPrice | currencyFiatFormat }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mt-1">
+            <div class="card">
+                <div class="card-header">Mi Posición</div>
+                <div class="card-body" *ngIf="detail.position as p; else noPosition">
+                    <p class="mb-0 small">Cantidad: <strong>{{ p.quantity | currencyInvestmentFormat }}</strong></p>
+                    <p class="mb-0 small">Invertido: <strong>{{ p.originalValue | currencyFiatFormat }}</strong></p>
+                    <p class="mb-0 small">Valor Actual: <strong>{{ p.actualValue | currencyFiatFormat }}</strong></p>
+                </div>
+                <ng-template #noPosition>
+                    <div class="card-body">
+                        <h4 class="card-title mb-0 text-body-secondary">Sin tenencia</h4>
+                    </div>
+                </ng-template>
+            </div>
+        </div>
+        <div class="col-md-3 mt-1">
+            <div class="card">
+                <div class="card-header">Peso en Bolsa y Ganancia / Pérdida</div>
+                <div class="card-body" *ngIf="detail.position as p; else noWeight">
+                    <p class="mb-0 small">Peso: <strong>{{ p.weightPercent | currencyInvestmentFormat }} %</strong></p>
+                    <p class="mb-0 small" [class.text-success]="(p.gainLossPercent ?? 0) >= 0" [class.text-danger]="(p.gainLossPercent ?? 0) < 0">
+                        {{ p.gainLossPercent != null ? (p.gainLossPercent | currencyInvestmentFormat) + ' %' : '—' }}
+                    </p>
+                </div>
+                <ng-template #noWeight>
+                    <div class="card-body">
+                        <h4 class="card-title mb-0 text-body-secondary">—</h4>
+                    </div>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12 mt-1">
+            <div class="card">
+                <div class="card-header">Cotización, con compras (▲) y ventas (◆) marcadas (En {{ detail.referenceAssetSymbol }})</div>
+                <div class="card-body">
+                    <app-chart [options]="priceOptions" [height]="360"></app-chart>
+                    <p class="text-body-secondary small mb-0 mt-2" *ngFor="let s of detail.splitEvents">{{ splitCaption(s) }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-4 mt-1" *ngIf="detail.balanceByAccount.length > 0">
+            <div class="card">
+                <div class="card-header">Saldo por Cuenta</div>
+                <div class="card-body p-0">
+                    <table class="table table-sm mb-0">
+                        <tbody>
+                            <tr *ngFor="let b of detail.balanceByAccount">
+                                <td>{{ b.account }}</td>
+                                <td class="text-end">{{ b.balance | currencyInvestmentFormat }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8 mt-1" *ngIf="detail.transactions.length > 0">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Movimientos (En {{ detail.referenceAssetSymbol }})</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm mb-0">
+                            <thead class="table-header-brand">
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Cuenta</th>
+                                    <th>Movimiento</th>
+                                    <th>Comercio</th>
+                                    <th class="text-end">Cantidad</th>
+                                    <th class="text-end">Cotización</th>
+                                    <th class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let t of detail.transactions">
+                                    <td>{{ t.date | date: 'dd/MM/yyyy' }}</td>
+                                    <td>{{ t.account }}</td>
+                                    <td>{{ t.movementType | movementType }}</td>
+                                    <td>{{ t.commerceType | commerceType }}</td>
+                                    <td class="text-end">{{ t.quantity | currencyInvestmentFormat }}</td>
+                                    <td class="text-end">{{ t.quotePrice | currencyFiatFormat }}</td>
+                                    <td class="text-end">{{ t.total | currencyFiatFormat }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

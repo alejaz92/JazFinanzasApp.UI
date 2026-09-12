@@ -3,13 +3,22 @@ import { NgIf } from '@angular/common';
 import type { EChartsOption } from 'echarts';
 
 import { InvestmentReportService } from '../services/investment-report.service';
-import { InvestmentOverview } from '../models/investment-report.model';
+import { InvestmentOverview, InvestmentHolding } from '../models/investment-report.model';
 import { ReportContextService } from '../../../shared/services/report-context.service';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { CurrencyInvestmentFormatPipe } from '../../../shared/pipes/currencyInvestmentFormat/currency-investment-format.pipe';
+
+// D-18 (revisión de Bolsa, 2026-09-12): etiquetas legibles para los cuatro buckets de
+// ClassifyNetWorthBucket — el mapa de bloques agrupa por acá en vez de mostrar 42 activos planos.
+const BUCKET_LABELS: Record<string, string> = {
+    Stocks: 'Acciones y renta variable',
+    Bonds: 'Bonos',
+    CryptoStable: 'Cripto estable',
+    CryptoVolatile: 'Cripto volátil',
+};
 
 // Panorama de inversiones (Fase 20, Flujo 5): pantalla de entrada de la categoría Inversiones —
 // mapa de bloques de todo lo invertido (bolsa, cripto, bonos, sin efectivo) coloreado por
@@ -55,10 +64,22 @@ export class InvestmentsOverviewComponent {
         this.renderValueLine(data);
     }
 
+    // D-18: agrupado por bucket (Acciones y renta variable / Bonos / Cripto estable / Cripto
+    // volátil) en vez de 42 bloques planos — mismo helper que Bolsa — General (Fase 20b), sin tocar
+    // este endpoint.
     private renderTreemap(data: InvestmentOverview): void {
         if (data.holdings.length === 0) { this.treemapOptions = {}; return; }
-        const items = data.holdings.map(h => ({ name: h.symbol, value: h.actualValue, gainLossPercent: h.gainLossPercent }));
-        this.treemapOptions = this.chartTheme.treemapOptions(items, { formatValue: v => this.chartTheme.formatNumber(v, { maximumFractionDigits: 0 }) });
+        const byBucket = new Map<string, InvestmentHolding[]>();
+        for (const h of data.holdings) {
+            const list = byBucket.get(h.bucket) ?? [];
+            list.push(h);
+            byBucket.set(h.bucket, list);
+        }
+        const groups = Array.from(byBucket.entries()).map(([bucket, holdings]) => ({
+            name: BUCKET_LABELS[bucket] ?? bucket,
+            items: holdings.map(h => ({ name: h.symbol, value: h.actualValue, gainLossPercent: h.gainLossPercent })),
+        }));
+        this.treemapOptions = this.chartTheme.groupedTreemapOptions(groups, { formatValue: v => this.chartTheme.formatNumber(v, { maximumFractionDigits: 0 }) });
     }
 
     private renderValueLine(data: InvestmentOverview): void {

@@ -1,13 +1,13 @@
 <app-loading [isLoading]="isLoading"></app-loading>
 
 <div *ngIf="!isLoading">
-    <h2 class="mb-3">Bolsa</h2>
+    <h2 class="mb-3">Bolsa — General</h2>
 
     <p class="text-body-secondary" *ngIf="tickers.length === 0">Todavía no hay tenencias en bolsa.</p>
 
     <ng-container *ngIf="tickers.length > 0">
         <div class="row">
-            <div class="col-md-4 mt-1">
+            <div class="col-md-3 mt-1">
                 <div class="card">
                     <div class="card-header">Valor Actual (En {{ referenceAssetSymbol }})</div>
                     <div class="card-body">
@@ -15,7 +15,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-4 mt-1">
+            <div class="col-md-3 mt-1">
                 <div class="card">
                     <div class="card-header">Invertido (En {{ referenceAssetSymbol }})</div>
                     <div class="card-body">
@@ -23,7 +23,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-4 mt-1">
+            <div class="col-md-3 mt-1">
                 <div class="card">
                     <div class="card-header">Ganancia / Pérdida</div>
                     <div class="card-body">
@@ -35,22 +35,52 @@
                     </div>
                 </div>
             </div>
+            <div class="col-md-3 mt-1">
+                <div class="card">
+                    <div class="card-header">Tickers</div>
+                    <div class="card-body">
+                        <h4 class="card-title mb-0">
+                            {{ tickers.length }} vivos
+                            <span class="text-body-secondary" *ngIf="reportContext.includeClosedPositions()"> · {{ closedPositions.length }} cerradas</span>
+                        </h4>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="row mt-4">
             <div class="col-md-6 mt-1">
                 <div class="card">
-                    <div class="card-header">Ganancia / Pérdida por Ticker (En {{ referenceAssetSymbol }})</div>
+                    <div class="card-header">Composición por Tipo y Ticker (En {{ referenceAssetSymbol }}) — coloreado por ganancia/pérdida</div>
                     <div class="card-body">
-                        <app-chart [options]="gainLossOptions" [height]="320"></app-chart>
+                        <app-chart [options]="treemapOptions" [height]="340"></app-chart>
                     </div>
                 </div>
             </div>
             <div class="col-md-6 mt-1">
                 <div class="card">
-                    <div class="card-header">Rendimiento contra Peso en la Cartera</div>
+                    <div class="card-header">Valor por Tipo — últimos 12 meses (En {{ referenceAssetSymbol }})</div>
                     <div class="card-body">
-                        <app-chart [options]="dispersionOptions" [height]="320"></app-chart>
+                        <app-chart [options]="evolutionOptions" [height]="340"></app-chart>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6 mt-1">
+                <div class="card">
+                    <div class="card-header">Rendimiento por Tipo de Activo</div>
+                    <div class="card-body">
+                        <app-chart [options]="typeGainLossOptions" [height]="280"></app-chart>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mt-1">
+                <div class="card">
+                    <div class="card-header">Mejores y Peores por Ticker (En {{ referenceAssetSymbol }})</div>
+                    <div class="card-body">
+                        <app-chart [options]="tickerGainLossOptions" [height]="280"></app-chart>
                     </div>
                 </div>
             </div>
@@ -60,34 +90,103 @@
             <div class="col-12 mt-1">
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="mb-0">Tenencias (En {{ referenceAssetSymbol }})</h5>
+                        <h5 class="mb-0">Tenencias por Tipo (En {{ referenceAssetSymbol }})</h5>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table class="table table-hover table-sm mb-0">
                                 <thead class="table-header-brand">
                                     <tr>
-                                        <th>Ticker</th>
-                                        <th class="text-end">Cantidad</th>
-                                        <th class="text-end">Cotización de Origen</th>
+                                        <th role="button" (click)="sortBy('assetTypeName')">
+                                            Tipo <i class="bi" [ngClass]="sortColumn === 'assetTypeName' ? (sortDirection === 'asc' ? 'bi-caret-up-fill' : 'bi-caret-down-fill') : 'bi-caret-down'"></i>
+                                        </th>
+                                        <th class="text-end" role="button" (click)="sortBy('tickerCount')">
+                                            Tickers <i class="bi" [ngClass]="sortColumn === 'tickerCount' ? (sortDirection === 'asc' ? 'bi-caret-up-fill' : 'bi-caret-down-fill') : 'bi-caret-down'"></i>
+                                        </th>
                                         <th class="text-end">Invertido</th>
-                                        <th class="text-end">Cotización Actual</th>
-                                        <th class="text-end">Valor Actual</th>
-                                        <th class="text-end">Peso</th>
-                                        <th class="text-end">%</th>
+                                        <th class="text-end" role="button" (click)="sortBy('actualValue')">
+                                            Valor Actual <i class="bi" [ngClass]="sortColumn === 'actualValue' ? (sortDirection === 'asc' ? 'bi-caret-up-fill' : 'bi-caret-down-fill') : 'bi-caret-down'"></i>
+                                        </th>
+                                        <th class="text-end" role="button" (click)="sortBy('gainLossPercent')">
+                                            % <i class="bi" [ngClass]="sortColumn === 'gainLossPercent' ? (sortDirection === 'asc' ? 'bi-caret-up-fill' : 'bi-caret-down-fill') : 'bi-caret-down'"></i>
+                                        </th>
+                                        <th class="text-end">Peso en Bolsa</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr *ngFor="let t of tickers">
-                                        <td>{{ t.assetName }} <span class="text-body-secondary">({{ t.symbol }})</span></td>
-                                        <td class="text-end">{{ t.quantity | currencyInvestmentFormat }}</td>
-                                        <td class="text-end">{{ t.quantity !== 0 ? (t.originalValue / t.quantity | currencyQuoteFormat) : '—' }}</td>
-                                        <td class="text-end">{{ t.originalValue | currencyFiatFormat }}</td>
-                                        <td class="text-end">{{ t.quantity !== 0 ? (t.actualValue / t.quantity | currencyQuoteFormat) : '—' }}</td>
-                                        <td class="text-end">{{ t.actualValue | currencyFiatFormat }}</td>
-                                        <td class="text-end">{{ t.weightPercent | currencyInvestmentFormat }} %</td>
-                                        <td class="text-end" [class.text-success]="(t.gainLossPercent ?? 0) >= 0" [class.text-danger]="(t.gainLossPercent ?? 0) < 0">
-                                            {{ t.gainLossPercent != null ? (t.gainLossPercent | currencyInvestmentFormat) + ' %' : '—' }}
+                                    <ng-container *ngFor="let g of groups">
+                                        <tr style="cursor: pointer;" (click)="toggleExpand(g.key)">
+                                            <td>
+                                                <i class="bi me-1" [ngClass]="expandedKey === g.key ? 'bi-chevron-down' : 'bi-chevron-right'"></i>
+                                                {{ g.assetTypeName }}
+                                            </td>
+                                            <td class="text-end">{{ g.tickerCount }}</td>
+                                            <td class="text-end">{{ g.originalValue | currencyFiatFormat }}</td>
+                                            <td class="text-end">{{ g.actualValue | currencyFiatFormat }}</td>
+                                            <td class="text-end" [class.text-success]="(g.gainLossPercent ?? 0) >= 0" [class.text-danger]="(g.gainLossPercent ?? 0) < 0">
+                                                {{ g.gainLossPercent != null ? (g.gainLossPercent | currencyInvestmentFormat) + ' %' : '—' }}
+                                            </td>
+                                            <td class="text-end">{{ totalActualValue !== 0 ? ((g.actualValue / totalActualValue * 100) | currencyInvestmentFormat) + ' %' : '—' }}</td>
+                                        </tr>
+                                        <ng-container *ngIf="expandedKey === g.key">
+                                            <tr *ngFor="let t of g.tickers" class="table-secondary" style="cursor: pointer;"
+                                                [routerLink]="['/report/stocks-detail']" [queryParams]="{ stockAssetId: t.assetId }" queryParamsHandling="merge">
+                                                <td class="ps-4 text-body-secondary">{{ t.assetName }} <span class="text-body-secondary">({{ t.symbol }})</span></td>
+                                                <td class="text-end">{{ t.quantity | currencyInvestmentFormat }}</td>
+                                                <td class="text-end">{{ t.originalValue | currencyFiatFormat }}</td>
+                                                <td class="text-end">{{ t.actualValue | currencyFiatFormat }}</td>
+                                                <td class="text-end" [class.text-success]="(t.gainLossPercent ?? 0) >= 0" [class.text-danger]="(t.gainLossPercent ?? 0) < 0">
+                                                    {{ t.gainLossPercent != null ? (t.gainLossPercent | currencyInvestmentFormat) + ' %' : '—' }}
+                                                </td>
+                                                <td class="text-end">{{ t.weightPercent | currencyInvestmentFormat }} %</td>
+                                            </tr>
+                                        </ng-container>
+                                    </ng-container>
+                                </tbody>
+                                <tfoot>
+                                    <tr class="fw-bold table-header-brand">
+                                        <td>Total</td>
+                                        <td class="text-end">{{ tickers.length }}</td>
+                                        <td class="text-end">{{ totalOriginalValue | currencyFiatFormat }}</td>
+                                        <td class="text-end">{{ totalActualValue | currencyFiatFormat }}</td>
+                                        <td class="text-end" [class.text-success]="(totalGainLossPct ?? 0) >= 0" [class.text-danger]="(totalGainLossPct ?? 0) < 0">
+                                            {{ totalGainLossPct != null ? (totalGainLossPct | currencyInvestmentFormat) + ' %' : '—' }}
+                                        </td>
+                                        <td class="text-end">100 %</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4" *ngIf="reportContext.includeClosedPositions()">
+            <div class="col-12 mt-1">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Posiciones Cerradas — Resultado Realizado (En {{ referenceAssetSymbol }})</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <p class="text-body-secondary p-3 mb-0" *ngIf="closedPositions.length === 0">No hay posiciones vendidas del todo.</p>
+                        <div class="table-responsive" *ngIf="closedPositions.length > 0">
+                            <table class="table table-hover table-sm mb-0">
+                                <thead class="table-header-brand">
+                                    <tr>
+                                        <th>Tipo</th>
+                                        <th>Activo</th>
+                                        <th>Última Operación</th>
+                                        <th class="text-end">Resultado Realizado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let c of closedPositions">
+                                        <td>{{ c.assetTypeName }}</td>
+                                        <td>{{ c.assetName }} <span class="text-body-secondary">({{ c.symbol }})</span></td>
+                                        <td>{{ c.lastMovementDate | date: 'dd/MM/yyyy' }}</td>
+                                        <td class="text-end" [class.text-success]="c.realizedResult >= 0" [class.text-danger]="c.realizedResult < 0">
+                                            {{ c.realizedResult | currencyFiatFormat }}
                                         </td>
                                     </tr>
                                 </tbody>

@@ -297,6 +297,107 @@ export class ChartThemeService {
   }
 
   /**
+   * Mapa de bloques en DOS niveles (revisión de Bolsa, 2026-09-12, D-12/D-18): un grupo por tipo de
+   * activo/bucket, cada uno con sus propios activos adentro. El color de cada grupo es el promedio
+   * de ganancia/pérdida de sus activos ponderado por valor — no hay un "gainLossPercent de grupo"
+   * en los DTOs, así que se aproxima acá. A diferencia de `treemapOptions` (un nivel, sin
+   * breadcrumb), esta versión permite hacer zoom a un grupo con un clic y volver con el breadcrumb.
+   */
+  groupedTreemapOptions(
+    groups: { name: string; items: { name: string; value: number; gainLossPercent: number | null }[] }[],
+    opts?: { formatValue?: (v: number) => string }
+  ): EChartsOption {
+    const formatValue = opts?.formatValue ?? ((v: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(v));
+    const axisLabel = this.surface.axisLabel;
+
+    const data = groups.map(g => {
+      const groupValue = g.items.reduce((sum, i) => sum + i.value, 0);
+      const weightedPct = groupValue !== 0
+        ? g.items.reduce((sum, i) => sum + i.value * (i.gainLossPercent ?? 0), 0) / groupValue
+        : null;
+      return {
+        name: g.name,
+        value: groupValue,
+        gainLossPercent: weightedPct,
+        itemStyle: { color: this.gainLossColor(weightedPct) },
+        children: g.items.map(i => ({
+          name: i.name,
+          value: i.value,
+          gainLossPercent: i.gainLossPercent,
+          itemStyle: { color: this.gainLossColor(i.gainLossPercent) },
+        })),
+      };
+    });
+
+    return {
+      tooltip: {
+        ...this.tooltipDefaults(),
+        formatter: (p: any) => {
+          const pct = p.data?.gainLossPercent;
+          const pctText = pct == null ? '' : ` (${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%)`;
+          return `${p.name}: ${formatValue(p.value)}${pctText}`;
+        },
+      },
+      series: [{
+        type: 'treemap',
+        roam: false,
+        nodeClick: 'zoomToNode',
+        breadcrumb: { show: true, itemStyle: { color: this.surface.tooltipBg, textStyle: { color: axisLabel } } },
+        label: { show: true, color: '#fff', fontWeight: 'bold' },
+        upperLabel: { show: true, height: 22, color: '#fff' },
+        levels: [
+          {},
+          { itemStyle: { borderColor: this.surface.tooltipBg, borderWidth: 4, gapWidth: 4 } },
+          { itemStyle: { borderColor: this.surface.tooltipBg, borderWidth: 1, gapWidth: 1 } },
+        ],
+        data,
+      }],
+    } as EChartsOption;
+  }
+
+  /**
+   * Área apilada de varias series en el tiempo (D-13: valor mensual de Bolsa abierto por tipo de
+   * activo) — mismo eje de categorías salteado que `lineOptions`, con leyenda porque acá sí importa
+   * distinguir una serie de otra.
+   */
+  stackedAreaOptions(
+    labels: string[],
+    series: { name: string; values: number[] }[],
+    opts?: { formatValue?: (v: number) => string }
+  ): EChartsOption {
+    const formatValue = opts?.formatValue ?? ((v: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(v));
+    const axisLabel = this.surface.axisLabel;
+
+    return {
+      color: series.map((_, i) => this.colorAt(i)),
+      legend: { top: 0, textStyle: { color: axisLabel } },
+      grid: { left: 70, right: 20, top: 40, bottom: 40 },
+      tooltip: { trigger: 'axis', ...this.tooltipDefaults(), valueFormatter: (v: unknown) => formatValue(Number(v)) },
+      xAxis: {
+        type: 'category',
+        data: labels,
+        boundaryGap: false,
+        axisLabel: { color: axisLabel, interval: 1 },
+        axisLine: { lineStyle: { color: this.surface.axisLine } },
+      },
+      yAxis: {
+        type: 'value',
+        axisLabel: { color: axisLabel, formatter: (v: number) => formatValue(v) },
+        splitLine: { lineStyle: { color: this.surface.splitLine } },
+      },
+      series: series.map(s => ({
+        name: s.name,
+        type: 'line',
+        stack: 'total',
+        data: s.values,
+        showSymbol: false,
+        lineStyle: { width: 1 },
+        areaStyle: { opacity: 0.75 },
+      })),
+    } as EChartsOption;
+  }
+
+  /**
    * Barras horizontales divergentes de ganancia/pérdida (Bolsa): una barra por ticker, color por
    * signo (`status.good`/`status.critical`), eje de valor cruzando por 0.
    */

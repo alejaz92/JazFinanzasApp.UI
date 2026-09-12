@@ -9,6 +9,7 @@ import {
     StocksReport,
     CryptoOverviewReport,
     CryptoDetailReport,
+    AssetDetailReport,
     ContributionsVsPerformance
 } from '../models/investment-report.model';
 
@@ -31,8 +32,10 @@ export class InvestmentReportService {
     return this.http.get<PortfolioDetailReport>(`${environment.apiBaseURL}/api/investmentreport/Portfolios/${portfolioId}/Detail/${assetId}?includeCash=${includeCash}`);
   }
 
-  getStocks(assetId: number): Observable<StocksReport> {
-    return this.http.get<StocksReport>(`${environment.apiBaseURL}/api/investmentreport/Stocks/${assetId}`);
+  // assetTypeId en 0 (default) trae todo el entorno (D-11); includeClosed suma las posiciones ya
+  // vendidas del todo, apagado por default (D-14).
+  getStocks(assetId: number, assetTypeId: number = 0, includeClosed: boolean = false): Observable<StocksReport> {
+    return this.http.get<StocksReport>(`${environment.apiBaseURL}/api/investmentreport/Stocks/${assetId}?assetTypeId=${assetTypeId}&includeClosed=${includeClosed}`);
   }
 
   getCryptoOverview(assetId: number, includeStables: boolean = true): Observable<CryptoOverviewReport> {
@@ -41,6 +44,13 @@ export class InvestmentReportService {
 
   getCryptoDetail(cryptoAssetId: number, assetId: number): Observable<CryptoDetailReport> {
     return this.http.get<CryptoDetailReport>(`${environment.apiBaseURL}/api/investmentreport/Crypto/${cryptoAssetId}/Detail/${assetId}`);
+  }
+
+  // Detalle de un activo (T17, revisión de Bolsa 2026-09-12): generaliza la ruta de arriba —
+  // Bolsa — Detalle la usa, Cryptos — Detalle sigue en la ruta vieja (mismo cálculo del lado del
+  // backend, sin romper contrato mientras esa pantalla no migre).
+  getAssetDetail(assetId: number, referenceAssetId: number): Observable<AssetDetailReport> {
+    return this.http.get<AssetDetailReport>(`${environment.apiBaseURL}/api/investmentreport/Asset/${assetId}/Detail/${referenceAssetId}`);
   }
 
   getContributionsVsPerformance(assetId: number): Observable<ContributionsVsPerformance> {

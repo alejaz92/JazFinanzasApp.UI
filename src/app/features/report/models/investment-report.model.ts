@@ -77,6 +77,10 @@ export interface PortfolioDetailReport {
 }
 
 export interface StockTickerReport {
+    // assetId y assetTypeName (revisión de Bolsa, 2026-09-12): habilitan el enlace a Bolsa —
+    // Detalle y la agrupación/filtro por tipo de activo (D-11).
+    assetId: number;
+    assetTypeName: string;
     assetName: string;
     symbol: string;
     quantity: number;
@@ -87,11 +91,47 @@ export interface StockTickerReport {
     weightPercent: number;
 }
 
+// D-12: reemplaza al ranking de 30 barras por ticker — una barra por tipo de activo.
+export interface StockTypeAggregate {
+    assetTypeName: string;
+    tickerCount: number;
+    originalValue: number;
+    actualValue: number;
+    gainLossPercent: number | null;
+}
+
+// D-13: un mes, con el valor de cada tipo de activo dentro de Bolsa.
+export interface AssetTypeValue {
+    assetTypeName: string;
+    value: number;
+}
+
+export interface StocksMonthlyPoint {
+    month: string;
+    byType: AssetTypeValue[];
+}
+
+// D-14: una posición de Bolsa con tenencia neta cero.
+export interface ClosedPosition {
+    assetId: number;
+    assetName: string;
+    symbol: string;
+    assetTypeName: string;
+    realizedResult: number;
+    lastMovementDate: string;
+}
+
 export interface StocksReport {
     referenceAssetSymbol: string;
     totalOriginalValue: number;
     totalActualValue: number;
+    // Agregados por tipo, siempre sobre el entorno completo — el filtro de la barra (D-11) recorta
+    // tickers, no esta lista.
+    types: StockTypeAggregate[];
     tickers: StockTickerReport[];
+    valueSeries: StocksMonthlyPoint[];
+    // Vacía salvo que se pida con includeClosed=true (apagado por default, D-14).
+    closedPositions: ClosedPosition[];
 }
 
 export interface CryptoPurchaseMonth {
@@ -125,6 +165,21 @@ export interface AccountHoldingAmount {
     balance: number;
 }
 
+// D-16 (revisión de Bolsa, 2026-09-12): una marca vertical en la línea de cotización.
+export interface AssetSplitEventMarker {
+    date: string;
+    splitRatio: number;
+}
+
+// D-15: cantidad, invertido, valor actual, ganancia/pérdida y peso dentro de su propia categoría.
+export interface AssetPosition {
+    quantity: number;
+    originalValue: number;
+    actualValue: number;
+    gainLossPercent: number | null;
+    weightPercent: number;
+}
+
 export interface CryptoDetailReport {
     assetId: number;
     assetName: string;
@@ -137,7 +192,17 @@ export interface CryptoDetailReport {
     priceEvolution: InvestmentValuePoint[];
     transactions: CryptoTransactionMarker[];
     balanceByAccount: AccountHoldingAmount[];
+    // Splits (D-16) y posición (D-15) — sumados en la revisión de Bolsa 2026-09-12 al generalizar
+    // el detalle (T17, backend). Cryptos — Detalle no los usa todavía (splitEvents siempre vacío
+    // hoy, ninguna cripto tiene splits cargados), pero viajan igual porque es el mismo endpoint.
+    splitEvents: AssetSplitEventMarker[];
+    position: AssetPosition | null;
 }
+
+// El detalle de un activo (T17): mismo shape que CryptoDetailReport, el nombre quedó atrás de la
+// generalización del backend. Bolsa — Detalle usa este alias; Cryptos — Detalle sigue usando el
+// nombre viejo (mismo tipo).
+export type AssetDetailReport = CryptoDetailReport;
 
 export interface ContributionsVsPerformance {
     referenceAssetSymbol: string;
