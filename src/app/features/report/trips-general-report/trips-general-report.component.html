@@ -1,34 +1,46 @@
 <app-loading [isLoading]="isLoading"></app-loading>
 
 <div *ngIf="!isLoading">
-    <h2 class="mb-3">Viajes — Vista General</h2>
+    <h2 class="mb-3">Viajes — General</h2>
 
-    <div class="row">
-        <div class="col-md-6 mt-1">
-            <div class="card">
-                <div class="card-header">Total Gastado (En {{ mainReference?.symbol }})</div>
-                <div class="card-body">
-                    <h4 class="card-title mb-0">{{ totalInReference | currencyFiatFormat }}</h4>
+    <p class="text-body-secondary" *ngIf="trips.length === 0">Todavía no hay viajes cargados.</p>
+
+    <ng-container *ngIf="trips.length > 0">
+        <div class="row">
+            <div class="col-md-6 mt-1">
+                <div class="card">
+                    <div class="card-header">Cantidad de viajes</div>
+                    <div class="card-body">
+                        <h4 class="card-title mb-0">{{ trips.length }}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mt-1">
+                <div class="card">
+                    <div class="card-header">Total gastado (En {{ referenceAssetSymbol }})</div>
+                    <div class="card-body">
+                        <h4 class="card-title mb-0">{{ totalSpent | currencyFiatFormat }}</h4>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-6 mt-1">
-            <label for="typeFilter">Tipo</label>
-            <select id="typeFilter" class="form-select" [(ngModel)]="typeFilter" (change)="onFilterChange()">
-                <option value="ALL">Todos</option>
-                <option value="DOMESTIC">Doméstico</option>
-                <option value="INTERNATIONAL">Internacional</option>
-            </select>
-        </div>
-    </div>
 
-    <ng-container *ngIf="trips.length > 0; else empty">
-        <div class="row mt-4" *ngIf="filteredTrips.length > 0">
-            <div class="col-12 mt-1">
+        <div class="row mt-4">
+            <div class="col-md-6 mt-1">
                 <div class="card">
-                    <div class="card-header">Total por Viaje (En {{ mainReference?.symbol }})</div>
+                    <div class="card-header">Costo total por viaje</div>
                     <div class="card-body">
                         <app-chart [options]="totalByTripOptions" [height]="320"></app-chart>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mt-1">
+                <div class="card">
+                    <div class="card-header" title="El tamaño de cada punto es el costo por día — se ve de una qué viaje fue caro en serio y cuál solo fue largo">
+                        Duración vs. costo total
+                    </div>
+                    <div class="card-body">
+                        <app-chart [options]="bubbleOptions" [height]="320"></app-chart>
                     </div>
                 </div>
             </div>
@@ -38,27 +50,33 @@
             <div class="col-12 mt-1">
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="mb-0">Detalle por Viaje</h5>
+                        <h5 class="mb-0">Detalle por viaje</h5>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table class="table table-hover table-sm">
+                            <table class="table table-hover table-sm mb-0">
                                 <thead class="table-header-brand">
                                     <tr>
                                         <th>Viaje</th>
                                         <th>Tipo</th>
-                                        <th>Fechas</th>
                                         <th>Estado</th>
+                                        <th>Fechas</th>
+                                        <th class="text-end">Duración</th>
                                         <th class="text-end">Total</th>
+                                        <th class="text-end">Costo por día</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr *ngFor="let trip of filteredTrips">
-                                        <td>{{ trip.name }}</td>
-                                        <td>{{ typeLabel(trip.type) }}</td>
-                                        <td>{{ trip.startDate | date:'dd/MM/yyyy' }} - {{ trip.endDate | date:'dd/MM/yyyy' }}</td>
-                                        <td>{{ statusLabel(trip.status) }}</td>
-                                        <td class="text-end">{{ trip.totalInReference | currencyFiatFormat }}</td>
+                                    <tr *ngFor="let t of trips" style="cursor: pointer;"
+                                        [routerLink]="['/report/trip-detail']"
+                                        [queryParams]="{ tripId: t.tripId }" queryParamsHandling="merge">
+                                        <td>{{ t.name }}</td>
+                                        <td>{{ typeLabel(t.type) }}</td>
+                                        <td>{{ statusLabel(t.status) }}</td>
+                                        <td>{{ t.startDate | date:'dd/MM/yy' }} – {{ t.endDate | date:'dd/MM/yy' }}</td>
+                                        <td class="text-end">{{ t.durationDays }} días</td>
+                                        <td class="text-end">{{ t.total | currencyFiatFormat }}</td>
+                                        <td class="text-end">{{ t.costPerDay | currencyFiatFormat }}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -68,11 +86,4 @@
             </div>
         </div>
     </ng-container>
-
-    <ng-template #empty>
-        <div class="text-center py-5 text-muted">
-            <i class="bi bi-inbox fs-1 d-block mb-3"></i>
-            <p class="mb-0">No hay viajes registrados.</p>
-        </div>
-    </ng-template>
 </div>

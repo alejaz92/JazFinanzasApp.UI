@@ -180,6 +180,42 @@
       </div>
     }
 
+    @if (tripFilterMode() !== 'none' && trips().length > 0) {
+      <div class="d-flex align-items-center gap-2" title="Viaje">
+        <label for="reportTripFilter" class="form-label mb-0 small text-body-secondary">Viaje:</label>
+        <select id="reportTripFilter" class="form-select form-select-sm w-auto"
+                [ngModel]="reportContext.selectedTripId() ?? 0" (ngModelChange)="onTripFilterChange($event)">
+          @for (trip of trips(); track trip.id) {
+            <option [ngValue]="trip.id">{{ trip.name }}</option>
+          }
+        </select>
+      </div>
+    }
+
+    @if (personFilterMode() !== 'none' && people().length > 0) {
+      <div class="d-flex align-items-center gap-2" title="Persona">
+        <label for="reportPersonFilter" class="form-label mb-0 small text-body-secondary">Persona:</label>
+        <select id="reportPersonFilter" class="form-select form-select-sm w-auto"
+                [ngModel]="reportContext.selectedPersonId() ?? 0" (ngModelChange)="onPersonFilterChange($event)">
+          @for (person of people(); track person.id) {
+            <option [ngValue]="person.id">{{ person.alias || person.name }}</option>
+          }
+        </select>
+      </div>
+    }
+
+    @if (eventFilterMode() !== 'none' && sharedEvents().length > 0) {
+      <div class="d-flex align-items-center gap-2" title="Evento">
+        <label for="reportEventFilter" class="form-label mb-0 small text-body-secondary">Evento:</label>
+        <select id="reportEventFilter" class="form-select form-select-sm w-auto"
+                [ngModel]="reportContext.selectedEventId() ?? 0" (ngModelChange)="onEventFilterChange($event)">
+          @for (e of sharedEvents(); track e.id) {
+            <option [ngValue]="e.id">{{ e.name }}</option>
+          }
+        </select>
+      </div>
+    }
+
     @if (showIncludeClosedFilter()) {
       <div class="form-check form-switch mb-0" title="Incluir posiciones ya vendidas del todo, con su resultado realizado">
         <input class="form-check-input" type="checkbox" id="reportIncludeClosed"
@@ -204,7 +240,7 @@
       </div>
     }
 
-    @if (referenceAssets().length > 0) {
+    @if (!hideCurrencyFilter() && referenceAssets().length > 0) {
       <div class="d-flex align-items-center gap-2 ms-auto" title="Moneda de referencia de la sección">
         <label for="reportCurrency" class="form-label mb-0 small text-body-secondary">Moneda:</label>
         <select id="reportCurrency" class="form-select form-select-sm w-auto"

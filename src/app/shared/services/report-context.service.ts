@@ -56,6 +56,13 @@ export class ReportContextService {
   private readonly stockAssetId = signal<number | null>(null);
   private readonly includeClosedFlag = signal<boolean>(false);
 
+  // Fase 22 (Viajes y Compartidos, Flujo 6/7): mismo criterio que portfolioId/cryptoAssetId —
+  // selector de viaje (Viajes — Detalle), de persona (Compartidos — Por persona) y de evento
+  // (Compartidos — Por evento), los tres en la barra de filtros compartida y en la URL.
+  private readonly tripId = signal<number | null>(null);
+  private readonly personId = signal<number | null>(null);
+  private readonly eventId = signal<number | null>(null);
+
   readonly period = computed<ReportPeriod>(() => ({
     preset: this.periodPreset(),
     from: this.customFrom() ?? undefined,
@@ -71,6 +78,9 @@ export class ReportContextService {
   readonly selectedStockTypeId = this.stockTypeId.asReadonly();
   readonly selectedStockAssetId = this.stockAssetId.asReadonly();
   readonly includeClosedPositions = this.includeClosedFlag.asReadonly();
+  readonly selectedTripId = this.tripId.asReadonly();
+  readonly selectedPersonId = this.personId.asReadonly();
+  readonly selectedEventId = this.eventId.asReadonly();
 
   constructor() {
     this.readFromUrl(this.router.url);
@@ -127,6 +137,18 @@ export class ReportContextService {
     this.navigate({ includeClosed: value ? 'true' : null });
   }
 
+  setTripId(tripId: number): void {
+    this.navigate({ tripId });
+  }
+
+  setPersonId(personId: number): void {
+    this.navigate({ personId });
+  }
+
+  setEventId(eventId: number): void {
+    this.navigate({ eventId });
+  }
+
   private readFromUrl(url: string): void {
     const qp = this.router.parseUrl(url).queryParams;
     this.periodPreset.set(this.isPreset(qp['period']) ? qp['period'] : DEFAULT_PERIOD);
@@ -141,6 +163,9 @@ export class ReportContextService {
     this.stockTypeId.set(qp['stockTypeId'] != null ? Number(qp['stockTypeId']) : null);
     this.stockAssetId.set(qp['stockAssetId'] != null ? Number(qp['stockAssetId']) : null);
     this.includeClosedFlag.set(qp['includeClosed'] === 'true');
+    this.tripId.set(qp['tripId'] != null ? Number(qp['tripId']) : null);
+    this.personId.set(qp['personId'] != null ? Number(qp['personId']) : null);
+    this.eventId.set(qp['eventId'] != null ? Number(qp['eventId']) : null);
   }
 
   private isPreset(value: unknown): value is PeriodPreset {

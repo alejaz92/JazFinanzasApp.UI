@@ -151,12 +151,35 @@ export const reportRoutes: Routes = [
                 data: { usesPeriod: false }
             },
             {
+                // Viajes — General (Fase 22, Flujo 6) — foto de todos los viajes, no un rango
+                // elegible (mismo criterio que Patrimonio/Tarjetas/Inversiones).
                 path: 'trips-general',
-                loadComponent: () => import('./trips-general-report/trips-general-report.component').then(m => m.TripsGeneralReportComponent)
+                loadComponent: () => import('./trips-general-report/trips-general-report.component').then(m => m.TripsGeneralReportComponent),
+                data: { usesPeriod: false }
             },
             {
+                // El selector de viaje pasa a la barra de filtros de la sección, mismo criterio que
+                // "Por tarjeta" (cardFilter: 'required').
                 path: 'trip-detail',
-                loadComponent: () => import('./trip-report/trip-report.component').then(m => m.TripReportComponent)
+                loadComponent: () => import('./trip-report/trip-report.component').then(m => m.TripReportComponent),
+                data: { usesPeriod: false, tripFilter: 'required' }
+            },
+            {
+                // Compartidos (Fase 22, Flujo 7) — sin moneda de referencia única por diseño (cada
+                // saldo nace en su propia moneda), así que el selector de moneda de la barra se oculta.
+                path: 'shared-events-general',
+                loadComponent: () => import('./shared-events-general-report/shared-events-general-report.component').then(m => m.SharedEventsGeneralReportComponent),
+                data: { usesPeriod: false, hideCurrencyFilter: true }
+            },
+            {
+                path: 'shared-events-by-person',
+                loadComponent: () => import('./shared-events-by-person-report/shared-events-by-person-report.component').then(m => m.SharedEventsByPersonReportComponent),
+                data: { usesPeriod: false, hideCurrencyFilter: true, personFilter: 'required' }
+            },
+            {
+                path: 'shared-events-by-event',
+                loadComponent: () => import('./shared-event-detail-report/shared-event-detail-report.component').then(m => m.SharedEventDetailReportComponent),
+                data: { usesPeriod: false, hideCurrencyFilter: true, eventFilter: 'required' }
             }
         ]
     }

@@ -464,4 +464,57 @@ export class ChartThemeService {
       }],
     };
   }
+
+  /**
+   * Dispersión de burbujas: eje X e Y numéricos, tamaño de cada punto proporcional a un tercer
+   * valor (Viajes — General, Flujo 6: duración en un eje, costo total en el otro, tamaño = costo
+   * por día — se ve de una qué viaje fue caro *en serio* y cuál solo fue largo).
+   */
+  bubbleOptions(
+    points: { name: string; x: number; y: number; size: number }[],
+    opts?: {
+      xLabel?: string;
+      yLabel?: string;
+      formatX?: (v: number) => string;
+      formatY?: (v: number) => string;
+      formatSize?: (v: number) => string;
+    }
+  ): EChartsOption {
+    const axisLabel = this.surface.axisLabel;
+    const formatX = opts?.formatX ?? ((v: number) => this.formatNumber(v));
+    const formatY = opts?.formatY ?? ((v: number) => this.formatNumber(v));
+    const formatSize = opts?.formatSize ?? formatY;
+    const maxSize = Math.max(1, ...points.map(p => p.size));
+
+    return {
+      grid: { left: 70, right: 30, top: 20, bottom: 55 },
+      tooltip: {
+        trigger: 'item',
+        ...this.tooltipDefaults(),
+        formatter: (p: any) => {
+          const d = points[p.dataIndex];
+          return `<strong>${d.name}</strong><br/>${opts?.xLabel ?? 'X'}: ${formatX(d.x)}<br/>`
+            + `${opts?.yLabel ?? 'Y'}: ${formatY(d.y)}<br/>${formatSize(d.size)}`;
+        },
+      },
+      xAxis: {
+        type: 'value', name: opts?.xLabel, nameLocation: 'middle', nameGap: 30,
+        axisLabel: { color: axisLabel, formatter: (v: number) => formatX(v) },
+        axisLine: { lineStyle: { color: this.surface.axisLine } },
+        splitLine: { lineStyle: { color: this.surface.splitLine } },
+      },
+      yAxis: {
+        type: 'value', name: opts?.yLabel,
+        axisLabel: { color: axisLabel, formatter: (v: number) => formatY(v) },
+        axisLine: { lineStyle: { color: this.surface.axisLine } },
+        splitLine: { lineStyle: { color: this.surface.splitLine } },
+      },
+      series: [{
+        type: 'scatter',
+        data: points.map((p, i) => ({ value: [p.x, p.y], name: p.name, itemStyle: { color: this.colorAt(i) } })),
+        symbolSize: (_value: number[], params: any) => 14 + (points[params.dataIndex].size / maxSize) * 40,
+        label: { show: true, position: 'top', formatter: (p: any) => p.name, color: axisLabel, fontSize: 10 },
+      }],
+    } as EChartsOption;
+  }
 }

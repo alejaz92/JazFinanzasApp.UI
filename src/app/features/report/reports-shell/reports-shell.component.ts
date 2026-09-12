@@ -10,12 +10,21 @@ import { CardService } from '../../card/services/card.service';
 import { Card } from '../../card/models/card.model';
 import { PortfolioService } from '../../portfolios/services/portfolio.service';
 import { Portfolio } from '../../portfolios/models/portfolio.model';
+import { TripService } from '../../trips/services/trip.service';
+import { Trip } from '../../trips/models/trip.model';
+import { PersonService } from '../../people/services/person.service';
+import { Person } from '../../people/models/person.model';
+import { SharedEventService } from '../../shared-events/services/shared-event.service';
+import { SharedEventListItem } from '../../shared-events/models/shared-event.model';
 import { ReportContextService, PeriodPreset } from '../../../shared/services/report-context.service';
 
 type CardFilterMode = 'none' | 'required' | 'optional';
 type PortfolioFilterMode = 'none' | 'required';
 type CryptoFilterMode = 'none' | 'required';
 type StockFilterMode = 'none' | 'required';
+type TripFilterMode = 'none' | 'required';
+type PersonFilterMode = 'none' | 'required';
+type EventFilterMode = 'none' | 'required';
 
 interface NavLink {
     type: 'link';
@@ -64,6 +73,9 @@ export class ReportsShellComponent implements OnInit {
     private readonly assetTypeService = inject(AssetTypeService);
     private readonly cardService = inject(CardService);
     private readonly portfolioService = inject(PortfolioService);
+    private readonly tripService = inject(TripService);
+    private readonly personService = inject(PersonService);
+    private readonly sharedEventService = inject(SharedEventService);
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
     protected readonly reportContext = inject(ReportContextService);
@@ -77,6 +89,12 @@ export class ReportsShellComponent implements OnInit {
     // D-15) — mismo mecanismo que `cryptos`, sumando los seis tipos en vez de un único nombre.
     readonly stockAssetTypes = signal<AssetType[]>([]);
     readonly stocks = signal<Asset[]>([]);
+
+    // Fase 22 (Viajes y Compartidos, Flujo 6/7): mismo mecanismo que cards/portfolios/cryptos —
+    // listas para los selectores de la barra de filtros.
+    readonly trips = signal<Trip[]>([]);
+    readonly people = signal<Person[]>([]);
+    readonly sharedEvents = signal<SharedEventListItem[]>([]);
 
     // Algunas pantallas (ej. Patrimonio) son una foto de hoy + una serie fija, no un rango elegible
     // — el propio hijo declara `data: { usesPeriod: false }` en report.routes.ts y el filtro se oculta.
@@ -103,6 +121,17 @@ export class ReportsShellComponent implements OnInit {
     readonly showStockTypeFilter = signal(false);
     readonly showIncludeClosedFilter = signal(false);
     readonly stockFilterMode = signal<StockFilterMode>('none');
+
+    // Fase 22: selector de viaje (Viajes — Detalle), de persona (Compartidos — Por persona) y de
+    // evento (Compartidos — Por evento) — mismo criterio que portfolioFilterMode/cryptoFilterMode.
+    readonly tripFilterMode = signal<TripFilterMode>('none');
+    readonly personFilterMode = signal<PersonFilterMode>('none');
+    readonly eventFilterMode = signal<EventFilterMode>('none');
+
+    // Compartidos no tiene una sola moneda de referencia por diseño (cada saldo nace en su propia
+    // moneda, mismo criterio que "Saldo compartido" en Inicio) — el selector de moneda de la barra
+    // no le pega a ninguna de sus tres pantallas, así que se oculta en vez de mostrarlo sin efecto.
+    readonly hideCurrencyFilter = signal(false);
 
     readonly periodOptions: { value: PeriodPreset; label: string }[] = [
         { value: 'this-month', label: 'Este mes' },
@@ -199,6 +228,16 @@ export class ReportsShellComponent implements OnInit {
                 { type: 'link', label: 'General', icon: 'bi-grid-1x2', route: '/report/trips-general' },
                 { type: 'link', label: 'Detalle',  icon: 'bi-list-ul', route: '/report/trip-detail' }
             ]
+        },
+        {
+            // Fase 22, Flujo 7: pantallas nuevas — hasta ahora "Compartidos" solo existía como
+            // feature de gestión (`/shared-events`), sin nada dentro de Reportes.
+            type: 'category', label: 'Compartidos', icon: 'bi-people',
+            children: [
+                { type: 'link', label: 'General', icon: 'bi-grid-1x2', route: '/report/shared-events-general' },
+                { type: 'link', label: 'Por persona', icon: 'bi-person', route: '/report/shared-events-by-person' },
+                { type: 'link', label: 'Por evento', icon: 'bi-calendar-event', route: '/report/shared-events-by-event' }
+            ]
         }
     ];
 
@@ -241,6 +280,23 @@ export class ReportsShellComponent implements OnInit {
             this.ensureStockSelected();
         });
 
+        this.tripService.getAllTrips().subscribe(trips => {
+            this.trips.set(trips);
+            this.ensureTripSelected();
+        });
+
+        this.personService.getAllPeople().subscribe(people => {
+            this.people.set(people);
+            this.ensurePersonSelected();
+        });
+
+        // includeClosed=true: "Por evento" tiene que poder elegir eventos ya cerrados (Flujo 7,
+        // "cómo cerró este evento"), no solo los pendientes.
+        this.sharedEventService.getAll(true).subscribe(events => {
+            this.sharedEvents.set(events);
+            this.ensureEventSelected();
+        });
+
         this.updateRouteFlags();
         this.router.events
             .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
@@ -250,6 +306,9 @@ export class ReportsShellComponent implements OnInit {
                 this.ensurePortfolioSelected();
                 this.ensureCryptoSelected();
                 this.ensureStockSelected();
+                this.ensureTripSelected();
+                this.ensurePersonSelected();
+                this.ensureEventSelected();
             });
     }
 
@@ -264,6 +323,10 @@ export class ReportsShellComponent implements OnInit {
         this.showStockTypeFilter.set(data?.['showAssetTypeFilter'] ?? false);
         this.showIncludeClosedFilter.set(data?.['showIncludeClosedFilter'] ?? false);
         this.stockFilterMode.set(data?.['stockFilter'] ?? 'none');
+        this.tripFilterMode.set(data?.['tripFilter'] ?? 'none');
+        this.personFilterMode.set(data?.['personFilter'] ?? 'none');
+        this.eventFilterMode.set(data?.['eventFilter'] ?? 'none');
+        this.hideCurrencyFilter.set(data?.['hideCurrencyFilter'] ?? false);
     }
 
     // Si la pantalla activa exige una tarjeta (cardFilter: 'required') y todavía no hay ninguna
@@ -298,6 +361,30 @@ export class ReportsShellComponent implements OnInit {
         const current = this.reportContext.selectedStockAssetId();
         const stillExists = current != null && this.stocks().some(s => s.id === current);
         if (!stillExists) this.reportContext.setStockAssetId(this.stocks()[0].id);
+    }
+
+    // Mismo criterio que ensureCardSelected, para Viajes — Detalle (Fase 22).
+    private ensureTripSelected(): void {
+        if (this.tripFilterMode() !== 'required' || this.trips().length === 0) return;
+        const current = this.reportContext.selectedTripId();
+        const stillExists = current != null && this.trips().some(t => t.id === current);
+        if (!stillExists) this.reportContext.setTripId(this.trips()[0].id);
+    }
+
+    // Mismo criterio que ensureCardSelected, para Compartidos — Por persona (Fase 22).
+    private ensurePersonSelected(): void {
+        if (this.personFilterMode() !== 'required' || this.people().length === 0) return;
+        const current = this.reportContext.selectedPersonId();
+        const stillExists = current != null && this.people().some(p => p.id === current);
+        if (!stillExists) this.reportContext.setPersonId(this.people()[0].id);
+    }
+
+    // Mismo criterio que ensureCardSelected, para Compartidos — Por evento (Fase 22).
+    private ensureEventSelected(): void {
+        if (this.eventFilterMode() !== 'required' || this.sharedEvents().length === 0) return;
+        const current = this.reportContext.selectedEventId();
+        const stillExists = current != null && this.sharedEvents().some(e => e.id === current);
+        if (!stillExists) this.reportContext.setEventId(this.sharedEvents()[0].id);
     }
 
     onPeriodChange(preset: PeriodPreset): void {
@@ -343,6 +430,18 @@ export class ReportsShellComponent implements OnInit {
 
     onStockFilterChange(stockAssetId: number): void {
         this.reportContext.setStockAssetId(stockAssetId);
+    }
+
+    onTripFilterChange(tripId: number): void {
+        this.reportContext.setTripId(tripId);
+    }
+
+    onPersonFilterChange(personId: number): void {
+        this.reportContext.setPersonId(personId);
+    }
+
+    onEventFilterChange(eventId: number): void {
+        this.reportContext.setEventId(eventId);
     }
 
     onIncludeClosedChange(value: boolean): void {

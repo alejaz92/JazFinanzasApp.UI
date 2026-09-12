@@ -1,0 +1,141 @@
+<app-loading [isLoading]="isLoading"></app-loading>
+
+<div *ngIf="!isLoading && event">
+    <div class="d-flex align-items-center gap-2 mb-3">
+        <h2 class="mb-0">Compartidos — Por evento: {{ event.name }}</h2>
+        <span class="badge" [class.bg-secondary]="event.isClosed" [class.bg-success]="!event.isClosed">
+            {{ event.isClosed ? 'Cerrado' : 'Abierto' }}
+        </span>
+    </div>
+    <p class="text-body-secondary mb-1" *ngIf="event.tripName"><i class="bi-airplane me-1"></i>{{ event.tripName }}</p>
+    <p class="text-body-secondary" *ngIf="event.notes">{{ event.notes }}</p>
+
+    <p class="text-body-secondary mt-3" *ngIf="event.movements.length === 0">Todavía no hay movimientos cargados en este evento.</p>
+
+    <ng-container *ngIf="event.movements.length > 0">
+        <div class="row mt-1">
+            <div class="col-md-6 mt-1">
+                <div class="card">
+                    <div class="card-header" title="Positivo: puso más de lo que consumió (le deben). Negativo: le queda pendiente devolver">
+                        Quién puso qué — qué quedó pendiente
+                    </div>
+                    <div class="card-body">
+                        <app-chart [options]="contributedOptions" [height]="Math.max(200, event.balances.length * 40)"></app-chart>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mt-1" *ngIf="event.categoryTotals.length > 0">
+                <div class="card">
+                    <div class="card-header">Cómo se repartió por categoría</div>
+                    <div class="card-body">
+                        <app-chart [options]="categoryOptions" [height]="280"></app-chart>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12 mt-1">
+                <div class="card">
+                    <div class="card-header">Balances</div>
+                    <div class="card-body p-0">
+                        <table class="table table-sm mb-0">
+                            <thead class="table-header-brand">
+                                <tr>
+                                    <th>Persona</th>
+                                    <th>Moneda</th>
+                                    <th class="text-end">Puso</th>
+                                    <th class="text-end">Consumió</th>
+                                    <th class="text-end">Posición neta</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let b of event.balances">
+                                    <td>{{ b.personId === null ? 'Vos' : b.personName }}</td>
+                                    <td>{{ b.assetSymbol }}</td>
+                                    <td class="text-end">{{ b.contributed | number:'1.2-2' }}</td>
+                                    <td class="text-end">{{ b.consumed | number:'1.2-2' }}</td>
+                                    <td class="text-end fw-bold" [class.text-success]="b.netBalance > 0" [class.text-danger]="b.netBalance < 0">
+                                        {{ b.netBalance | number:'1.2-2' }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12 mt-1">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Movimientos</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-sm mb-0">
+                                <thead class="table-header-brand">
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Descripción</th>
+                                        <th>Categoría</th>
+                                        <th>Pagó</th>
+                                        <th class="text-end">Monto</th>
+                                        <th>División</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let m of event.movements">
+                                        <td>{{ m.date | date:'dd/MM/yy' }}</td>
+                                        <td>{{ m.description }}</td>
+                                        <td>{{ m.transactionClassName }}</td>
+                                        <td>{{ m.payerPersonId === null ? 'Vos' : m.payerPersonName }}</td>
+                                        <td class="text-end">{{ m.totalAmount | number:'1.2-2' }} {{ m.assetSymbol }}</td>
+                                        <td>
+                                            <span *ngFor="let s of m.shares; let last = last" class="small">
+                                                {{ s.personId === null ? 'Vos' : s.personName }}: {{ s.amount | number:'1.2-2' }}{{ last ? '' : ', ' }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4" *ngIf="event.payments.length > 0">
+            <div class="col-12 mt-1">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Pagos registrados</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-sm mb-0">
+                            <thead class="table-header-brand">
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>De</th>
+                                    <th>A</th>
+                                    <th class="text-end">Monto</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let p of event.payments">
+                                    <td>{{ p.date | date:'dd/MM/yy' }}</td>
+                                    <td>{{ p.isInternalCompensation ? '—' : (p.fromPersonId === null ? 'Vos' : p.fromPersonName) }}</td>
+                                    <td>{{ p.isInternalCompensation ? '—' : (p.toPersonId === null ? 'Vos' : p.toPersonName) }}</td>
+                                    <td class="text-end">
+                                        {{ p.isInternalCompensation ? 'Compensación interna' : (p.amount | number:'1.2-2') + ' ' + p.assetSymbol }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+</div>

@@ -1,0 +1,87 @@
+<app-loading [isLoading]="isLoading"></app-loading>
+
+<div *ngIf="!isLoading && data">
+    <h2 class="mb-3">Compartidos — Por persona: {{ data.personName }}</h2>
+
+    <div class="row" *ngIf="data.balances.length > 0">
+        <div class="col-12 mt-1">
+            <div class="card">
+                <div class="card-header">Saldo actual</div>
+                <div class="card-body p-0">
+                    <table class="table table-sm mb-0">
+                        <thead class="table-header-brand">
+                            <tr>
+                                <th>Moneda</th>
+                                <th class="text-end">Me debe</th>
+                                <th class="text-end">Debo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let b of data.balances">
+                                <td>{{ b.assetSymbol }}</td>
+                                <td class="text-end text-success">{{ b.pendingInFavor > 0 ? (b.pendingInFavor | number:'1.2-2') : '—' }}</td>
+                                <td class="text-end text-danger">{{ b.pendingAgainst > 0 ? (b.pendingAgainst | number:'1.2-2') : '—' }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <p class="text-body-secondary mt-3" *ngIf="data.balances.length === 0">Sin saldo pendiente con esta persona.</p>
+
+    <div class="row mt-4" *ngIf="assetEvolutions.length > 0 || data.categoryTotals.length > 0">
+        <div class="col-md-6 mt-1" *ngFor="let ev of assetEvolutions">
+            <div class="card">
+                <div class="card-header">Saldo acumulado — {{ ev.assetSymbol }}</div>
+                <div class="card-body">
+                    <app-chart [options]="ev.options" [height]="280"></app-chart>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mt-1" *ngIf="data.categoryTotals.length > 0">
+            <div class="card">
+                <div class="card-header">Qué categorías compartimos</div>
+                <div class="card-body">
+                    <app-chart [options]="categoryTotalsOptions" [height]="280"></app-chart>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4" *ngIf="history.length > 0">
+        <div class="col-12 mt-1">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Historial de movimientos y pagos</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm mb-0">
+                            <thead class="table-header-brand">
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Evento</th>
+                                    <th></th>
+                                    <th>Detalle</th>
+                                    <th class="text-end">Monto</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let h of history">
+                                    <td>{{ h.date | date:'dd/MM/yy' }}</td>
+                                    <td>{{ h.eventName }}</td>
+                                    <td>
+                                        <span class="badge" [class.bg-primary]="h.kind === 'Movimiento'" [class.bg-secondary]="h.kind === 'Pago'">{{ h.kind }}</span>
+                                    </td>
+                                    <td>{{ h.description }}</td>
+                                    <td class="text-end">{{ h.amount | number:'1.2-2' }} {{ h.assetSymbol }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
