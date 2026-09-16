@@ -43,7 +43,9 @@ export class TripsGeneralReportComponent {
     protected readonly reportContext = inject(ReportContextService);
 
     isLoading = true;
+    allTrips: TripGeneralReport[] = [];
     trips: TripGeneralReport[] = [];
+    typeFilter: TripType | 'ALL' = 'ALL';
     referenceAssetSymbol = '';
 
     totalByTripOptions: EChartsOption = {};
@@ -71,10 +73,20 @@ export class TripsGeneralReportComponent {
         this.isLoading = true;
         this.referenceAssetSymbol = this.referenceAssetSymbols.get(assetId) ?? '';
         this.tripReportService.getGeneral(assetId).subscribe(trips => {
-            this.trips = [...trips].sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
+            this.allTrips = [...trips].sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
             this.isLoading = false;
-            setTimeout(() => this.renderCharts(), 0);
+            this.applyTypeFilter();
         });
+    }
+
+    setTypeFilter(type: TripType | 'ALL'): void {
+        this.typeFilter = type;
+        this.applyTypeFilter();
+    }
+
+    private applyTypeFilter(): void {
+        this.trips = this.typeFilter === 'ALL' ? this.allTrips : this.allTrips.filter(t => t.type === this.typeFilter);
+        setTimeout(() => this.renderCharts(), 0);
     }
 
     get totalSpent(): number {

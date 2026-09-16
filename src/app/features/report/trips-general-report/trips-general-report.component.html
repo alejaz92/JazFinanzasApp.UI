@@ -1,9 +1,17 @@
 <app-loading [isLoading]="isLoading"></app-loading>
 
 <div *ngIf="!isLoading">
-    <h2 class="mb-3">Viajes — General</h2>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Viajes — General</h2>
+        <div class="btn-group btn-group-sm" *ngIf="allTrips.length > 0">
+            <button type="button" class="btn" [class.btn-primary]="typeFilter === 'ALL'" [class.btn-outline-secondary]="typeFilter !== 'ALL'" (click)="setTypeFilter('ALL')">Todos</button>
+            <button type="button" class="btn" [class.btn-primary]="typeFilter === 'DOMESTIC'" [class.btn-outline-secondary]="typeFilter !== 'DOMESTIC'" (click)="setTypeFilter('DOMESTIC')">Doméstico</button>
+            <button type="button" class="btn" [class.btn-primary]="typeFilter === 'INTERNATIONAL'" [class.btn-outline-secondary]="typeFilter !== 'INTERNATIONAL'" (click)="setTypeFilter('INTERNATIONAL')">Internacional</button>
+        </div>
+    </div>
 
-    <p class="text-body-secondary" *ngIf="trips.length === 0">Todavía no hay viajes cargados.</p>
+    <p class="text-body-secondary" *ngIf="allTrips.length === 0">Todavía no hay viajes cargados.</p>
+    <p class="text-body-secondary" *ngIf="allTrips.length > 0 && trips.length === 0">No hay viajes {{ typeFilter === 'DOMESTIC' ? 'domésticos' : 'internacionales' }} cargados.</p>
 
     <ng-container *ngIf="trips.length > 0">
         <div class="row">
