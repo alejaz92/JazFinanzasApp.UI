@@ -47,19 +47,6 @@
         </div>
     </ng-container>
 
-    <ng-container *ngIf="assetEvolutions.length > 0">
-        <div class="row mt-4">
-            <div class="col-md-6 mt-1" *ngFor="let ev of assetEvolutions">
-                <div class="card">
-                    <div class="card-header">Evolución del saldo — {{ ev.assetSymbol }}</div>
-                    <div class="card-body">
-                        <app-chart [options]="ev.options" [height]="260"></app-chart>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </ng-container>
-
     <ng-container *ngIf="data.eventRanking.length > 0">
         <div class="row mt-4">
             <div class="col-md-6 mt-1">

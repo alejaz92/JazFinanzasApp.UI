@@ -3,17 +3,11 @@ import { NgIf, NgFor, DecimalPipe, DatePipe } from '@angular/common';
 import type { EChartsOption } from 'echarts';
 
 import { SharedEventReportService } from '../services/shared-event-report.service';
-import { SharedEventPersonReport, SharedEventBalancePoint } from '../models/shared-event-report.model';
+import { SharedEventPersonReport } from '../models/shared-event-report.model';
 import { ReportContextService } from '../../../shared/services/report-context.service';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
-
-interface AssetEvolution {
-    assetId: number;
-    assetSymbol: string;
-    options: EChartsOption;
-}
 
 interface HistoryItem {
     date: string;
@@ -28,6 +22,11 @@ interface HistoryItem {
 // de persona vive en la barra de filtros compartida (personFilter: 'required'), mismo criterio que
 // "Por tarjeta"/"Carteras — Detalle". Sin selector de moneda (hideCurrencyFilter): cada saldo se
 // muestra en la suya, ver el comentario de SharedEventReportDTOs en el backend.
+//
+// Hubo un gráfico de evolución del saldo (BalanceEvolution), sacado tras la revisión de la Fase 22:
+// contradecía a la tabla de "Saldo actual" de esta misma pantalla porque solo podía reconstruirse a
+// partir de Eventos, y la mayoría del saldo real de una persona viene del pool de gastos compartidos
+// sueltos (sin Evento) — ver el comentario en SharedEventReportService (backend).
 @Component({
     selector: 'app-shared-events-by-person-report',
     standalone: true,
@@ -42,7 +41,6 @@ export class SharedEventsByPersonReportComponent {
 
     isLoading = true;
     data: SharedEventPersonReport | null = null;
-    assetEvolutions: AssetEvolution[] = [];
     history: HistoryItem[] = [];
 
     categoryTotalsOptions: EChartsOption = {};
@@ -60,7 +58,7 @@ export class SharedEventsByPersonReportComponent {
             this.data = data;
             this.history = this.buildHistory(data);
             this.isLoading = false;
-            setTimeout(() => this.renderCharts(data), 0);
+            setTimeout(() => this.renderCategoryTotals(data), 0);
         });
     }
 
@@ -82,27 +80,6 @@ export class SharedEventsByPersonReportComponent {
             assetSymbol: p.payment.assetSymbol,
         }));
         return [...movements, ...payments].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    }
-
-    private renderCharts(data: SharedEventPersonReport): void {
-        this.renderEvolutions(data.balanceEvolution);
-        this.renderCategoryTotals(data);
-    }
-
-    private renderEvolutions(points: SharedEventBalancePoint[]): void {
-        const byAsset = new Map<number, { assetSymbol: string; points: SharedEventBalancePoint[] }>();
-        for (const p of points) {
-            const entry = byAsset.get(p.assetId);
-            if (entry) entry.points.push(p);
-            else byAsset.set(p.assetId, { assetSymbol: p.assetSymbol, points: [p] });
-        }
-
-        const fmt = (v: number) => this.chartTheme.formatNumber(v, { maximumFractionDigits: 0 });
-        this.assetEvolutions = Array.from(byAsset.entries()).map(([assetId, { assetSymbol, points }]) => {
-            const labels = points.map(p => new Date(p.month).toLocaleDateString('es-AR', { month: 'short', year: 'numeric' }));
-            const values = points.map(p => p.myBalance);
-            return { assetId, assetSymbol, options: this.chartTheme.lineOptions(labels, values, { formatValue: fmt, colorIndex: 6 }) };
-        });
     }
 
     private renderCategoryTotals(data: SharedEventPersonReport): void {

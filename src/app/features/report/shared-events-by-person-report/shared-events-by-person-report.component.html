@@ -30,15 +30,7 @@
     </div>
     <p class="text-body-secondary mt-3" *ngIf="data.balances.length === 0">Sin saldo pendiente con esta persona.</p>
 
-    <div class="row mt-4" *ngIf="assetEvolutions.length > 0 || data.categoryTotals.length > 0">
-        <div class="col-md-6 mt-1" *ngFor="let ev of assetEvolutions">
-            <div class="card">
-                <div class="card-header">Saldo acumulado — {{ ev.assetSymbol }}</div>
-                <div class="card-body">
-                    <app-chart [options]="ev.options" [height]="280"></app-chart>
-                </div>
-            </div>
-        </div>
+    <div class="row mt-4" *ngIf="data.categoryTotals.length > 0">
         <div class="col-md-6 mt-1" *ngIf="data.categoryTotals.length > 0">
             <div class="card">
                 <div class="card-header">Qué categorías compartimos</div>

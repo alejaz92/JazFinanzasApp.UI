@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 import type { EChartsOption } from 'echarts';
 
 import { SharedEventReportService } from '../services/shared-event-report.service';
-import { SharedEventGeneralReport, SharedEventBalancePoint } from '../models/shared-event-report.model';
+import { SharedEventGeneralReport } from '../models/shared-event-report.model';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
@@ -15,16 +15,15 @@ interface PersonNet {
     net: number;
 }
 
-interface AssetEvolution {
-    assetId: number;
-    assetSymbol: string;
-    options: EChartsOption;
-}
-
 // Compartidos — General (Fase 22, Flujo 7): con quién comparto y cómo estoy. Balances reusa íntegro
 // SharedEventReportService.GetGeneralAsync/GetConsolidatedDebtsAsync (backend, Fase 21) — no se
 // convierte a una sola moneda, cada saldo se agrupa y grafica por su propia moneda (ver comentario
 // del modelo). Sin selector de moneda en la barra (hideCurrencyFilter, ver report.routes.ts).
+//
+// Hubo un gráfico de evolución del saldo (BalanceEvolution), sacado tras la revisión de la Fase 22:
+// contradecía a la tabla de "Saldo actual" de esta misma pantalla porque solo podía reconstruirse a
+// partir de Eventos, y la mayoría del saldo real viene del pool de gastos compartidos sueltos (sin
+// Evento) — ver el comentario en SharedEventReportService (backend).
 @Component({
     selector: 'app-shared-events-general-report',
     standalone: true,
@@ -41,7 +40,6 @@ export class SharedEventsGeneralReportComponent implements OnInit {
     isLoading = true;
     data: SharedEventGeneralReport | null = null;
     personNets: PersonNet[] = [];
-    assetEvolutions: AssetEvolution[] = [];
 
     balancesByPersonOptions: EChartsOption = {};
     eventRankingOptions: EChartsOption = {};
@@ -72,7 +70,6 @@ export class SharedEventsGeneralReportComponent implements OnInit {
 
     private renderCharts(data: SharedEventGeneralReport): void {
         this.renderBalancesByPerson();
-        this.renderEvolutions(data.balanceEvolution);
         this.renderRanking(data);
     }
 
@@ -86,22 +83,6 @@ export class SharedEventsGeneralReportComponent implements OnInit {
             this.personNets.map(p => p.net),
             { formatValue: v => this.chartTheme.formatNumber(v, { maximumFractionDigits: 0 }) }
         );
-    }
-
-    private renderEvolutions(points: SharedEventBalancePoint[]): void {
-        const byAsset = new Map<number, { assetSymbol: string; points: SharedEventBalancePoint[] }>();
-        for (const p of points) {
-            const entry = byAsset.get(p.assetId);
-            if (entry) entry.points.push(p);
-            else byAsset.set(p.assetId, { assetSymbol: p.assetSymbol, points: [p] });
-        }
-
-        const fmt = (v: number) => this.chartTheme.formatNumber(v, { maximumFractionDigits: 0 });
-        this.assetEvolutions = Array.from(byAsset.entries()).map(([assetId, { assetSymbol, points }]) => {
-            const labels = points.map(p => new Date(p.month).toLocaleDateString('es-AR', { month: 'short', year: 'numeric' }));
-            const values = points.map(p => p.myBalance);
-            return { assetId, assetSymbol, options: this.chartTheme.lineOptions(labels, values, { formatValue: fmt, colorIndex: 6 }) };
-        });
     }
 
     private renderRanking(data: SharedEventGeneralReport): void {

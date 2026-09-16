@@ -6,13 +6,12 @@ import { SharedEventConsolidatedDebt, SharedEventCategoryTotal, SharedEventMovem
 // su propia moneda (mismo criterio que "Saldo compartido" en Inicio) y mezclarlas mentiría.
 // "Por evento" no tiene modelo propio: reusa `SharedEventDetail` (`shared-event.model.ts`) tal cual,
 // consumido con `SharedEventService.getById` — ver el comentario en TripReportService (Fase 21).
-
-export interface SharedEventBalancePoint {
-  month: string;
-  assetId: number;
-  assetSymbol: string;
-  myBalance: number;
-}
+//
+// Hubo un `SharedEventBalancePoint`/`balanceEvolution` (evolución mensual del saldo) sacado tras la
+// revisión de la Fase 22 — solo se podía reconstruir a partir de Eventos, y la mayoría del saldo real
+// viene del pool de gastos compartidos sueltos (sin Evento), que en el 89% de los casos no tiene
+// fecha histórica de cuándo se saldó. El gráfico terminaba contradiciendo la tabla de "Saldo actual"
+// de la misma pantalla — ver el comentario en `SharedEventReportService` (backend).
 
 export interface SharedEventAssetAmount {
   assetId: number;
@@ -30,10 +29,6 @@ export interface SharedEventRanking {
 
 export interface SharedEventGeneralReport {
   balances: SharedEventConsolidatedDebt[];
-  // Subconjunto de "Saldo compartido" (Inicio): solo Eventos, sin el pool de gastos compartidos
-  // sueltos (ver comentario del backend, SharedEventReportService) — puede no coincidir con la
-  // suma de `balances` a propósito.
-  balanceEvolution: SharedEventBalancePoint[];
   eventRanking: SharedEventRanking[];
 }
 
@@ -53,7 +48,6 @@ export interface SharedEventPersonReport {
   personId: number;
   personName: string;
   balances: SharedEventConsolidatedDebt[];
-  balanceEvolution: SharedEventBalancePoint[];
   categoryTotals: SharedEventCategoryTotal[];
   movements: SharedEventPersonMovement[];
   payments: SharedEventPersonPayment[];
