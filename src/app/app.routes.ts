@@ -208,11 +208,6 @@ export const routes: Routes = [
     canActivate: [AuthGuard]
   },
   {
-    path: 'balance',
-    loadComponent: () => import('./features/report/balance/balance.component').then(m => m.BalanceComponent),
-    canActivate: [AuthGuard]
-  },
-  {
     path: 'report',
     loadChildren: () => import('./features/report/report.routes').then(m => m.reportRoutes),
     canActivate: [AuthGuard]
