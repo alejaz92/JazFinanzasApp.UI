@@ -59,11 +59,14 @@
         </div>
 
         <div class="row mt-4">
-            <div class="col-md-6 mt-1" *ngIf="detail.costPerDayComparison.length > 1">
+            <div class="col-md-6 mt-1">
                 <div class="card">
                     <div class="card-header">Costo por día contra otros viajes</div>
                     <div class="card-body">
-                        <app-chart [options]="costPerDayComparisonOptions" [height]="280"></app-chart>
+                        <app-chart *ngIf="detail.costPerDayComparison.length > 1" [options]="costPerDayComparisonOptions" [height]="280"></app-chart>
+                        <p class="text-body-secondary small mb-0" *ngIf="detail.costPerDayComparison.length <= 1">
+                            Se compara solo cuando hay otro viaje cargado — hoy este es el único.
+                        </p>
                     </div>
                 </div>
             </div>

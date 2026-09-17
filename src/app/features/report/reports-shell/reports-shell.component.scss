@@ -163,3 +163,32 @@ $sidebar-bg-bottom: #1b0f44;
     background: rgba(0, 0, 0, 0.5);
     z-index: 1040;
 }
+
+// -- Favoritos (Fase 25) --------------------------------------------------------
+
+.sidebar-favorites-heading {
+    color: rgba(255, 255, 255, 0.55);
+    letter-spacing: 0.04em;
+}
+
+.sidebar-favorites-divider {
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+// -- Impresión (Fase 25, sección 7 del plan) ------------------------------------
+// Solo el contenido del reporte activo; sidebar, barra móvil, barra de filtros y los
+// botones de favorito/exportar/imprimir no aportan nada en papel.
+
+@media print {
+    .reports-mobile-bar,
+    .reports-sidebar,
+    .sidebar-overlay,
+    .reports-filter-bar,
+    .no-print {
+        display: none !important;
+    }
+
+    .reports-content {
+        margin-left: 0;
+    }
+}

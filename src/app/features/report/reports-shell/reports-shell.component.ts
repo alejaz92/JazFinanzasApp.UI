@@ -1,7 +1,8 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, NavigationEnd, Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { filter, forkJoin, of, switchMap } from 'rxjs';
+import * as XLSX from 'xlsx';
 import { AssetService } from '../../asset/services/asset.service';
 import { Asset } from '../../asset/models/asset.model';
 import { AssetTypeService } from '../../assetType/services/asset-type.service';
@@ -17,6 +18,9 @@ import { Person } from '../../people/models/person.model';
 import { SharedEventService } from '../../shared-events/services/shared-event.service';
 import { SharedEventListItem } from '../../shared-events/models/shared-event.model';
 import { ReportContextService, PeriodPreset } from '../../../shared/services/report-context.service';
+import { ReportFavoriteService } from '../services/report-favorite.service';
+import { ReportFavorite } from '../models/report-favorite.model';
+import { ToastService } from '../../../core/services/toast.service';
 
 type CardFilterMode = 'none' | 'required' | 'optional';
 type PortfolioFilterMode = 'none' | 'required';
@@ -51,6 +55,17 @@ interface NavCategory {
 
 type NavEntry = NavLink | NavCategory;
 
+// Fase 25 (sección 7 del plan, "Favoritos"): un favorito resuelto contra el árbol de navEntries
+// para poder mostrarlo en la fila fija de arriba del sidebar, con su label/ícono y la ruta+query
+// exactos que se guardaron (una vista de "Por persona: Ana" concreta, no el reporte genérico).
+interface FavoriteNavLink {
+    favorite: ReportFavorite;
+    label: string;
+    icon: string;
+    path: string;
+    queryParams: Record<string, string>;
+}
+
 @Component({
     selector: 'app-reports-shell',
     standalone: true,
@@ -76,6 +91,8 @@ export class ReportsShellComponent implements OnInit {
     private readonly tripService = inject(TripService);
     private readonly personService = inject(PersonService);
     private readonly sharedEventService = inject(SharedEventService);
+    private readonly reportFavoriteService = inject(ReportFavoriteService);
+    private readonly toastService = inject(ToastService);
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
     protected readonly reportContext = inject(ReportContextService);
@@ -132,6 +149,34 @@ export class ReportsShellComponent implements OnInit {
     // moneda, mismo criterio que "Saldo compartido" en Inicio) — el selector de moneda de la barra
     // no le pega a ninguna de sus tres pantallas, así que se oculta en vez de mostrarlo sin efecto.
     readonly hideCurrencyFilter = signal(false);
+
+    // Fase 25 (sección 7 del plan, "Favoritos"): reportKey es la ruta actual relativa a /report/ +
+    // query params (ej. "shared-events-by-person?personId=3") — mismo criterio que "enlaces que se
+    // pueden guardar". `favorites` se carga una vez al entrar a la sección; currentReportKey se
+    // actualiza en cada navegación.
+    readonly favorites = signal<ReportFavorite[]>([]);
+    readonly currentReportKey = signal('');
+    readonly currentFavorite = computed(() =>
+        this.favorites().find(f => f.reportKey === this.currentReportKey()));
+
+    readonly favoriteLinks = computed<FavoriteNavLink[]>(() => {
+        const flat = this.flatNavEntries();
+        return [...this.favorites()]
+            .sort((a, b) => a.order - b.order)
+            .map(favorite => {
+                const [path, query] = favorite.reportKey.split('?');
+                const entry = flat.get(path);
+                const queryParams: Record<string, string> = {};
+                if (query) new URLSearchParams(query).forEach((v, k) => queryParams[k] = v);
+                return {
+                    favorite,
+                    label: entry?.label ?? favorite.reportKey,
+                    icon: entry?.icon ?? 'bi-star',
+                    path: `/report/${path}`,
+                    queryParams
+                };
+            });
+    });
 
     readonly periodOptions: { value: PeriodPreset; label: string }[] = [
         { value: 'this-month', label: 'Este mes' },
@@ -242,6 +287,8 @@ export class ReportsShellComponent implements OnInit {
     ];
 
     ngOnInit(): void {
+        this.reportFavoriteService.getAll().subscribe(favorites => this.favorites.set(favorites));
+
         this.assetService.getReferenceAssets().subscribe(assets => {
             this.referenceAssets.set(assets);
             if (this.reportContext.currencyAssetId() == null) {
@@ -313,6 +360,10 @@ export class ReportsShellComponent implements OnInit {
     }
 
     private updateRouteFlags(): void {
+        // reportKey = todo lo que sigue a "/report/" (ruta del hijo + query string), mismo criterio
+        // documentado en report-favorite.model.ts.
+        this.currentReportKey.set(this.router.url.replace(/^\/report\//, ''));
+
         const data = this.route.snapshot.firstChild?.data;
         this.usesPeriod.set(data?.['usesPeriod'] ?? true);
         this.cardFilterMode.set(data?.['cardFilter'] ?? 'none');
@@ -475,5 +526,70 @@ export class ReportsShellComponent implements OnInit {
 
     isSubcategory(child: NavLink | NavSubcategory): child is NavSubcategory {
         return child.type === 'subcategory';
+    }
+
+    // Memoizado: navEntries es estático, no hace falta recalcularlo en cada acceso a favoriteLinks.
+    private _flatNavEntries: Map<string, { label: string; icon: string }> | null = null;
+    private flatNavEntries(): Map<string, { label: string; icon: string }> {
+        if (this._flatNavEntries) return this._flatNavEntries;
+
+        const flat = new Map<string, { label: string; icon: string }>();
+        const addLink = (link: NavLink) => flat.set(link.route.replace(/^\/report\//, ''), { label: link.label, icon: link.icon });
+        for (const entry of this.navEntries) {
+            if (!this.isCategory(entry)) { addLink(entry); continue; }
+            for (const child of entry.children) {
+                if (this.isSubcategory(child)) child.children.forEach(addLink);
+                else addLink(child);
+            }
+        }
+        this._flatNavEntries = flat;
+        return flat;
+    }
+
+    toggleFavorite(): void {
+        const existing = this.currentFavorite();
+        if (existing) {
+            this.reportFavoriteService.delete(existing.id).subscribe(() => {
+                this.favorites.update(list => list.filter(f => f.id !== existing.id));
+            });
+            return;
+        }
+
+        const reportKey = this.currentReportKey();
+        this.reportFavoriteService.create(reportKey).subscribe(created => {
+            this.favorites.update(list => [...list, created]);
+        });
+    }
+
+    // Exportación a Excel (sección 7 del plan): sin backend (ver decisión de la Fase 24) — arma un
+    // .xlsx en el navegador a partir de las tablas visibles del reporte actual. Cada reporte muy
+    // distinto entre sí ya expone su detalle como una o más <table>, así que no hace falta que cada
+    // pantalla declare qué exportar.
+    exportToExcel(): void {
+        const tables = document.querySelectorAll<HTMLTableElement>('.reports-content table');
+        if (tables.length === 0) {
+            this.toastService.error('Este reporte no tiene tablas para exportar');
+            return;
+        }
+
+        const workbook = XLSX.utils.book_new();
+        tables.forEach((table, i) => {
+            const sheetName = this.nearestCardHeader(table) ?? `Tabla ${i + 1}`;
+            const sheet = XLSX.utils.table_to_sheet(table);
+            XLSX.utils.book_append_sheet(workbook, sheet, sheetName.substring(0, 31));
+        });
+
+        const label = this.currentReportKey().split('?')[0] || 'reporte';
+        XLSX.writeFile(workbook, `${label}.xlsx`);
+    }
+
+    private nearestCardHeader(table: HTMLTableElement): string | null {
+        const card = table.closest('.card');
+        const header = card?.querySelector('.card-header');
+        return header?.textContent?.trim().replace(/\s+/g, ' ') ?? null;
+    }
+
+    print(): void {
+        window.print();
     }
 }
