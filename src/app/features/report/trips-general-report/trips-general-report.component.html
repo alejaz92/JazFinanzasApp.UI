@@ -44,8 +44,10 @@
             </div>
             <div class="col-md-6 mt-1">
                 <div class="card">
-                    <div class="card-header" title="El tamaño de cada punto es el costo por día — se ve de una qué viaje fue caro en serio y cuál solo fue largo">
+                    <div class="card-header d-flex align-items-center gap-2">
                         Duración vs. costo total
+                        <app-info-button title="Duración vs. costo total"
+                            text="Cada punto es un viaje: a la derecha duró más días, más arriba costó más en total. El tamaño del punto es el costo por día, así se ve de una qué viaje fue caro en serio y cuál solo fue largo."></app-info-button>
                     </div>
                     <div class="card-body">
                         <app-chart [options]="bubbleOptions" [height]="320"></app-chart>

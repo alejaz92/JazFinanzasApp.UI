@@ -11,6 +11,7 @@ import { ReportContextService } from '../../../shared/services/report-context.se
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
+import { InfoButtonComponent } from '../../../shared/components/info-button/info-button.component';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 
 const STATUS_LABELS: Record<TripStatus, string> = {
@@ -32,7 +33,7 @@ const TYPE_LABELS: Record<TripType, string> = {
 @Component({
     selector: 'app-trips-general-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, DatePipe, RouterLink, CurrencyFiatFormatPipe, ChartComponent],
+    imports: [LoadingComponent, NgIf, NgFor, DatePipe, RouterLink, CurrencyFiatFormatPipe, ChartComponent, InfoButtonComponent],
     templateUrl: './trips-general-report.component.html',
     styleUrl: './trips-general-report.component.css'
 })

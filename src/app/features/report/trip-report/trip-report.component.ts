@@ -9,6 +9,7 @@ import { ReportContextService } from '../../../shared/services/report-context.se
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
+import { InfoButtonComponent } from '../../../shared/components/info-button/info-button.component';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 
 interface WaterfallStep {
@@ -27,7 +28,7 @@ interface WaterfallStep {
 @Component({
     selector: 'app-trip-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, CurrencyFiatFormatPipe, ChartComponent],
+    imports: [LoadingComponent, NgIf, NgFor, CurrencyFiatFormatPipe, ChartComponent, InfoButtonComponent],
     templateUrl: './trip-report.component.html',
     styleUrl: './trip-report.component.css'
 })

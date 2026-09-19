@@ -1,0 +1,19 @@
+<button type="button" class="btn btn-link btn-sm p-0 info-button" [title]="'Qué muestra: ' + title"
+        [attr.aria-label]="'Ayuda: ' + title" (click)="open()">
+  <i class="bi bi-info-circle"></i>
+</button>
+
+<div #modalRef class="modal fade" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ title }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <p *ngIf="text" class="mb-0">{{ text }}</p>
+        <ng-content></ng-content>
+      </div>
+    </div>
+  </div>
+</div>

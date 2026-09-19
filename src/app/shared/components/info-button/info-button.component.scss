@@ -1,0 +1,7 @@
+.info-button {
+    color: var(--bs-secondary-color);
+    line-height: 1;
+    vertical-align: baseline;
+
+    &:hover { color: var(--bs-primary); }
+}

@@ -42,7 +42,17 @@
         <div class="row mt-4">
             <div class="col-md-6 mt-1">
                 <div class="card">
-                    <div class="card-header">Cascada por categoría</div>
+                    <div class="card-header d-flex align-items-center gap-2">
+                        Cascada por categoría
+                        <app-info-button title="Cascada por categoría">
+                            <p>Cómo se armó el total del viaje, categoría por categoría:</p>
+                            <ul class="mb-0">
+                                <li>Cada escalón suma lo gastado en esa categoría.</li>
+                                <li>La última barra es el total del viaje.</li>
+                                <li>Incluye tu parte de los eventos compartidos vinculados y tus gastos propios etiquetados con el viaje.</li>
+                            </ul>
+                        </app-info-button>
+                    </div>
                     <div class="card-body">
                         <app-chart [options]="waterfallOptions" [height]="320"></app-chart>
                     </div>
