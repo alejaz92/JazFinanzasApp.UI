@@ -9,7 +9,11 @@
         <div class="col-md-3">
             <div class="card mb-3 text-center">
                 <div class="card-header" [style.backgroundColor]="data.pesoAssetColor" [style.color]="data.pesoAssetColor | contrastText">
-                    Ahorrado en {{ data.pesoAssetSymbol }}, en {{ data.referenceAssetSymbol }}
+                    <span class="d-flex align-items-center justify-content-center gap-2">
+                        Ahorrado en {{ data.pesoAssetSymbol }}, en {{ data.referenceAssetSymbol }}
+                        <app-info-button title="Ahorrado en pesos"
+                            text="Suma histórica de todos los reintegros y descuentos de tarjeta cargados sobre compras en pesos, sin límite de fechas. Se muestra en la moneda de referencia con la cotización de hoy."></app-info-button>
+                    </span>
                 </div>
                 <div class="card-body">
                     <h4 class="mb-0">{{ data.totalSavedPesos | currencyFiatFormat }}</h4>
@@ -19,7 +23,11 @@
         <div class="col-md-3">
             <div class="card mb-3 text-center">
                 <div class="card-header" [style.backgroundColor]="data.dollarAssetColor" [style.color]="data.dollarAssetColor | contrastText">
-                    Ahorrado en {{ data.dollarAssetSymbol }}, en {{ data.referenceAssetSymbol }}
+                    <span class="d-flex align-items-center justify-content-center gap-2">
+                        Ahorrado en {{ data.dollarAssetSymbol }}, en {{ data.referenceAssetSymbol }}
+                        <app-info-button title="Ahorrado en dólares"
+                            text="Suma histórica de todos los reintegros y descuentos de tarjeta cargados sobre compras en dólares, sin límite de fechas. Se muestra en la moneda de referencia con la cotización de hoy."></app-info-button>
+                    </span>
                 </div>
                 <div class="card-body">
                     <h4 class="mb-0">{{ data.totalSavedDollars | currencyFiatFormat }}</h4>
@@ -28,7 +36,11 @@
         </div>
         <div class="col-md-3">
             <div class="card mb-3 text-center">
-                <div class="card-header">% sobre consumo ({{ data.pesoAssetSymbol }})</div>
+                <div class="card-header d-flex align-items-center gap-2 justify-content-center">
+                    % sobre consumo ({{ data.pesoAssetSymbol }})
+                    <app-info-button title="% sobre consumo"
+                        text="Lo ahorrado en total (histórico) dividido por lo consumido con tarjeta en pesos en los últimos 12 meses. Como el ahorro es de todo el historial y el consumo es de 12 meses, es una referencia de cuánto rinden las promos, no un porcentaje exacto de un período. Queda en guion si no hubo consumo en esa moneda."></app-info-button>
+                </div>
                 <div class="card-body">
                     <h4 class="mb-0">{{ data.percentOfConsumptionPesos != null ? (data.percentOfConsumptionPesos | number:'1.1-1') + '%' : '—' }}</h4>
                 </div>
@@ -36,7 +48,11 @@
         </div>
         <div class="col-md-3">
             <div class="card mb-3 text-center">
-                <div class="card-header">% sobre consumo ({{ data.dollarAssetSymbol }})</div>
+                <div class="card-header d-flex align-items-center gap-2 justify-content-center">
+                    % sobre consumo ({{ data.dollarAssetSymbol }})
+                    <app-info-button title="% sobre consumo"
+                        text="Lo ahorrado en total (histórico) dividido por lo consumido con tarjeta en dólares en los últimos 12 meses. Como el ahorro es de todo el historial y el consumo es de 12 meses, es una referencia de cuánto rinden las promos, no un porcentaje exacto de un período. Queda en guion si no hubo consumo en esa moneda."></app-info-button>
+                </div>
                 <div class="card-body">
                     <h4 class="mb-0">{{ data.percentOfConsumptionDollars != null ? (data.percentOfConsumptionDollars | number:'1.1-1') + '%' : '—' }}</h4>
                 </div>
@@ -47,7 +63,11 @@
     <div class="row mt-2" *ngIf="hasMonthlyData">
         <div class="col-12 mt-1">
             <div class="card">
-                <div class="card-header">Ahorro por mes, últimos 12 meses, en {{ data.referenceAssetSymbol }}</div>
+                <div class="card-header d-flex align-items-center gap-2">
+                    Ahorro por mes, últimos 12 meses, en {{ data.referenceAssetSymbol }}
+                    <app-info-button title="Ahorro por mes"
+                        text="Cuánto ahorraste en promociones y reintegros en cada uno de los últimos 12 meses, separado entre pesos y dólares y convertido a la moneda de referencia con la cotización de cada mes."></app-info-button>
+                </div>
                 <div class="card-body">
                     <app-chart [options]="monthlyOptions" [height]="300"></app-chart>
                 </div>
@@ -60,8 +80,16 @@
 
     <div class="mt-4">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header d-flex align-items-center gap-2">
                 <h5 class="mb-0">Pendientes de acreditar o de aplicar</h5>
+                <app-info-button title="Pendientes de acreditar o de aplicar">
+                    <p>Los reintegros que todavía no terminaron su recorrido:</p>
+                    <ul class="mb-0">
+                        <li><strong>Pendiente de acreditar:</strong> lo que el banco todavía no te devolvió.</li>
+                        <li><strong>Pendiente de aplicar:</strong> lo que ya se acreditó pero todavía no se descontó de una cuota de tarjeta.</li>
+                        <li>La fecha es la de acreditación prevista.</li>
+                    </ul>
+                </app-info-button>
             </div>
             <div class="card-body">
                 <ng-container *ngIf="data.pending.length > 0; else noPending">

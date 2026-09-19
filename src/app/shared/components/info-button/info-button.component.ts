@@ -21,7 +21,11 @@ export class InfoButtonComponent implements OnDestroy {
     private modalInstance: any;
     private movedToBody = false;
 
-    open(): void {
+    open(event?: Event): void {
+        // Muchos encabezados viven dentro de una tarjeta que es un link (Panorama): el clic del botón
+        // no tiene que navegar.
+        event?.preventDefault();
+        event?.stopPropagation();
         const el = this.modalRef?.nativeElement;
         if (!el) return;
         // Se lleva el modal al <body>: dentro de un card-header o de un contenedor con transform el

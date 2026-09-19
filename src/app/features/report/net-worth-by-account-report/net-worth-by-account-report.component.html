@@ -11,7 +11,16 @@
         <div class="row">
             <div class="col-12 mt-1">
                 <div class="card">
-                    <div class="card-header">Todas las cuentas, de una sola vez</div>
+                    <div class="card-header d-flex align-items-center gap-2">
+                        Todas las cuentas, de una sola vez
+                        <app-info-button title="Patrimonio por cuenta">
+                            <p>Una barra por cuenta con su saldo total en la moneda elegida, sumando todos los activos que tiene adentro. Abajo, cada cuenta se abre para ver:</p>
+                            <ul class="mb-0">
+                                <li>Los activos que contiene, con su saldo en la unidad del propio activo y su valor en la moneda de referencia.</li>
+                                <li>Cómo evolucionó el saldo de esa cuenta en los últimos 12 meses.</li>
+                            </ul>
+                        </app-info-button>
+                    </div>
                     <div class="card-body">
                         <app-chart [options]="barOptions" [height]="barChartHeight"></app-chart>
                     </div>

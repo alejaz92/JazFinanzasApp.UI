@@ -13,14 +13,22 @@
 
 <ng-container *ngIf="dataRequested && !isLoading && data">
     <div class="card mb-3">
-        <div class="card-header">Un cuadradito por día — clic para ver los movimientos</div>
+        <div class="card-header d-flex align-items-center gap-2">
+            Un cuadradito por día — clic para ver los movimientos
+            <app-info-button title="Calendario de gastos"
+                text="Cada cuadradito es un día del año elegido: cuanto más intenso el color, más se gastó ese día (la escala de arriba va de cero al día más caro del año). Con un clic se abren los movimientos de ese día. Cuenta lo mismo que el Resumen del mes: egresos con categoría, y las cuotas de tarjeta el día que se pagan."></app-info-button>
+        </div>
         <div class="card-body">
             <app-chart [options]="calendarOptions" [height]="220" (chartClick)="onCalendarClick($event)"></app-chart>
         </div>
     </div>
 
     <div class="card">
-        <div class="card-header">Gasto promedio por día de la semana</div>
+        <div class="card-header d-flex align-items-center gap-2">
+            Gasto promedio por día de la semana
+            <app-info-button title="Gasto promedio por día de la semana"
+                text="Cuánto se gasta en promedio un lunes, un martes, etc. El promedio divide por todas las veces que ese día ocurrió en el año, incluidos los días en que no gastaste nada, no solo por los días con gasto."></app-info-button>
+        </div>
         <div class="card-body">
             <app-chart [options]="weekdayOptions" [height]="260"></app-chart>
         </div>

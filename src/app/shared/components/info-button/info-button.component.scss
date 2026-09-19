@@ -1,7 +1,12 @@
+// Hereda el color del encabezado donde se use (hay encabezados con color de moneda propio) y solo baja
+// la opacidad, para que se lea igual de bien sobre cualquier fondo.
 .info-button {
-    color: var(--bs-secondary-color);
+    color: inherit;
+    opacity: 0.6;
+    font-size: 1rem;
+    font-weight: normal;
     line-height: 1;
     vertical-align: baseline;
 
-    &:hover { color: var(--bs-primary); }
+    &:hover { opacity: 1; }
 }

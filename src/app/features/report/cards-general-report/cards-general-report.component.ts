@@ -11,6 +11,7 @@ import { ChartComponent } from '../../../shared/components/chart/chart.component
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { ContrastTextPipe } from '../../../shared/pipes/contrastText/contrast-text.pipe';
+import { InfoButtonComponent } from '../../../shared/components/info-button/info-button.component';
 
 // Tarjetas — General (Fase 15): reemplaza a la vieja pantalla "Tarjetas" (features/report/cards-report,
 // dada de baja). Consumo devengado (CardTransaction.Date/TotalAmount), apilado por mes y por tarjeta.
@@ -20,7 +21,7 @@ import { ContrastTextPipe } from '../../../shared/pipes/contrastText/contrast-te
 @Component({
     selector: 'app-cards-general-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, DatePipe, CurrencyFiatFormatPipe, ContrastTextPipe, ChartComponent],
+    imports: [LoadingComponent, NgIf, NgFor, DatePipe, CurrencyFiatFormatPipe, ContrastTextPipe, ChartComponent, InfoButtonComponent],
     templateUrl: './cards-general-report.component.html',
     styleUrl: './cards-general-report.component.css'
 })

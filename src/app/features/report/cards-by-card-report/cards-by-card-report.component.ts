@@ -13,6 +13,7 @@ import { ChartComponent } from '../../../shared/components/chart/chart.component
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { ContrastTextPipe } from '../../../shared/pipes/contrastText/contrast-text.pipe';
+import { InfoButtonComponent } from '../../../shared/components/info-button/info-button.component';
 
 // Tarjetas — Por tarjeta (Fase 15): ficha de una tarjeta (próximo cierre/vencimiento, consumo del
 // mes, composición por categoría y evolución mensual), sobre CardReportController.GetByCardAsync.
@@ -21,7 +22,7 @@ import { ContrastTextPipe } from '../../../shared/pipes/contrastText/contrast-te
 @Component({
     selector: 'app-cards-by-card-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, FormsModule, DatePipe, CurrencyFiatFormatPipe, ContrastTextPipe, ChartComponent],
+    imports: [LoadingComponent, NgIf, NgFor, FormsModule, DatePipe, CurrencyFiatFormatPipe, ContrastTextPipe, ChartComponent, InfoButtonComponent],
     templateUrl: './cards-by-card-report.component.html',
     styleUrl: './cards-by-card-report.component.css'
 })

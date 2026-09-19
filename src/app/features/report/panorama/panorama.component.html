@@ -1,4 +1,16 @@
-<h2 class="mb-3">Panorama</h2>
+<h2 class="mb-3 d-flex align-items-center gap-2">
+    Panorama
+    <app-info-button title="Cómo leer el Panorama">
+        <p>Un resumen de cómo estás hoy, en la moneda elegida arriba. Cada tarjeta lleva al reporte que la desarrolla:</p>
+        <ul class="mb-0">
+            <li><strong>Patrimonio:</strong> lo que tenés en cuentas e inversiones a la cotización de hoy, y cuánto cambió contra el cierre del mes pasado.</li>
+            <li><strong>Resultado del mes:</strong> ingresos menos egresos del mes en curso, contra el resultado del mes pasado completo.</li>
+            <li><strong>Gasto del mes:</strong> lo gastado en el mes en curso y, debajo, el promedio de los últimos 6 meses.</li>
+            <li><strong>Tarjetas a pagar:</strong> lo que vence este mes sumando todas tus tarjetas (en pesos) y la fecha del próximo vencimiento.</li>
+            <li><strong>Saldo compartido:</strong> cuánto te deben (positivo) o debés (negativo) en gastos compartidos, separado por moneda.</li>
+        </ul>
+    </app-info-button>
+</h2>
 
 <app-loading [isLoading]="isLoadingTotals"></app-loading>
 
@@ -6,7 +18,11 @@
     <div class="col-12" [ngClass]="{ 'col-md-12': totals.length === 1, 'col-md-6': totals.length >= 2 }" *ngFor="let t of totals">
         <a class="card mb-3 text-center text-decoration-none" [routerLink]="['/report/networth-general']" queryParamsHandling="preserve"
            [style.backgroundColor]="t.color" [style.color]="t.color | contrastText">
-            <div class="card-header">Valor Total en {{ t.symbol }}</div>
+            <div class="card-header d-flex align-items-center gap-2 justify-content-center">
+                Valor Total en {{ t.symbol }}
+                <app-info-button title="Valor total"
+                    text="Todo lo que tenés (cuentas, bolsa, cripto y bonos) expresado en esta moneda a la cotización de hoy. Es el total bruto: no descuenta la deuda de tarjeta, eso se ve en Patrimonio → General."></app-info-button>
+            </div>
             <div class="card-body">
                 <h4 class="card-title mb-0">{{ t.grossBalance | currencyFiatFormat }}</h4>
             </div>
@@ -85,7 +101,18 @@
 
     <!-- Termómetro del mes -->
     <div class="card mb-3">
-        <div class="card-header">Termómetro del mes</div>
+        <div class="card-header d-flex align-items-center gap-2">
+            Termómetro del mes
+            <app-info-button title="Termómetro del mes">
+                <p>Cómo viene el gasto del mes en curso:</p>
+                <ul class="mb-0">
+                    <li><strong>Llevo gastado:</strong> lo acumulado desde el día 1 hasta hoy.</li>
+                    <li><strong>Mismo día mes pasado:</strong> lo que llevabas gastado a esta misma altura del mes anterior, para saber si vas más rápido o más lento.</li>
+                    <li><strong>Proyección de cierre:</strong> lo gastado hasta hoy, dividido los días transcurridos y multiplicado por los días del mes. Asume un ritmo parejo, así que un gasto grande a principio de mes la infla.</li>
+                    <li>La barra es qué parte de esa proyección ya llevás gastada.</li>
+                </ul>
+            </app-info-button>
+        </div>
         <div class="card-body">
             <div class="progress mb-2" style="height: 10px;">
                 <div class="progress-bar" role="progressbar" [style.width.%]="thermometerPct"></div>
@@ -102,7 +129,11 @@
     <div class="row" *ngIf="monthly.length > 0">
         <div class="col-md-8 mb-3">
             <a class="card text-decoration-none text-reset" [routerLink]="['/report/networth-general']" queryParamsHandling="preserve">
-                <div class="card-header">Patrimonio — últimos 12 meses</div>
+                <div class="card-header d-flex align-items-center gap-2">
+                    Patrimonio — últimos 12 meses
+                    <app-info-button title="Patrimonio — últimos 12 meses"
+                        text="Una línea con el valor total al cierre de cada uno de los últimos 12 meses (el último punto es el de hoy), en la moneda elegida. Cada punto valúa lo que tenías ese mes; el detalle por grupo está en Patrimonio → General."></app-info-button>
+                </div>
                 <div class="card-body">
                     <app-chart [options]="netWorthLineOptions" [height]="280"></app-chart>
                 </div>
@@ -110,7 +141,11 @@
         </div>
         <div class="col-md-4 mb-3">
             <a class="card text-decoration-none text-reset" [routerLink]="['/report/networth-general']" queryParamsHandling="preserve">
-                <div class="card-header">Composición de hoy</div>
+                <div class="card-header d-flex align-items-center gap-2">
+                    Composición de hoy
+                    <app-info-button title="Composición de hoy"
+                        text="Cómo se reparte el patrimonio de hoy entre cinco grupos: Dinero (cuentas en moneda corriente), Bolsa de renta variable, Cripto volátil, Cripto estable (DAI, USDT y USDC) y Bolsa de renta fija (bonos y obligaciones negociables). El número del centro es el total."></app-info-button>
+                </div>
                 <div class="card-body">
                     <app-chart [options]="compositionOptions" [height]="280"></app-chart>
                 </div>
@@ -120,7 +155,19 @@
 
     <!-- Lo que necesita atención -->
     <div class="card mb-3">
-        <div class="card-header">Lo que necesita atención</div>
+        <div class="card-header d-flex align-items-center gap-2">
+            Lo que necesita atención
+            <app-info-button title="Lo que necesita atención">
+                <p>Una lista de lo que hoy pide una acción tuya, ordenada por urgencia. Puede incluir:</p>
+                <ul class="mb-0">
+                    <li>Una tarjeta que cierra o vence pronto, o ya vencida.</li>
+                    <li>Un evento compartido con saldo abierto.</li>
+                    <li>Una deuda suelta pendiente con una persona (gastos compartidos sin evento).</li>
+                    <li>Un viaje en curso sin gastos cargados hace varios días.</li>
+                    <li>Cada fila lleva a donde se resuelve. Si no hay nada, dice «Todo al día».</li>
+                </ul>
+            </app-info-button>
+        </div>
         <div class="card-body p-0">
             <p class="text-body-secondary p-3 mb-0" *ngIf="pending.length === 0">Todo al día.</p>
             <div class="list-group list-group-flush" *ngIf="pending.length > 0">

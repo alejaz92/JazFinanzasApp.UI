@@ -11,6 +11,7 @@ import { ChartThemeService } from '../../../shared/services/chart-theme.service'
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { TransactionService } from '../../transaction/services/transaction.service';
 import { Transaction } from '../../transaction/models/transaction.model';
+import { InfoButtonComponent } from '../../../shared/components/info-button/info-button.component';
 
 declare const bootstrap: any;
 
@@ -27,7 +28,7 @@ interface TreemapNode {
 @Component({
     selector: 'app-inc-exp-by-category-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, DatePipe, CurrencyFiatFormatPipe, ChartComponent],
+    imports: [LoadingComponent, NgIf, NgFor, DatePipe, CurrencyFiatFormatPipe, ChartComponent, InfoButtonComponent],
     templateUrl: './inc-exp-by-category-report.component.html',
     styleUrl: './inc-exp-by-category-report.component.css'
 })

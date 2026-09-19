@@ -38,8 +38,10 @@
             </div>
             <div class="col-md-4">
                 <div class="card mb-3 text-center">
-                    <div class="card-header">
+                    <div class="card-header d-flex align-items-center gap-2 justify-content-center">
                         Consumo del mes total, en {{ detail.referenceAssetSymbol }}
+                        <app-info-button title="Consumo del mes"
+                            text="Lo comprado con esta tarjeta en el mes en curso (por fecha de compra), en pesos, en dólares y en total. Los tres están en la moneda de referencia elegida arriba, así que el total combinado es la suma de los dos."></app-info-button>
                     </div>
                     <div class="card-body">
                         <h4 class="mb-0">{{ currentMonthTotal | currencyFiatFormat }}</h4>
@@ -52,7 +54,11 @@
             <div class="row mt-2">
                 <div class="col-md-6 mt-1">
                     <div class="card">
-                        <div class="card-header">Composición por categoría (últimos 12 meses, en {{ detail.referenceAssetSymbol }})</div>
+                        <div class="card-header d-flex align-items-center gap-2">
+                            Composición por categoría (últimos 12 meses, en {{ detail.referenceAssetSymbol }})
+                            <app-info-button title="Composición por categoría"
+                                text="En qué categorías gastaste con esta tarjeta en los últimos 12 meses, una barra por categoría con dos segmentos: lo gastado en pesos y lo gastado en dólares, ya convertidos a la moneda de referencia. Se mide por la fecha de la compra."></app-info-button>
+                        </div>
                         <div class="card-body">
                             <app-chart [options]="categoryChartOptions" [height]="280"></app-chart>
                         </div>
@@ -61,7 +67,16 @@
                 <div class="col-md-6 mt-1">
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            <span>Evolución mensual, en {{ detail.referenceAssetSymbol }}</span>
+                            <span class="d-flex align-items-center gap-2">
+                                Evolución mensual, en {{ detail.referenceAssetSymbol }}
+                                <app-info-button title="Evolución mensual">
+                                    <p>Lo gastado con esta tarjeta en cada uno de los últimos 12 meses, por fecha de compra:</p>
+                                    <ul class="mb-0">
+                                        <li>Por defecto separa lo gastado en pesos y en dólares, cada uno convertido a la moneda de referencia.</li>
+                                        <li>El interruptor «Total combinado» los suma en una sola serie, que es válido porque ya están en la misma moneda.</li>
+                                    </ul>
+                                </app-info-button>
+                            </span>
                             <div class="form-check form-switch mb-0">
                                 <input class="form-check-input" type="checkbox" id="combinedEvolutionToggle" [(ngModel)]="showCombinedEvolution" (change)="onEvolutionViewChange()">
                                 <label class="form-check-label small" for="combinedEvolutionToggle">Total combinado</label>
@@ -82,7 +97,17 @@
         <div class="mt-4">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Resumen del mes</h5>
+                    <h5 class="mb-0 d-flex align-items-center gap-2">
+                        Resumen del mes
+                        <app-info-button title="Resumen del mes">
+                            <p>Las cuotas de esta tarjeta que se pagan en el mes elegido, no las compras hechas ese mes:</p>
+                            <ul class="mb-0">
+                                <li><strong>Cuota</strong> indica qué cuota es (por ejemplo 2/6) y <strong>Monto cuota</strong> su valor en la moneda de la compra.</li>
+                                <li><strong>Valor pesos</strong> lo pasa a pesos, con la cotización de hoy si la compra fue en dólares.</li>
+                                <li>Con las flechas navegás a otros meses.</li>
+                            </ul>
+                        </app-info-button>
+                    </h5>
                     <div class="d-flex align-items-center gap-2">
                         <button class="btn btn-sm btn-outline-secondary" (click)="previousMonth()"><i class="bi-chevron-left"></i></button>
                         <span class="text-capitalize fw-semibold">{{ summaryMonthLabel }}</span>

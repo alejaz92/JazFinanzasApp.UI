@@ -10,6 +10,7 @@ import { LoadingComponent } from '../../../core/components/loading/loading.compo
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
+import { InfoButtonComponent } from '../../../shared/components/info-button/info-button.component';
 
 const PAYDAY_MONTHS = 12;
 
@@ -32,7 +33,7 @@ interface TimelinePoint {
 @Component({
     selector: 'app-inc-pay-days-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, FormsModule, CurrencyFiatFormatPipe, ChartComponent],
+    imports: [LoadingComponent, NgIf, NgFor, FormsModule, CurrencyFiatFormatPipe, ChartComponent, InfoButtonComponent],
     templateUrl: './inc-pay-days-report.component.html',
     styleUrl: './inc-pay-days-report.component.css'
 })

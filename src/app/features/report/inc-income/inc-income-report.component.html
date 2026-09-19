@@ -19,7 +19,11 @@
 
     <div class="card mb-3" *ngIf="composition && composition.categories.length > 0">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <span>Composición de {{ monthLabel }}</span>
+            <span class="d-flex align-items-center gap-2">
+                Composición de {{ monthLabel }}
+                <app-info-button title="Composición de los ingresos"
+                    text="Cómo se reparten los ingresos del mes elegido entre categorías (sueldo, aporte familiar, etc.). El número de la derecha es el total del mes en la moneda elegida, con cada ingreso convertido con la cotización de su fecha. Quedan afuera los cambios de moneda y las categorías que no cuentan como ingreso."></app-info-button>
+            </span>
             <span class="fw-semibold">{{ compositionTotal | currencyFiatFormat }}</span>
         </div>
         <div class="card-body">
@@ -29,7 +33,11 @@
 
     <!-- Evolución en el tiempo: secundaria -->
     <div class="card" *ngIf="categories.length > 0">
-        <div class="card-header text-body-secondary">Evolución por categoría — últimos 24 meses</div>
+        <div class="card-header text-body-secondary d-flex align-items-center gap-2">
+            Evolución por categoría — últimos 24 meses
+            <app-info-button title="Evolución de los ingresos por categoría"
+                text="Barras apiladas, una por mes durante los últimos 24 meses: cada color es una categoría de ingreso y la altura total es lo cobrado ese mes. Sirve para ver si una fuente creció, se cortó o apareció."></app-info-button>
+        </div>
         <div class="card-body">
             <app-chart [options]="evolutionOptions" [height]="260"></app-chart>
         </div>

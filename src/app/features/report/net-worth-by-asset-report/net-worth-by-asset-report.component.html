@@ -1,4 +1,13 @@
-<h2 class="mb-3">Patrimonio — Por activo</h2>
+<h2 class="mb-3 d-flex align-items-center gap-2">
+    Patrimonio — Por activo
+    <app-info-button title="Patrimonio por activo">
+        <p>Elegís un tipo de activo y un activo para ver en qué cuentas está:</p>
+        <ul class="mb-0">
+            <li>La tabla lista cada cuenta que lo tiene, con el saldo en la unidad del activo y su valor en la moneda de referencia; el total de abajo es lo que tenés de ese activo en todas las cuentas juntas.</li>
+            <li>El gráfico muestra cómo se reparte ese total entre las cuentas.</li>
+        </ul>
+    </app-info-button>
+</h2>
 
 <p class="text-body-secondary" *ngIf="!dataRequested">
     Elegí una moneda arriba para ver en qué cuentas está cada activo.

@@ -11,11 +11,12 @@ import { ChartComponent } from '../../../shared/components/chart/chart.component
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { ContrastTextPipe } from '../../../shared/pipes/contrastText/contrast-text.pipe';
+import { InfoButtonComponent } from '../../../shared/components/info-button/info-button.component';
 
 @Component({
     selector: 'app-net-worth-general-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, NgClass, FormsModule, CurrencyFiatFormatPipe, ChartComponent, DatePipe, DecimalPipe, ContrastTextPipe],
+    imports: [LoadingComponent, NgIf, NgFor, NgClass, FormsModule, CurrencyFiatFormatPipe, ChartComponent, DatePipe, DecimalPipe, ContrastTextPipe, InfoButtonComponent],
     templateUrl: './net-worth-general-report.component.html',
     styleUrl: './net-worth-general-report.component.css'
 })

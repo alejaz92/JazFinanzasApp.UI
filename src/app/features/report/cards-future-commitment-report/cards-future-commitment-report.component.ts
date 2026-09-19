@@ -9,6 +9,7 @@ import { LoadingComponent } from '../../../core/components/loading/loading.compo
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
+import { InfoButtonComponent } from '../../../shared/components/info-button/info-button.component';
 
 declare const bootstrap: any;
 
@@ -23,7 +24,7 @@ declare const bootstrap: any;
 @Component({
     selector: 'app-cards-future-commitment-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, CurrencyFiatFormatPipe, ChartComponent],
+    imports: [LoadingComponent, NgIf, NgFor, CurrencyFiatFormatPipe, ChartComponent, InfoButtonComponent],
     templateUrl: './cards-future-commitment-report.component.html',
     styleUrl: './cards-future-commitment-report.component.css'
 })

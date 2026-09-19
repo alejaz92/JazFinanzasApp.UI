@@ -1,4 +1,15 @@
-<h2 class="mb-3">Ingresos y Egresos — Por etiqueta</h2>
+<h2 class="mb-3 d-flex align-items-center gap-2">
+    Ingresos y Egresos — Por etiqueta
+    <app-info-button title="Gasto por etiqueta">
+        <p>Cada tarjeta es una etiqueta que pusiste a movimientos o consumos de tarjeta:</p>
+        <ul class="mb-0">
+            <li>El número de arriba es lo gastado con esa etiqueta en los últimos 6 meses.</li>
+            <li>El gráfico chico es su evolución mes a mes.</li>
+            <li>Debajo se abre por categoría, para ver de qué está hecha. Con un clic se ven los movimientos.</li>
+            <li>Sirve para cortes que ninguna categoría sola responde, como cuánto cuesta el auto entre combustible, seguro y service.</li>
+        </ul>
+    </app-info-button>
+</h2>
 <p class="text-body-secondary small">Últimos 6 meses. Cortes que ninguna categoría sola responde — ej. cuánto sale el auto entre combustible, seguro y service.</p>
 
 <p class="text-body-secondary" *ngIf="!dataRequested">Elegí una moneda arriba para ver el gasto por etiqueta.</p>

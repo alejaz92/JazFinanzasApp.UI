@@ -9,13 +9,14 @@ import { LoadingComponent } from '../../../core/components/loading/loading.compo
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
+import { InfoButtonComponent } from '../../../shared/components/info-button/info-button.component';
 
 const EVOLUTION_MONTHS = 24;
 
 @Component({
     selector: 'app-inc-income-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, CurrencyFiatFormatPipe, ChartComponent],
+    imports: [LoadingComponent, NgIf, CurrencyFiatFormatPipe, ChartComponent, InfoButtonComponent],
     templateUrl: './inc-income-report.component.html',
     styleUrl: './inc-income-report.component.css'
 })

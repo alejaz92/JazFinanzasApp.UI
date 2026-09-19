@@ -15,6 +15,17 @@
     <p class="text-body-secondary small" *ngIf="!hasSpend">No hay gastos categorizados en {{ monthLabel }}.</p>
 
     <div class="card mb-3" *ngIf="hasSpend">
+        <div class="card-header d-flex align-items-center gap-2">
+            Gasto por categoría
+            <app-info-button title="Gasto por categoría">
+                <p>Un mapa de bloques del mes elegido:</p>
+                <ul class="mb-0">
+                    <li>El tamaño de cada bloque es lo gastado en esa categoría; los más grandes son los que más pesaron.</li>
+                    <li>Con un clic se abre un panel con la tendencia de los últimos 6 meses de esa categoría y los movimientos que la componen.</li>
+                    <li>Cuenta lo mismo que el Resumen del mes: egresos con categoría, con las cuotas de tarjeta contadas al pagarse.</li>
+                </ul>
+            </app-info-button>
+        </div>
         <div class="card-body">
             <app-chart [options]="treemapOptions" [height]="420" (chartClick)="onTreemapClick($event)"></app-chart>
         </div>

@@ -10,11 +10,12 @@ import { ChartComponent } from '../../../shared/components/chart/chart.component
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { CurrencyInvestmentFormatPipe } from '../../../shared/pipes/currencyInvestmentFormat/currency-investment-format.pipe';
+import { InfoButtonComponent } from '../../../shared/components/info-button/info-button.component';
 
 @Component({
     selector: 'app-net-worth-by-account-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, ChartComponent],
+    imports: [LoadingComponent, NgIf, NgFor, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, ChartComponent, InfoButtonComponent],
     templateUrl: './net-worth-by-account-report.component.html',
     styleUrl: './net-worth-by-account-report.component.css'
 })

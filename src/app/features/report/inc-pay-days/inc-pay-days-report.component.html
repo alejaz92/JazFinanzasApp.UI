@@ -11,7 +11,17 @@
     <ng-container *ngIf="dayRows.length > 0">
         <!-- Timeline -->
         <div class="card mb-3">
-            <div class="card-header">Timeline por categoría</div>
+            <div class="card-header d-flex align-items-center gap-2">
+                Timeline por categoría
+                <app-info-button title="Timeline por categoría">
+                    <p>Para cada categoría de ingreso, en qué días del mes cobraste durante los últimos 12 meses:</p>
+                    <ul class="mb-0">
+                        <li>El eje horizontal es el día del mes (1 a 31).</li>
+                        <li>El tamaño de cada punto es cuántas veces cobraste ese día: un punto grande es una fecha que se repite.</li>
+                        <li>Podés elegir arriba qué categorías ver.</li>
+                    </ul>
+                </app-info-button>
+            </div>
             <div class="card-body">
                 <div class="d-flex flex-wrap gap-3 mb-3">
                     <div class="form-check" *ngFor="let c of categoryNames">
@@ -28,7 +38,18 @@
 
         <!-- Tabla -->
         <div class="card">
-            <div class="card-header">Tabla por categoría</div>
+            <div class="card-header d-flex align-items-center gap-2">
+                Tabla por categoría
+                <app-info-button title="Tabla por categoría">
+                    <p>Resume los cobros de los últimos 12 meses de cada categoría:</p>
+                    <ul class="mb-0">
+                        <li><strong>Día típico:</strong> el día del mes en que más veces cayó ese ingreso.</li>
+                        <li><strong>Desvío:</strong> cuántos días se aleja en promedio de ese día típico, contando todos los cobros; un desvío alto significa que la fecha real varía bastante.</li>
+                        <li><strong>Frecuencia:</strong> el porcentaje de los cobros de esa categoría que cayó justo en el día típico.</li>
+                        <li><strong>Monto promedio:</strong> lo que suele cobrarse cada vez.</li>
+                    </ul>
+                </app-info-button>
+            </div>
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-sm table-hover">
@@ -57,7 +78,11 @@
 
                 <!-- Calendario por categoría -->
         <div class="card mb-3">
-            <div class="card-header">Calendario por categoría</div>
+            <div class="card-header d-flex align-items-center gap-2">
+                Calendario por categoría
+                <app-info-button title="Calendario por categoría"
+                    text="Los últimos 12 meses, un cuadradito por día, para la categoría elegida: se pinta el día en que cobraste y cuanto más intenso el color, mayor el monto. Sirve para ver de un vistazo en qué fecha cae cada cobro mes a mes."></app-info-button>
+            </div>
             <div class="card-body">
                 <div class="d-flex align-items-center gap-2 mb-3">
                     <label for="calendarCategory" class="form-label mb-0 small text-body-secondary">Categoría:</label>

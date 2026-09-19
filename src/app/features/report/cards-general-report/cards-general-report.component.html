@@ -10,7 +10,18 @@
             <div class="col-md-6 mt-1">
                 <div class="card">
                     <div class="card-header" [style.backgroundColor]="pesoAssetColor" [style.color]="pesoAssetColor | contrastText">
-                        Gasto originado en {{ pesoAssetSymbol }}, en {{ referenceAssetSymbol }}
+                        <span class="d-flex align-items-center gap-2">
+                            Gasto originado en {{ pesoAssetSymbol }}, en {{ referenceAssetSymbol }}
+                            <app-info-button title="Gasto originado en pesos">
+                                <p>Lo que gastaste con tarjeta en cada uno de los últimos 12 meses, en compras hechas en pesos, apilado por tarjeta:</p>
+                                <ul class="mb-0">
+                                    <li>Se mide por <strong>cuándo hiciste la compra</strong> (consumo devengado), con el monto total, no por cuándo se paga cada cuota.</li>
+                                <li>Una suscripción recurrente sin fin (por ejemplo un servicio mensual) se cuenta en cada mes desde que empezó, no una sola vez.</li>
+                                    <li>Cada mes se convierte a la moneda de referencia con la cotización de ese mes.</li>
+                                    <li>Por eso este gráfico no coincide con la tabla de abajo: la tabla muestra las cuotas que se pagan en el mes, y el gráfico las compras que se hicieron en el mes.</li>
+                                </ul>
+                            </app-info-button>
+                        </span>
                     </div>
                     <div class="card-body">
                         <app-chart [options]="pesosChartOptions" [height]="320"></app-chart>
@@ -20,7 +31,16 @@
             <div class="col-md-6 mt-1">
                 <div class="card">
                     <div class="card-header" [style.backgroundColor]="dollarAssetColor" [style.color]="dollarAssetColor | contrastText">
-                        Gasto originado en {{ dollarAssetSymbol }}, en {{ referenceAssetSymbol }}
+                        <span class="d-flex align-items-center gap-2">
+                            Gasto originado en {{ dollarAssetSymbol }}, en {{ referenceAssetSymbol }}
+                            <app-info-button title="Gasto originado en dólares">
+                                <p>Lo mismo que el gráfico de pesos, para las compras hechas en dólares:</p>
+                                <ul class="mb-0">
+                                    <li>Se mide por <strong>cuándo hiciste la compra</strong> (consumo devengado), no por cuándo se paga cada cuota.</li>
+                                    <li>Cada mes se convierte a la moneda de referencia con la cotización de ese mes.</li>
+                                </ul>
+                            </app-info-button>
+                        </span>
                     </div>
                     <div class="card-body">
                         <app-chart [options]="dollarsChartOptions" [height]="320"></app-chart>
@@ -37,7 +57,17 @@
     <div class="mt-4">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Resumen del mes</h5>
+                <h5 class="mb-0 d-flex align-items-center gap-2">
+                    Resumen del mes
+                    <app-info-button title="Resumen del mes">
+                        <p>Las cuotas que se pagan en el mes elegido con todas tus tarjetas (lo que va a salir de tu bolsillo), no las compras que hiciste ese mes:</p>
+                        <ul class="mb-0">
+                            <li><strong>Cuota</strong> indica qué cuota es (por ejemplo 2/6) y <strong>Monto cuota</strong> su valor en la moneda de la compra.</li>
+                            <li><strong>Valor pesos</strong> lo pasa a pesos, con la cotización de hoy si la compra fue en dólares.</li>
+                            <li>Con las flechas navegás a otros meses.</li>
+                        </ul>
+                    </app-info-button>
+                </h5>
                 <div class="d-flex align-items-center gap-2">
                     <button class="btn btn-sm btn-outline-secondary" (click)="previousMonth()"><i class="bi-chevron-left"></i></button>
                     <span class="text-capitalize fw-semibold">{{ summaryMonthLabel }}</span>

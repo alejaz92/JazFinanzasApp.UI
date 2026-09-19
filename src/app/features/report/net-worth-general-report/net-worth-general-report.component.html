@@ -12,7 +12,11 @@
     <div class="row">
         <div class="col-12" [ngClass]="{ 'col-md-12': totals.length === 1, 'col-md-6': totals.length === 2, 'col-md-4': totals.length >= 3 }" *ngFor="let t of totals">
             <div class="card mb-3 text-center" [style.backgroundColor]="t.color" [style.color]="t.color | contrastText">
-                <div class="card-header">Valor Total en {{ t.symbol }}</div>
+                <div class="card-header d-flex align-items-center gap-2 justify-content-center">
+                    Valor Total en {{ t.symbol }}
+                    <app-info-button title="Valor total"
+                        text="Todo lo que tenés (cuentas, bolsa, cripto y bonos) valuado en esta moneda a la cotización de hoy. Por defecto es el total bruto; el interruptor de arriba resta la deuda de tarjeta viva (cuotas todavía no vencidas de consumos que siguen abiertos, valuadas con la cotización del consumo)."></app-info-button>
+                </div>
                 <div class="card-body">
                     <h4 class="card-title mb-1">{{ (showNet ? t.netBalance : t.grossBalance) | currencyFiatFormat }}</h4>
                     <div class="small" *ngIf="showNet">
@@ -40,7 +44,11 @@
         <div class="row mt-4">
             <div class="col-md-8 mt-1">
                 <div class="card">
-                    <div class="card-header">Evolución de los últimos 12 meses, por grupo</div>
+                    <div class="card-header d-flex align-items-center gap-2">
+                        Evolución de los últimos 12 meses, por grupo
+                        <app-info-button title="Evolución por grupo"
+                            text="Áreas apiladas: cada color es un grupo (Dinero, Bolsa de renta variable, Cripto volátil, Cripto estable, Bolsa de renta fija) y la altura total es el patrimonio de cada mes. Cada mes se valúa con las cotizaciones de ese momento, así que el patrimonio sube o baja tanto por lo que sumaste como por lo que se movieron los precios."></app-info-button>
+                    </div>
                     <div class="card-body">
                         <app-chart [options]="stackedAreaOptions" [height]="320"></app-chart>
                     </div>
@@ -48,7 +56,11 @@
             </div>
             <div class="col-md-4 mt-1">
                 <div class="card">
-                    <div class="card-header">Composición de hoy</div>
+                    <div class="card-header d-flex align-items-center gap-2">
+                        Composición de hoy
+                        <app-info-button title="Composición de hoy"
+                            text="Cómo se reparte el patrimonio de hoy entre los cinco grupos. Cripto estable son DAI, USDT y USDC; Bolsa de renta fija son bonos y obligaciones negociables. El centro muestra el total."></app-info-button>
+                    </div>
                     <div class="card-body">
                         <app-chart [options]="snapshotOptions" [height]="320"></app-chart>
                     </div>
@@ -59,8 +71,10 @@
         <div class="row mt-4">
             <div class="col-12 mt-1">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header d-flex align-items-center gap-2">
                         <h5 class="mb-0">Variación mes a mes</h5>
+                        <app-info-button title="Variación mes a mes"
+                            text="Los mismos datos del gráfico en tabla: el patrimonio de cada mes por grupo y en total, y la variación contra el mes anterior en monto y en porcentaje (la variación mezcla lo que aportaste con lo que subieron o bajaron los precios)."></app-info-button>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">

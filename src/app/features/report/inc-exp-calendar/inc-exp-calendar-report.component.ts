@@ -11,6 +11,7 @@ import { ChartThemeService } from '../../../shared/services/chart-theme.service'
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { TransactionService } from '../../transaction/services/transaction.service';
 import { Transaction } from '../../transaction/models/transaction.model';
+import { InfoButtonComponent } from '../../../shared/components/info-button/info-button.component';
 
 declare const bootstrap: any;
 
@@ -21,7 +22,7 @@ const WEEKDAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
 @Component({
     selector: 'app-inc-exp-calendar-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, DatePipe, CurrencyFiatFormatPipe, ChartComponent],
+    imports: [LoadingComponent, NgIf, NgFor, DatePipe, CurrencyFiatFormatPipe, ChartComponent, InfoButtonComponent],
     templateUrl: './inc-exp-calendar-report.component.html',
     styleUrl: './inc-exp-calendar-report.component.css'
 })

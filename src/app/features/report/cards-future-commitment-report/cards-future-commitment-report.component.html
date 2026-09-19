@@ -9,7 +9,18 @@
         <div class="row">
             <div class="col-12 mt-1">
                 <div class="card">
-                    <div class="card-header">Cuotas por vencer, próximos meses, en {{ data.referenceAssetSymbol }} — agrupado por categoría</div>
+                    <div class="card-header d-flex align-items-center gap-2">
+                        Cuotas por vencer, próximos meses, en {{ data.referenceAssetSymbol }} — agrupado por categoría
+                        <app-info-button title="Cuotas por vencer">
+                            <p>Cuánta plata ya está comprometida en cuotas para los próximos meses:</p>
+                            <ul class="mb-0">
+                                <li>Cada columna es un mes futuro y cada color una categoría de compra.</li>
+                                <li>Suma solo cuotas todavía no pagadas de compras en cuotas. Una recurrente sin fin (una suscripción) cuenta solo la cuota del mes en curso si aún no se pagó, porque no es un compromiso cerrado.</li>
+                                <li>Con un clic en un segmento ves las compras que lo componen.</li>
+                                <li>El «Incluir recurrentes» de la barra de arriba suma o no esas suscripciones a la proyección.</li>
+                            </ul>
+                        </app-info-button>
+                    </div>
                     <div class="card-body">
                         <app-chart [options]="stackedOptions" [height]="320" (chartClick)="onStackedClick($event)"></app-chart>
                     </div>
@@ -20,7 +31,11 @@
         <div class="row mt-4">
             <div class="col-12 mt-1">
                 <div class="card">
-                    <div class="card-header">Cronograma</div>
+                    <div class="card-header d-flex align-items-center gap-2">
+                        Cronograma
+                        <app-info-button title="Cronograma"
+                            text="Una barra por compra en cuotas todavía viva: va desde su primera hasta su última cuota. Sirve para ver cuándo se libera cada compromiso; el color distingue cada compra individual."></app-info-button>
+                    </div>
                     <div class="card-body">
                         <app-chart [options]="ganttOptions" [height]="ganttHeight"></app-chart>
                     </div>

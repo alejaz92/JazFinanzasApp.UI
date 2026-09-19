@@ -12,14 +12,28 @@
 
 <ng-container *ngIf="dataRequested && !isLoading && points.length > 0">
     <div class="card mb-3">
-        <div class="card-header">Ingreso, egreso y resultado acumulado</div>
+        <div class="card-header d-flex align-items-center gap-2">
+        Ingreso, egreso y resultado acumulado
+        <app-info-button title="Ingreso, egreso y resultado acumulado">
+            <p>Mes a mes, con los mismos criterios de qué cuenta que el Resumen del mes:</p>
+            <ul class="mb-0">
+                <li><strong>Barras:</strong> los ingresos hacia arriba y los egresos hacia abajo (se dibujan en negativo para enfrentarlos).</li>
+                <li><strong>Línea continua:</strong> resultado acumulado, la suma de ingresos menos egresos desde el primer mes del gráfico.</li>
+                <li><strong>Línea punteada:</strong> promedio móvil de gasto de 6 meses. Compara cada mes contra su tendencia reciente, no contra todo el historial, para que los primeros meses de carga no distorsionen.</li>
+            </ul>
+        </app-info-button>
+    </div>
         <div class="card-body">
             <app-chart [options]="chartOptions" [height]="380"></app-chart>
         </div>
     </div>
 
     <div class="card">
-        <div class="card-header">Detalle mensual</div>
+        <div class="card-header d-flex align-items-center gap-2">
+        Detalle mensual
+        <app-info-button title="Detalle mensual"
+            text="Los mismos datos del gráfico en tabla. Resultado es ingresos menos egresos del mes; Acumulado suma los resultados desde el primer mes de la tabla; el promedio móvil de gasto usa los últimos 6 meses y queda vacío mientras no haya 6 meses de historia."></app-info-button>
+    </div>
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-hover table-sm">

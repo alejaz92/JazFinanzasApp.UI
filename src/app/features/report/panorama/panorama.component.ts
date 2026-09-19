@@ -17,6 +17,7 @@ import { ChartComponent } from '../../../shared/components/chart/chart.component
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { ContrastTextPipe } from '../../../shared/pipes/contrastText/contrast-text.pipe';
+import { InfoButtonComponent } from '../../../shared/components/info-button/info-button.component';
 
 // Panorama (Fase 17, Flujo 1 del plan): pantalla de entrada de Reportes. Compone tres fuentes que
 // ya existen, sin recalcular nada: DashboardService (Fase 16 — indicadores, termómetro, pendientes),
@@ -28,7 +29,7 @@ import { ContrastTextPipe } from '../../../shared/pipes/contrastText/contrast-te
 @Component({
     selector: 'app-panorama',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, NgClass, RouterLink, DatePipe, CurrencyFiatFormatPipe, ContrastTextPipe, ChartComponent],
+    imports: [LoadingComponent, NgIf, NgFor, NgClass, RouterLink, DatePipe, CurrencyFiatFormatPipe, ContrastTextPipe, ChartComponent, InfoButtonComponent],
     templateUrl: './panorama.component.html',
     styleUrl: './panorama.component.css'
 })

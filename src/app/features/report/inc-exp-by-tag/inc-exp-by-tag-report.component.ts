@@ -10,13 +10,14 @@ import { LoadingComponent } from '../../../core/components/loading/loading.compo
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
+import { InfoButtonComponent } from '../../../shared/components/info-button/info-button.component';
 
 const MONTHS = 6;
 
 @Component({
     selector: 'app-inc-exp-by-tag-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, CurrencyFiatFormatPipe, ChartComponent],
+    imports: [LoadingComponent, NgIf, NgFor, CurrencyFiatFormatPipe, ChartComponent, InfoButtonComponent],
     templateUrl: './inc-exp-by-tag-report.component.html',
     styleUrl: './inc-exp-by-tag-report.component.css'
 })

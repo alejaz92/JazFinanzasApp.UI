@@ -44,14 +44,28 @@
     </div>
 
     <div class="card mb-3">
-        <div class="card-header">Cómo cerró el mes</div>
+        <div class="card-header d-flex align-items-center gap-2">
+        Cómo cerró el mes
+        <app-info-button title="Cómo cerró el mes">
+            <p>Una cascada: arranca con los ingresos del mes, cada escalón resta una categoría de egreso (de la más grande a la más chica) y termina en el resultado del mes.</p>
+            <ul class="mb-0">
+                <li>Cuenta lo de tus cuentas: ingresos y egresos con categoría. Quedan afuera los cambios de moneda y las categorías que no cuentan como ingreso o egreso.</li>
+                <li>Un consumo de tarjeta cuenta cuando se paga la cuota, no cuando se hizo la compra.</li>
+                <li>Cada movimiento se convierte a la moneda elegida con la cotización de su fecha.</li>
+            </ul>
+        </app-info-button>
+    </div>
         <div class="card-body">
             <app-chart [options]="waterfallOptions" [height]="360"></app-chart>
         </div>
     </div>
 
     <div class="card">
-        <div class="card-header">Detalle por categoría</div>
+        <div class="card-header d-flex align-items-center gap-2">
+        Detalle por categoría
+        <app-info-button title="Detalle por categoría"
+            text="Los mismos escalones de egreso de la cascada, en tabla y de mayor a menor: cuánto se fue en cada categoría este mes, con los mismos criterios de qué cuenta como egreso."></app-info-button>
+    </div>
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-hover table-sm">
