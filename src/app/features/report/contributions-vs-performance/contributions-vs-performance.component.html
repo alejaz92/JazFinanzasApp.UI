@@ -1,7 +1,18 @@
 <app-loading [isLoading]="isLoading"></app-loading>
 
 <div *ngIf="!isLoading && data">
-    <h2 class="mb-3">Aportes vs Rendimiento</h2>
+    <h2 class="mb-3 d-flex align-items-center gap-2">
+        Aportes vs Rendimiento
+        <app-info-button title="Aportes vs rendimiento">
+            <p>Separa cuánto creció lo invertido porque pusiste plata de cuánto creció porque los precios se movieron:</p>
+            <ul class="mb-0">
+                <li><strong>Aportes:</strong> lo que pusiste en compras desde el mes de inicio.</li>
+                <li><strong>Retiros:</strong> lo que sacaste con ventas en ese mismo período.</li>
+                <li><strong>Valorización:</strong> el resto. Es el valor final menos el valor inicial, menos los aportes, más los retiros: lo que se ganó o perdió por movimiento de precios.</li>
+                <li>Arranca en marzo de 2024 porque los movimientos anteriores son ajustes de saldo, no aportes reales.</li>
+            </ul>
+        </app-info-button>
+    </h2>
 
     <p class="text-body-secondary">
         Desde {{ data.startMonth | date: 'MMMM yyyy' }} — los movimientos anteriores son ajustes de saldo, no aportes reales.
@@ -39,7 +50,11 @@
     <div class="row mt-4">
         <div class="col-12">
             <div class="card">
-                <div class="card-header">Valor inicial → Aportes → Retiros → Valorización → Valor final (En {{ data.referenceAssetSymbol }})</div>
+                <div class="card-header d-flex align-items-center gap-2">
+                    Valor inicial → Aportes → Retiros → Valorización → Valor final (En {{ data.referenceAssetSymbol }})
+                    <app-info-button title="Cascada de aportes y rendimiento"
+                        text="Una cascada: arranca en el valor de lo invertido a fin del mes anterior al inicio, suma los aportes, resta los retiros, suma o resta la valorización y termina en el valor de hoy. Mostrar la valorización aparte evita atribuirle al buen ojo lo que fue plata que pusiste, y al revés."></app-info-button>
+                </div>
                 <div class="card-body">
                     <app-chart [options]="waterfallOptions" [height]="360"></app-chart>
                 </div>

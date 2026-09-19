@@ -1,7 +1,16 @@
 <app-loading [isLoading]="isLoading"></app-loading>
 
 <div *ngIf="!isLoading && data">
-    <h2 class="mb-3">Compartidos — General</h2>
+    <h2 class="mb-3 d-flex align-items-center gap-2">
+        Compartidos — General
+        <app-info-button title="Cómo leer Compartidos — General">
+            <p>Con quién compartís y cómo estás, sin convertir monedas: cada saldo se muestra en la suya.</p>
+            <ul class="mb-0">
+                <li>El saldo cuenta los eventos abiertos y los gastos compartidos sueltos (sin evento) que siguen pendientes. Los eventos ya cerrados no suman.</li>
+                <li>Positivo es que te deben; negativo, que debés.</li>
+            </ul>
+        </app-info-button>
+    </h2>
 
     <p class="text-body-secondary" *ngIf="data.balances.length === 0 && data.eventRanking.length === 0">
         Todavía no hay eventos ni gastos compartidos cargados.
@@ -11,7 +20,11 @@
         <div class="row mt-1">
             <div class="col-md-6 mt-1">
                 <div class="card">
-                    <div class="card-header">Saldo por persona (me deben / debo)</div>
+                    <div class="card-header d-flex align-items-center gap-2">
+                        Saldo por persona (me deben / debo)
+                        <app-info-button title="Saldo por persona"
+                            text="Una barra por persona con su saldo neto: hacia un lado lo que te debe y hacia el otro lo que le debés. Si una persona tuviera saldo en más de una moneda, se suman los números tal cual. Un clic en la tabla de al lado abre el detalle de esa persona."></app-info-button>
+                    </div>
                     <div class="card-body">
                         <app-chart [options]="balancesByPersonOptions" [height]="Math.max(200, personNets.length * 40)"></app-chart>
                     </div>
@@ -19,7 +32,11 @@
             </div>
             <div class="col-md-6 mt-1">
                 <div class="card">
-                    <div class="card-header">Detalle por persona y moneda</div>
+                    <div class="card-header d-flex align-items-center gap-2">
+                        Detalle por persona y moneda
+                        <app-info-button title="Detalle por persona y moneda"
+                            text="Los mismos saldos en tabla, separados por moneda: la columna «Me debe» es lo que la persona te tiene que devolver y «Debo» lo que le tenés que devolver vos. Un clic en una fila abre esa persona."></app-info-button>
+                    </div>
                     <div class="card-body p-0">
                         <table class="table table-sm mb-0">
                             <thead class="table-header-brand">
@@ -51,7 +68,11 @@
         <div class="row mt-4">
             <div class="col-md-6 mt-1">
                 <div class="card">
-                    <div class="card-header">Ranking de eventos por monto</div>
+                    <div class="card-header d-flex align-items-center gap-2">
+                        Ranking de eventos por monto
+                        <app-info-button title="Ranking de eventos"
+                            text="Los eventos, abiertos y cerrados, ordenados por el monto total de sus gastos (lo gastado entre todos los participantes, no solo tu parte)."></app-info-button>
+                    </div>
                     <div class="card-body">
                         <app-chart [options]="eventRankingOptions" [height]="Math.max(200, data.eventRanking.length * 40)"></app-chart>
                     </div>
@@ -59,7 +80,11 @@
             </div>
             <div class="col-md-6 mt-1">
                 <div class="card">
-                    <div class="card-header">Eventos</div>
+                    <div class="card-header d-flex align-items-center gap-2">
+                        Eventos
+                        <app-info-button title="Eventos"
+                            text="Todos tus eventos con su estado (abierto o cerrado) y el monto total de sus gastos, en la moneda de cada uno. Un clic abre el reporte del evento."></app-info-button>
+                    </div>
                     <div class="card-body p-0">
                         <table class="table table-sm table-hover mb-0">
                             <thead class="table-header-brand">

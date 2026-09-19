@@ -1,7 +1,18 @@
 <app-loading [isLoading]="isLoading"></app-loading>
 
 <div *ngIf="!isLoading">
-    <h2 class="mb-3">Carteras — General</h2>
+    <h2 class="mb-3 d-flex align-items-center gap-2">
+        Carteras — General
+        <app-info-button title="Cómo leer Carteras — General">
+            <p>Las carteras se comparan entre sí, en la moneda elegida arriba:</p>
+            <ul class="mb-0">
+                <li><strong>Valor total:</strong> lo que valen hoy todas las carteras juntas.</li>
+                <li><strong>Valor de origen:</strong> lo que pagaste por esas tenencias, valuando cada compra con la cotización del día en que se hizo.</li>
+                <li><strong>Ganancia / Pérdida:</strong> la diferencia en porcentaje sobre el valor de origen.</li>
+                <li>El interruptor «Incluir efectivo» de la barra suma o no el dinero en cuentas al cálculo.</li>
+            </ul>
+        </app-info-button>
+    </h2>
 
     <div class="row">
         <div class="col-md-4 mt-1">
@@ -40,7 +51,11 @@
         <div class="row mt-4">
             <div class="col-md-6 mt-1">
                 <div class="card">
-                    <div class="card-header">Distribución del Patrimonio Invertido por Cartera</div>
+                    <div class="card-header d-flex align-items-center gap-2">
+                        Distribución del Patrimonio Invertido por Cartera
+                        <app-info-button title="Distribución por cartera"
+                            text="Qué parte del total invertido está en cada cartera, según su valor actual."></app-info-button>
+                    </div>
                     <div class="card-body">
                         <app-chart [options]="distributionOptions" [height]="320"></app-chart>
                     </div>
@@ -48,7 +63,11 @@
             </div>
             <div class="col-md-6 mt-1">
                 <div class="card">
-                    <div class="card-header">Valor de Origen vs Valor Actual por Cartera (En {{ referenceAssetSymbol }})</div>
+                    <div class="card-header d-flex align-items-center gap-2">
+                        Valor de Origen vs Valor Actual por Cartera (En {{ referenceAssetSymbol }})
+                        <app-info-button title="Origen vs actual"
+                            text="Para cada cartera, dos barras enfrentadas: lo que pagaste (valor de origen) contra lo que vale hoy. Si la del valor actual es más alta, la cartera está ganando."></app-info-button>
+                    </div>
                     <div class="card-body">
                         <app-chart [options]="originalVsActualOptions" [height]="320"></app-chart>
                     </div>
@@ -59,8 +78,10 @@
         <div class="row mt-4">
             <div class="col-12 mt-1">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header d-flex align-items-center gap-2">
                         <h5 class="mb-0">Detalle por Cartera</h5>
+                        <app-info-button title="Detalle por cartera"
+                            text="Los mismos números en tabla: valor de origen, valor actual, porcentaje de ganancia o pérdida y qué parte del total representa cada cartera (distribución). Un clic en una fila abre el detalle de esa cartera."></app-info-button>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">

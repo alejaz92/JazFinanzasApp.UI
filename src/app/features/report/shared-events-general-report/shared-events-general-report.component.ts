@@ -8,6 +8,7 @@ import { SharedEventGeneralReport } from '../models/shared-event-report.model';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
+import { InfoButtonComponent } from '../../../shared/components/info-button/info-button.component';
 
 interface PersonNet {
     personId: number;
@@ -27,7 +28,7 @@ interface PersonNet {
 @Component({
     selector: 'app-shared-events-general-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, DecimalPipe, RouterLink, ChartComponent],
+    imports: [LoadingComponent, NgIf, NgFor, DecimalPipe, RouterLink, ChartComponent, InfoButtonComponent],
     templateUrl: './shared-events-general-report.component.html',
     styleUrl: './shared-events-general-report.component.css'
 })

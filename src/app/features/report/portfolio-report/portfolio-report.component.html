@@ -1,4 +1,15 @@
-<h2 class="mb-3">Carteras — Detalle</h2>
+<h2 class="mb-3 d-flex align-items-center gap-2">
+    Carteras — Detalle
+    <app-info-button title="Cómo leer Carteras — Detalle">
+        <p>El interior de la cartera elegida en la barra, en la moneda elegida arriba:</p>
+        <ul class="mb-0">
+            <li><strong>Valor actual:</strong> lo que vale hoy lo que tiene la cartera.</li>
+            <li><strong>Valor de origen:</strong> lo que pagaste, valuando cada compra con la cotización del día en que se hizo.</li>
+            <li><strong>Ganancia / Pérdida:</strong> la diferencia en porcentaje sobre el valor de origen.</li>
+            <li>El interruptor «Incluir efectivo» de la barra suma o no el dinero en cuentas al cálculo.</li>
+        </ul>
+    </app-info-button>
+</h2>
 
 <app-loading [isLoading]="isLoadingDetail"></app-loading>
 
@@ -37,7 +48,11 @@
     <div class="row mt-4">
         <div class="col-md-6 mt-1">
             <div class="card">
-                <div class="card-header">Composición (En {{ detail.referenceAssetSymbol }}) — coloreado por ganancia/pérdida</div>
+                <div class="card-header d-flex align-items-center gap-2">
+                    Composición (En {{ detail.referenceAssetSymbol }}) — coloreado por ganancia/pérdida
+                    <app-info-button title="Composición de la cartera"
+                        text="Un mapa de bloques de lo que tiene la cartera: el tamaño de cada bloque es su valor actual y el color su ganancia o pérdida sobre lo invertido (verde ganó, rojo perdió, gris en cero o sin costo conocido; se satura a partir de ±50%)."></app-info-button>
+                </div>
                 <div class="card-body">
                     <app-chart [options]="compositionOptions" [height]="320"></app-chart>
                 </div>
@@ -45,7 +60,11 @@
         </div>
         <div class="col-md-6 mt-1">
             <div class="card">
-                <div class="card-header">Evolución del Valor (En {{ detail.referenceAssetSymbol }}, últimos 12 meses)</div>
+                <div class="card-header d-flex align-items-center gap-2">
+                    Evolución del Valor (En {{ detail.referenceAssetSymbol }}, últimos 12 meses)
+                    <app-info-button title="Evolución del valor"
+                        text="Cuánto valía la cartera al cierre de cada uno de los últimos 12 meses (el último punto es hoy), con las cotizaciones de cada momento. Sube tanto por lo que sumaste como por lo que se movieron los precios."></app-info-button>
+                </div>
                 <div class="card-body">
                     <app-chart [options]="evolutionOptions" [height]="320"></app-chart>
                 </div>
@@ -56,8 +75,17 @@
     <div class="row mt-4" *ngIf="holdingGroups.length > 0">
         <div class="col-12 mt-1">
             <div class="card">
-                <div class="card-header">
+                <div class="card-header d-flex align-items-center gap-2">
                     <h5 class="mb-0">Tenencias (En {{ detail.referenceAssetSymbol }})</h5>
+                    <app-info-button title="Tenencias">
+                        <p>Un renglón por activo:</p>
+                        <ul class="mb-0">
+                            <li><strong>Cotización de origen:</strong> el precio promedio al que compraste (valor de origen dividido cantidad).</li>
+                            <li><strong>Cotización actual:</strong> el precio de hoy en el mercado.</li>
+                            <li><strong>%:</strong> ganancia o pérdida del activo sobre su valor de origen.</li>
+                            <li>Si el activo está en más de una cuenta, la fila se abre con un clic para ver cada cuenta.</li>
+                        </ul>
+                    </app-info-button>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">

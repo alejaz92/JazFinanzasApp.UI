@@ -9,6 +9,7 @@ import { LoadingComponent } from '../../../core/components/loading/loading.compo
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
+import { InfoButtonComponent } from '../../../shared/components/info-button/info-button.component';
 
 interface WaterfallStep {
     name: string;
@@ -26,7 +27,7 @@ interface WaterfallStep {
 @Component({
     selector: 'app-contributions-vs-performance',
     standalone: true,
-    imports: [LoadingComponent, NgIf, DatePipe, CurrencyFiatFormatPipe, ChartComponent],
+    imports: [LoadingComponent, NgIf, DatePipe, CurrencyFiatFormatPipe, ChartComponent, InfoButtonComponent],
     templateUrl: './contributions-vs-performance.component.html',
     styleUrl: './contributions-vs-performance.component.css'
 })

@@ -1,7 +1,17 @@
 <app-loading [isLoading]="isLoading"></app-loading>
 
 <div *ngIf="!isLoading && overview">
-    <h2 class="mb-3">Panorama de Inversiones</h2>
+    <h2 class="mb-3 d-flex align-items-center gap-2">
+        Panorama de Inversiones
+        <app-info-button title="Cómo leer el Panorama de inversiones">
+            <p>Todo lo invertido en bolsa, cripto y bonos, en la moneda elegida arriba. El efectivo no cuenta acá, se ve en Patrimonio.</p>
+            <ul class="mb-0">
+                <li><strong>Valor actual:</strong> lo que vale hoy lo que tenés invertido, a la cotización de hoy.</li>
+                <li><strong>Invertido:</strong> lo que pagaste por eso mismo, valuando cada compra con la cotización del día en que se hizo.</li>
+                <li><strong>Ganancia / Pérdida:</strong> la diferencia entre los dos, en porcentaje sobre lo invertido. Queda en guion si no hay un costo conocido (por ejemplo un ajuste de saldo).</li>
+            </ul>
+        </app-info-button>
+    </h2>
 
     <div class="row">
         <div class="col-md-4 mt-1">
@@ -42,7 +52,17 @@
         <div class="row mt-3">
             <div class="col-md-6 mt-1">
                 <div class="card">
-                    <div class="card-header">Composición (En {{ overview.referenceAssetSymbol }}) — coloreado por ganancia/pérdida</div>
+                    <div class="card-header d-flex align-items-center gap-2">
+                        Composición (En {{ overview.referenceAssetSymbol }}) — coloreado por ganancia/pérdida
+                        <app-info-button title="Composición">
+                            <p>Un mapa de bloques de todo lo invertido:</p>
+                            <ul class="mb-0">
+                                <li>Los activos se agrupan en Acciones y renta variable, Bonos, Cripto estable (DAI, USDT, USDC) y Cripto volátil.</li>
+                                <li>El tamaño de cada bloque es su valor actual.</li>
+                                <li>El color es la ganancia o pérdida sobre lo invertido: verde si ganó, rojo si perdió, gris si está en cero o no tiene costo conocido. El color se satura a partir de ±50%.</li>
+                            </ul>
+                        </app-info-button>
+                    </div>
                     <div class="card-body">
                         <app-chart [options]="treemapOptions" [height]="320"></app-chart>
                     </div>
@@ -50,7 +70,11 @@
             </div>
             <div class="col-md-6 mt-1">
                 <div class="card">
-                    <div class="card-header">Valor Total — últimos 12 meses, con aportes marcados</div>
+                    <div class="card-header d-flex align-items-center gap-2">
+                        Valor Total — últimos 12 meses, con aportes marcados
+                        <app-info-button title="Valor total, con aportes"
+                            text="El valor de todo lo invertido al cierre de cada uno de los últimos 12 meses (el último punto es hoy). Los pines verdes marcan los meses en que pusiste plata nueva, con el monto aportado: así se distingue si el valor subió porque aportaste o porque los precios se movieron."></app-info-button>
+                    </div>
                     <div class="card-body">
                         <app-chart [options]="valueLineOptions" [height]="320"></app-chart>
                     </div>

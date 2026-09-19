@@ -1,7 +1,17 @@
 <app-loading [isLoading]="isLoading"></app-loading>
 
 <div *ngIf="!isLoading && detail">
-    <h2 class="mb-3">Viajes — Detalle: {{ detail.name }}</h2>
+    <h2 class="mb-3 d-flex align-items-center gap-2">
+        Viajes — Detalle: {{ detail.name }}
+        <app-info-button title="Cómo leer Viajes — Detalle">
+            <p>El viaje elegido en la barra, en la moneda elegida arriba:</p>
+            <ul class="mb-0">
+                <li><strong>Total:</strong> tu parte de los eventos compartidos vinculados al viaje más tus gastos propios etiquetados con él.</li>
+                <li><strong>Duración:</strong> días del viaje contando el de ida y el de vuelta.</li>
+                <li><strong>Costo por día:</strong> el total dividido la duración.</li>
+            </ul>
+        </app-info-button>
+    </h2>
 
     <div class="row">
         <div class="col-md-4 mt-1">
@@ -60,7 +70,11 @@
             </div>
             <div class="col-md-6 mt-1">
                 <div class="card">
-                    <div class="card-header">Gasto día a día</div>
+                    <div class="card-header d-flex align-items-center gap-2">
+                        Gasto día a día
+                        <app-info-button title="Gasto día a día"
+                            text="Una barra por cada día del viaje con lo que se gastó ese día (en cero si no hubo gasto). Los gastos con fecha fuera de los días del viaje, como pasajes comprados con anticipación, ya están sumados en el total pero no aparecen acá; si los hay, un aviso arriba dice cuánto son."></app-info-button>
+                    </div>
                     <div class="card-body">
                         <app-chart [options]="dailySpendingOptions" [height]="320"></app-chart>
                     </div>
@@ -71,7 +85,11 @@
         <div class="row mt-4">
             <div class="col-md-6 mt-1">
                 <div class="card">
-                    <div class="card-header">Costo por día contra otros viajes</div>
+                    <div class="card-header d-flex align-items-center gap-2">
+                        Costo por día contra otros viajes
+                        <app-info-button title="Costo por día contra otros viajes"
+                            text="El costo por día de este viaje comparado con el de cada uno de tus otros viajes, para ver si fue caro o barato por día independientemente de cuánto duró. Solo se muestra cuando hay más de un viaje."></app-info-button>
+                    </div>
                     <div class="card-body">
                         <app-chart *ngIf="detail.costPerDayComparison.length > 1" [options]="costPerDayComparisonOptions" [height]="280"></app-chart>
                         <p class="text-body-secondary small mb-0" *ngIf="detail.costPerDayComparison.length <= 1">
@@ -82,7 +100,11 @@
             </div>
             <div class="col-md-6 mt-1" *ngIf="detail.netBreakdown.length > 0">
                 <div class="card">
-                    <div class="card-header">Por evento compartido</div>
+                    <div class="card-header d-flex align-items-center gap-2">
+                        Por evento compartido
+                        <app-info-button title="Por evento compartido"
+                            text="De los eventos compartidos vinculados al viaje, cuánto es tu parte (lo que te tocó consumir, no lo que pagaste). No incluye tus gastos propios etiquetados con el viaje, por eso puede sumar menos que el total."></app-info-button>
+                    </div>
                     <div class="card-body p-0">
                         <table class="table table-sm mb-0">
                             <thead class="table-header-brand">
@@ -106,8 +128,10 @@
         <div class="row mt-4">
             <div class="col-12 mt-1">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header d-flex align-items-center gap-2">
                         <h5 class="mb-0">Por categoría</h5>
+                        <app-info-button title="Por categoría"
+                            text="El total del viaje abierto por la categoría real de cada gasto (comida, transporte, alojamiento, etc.), de mayor a menor, sumando tu parte de los eventos y tus gastos propios."></app-info-button>
                     </div>
                     <div class="card-body p-0">
                         <table class="table table-sm mb-0">

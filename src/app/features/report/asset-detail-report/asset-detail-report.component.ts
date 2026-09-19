@@ -12,6 +12,7 @@ import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat
 import { CurrencyInvestmentFormatPipe } from '../../../shared/pipes/currencyInvestmentFormat/currency-investment-format.pipe';
 import { MovementTypePipe } from '../../../shared/pipes/movementType/movement-type.pipe';
 import { CommerceTypePipe } from '../../../shared/pipes/commerceType/commerce-type.pipe';
+import { InfoButtonComponent } from '../../../shared/components/info-button/info-button.component';
 
 // Bolsa — Detalle (revisión 2026-09-12, Fase 20b, D-15): mismo molde que Cryptos — Detalle
 // (crypto-report/), sobre el endpoint genérico de detalle que la Fase 20a generalizó (T17) —
@@ -23,7 +24,7 @@ import { CommerceTypePipe } from '../../../shared/pipes/commerceType/commerce-ty
 @Component({
     selector: 'app-asset-detail-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, DatePipe, ChartComponent, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, MovementTypePipe, CommerceTypePipe],
+    imports: [LoadingComponent, NgIf, NgFor, DatePipe, ChartComponent, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, MovementTypePipe, CommerceTypePipe, InfoButtonComponent],
     templateUrl: './asset-detail-report.component.html',
     styleUrl: './asset-detail-report.component.css'
 })

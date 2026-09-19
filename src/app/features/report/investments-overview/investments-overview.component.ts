@@ -10,6 +10,7 @@ import { ChartComponent } from '../../../shared/components/chart/chart.component
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { CurrencyInvestmentFormatPipe } from '../../../shared/pipes/currencyInvestmentFormat/currency-investment-format.pipe';
+import { InfoButtonComponent } from '../../../shared/components/info-button/info-button.component';
 
 // D-18 (revisión de Bolsa, 2026-09-12): etiquetas legibles para los cuatro buckets de
 // ClassifyNetWorthBucket — el mapa de bloques agrupa por acá en vez de mostrar 42 activos planos.
@@ -28,7 +29,7 @@ const BUCKET_LABELS: Record<string, string> = {
 @Component({
     selector: 'app-investments-overview',
     standalone: true,
-    imports: [LoadingComponent, NgIf, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, ChartComponent],
+    imports: [LoadingComponent, NgIf, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, ChartComponent, InfoButtonComponent],
     templateUrl: './investments-overview.component.html',
     styleUrl: './investments-overview.component.css'
 })

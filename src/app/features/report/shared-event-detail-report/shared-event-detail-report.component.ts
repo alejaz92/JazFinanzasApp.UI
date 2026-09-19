@@ -8,6 +8,7 @@ import { ReportContextService } from '../../../shared/services/report-context.se
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
+import { InfoButtonComponent } from '../../../shared/components/info-button/info-button.component';
 
 // Compartidos — Por evento (Fase 22, Flujo 7): quién puso qué, cómo se repartió, qué quedó
 // pendiente. No hay nada nuevo que pedirle al backend (Fase 21) — SharedEventService.GetByIdAsync ya
@@ -19,7 +20,7 @@ import { ChartThemeService } from '../../../shared/services/chart-theme.service'
 @Component({
     selector: 'app-shared-event-detail-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, DecimalPipe, DatePipe, ChartComponent],
+    imports: [LoadingComponent, NgIf, NgFor, DecimalPipe, DatePipe, ChartComponent, InfoButtonComponent],
     templateUrl: './shared-event-detail-report.component.html',
     styleUrl: './shared-event-detail-report.component.css'
 })

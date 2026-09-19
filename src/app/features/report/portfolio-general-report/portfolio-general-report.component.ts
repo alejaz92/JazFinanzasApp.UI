@@ -11,6 +11,7 @@ import { ChartComponent } from '../../../shared/components/chart/chart.component
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { CurrencyInvestmentFormatPipe } from '../../../shared/pipes/currencyInvestmentFormat/currency-investment-format.pipe';
+import { InfoButtonComponent } from '../../../shared/components/info-button/info-button.component';
 
 // Carteras — General (Fase 20, Flujo 5): reescrita sobre InvestmentReportController (Fase 19) en
 // vez de PortfolioService.getPortfolioStats — mismo dato de fondo (GetPortfolioStatsAsync), pero
@@ -20,7 +21,7 @@ import { CurrencyInvestmentFormatPipe } from '../../../shared/pipes/currencyInve
 @Component({
     selector: 'app-portfolio-general-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, RouterLink, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, ChartComponent],
+    imports: [LoadingComponent, NgIf, NgFor, RouterLink, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, ChartComponent, InfoButtonComponent],
     templateUrl: './portfolio-general-report.component.html',
     styleUrl: './portfolio-general-report.component.css'
 })

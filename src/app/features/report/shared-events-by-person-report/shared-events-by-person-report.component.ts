@@ -8,6 +8,7 @@ import { ReportContextService } from '../../../shared/services/report-context.se
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
+import { InfoButtonComponent } from '../../../shared/components/info-button/info-button.component';
 
 interface HistoryItem {
     date: string;
@@ -30,7 +31,7 @@ interface HistoryItem {
 @Component({
     selector: 'app-shared-events-by-person-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, DecimalPipe, DatePipe, ChartComponent],
+    imports: [LoadingComponent, NgIf, NgFor, DecimalPipe, DatePipe, ChartComponent, InfoButtonComponent],
     templateUrl: './shared-events-by-person-report.component.html',
     styleUrl: './shared-events-by-person-report.component.css'
 })

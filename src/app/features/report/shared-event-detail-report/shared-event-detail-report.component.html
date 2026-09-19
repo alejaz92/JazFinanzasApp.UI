@@ -2,7 +2,16 @@
 
 <div *ngIf="!isLoading && event">
     <div class="d-flex align-items-center gap-2 mb-3">
-        <h2 class="mb-0">Compartidos — Por evento: {{ event.name }}</h2>
+        <h2 class="mb-0 d-flex align-items-center gap-2">
+            Compartidos — Por evento: {{ event.name }}
+            <app-info-button title="Cómo leer Compartidos — Por evento">
+                <p>Cómo cerró (o cómo viene) el evento elegido en la barra, sin convertir monedas:</p>
+                <ul class="mb-0">
+                    <li>Quién puso la plata, cómo se repartió cada gasto y qué quedó pendiente entre los participantes.</li>
+                    <li>Los pagos ya registrados entre ustedes ya están descontados de la posición neta.</li>
+                </ul>
+            </app-info-button>
+        </h2>
         <span class="badge" [class.bg-secondary]="event.isClosed" [class.bg-success]="!event.isClosed">
             {{ event.isClosed ? 'Cerrado' : 'Abierto' }}
         </span>
@@ -16,8 +25,10 @@
         <div class="row mt-1">
             <div class="col-md-6 mt-1">
                 <div class="card">
-                    <div class="card-header" title="Positivo: puso más de lo que consumió (le deben). Negativo: le queda pendiente devolver">
+                    <div class="card-header d-flex align-items-center gap-2">
                         Quién puso qué — qué quedó pendiente
+                        <app-info-button title="Quién puso qué — qué quedó pendiente"
+                            text="Una barra por participante con su posición neta: positiva es que puso más de lo que consumió (le deben); negativa, que le queda pendiente devolver. Ya incluye los pagos registrados."></app-info-button>
                     </div>
                     <div class="card-body">
                         <app-chart [options]="contributedOptions" [height]="Math.max(200, event.balances.length * 40)"></app-chart>
@@ -26,7 +37,11 @@
             </div>
             <div class="col-md-6 mt-1" *ngIf="event.categoryTotals.length > 0">
                 <div class="card">
-                    <div class="card-header">Cómo se repartió por categoría</div>
+                    <div class="card-header d-flex align-items-center gap-2">
+                        Cómo se repartió por categoría
+                        <app-info-button title="Cómo se repartió por categoría"
+                            text="El total gastado en el evento abierto por categoría (comida, transporte, etc.), sumando lo gastado por todos los participantes."></app-info-button>
+                    </div>
                     <div class="card-body">
                         <app-chart [options]="categoryOptions" [height]="280"></app-chart>
                     </div>
@@ -37,7 +52,17 @@
         <div class="row mt-4">
             <div class="col-12 mt-1">
                 <div class="card">
-                    <div class="card-header">Balances</div>
+                    <div class="card-header d-flex align-items-center gap-2">
+                        Balances
+                        <app-info-button title="Balances">
+                            <p>Un renglón por persona y moneda:</p>
+                            <ul class="mb-0">
+                                <li><strong>Puso:</strong> lo que pagó de su bolsillo en los gastos del evento.</li>
+                                <li><strong>Consumió:</strong> la parte que le tocó de todos los gastos.</li>
+                                <li><strong>Posición neta:</strong> puso menos consumió, ajustado por los pagos ya registrados. Positiva le deben; negativa debe.</li>
+                            </ul>
+                        </app-info-button>
+                    </div>
                     <div class="card-body p-0">
                         <table class="table table-sm mb-0">
                             <thead class="table-header-brand">
@@ -69,8 +94,10 @@
         <div class="row mt-4">
             <div class="col-12 mt-1">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header d-flex align-items-center gap-2">
                         <h5 class="mb-0">Movimientos</h5>
+                        <app-info-button title="Movimientos"
+                            text="Cada gasto del evento: quién lo pagó, el monto total y cómo se dividió entre los participantes."></app-info-button>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
@@ -109,8 +136,10 @@
         <div class="row mt-4" *ngIf="event.payments.length > 0">
             <div class="col-12 mt-1">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header d-flex align-items-center gap-2">
                         <h5 class="mb-0">Pagos registrados</h5>
+                        <app-info-button title="Pagos registrados"
+                            text="Los pagos entre participantes para saldar deudas del evento, con quién pagó a quién. Una compensación interna es un ajuste que no mueve plata entre personas."></app-info-button>
                     </div>
                     <div class="card-body p-0">
                         <table class="table table-sm mb-0">

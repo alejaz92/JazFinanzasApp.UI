@@ -1,12 +1,25 @@
 <app-loading [isLoading]="isLoading"></app-loading>
 
 <div *ngIf="!isLoading && data">
-    <h2 class="mb-3">Compartidos — Por persona: {{ data.personName }}</h2>
+    <h2 class="mb-3 d-flex align-items-center gap-2">
+        Compartidos — Por persona: {{ data.personName }}
+        <app-info-button title="Cómo leer Compartidos — Por persona">
+            <p>La historia compartida con la persona elegida en la barra:</p>
+            <ul class="mb-0">
+                <li>El saldo actual cuenta los eventos abiertos y los gastos sueltos pendientes; los eventos cerrados no suman.</li>
+                <li>Las categorías y el historial recorren todos los eventos, abiertos y cerrados.</li>
+            </ul>
+        </app-info-button>
+    </h2>
 
     <div class="row" *ngIf="data.balances.length > 0">
         <div class="col-12 mt-1">
             <div class="card">
-                <div class="card-header">Saldo actual</div>
+                <div class="card-header d-flex align-items-center gap-2">
+                    Saldo actual
+                    <app-info-button title="Saldo actual"
+                        text="Lo que hoy tienen pendiente entre ustedes, por moneda: «Me debe» es lo que esa persona te tiene que devolver y «Debo» lo que le tenés que devolver vos. Suma los eventos abiertos y los gastos compartidos sueltos (sin evento) que siguen sin cobrarse."></app-info-button>
+                </div>
                 <div class="card-body p-0">
                     <table class="table table-sm mb-0">
                         <thead class="table-header-brand">
@@ -33,7 +46,11 @@
     <div class="row mt-4" *ngIf="data.categoryTotals.length > 0">
         <div class="col-md-6 mt-1" *ngIf="data.categoryTotals.length > 0">
             <div class="card">
-                <div class="card-header">Qué categorías compartimos</div>
+                <div class="card-header d-flex align-items-center gap-2">
+                    Qué categorías compartimos
+                    <app-info-button title="Qué categorías compartimos"
+                        text="En qué categorías (comida, transporte, etc.) gastaron juntos: se cuenta la parte que le tocó a esta persona en cada gasto, no el total del gasto. Incluye eventos abiertos y cerrados."></app-info-button>
+                </div>
                 <div class="card-body">
                     <app-chart [options]="categoryTotalsOptions" [height]="280"></app-chart>
                 </div>
@@ -44,8 +61,10 @@
     <div class="row mt-4" *ngIf="history.length > 0">
         <div class="col-12 mt-1">
             <div class="card">
-                <div class="card-header">
+                <div class="card-header d-flex align-items-center gap-2">
                     <h5 class="mb-0">Historial de movimientos y pagos</h5>
+                    <app-info-button title="Historial de movimientos y pagos"
+                        text="Todos los gastos de eventos en los que esta persona pagó o participó, más los pagos entre ustedes, del más nuevo al más viejo. En los gastos el monto es la parte de esta persona; «Pagó» y «Recibió pago» indican la dirección de cada pago."></app-info-button>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">

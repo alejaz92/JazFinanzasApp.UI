@@ -1,7 +1,19 @@
 <app-loading [isLoading]="isLoading"></app-loading>
 
 <div *ngIf="!isLoading">
-    <h2 class="mb-3">Bolsa — General</h2>
+    <h2 class="mb-3 d-flex align-items-center gap-2">
+        Bolsa — General
+        <app-info-button title="Cómo leer Bolsa — General">
+            <p>Todo el entorno Bolsa (acciones argentinas y de EE.UU., CEDEARs, fondos, bonos y obligaciones negociables), en la moneda elegida arriba:</p>
+            <ul class="mb-0">
+                <li><strong>Valor actual:</strong> lo que vale hoy, a la cotización de hoy.</li>
+                <li><strong>Invertido:</strong> lo que pagaste, valuando cada compra con la cotización del día en que se hizo.</li>
+                <li><strong>Ganancia / Pérdida:</strong> la diferencia en porcentaje sobre lo invertido.</li>
+                <li><strong>Tickers:</strong> cuántos activos tenés vivos (y, con «Incluir cerradas», cuántas posiciones ya vendidas del todo).</li>
+                <li>El filtro «Tipo» de la barra acota toda la pantalla a un tipo de activo.</li>
+            </ul>
+        </app-info-button>
+    </h2>
 
     <p class="text-body-secondary" *ngIf="tickers.length === 0">Todavía no hay tenencias en bolsa.</p>
 
@@ -51,7 +63,11 @@
         <div class="row mt-4">
             <div class="col-md-6 mt-1">
                 <div class="card">
-                    <div class="card-header">Composición por Tipo y Ticker (En {{ referenceAssetSymbol }}) — coloreado por ganancia/pérdida</div>
+                    <div class="card-header d-flex align-items-center gap-2">
+                        Composición por Tipo y Ticker (En {{ referenceAssetSymbol }}) — coloreado por ganancia/pérdida
+                        <app-info-button title="Composición por tipo y ticker"
+                            text="Un mapa de bloques en dos niveles: primero el tipo de activo y adentro cada ticker. El tamaño es el valor actual y el color la ganancia o pérdida sobre lo invertido (verde ganó, rojo perdió, gris en cero; se satura a partir de ±50%). El color de un tipo es el promedio de sus tickers ponderado por valor."></app-info-button>
+                    </div>
                     <div class="card-body">
                         <app-chart [options]="treemapOptions" [height]="340"></app-chart>
                     </div>
@@ -59,7 +75,11 @@
             </div>
             <div class="col-md-6 mt-1">
                 <div class="card">
-                    <div class="card-header">Valor por Tipo — últimos 12 meses (En {{ referenceAssetSymbol }})</div>
+                    <div class="card-header d-flex align-items-center gap-2">
+                        Valor por Tipo — últimos 12 meses (En {{ referenceAssetSymbol }})
+                        <app-info-button title="Valor por tipo"
+                            text="Áreas apiladas: el valor de cada tipo de activo al cierre de cada uno de los últimos 12 meses (el último punto es hoy), con las cotizaciones de cada momento. Muestra cómo se movió el peso de cada tipo, no solo el total."></app-info-button>
+                    </div>
                     <div class="card-body">
                         <app-chart [options]="evolutionOptions" [height]="340"></app-chart>
                     </div>
@@ -70,7 +90,11 @@
         <div class="row mt-4">
             <div class="col-md-6 mt-1">
                 <div class="card">
-                    <div class="card-header">Rendimiento por Tipo de Activo</div>
+                    <div class="card-header d-flex align-items-center gap-2">
+                        Rendimiento por Tipo de Activo
+                        <app-info-button title="Rendimiento por tipo"
+                            text="La ganancia o pérdida porcentual de cada tipo de activo sobre lo invertido en él. Una barra hacia la derecha es ganancia y hacia la izquierda, pérdida."></app-info-button>
+                    </div>
                     <div class="card-body">
                         <app-chart [options]="typeGainLossOptions" [height]="280"></app-chart>
                     </div>
@@ -78,7 +102,11 @@
             </div>
             <div class="col-md-6 mt-1">
                 <div class="card">
-                    <div class="card-header">Mejores y Peores por Ticker (En {{ referenceAssetSymbol }})</div>
+                    <div class="card-header d-flex align-items-center gap-2">
+                        Mejores y Peores por Ticker (En {{ referenceAssetSymbol }})
+                        <app-info-button title="Mejores y peores por ticker"
+                            text="Los 5 tickers que más ganaron y los 5 que más perdieron, en plata (no en porcentaje) y en la moneda elegida. Con 10 o menos tickers se muestran todos."></app-info-button>
+                    </div>
                     <div class="card-body">
                         <app-chart [options]="tickerGainLossOptions" [height]="280"></app-chart>
                     </div>
@@ -89,8 +117,17 @@
         <div class="row mt-4">
             <div class="col-12 mt-1">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header d-flex align-items-center gap-2">
                         <h5 class="mb-0">Tenencias por Tipo (En {{ referenceAssetSymbol }})</h5>
+                        <app-info-button title="Tenencias por tipo">
+                            <p>Un renglón por tipo de activo; un clic lo abre y muestra sus tickers, y un clic en un ticker lleva a su detalle:</p>
+                            <ul class="mb-0">
+                                <li><strong>Invertido y Valor actual:</strong> lo pagado y lo que vale hoy.</li>
+                                <li><strong>%:</strong> ganancia o pérdida sobre lo invertido.</li>
+                                <li><strong>Peso en Bolsa:</strong> qué parte del valor total de Bolsa representa.</li>
+                                <li>Podés ordenar tocando el encabezado de las columnas con flecha.</li>
+                            </ul>
+                        </app-info-button>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
@@ -165,8 +202,10 @@
         <div class="row mt-4" *ngIf="reportContext.includeClosedPositions()">
             <div class="col-12 mt-1">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header d-flex align-items-center gap-2">
                         <h5 class="mb-0">Posiciones Cerradas — Resultado Realizado (En {{ referenceAssetSymbol }})</h5>
+                        <app-info-button title="Posiciones cerradas"
+                            text="Activos que ya vendiste por completo. El resultado realizado es lo que cobraste por las ventas menos lo que pagaste por las compras, cada movimiento con la cotización de su fecha. Solo aparece con «Incluir cerradas» activado en la barra."></app-info-button>
                     </div>
                     <div class="card-body p-0">
                         <p class="text-body-secondary p-3 mb-0" *ngIf="closedPositions.length === 0">No hay posiciones vendidas del todo.</p>

@@ -1,7 +1,18 @@
 <app-loading [isLoading]="isLoading"></app-loading>
 
 <div *ngIf="!isLoading">
-    <h2 class="mb-3">Cryptos — General</h2>
+    <h2 class="mb-3 d-flex align-items-center gap-2">
+        Cryptos — General
+        <app-info-button title="Cómo leer Cryptos — General">
+            <p>Todo lo que tenés en cripto, en la moneda elegida arriba:</p>
+            <ul class="mb-0">
+                <li><strong>Valor actual:</strong> lo que vale hoy a la cotización de hoy.</li>
+                <li><strong>Invertido:</strong> lo que pagaste, valuando cada compra con la cotización del día en que se hizo.</li>
+                <li><strong>Ganancia / Pérdida:</strong> la diferencia en porcentaje sobre lo invertido.</li>
+                <li>El interruptor de arriba incluye o saca las monedas estables (USDT, USDC, DAI) de todo lo que ves.</li>
+            </ul>
+        </app-info-button>
+    </h2>
 
     <div class="row">
         <div class="col-md-6">
@@ -50,7 +61,11 @@
         <div class="row mt-4">
             <div class="col-md-6 mt-1">
                 <div class="card">
-                    <div class="card-header">Distribución por Crypto (En {{ referenceAssetSymbol }})</div>
+                    <div class="card-header d-flex align-items-center gap-2">
+                        Distribución por Crypto (En {{ referenceAssetSymbol }})
+                        <app-info-button title="Distribución por crypto"
+                            text="Qué parte de tu cripto está en cada moneda, según su valor actual."></app-info-button>
+                    </div>
                     <div class="card-body">
                         <app-chart [options]="distributionOptions" [height]="320"></app-chart>
                     </div>
@@ -59,7 +74,11 @@
             <div class="col-md-6 mt-1">
                 <div class="row">
                     <div class="card">
-                        <div class="card-header">Evolución del Valor de la Cartera (En {{ referenceAssetSymbol }})</div>
+                        <div class="card-header d-flex align-items-center gap-2">
+                            Evolución del Valor de la Cartera (En {{ referenceAssetSymbol }})
+                            <app-info-button title="Evolución del valor"
+                                text="Cuánto valía tu cripto al cierre de cada uno de los últimos 12 meses (el último punto es hoy), con las cotizaciones de cada momento."></app-info-button>
+                        </div>
                         <div class="card-body">
                             <app-chart [options]="walletEvolutionOptions" [height]="150"></app-chart>
                         </div>
@@ -67,7 +86,11 @@
                 </div>
                 <div class="row mt-2">
                     <div class="card">
-                        <div class="card-header">Volumen Mensual de Movimientos (En {{ referenceAssetSymbol }})</div>
+                        <div class="card-header d-flex align-items-center gap-2">
+                            Volumen Mensual de Movimientos (En {{ referenceAssetSymbol }})
+                            <app-info-button title="Volumen mensual de movimientos"
+                                text="Cuánta plata moviste en cripto en cada uno de los últimos 12 meses, en barras apiladas por tipo de operación, valuadas con la cotización de cada fecha."></app-info-button>
+                        </div>
                         <div class="card-body">
                             <app-chart *ngIf="hasPurchasesByMonth" [options]="buyVolumeOptions" [height]="150"></app-chart>
                             <p class="text-body-secondary mb-0" *ngIf="!hasPurchasesByMonth">Sin movimientos en los últimos 12 meses.</p>
@@ -80,8 +103,16 @@
         <div class="row mt-4">
             <div class="col-12 mt-1">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header d-flex align-items-center gap-2">
                         <h5 class="mb-0">Tenencias (En {{ referenceAssetSymbol }})</h5>
+                        <app-info-button title="Tenencias">
+                            <p>Un renglón por cripto:</p>
+                            <ul class="mb-0">
+                                <li><strong>Cotización de origen:</strong> el precio promedio al que compraste (invertido dividido cantidad).</li>
+                                <li><strong>Cotización actual:</strong> valor actual dividido cantidad.</li>
+                                <li><strong>%:</strong> ganancia o pérdida sobre lo invertido.</li>
+                            </ul>
+                        </app-info-button>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">

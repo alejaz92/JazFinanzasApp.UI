@@ -12,6 +12,7 @@ import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat
 import { CurrencyInvestmentFormatPipe } from '../../../shared/pipes/currencyInvestmentFormat/currency-investment-format.pipe';
 import { MovementTypePipe } from '../../../shared/pipes/movementType/movement-type.pipe';
 import { CommerceTypePipe } from '../../../shared/pipes/commerceType/commerce-type.pipe';
+import { InfoButtonComponent } from '../../../shared/components/info-button/info-button.component';
 
 // Cryptos — Detalle (Fase 20, Flujo 5; selector de crypto movido a la barra de filtros compartida
 // el 2026-09-10, mismo criterio que "Por tarjeta" — antes vivía suelto en el cuerpo de esta
@@ -21,7 +22,7 @@ import { CommerceTypePipe } from '../../../shared/pipes/commerceType/commerce-ty
 @Component({
     selector: 'app-crypto-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, DatePipe, ChartComponent, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, MovementTypePipe, CommerceTypePipe],
+    imports: [LoadingComponent, NgIf, NgFor, DatePipe, ChartComponent, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, MovementTypePipe, CommerceTypePipe, InfoButtonComponent],
     templateUrl: './crypto-report.component.html',
     styleUrl: './crypto-report.component.css'
 })

@@ -2,7 +2,17 @@
 
 <div *ngIf="!isLoading">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="mb-0">Viajes — General</h2>
+        <h2 class="mb-0 d-flex align-items-center gap-2">
+            Viajes — General
+            <app-info-button title="Cómo leer Viajes — General">
+                <p>Todos tus viajes en la moneda elegida arriba (los botones de la derecha filtran por Doméstico o Internacional):</p>
+                <ul class="mb-0">
+                    <li><strong>Cantidad de viajes</strong> y <strong>total gastado</strong> suman los viajes que se ven con el filtro elegido.</li>
+                    <li>El costo de cada viaje es tu parte de los eventos compartidos vinculados al viaje más tus gastos propios etiquetados con él, cada uno con la cotización de su fecha.</li>
+                    <li>El costo por día es el total dividido la duración, contando el día de ida y el de vuelta.</li>
+                </ul>
+            </app-info-button>
+        </h2>
         <div class="btn-group btn-group-sm" *ngIf="allTrips.length > 0">
             <button type="button" class="btn" [class.btn-primary]="typeFilter === 'ALL'" [class.btn-outline-secondary]="typeFilter !== 'ALL'" (click)="setTypeFilter('ALL')">Todos</button>
             <button type="button" class="btn" [class.btn-primary]="typeFilter === 'DOMESTIC'" [class.btn-outline-secondary]="typeFilter !== 'DOMESTIC'" (click)="setTypeFilter('DOMESTIC')">Doméstico</button>
@@ -36,7 +46,11 @@
         <div class="row mt-4">
             <div class="col-md-6 mt-1">
                 <div class="card">
-                    <div class="card-header">Costo total por viaje</div>
+                    <div class="card-header d-flex align-items-center gap-2">
+                        Costo total por viaje
+                        <app-info-button title="Costo total por viaje"
+                            text="Una barra por viaje con lo que costó en total, en la moneda elegida. Sirve para comparar el tamaño de cada viaje, sin importar cuánto duró."></app-info-button>
+                    </div>
                     <div class="card-body">
                         <app-chart [options]="totalByTripOptions" [height]="320"></app-chart>
                     </div>
@@ -59,8 +73,10 @@
         <div class="row mt-4">
             <div class="col-12 mt-1">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header d-flex align-items-center gap-2">
                         <h5 class="mb-0">Detalle por viaje</h5>
+                        <app-info-button title="Detalle por viaje"
+                            text="Los mismos datos en tabla: tipo, estado (planificado, en curso o finalizado), fechas, duración en días, total y costo por día. Un clic en una fila abre el detalle de ese viaje."></app-info-button>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">

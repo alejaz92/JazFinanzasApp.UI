@@ -13,6 +13,7 @@ import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat
 import { CurrencyInvestmentFormatPipe } from '../../../shared/pipes/currencyInvestmentFormat/currency-investment-format.pipe';
 import { CurrencyQuoteFormatPipe } from '../../../shared/pipes/currencyQuoteFormat/currency-quote-format.pipe';
 import { CommerceTypePipe } from '../../../shared/pipes/commerceType/commerce-type.pipe';
+import { InfoButtonComponent } from '../../../shared/components/info-button/info-button.component';
 
 // Cryptos — General (Fase 20, Flujo 5): reescrita sobre InvestmentReportController (Fase 19),
 // mismo layout que la pantalla vieja (distribución + evolución del valor + volumen mensual + tabla)
@@ -20,7 +21,7 @@ import { CommerceTypePipe } from '../../../shared/pipes/commerceType/commerce-ty
 @Component({
     selector: 'app-cryptos-gral-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, FormsModule, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, CurrencyQuoteFormatPipe, ChartComponent],
+    imports: [LoadingComponent, NgIf, NgFor, FormsModule, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, CurrencyQuoteFormatPipe, ChartComponent, InfoButtonComponent],
     templateUrl: './cryptos-gral-report.component.html',
     styleUrl: './cryptos-gral-report.component.css'
 })

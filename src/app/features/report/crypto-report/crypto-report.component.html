@@ -1,4 +1,14 @@
-<h2 class="mb-3">Cryptos — Detalle</h2>
+<h2 class="mb-3 d-flex align-items-center gap-2">
+    Cryptos — Detalle
+    <app-info-button title="Cómo leer Cryptos — Detalle">
+        <p>La ficha de la cripto elegida en la barra, en la moneda elegida arriba:</p>
+        <ul class="mb-0">
+            <li><strong>Cotización actual:</strong> el precio de hoy.</li>
+            <li><strong>Precio promedio de compra:</strong> lo pagado por lo que compraste dividido la cantidad comprada (solo compras, las ventas no lo mueven).</li>
+            <li><strong>Mínimo y máximo:</strong> el precio más bajo y más alto de los últimos 12 meses.</li>
+        </ul>
+    </app-info-button>
+</h2>
 
 <app-loading [isLoading]="isLoadingDetail"></app-loading>
 
@@ -41,7 +51,17 @@
         <div class="row mt-4">
             <div class="col-12 mt-1">
                 <div class="card">
-                    <div class="card-header">Cotización, con compras (▲) y ventas (◆) marcadas (En {{ detail.referenceAssetSymbol }})</div>
+                    <div class="card-header d-flex align-items-center gap-2">
+                        Cotización, con compras (▲) y ventas (◆) marcadas (En {{ detail.referenceAssetSymbol }})
+                        <app-info-button title="Cotización, con compras y ventas">
+                            <p>La evolución del precio de la cripto, con tus operaciones encima:</p>
+                            <ul class="mb-0">
+                                <li>La línea es el precio por unidad (no el valor de tu tenencia).</li>
+                                <li>▲ marca una compra y ◆ una venta, en el precio al que la hiciste.</li>
+                                <li>La línea horizontal es el precio promedio de compra: por encima de ella, el precio de hoy da ganancia.</li>
+                            </ul>
+                        </app-info-button>
+                    </div>
                     <div class="card-body">
                         <app-chart [options]="priceOptions" [height]="360"></app-chart>
                     </div>
@@ -52,7 +72,11 @@
         <div class="row mt-4">
             <div class="col-md-4 mt-1" *ngIf="detail.balanceByAccount.length > 0">
                 <div class="card">
-                    <div class="card-header">Saldo por Cuenta</div>
+                    <div class="card-header d-flex align-items-center gap-2">
+                        Saldo por Cuenta
+                        <app-info-button title="Saldo por cuenta"
+                            text="Cuántas unidades de esta cripto hay en cada una de tus cuentas."></app-info-button>
+                    </div>
                     <div class="card-body p-0">
                         <table class="table table-sm mb-0">
                             <tbody>
@@ -67,8 +91,10 @@
             </div>
             <div class="col-md-8 mt-1" *ngIf="detail.transactions.length > 0">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header d-flex align-items-center gap-2">
                         <h5 class="mb-0">Movimientos (En {{ detail.referenceAssetSymbol }})</h5>
+                        <app-info-button title="Movimientos"
+                            text="Todas las compras y ventas de esta cripto con su fecha, cuenta, cantidad, cotización de ese día y total, en la moneda elegida."></app-info-button>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
