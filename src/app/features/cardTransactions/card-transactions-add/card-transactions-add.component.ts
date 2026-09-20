@@ -331,11 +331,20 @@ export class CardTransactionsAddComponent implements OnInit {
     // El mes de la cuota se calcula a partir del mes del CIERRE, no del mes del gasto: con un
     // cierre propio cargado, ambos pueden caer en meses distintos (ej. gasto el 26/07 con cierre
     // el 18/08 -> el resumen que corresponde es el que cierra en agosto, no julio).
+    // El mes del resumen que cierra en closingReference no se deduce del mes del cierre (un resumen
+    // que cierra el 1/10 es el de septiembre): si hay pagos registrados, es el que sigue al último
+    // pagado. Sin pagos se usa el mes del cierre.
+    let statementMonth = new Date(closingReference.getFullYear(), closingReference.getMonth());
+    if (selectedCard?.nextStatementMonth) {
+      const [statementYear, statementMonthNumber] = selectedCard.nextStatementMonth.substring(0, 10).split('-').map(Number);
+      statementMonth = new Date(statementYear, statementMonthNumber - 1);
+    }
+
     if (date > closingReference) {
-      const nextMonthDate = new Date(closingReference.getFullYear(), closingReference.getMonth() + 1);
+      const nextMonthDate = new Date(statementMonth.getFullYear(), statementMonth.getMonth() + 1);
       this.cardTransactionForm.controls['firstInstallmentDate'].setValue(this.formatDateToMonth(nextMonthDate));
     } else {
-      this.cardTransactionForm.controls['firstInstallmentDate'].setValue(this.formatDateToMonth(closingReference));
+      this.cardTransactionForm.controls['firstInstallmentDate'].setValue(this.formatDateToMonth(statementMonth));
     }
 
     this.updateInstallments();

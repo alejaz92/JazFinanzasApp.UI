@@ -4,4 +4,5 @@ export interface Card {
     nextClosingDate: string | null;
     nextDueDate: string | null;
     isCurrentPeriodPaid: boolean;
+    nextStatementMonth: string | null;
 }

@@ -51,6 +51,20 @@ describe('CardTransactionsAddComponent', () => {
       expect(component.cardTransactionForm.controls['firstInstallmentDate'].value).toBe('2026-09');
     });
 
+    it('should use the month after the last paid statement, not the closing month (cierre 1/10 = resumen de septiembre)', () => {
+      component.cards = [
+        { id: 3, name: 'Cierre a principio de mes', nextClosingDate: '2026-10-01T00:00:00', nextDueDate: '2026-10-09T00:00:00', nextStatementMonth: '2026-09-01T00:00:00' }
+      ];
+      component.cardTransactionForm.controls['card'].setValue('3');
+      component.cardTransactionForm.controls['date'].setValue('2026-09-19');
+      component.assignFirstInstallment();
+      expect(component.cardTransactionForm.controls['firstInstallmentDate'].value).toBe('2026-09');
+
+      component.cardTransactionForm.controls['date'].setValue('2026-10-02');
+      component.assignFirstInstallment();
+      expect(component.cardTransactionForm.controls['firstInstallmentDate'].value).toBe('2026-10');
+    });
+
     it('should fall back to getLastThursday when the card has no nextClosingDate loaded', () => {
       component.cardTransactionForm.controls['card'].setValue('2');
       component.cardTransactionForm.controls['date'].setValue('2026-09-10'); // antes del ultimo jueves (24/09/2026)

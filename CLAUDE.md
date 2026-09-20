@@ -57,7 +57,7 @@ app/
 │   └── user/
 ├── app.routes.ts     # rutas con loadComponent (lazy)
 └── shared/
-    ├── components/   # back-button, confirm-modal, submit-button
+    ├── components/   # back-button, chart, confirm-modal, info-button, submit-button, tag-picker
     ├── directives/
     ├── pipes/        # commerceType, currencyFiatFormat, currencyFiatInputFormat, currencyInvestmentFormat, movementType
     └── services/
@@ -84,6 +84,10 @@ Al mostrar un monto o un valor enumerado, preferir el pipe existente (o crear un
 ### Botón de submit (`shared/components/submit-button/`)
 
 Todos los formularios usan `<app-submit-button>` en lugar de un `<button type="submit">` a mano: deshabilita el botón y muestra un spinner mientras la request está en curso (evita doble submit y da feedback visual). Inputs: `[loading]` (bindear al flag `isSubmitting`/`loading` del componente, seteado a `true` antes del `subscribe` y a `false` en `next`/`error`), `[disabled]` (condición extra, ej. validez del formulario), `label`/`loadingLabel` (textos) y `btnClass` (clases Bootstrap, default `btn btn-primary m-1`). Al crear un formulario nuevo, seguir este patrón en vez de un botón nativo con lógica de disabled/spinner ad-hoc.
+
+### Reportes
+
+Antes de agregar o modificar un reporte (`features/report/`), leer `docs/plans/guias/estructura-reportes.md`: dónde vive y cómo se agrega al menú, el molde General + Detalle, qué forma visual va con cada pregunta, la barra de filtros de la sección (`reports-shell` + `ReportContextService`, flags en `report.routes.ts`, `usesPeriod: false` siempre), las exclusiones de negocio que aplican a todos, y el checklist de cierre. Puntos que no se pueden pasar por alto: un solo gráfico (`<app-chart>` + `ChartThemeService`, sin colores sueltos), números con los pipes de `shared/pipes/`, estado vacío que explique qué falta, y un `<app-info-button>` en cada gráfico y tabla con texto verificado contra el cálculo.
 
 ### Tests
 
