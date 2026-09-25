@@ -46,10 +46,10 @@
   <!-- Medio de pago: solo si pagaste vos -->
   <div *ngIf="payerIsMe" class="mt-2">
     <div class="btn-group d-flex mb-2" role="group">
-      <input type="radio" class="btn-check" name="paymentMode" id="modeAccount" value="account" [(ngModel)]="paymentMode">
+      <input type="radio" class="btn-check" name="paymentMode" id="modeAccount" value="account" [(ngModel)]="paymentMode" (ngModelChange)="onPaymentModeChange()">
       <label class="btn btn-outline-primary btn-sm" for="modeAccount">Cuenta</label>
 
-      <input type="radio" class="btn-check" name="paymentMode" id="modeCard" value="card" [(ngModel)]="paymentMode">
+      <input type="radio" class="btn-check" name="paymentMode" id="modeCard" value="card" [(ngModel)]="paymentMode" (ngModelChange)="onPaymentModeChange()">
       <label class="btn btn-outline-primary btn-sm" for="modeCard">Tarjeta</label>
     </div>
 
@@ -82,6 +82,23 @@
       <div class="col-md-4 mt-2">
         <label class="form-label">Primer vencimiento <span class="text-danger">*</span></label>
         <input type="month" class="form-control" name="movFirstInstallment" [(ngModel)]="firstInstallment">
+      </div>
+    </div>
+
+    <div *ngIf="showBankPromotion" class="card border-info mt-2">
+      <div class="card-header d-flex align-items-center bg-info-subtle">
+        <div class="form-check form-switch mb-0">
+          <input class="form-check-input" type="checkbox" id="movBankPromotionToggle"
+                 [(ngModel)]="bankPromotionActive" [ngModelOptions]="{standalone: true}"
+                 (change)="onBankPromotionToggle()">
+          <label class="form-check-label fw-semibold" for="movBankPromotionToggle">
+            Promoción bancaria
+          </label>
+        </div>
+      </div>
+      <div class="card-body" *ngIf="bankPromotionActive">
+        <app-bank-promotion-form (formChange)="onBankPromotionChange($event)"></app-bank-promotion-form>
+        <div *ngIf="bankPromotionError" class="alert alert-danger mt-2">{{ bankPromotionError }}</div>
       </div>
     </div>
   </div>

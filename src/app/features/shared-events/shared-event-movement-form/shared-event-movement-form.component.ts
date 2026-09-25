@@ -8,6 +8,8 @@ import { AssetService } from '../../asset/services/asset.service';
 import { AccountService } from '../../account/services/account.service';
 import { CardService } from '../../card/services/card.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { BankPromotionFormComponent, BankPromotionFormData } from '../../shared-expenses/bank-promotion-form/bank-promotion-form.component';
+import { CardTransactionDiscountService } from '../../card-transaction-discount/services/card-transaction-discount.service';
 
 const ME = 'me';
 
@@ -22,7 +24,7 @@ interface ShareRow {
 @Component({
     selector: 'app-shared-event-movement-form',
     templateUrl: './shared-event-movement-form.component.html',
-    imports: [FormsModule, NgFor, NgIf, DecimalPipe]
+    imports: [FormsModule, NgFor, NgIf, DecimalPipe, BankPromotionFormComponent]
 })
 export class SharedEventMovementFormComponent implements OnInit, OnChanges {
   @Input() eventId!: number;
@@ -46,6 +48,10 @@ export class SharedEventMovementFormComponent implements OnInit, OnChanges {
   firstInstallment: string = '';
 
   notes: string = '';
+
+  bankPromotionActive: boolean = false;
+  bankPromotionData: BankPromotionFormData | null = null;
+  bankPromotionError: string = '';
 
   splitMode: 'equal' | 'amount' | 'percentage' = 'equal';
   rows: ShareRow[] = [];
@@ -71,6 +77,7 @@ export class SharedEventMovementFormComponent implements OnInit, OnChanges {
     private assetService: AssetService,
     private accountService: AccountService,
     private cardService: CardService,
+    private cardTransactionDiscountService: CardTransactionDiscountService,
     private toastService: ToastService
   ) { }
 
@@ -169,6 +176,26 @@ export class SharedEventMovementFormComponent implements OnInit, OnChanges {
     this.recalculate();
   }
 
+  onPaymentModeChange(): void {
+    if (this.paymentMode !== 'card') {
+      this.bankPromotionActive = false;
+      this.bankPromotionData = null;
+      this.bankPromotionError = '';
+    }
+  }
+
+  onBankPromotionToggle(): void {
+    if (!this.bankPromotionActive) {
+      this.bankPromotionData = null;
+      this.bankPromotionError = '';
+    }
+  }
+
+  onBankPromotionChange(data: BankPromotionFormData | null): void {
+    this.bankPromotionData = data;
+    this.bankPromotionError = '';
+  }
+
   onTotalAmountChange(): void {
     this.recalculate();
   }
@@ -220,11 +247,22 @@ export class SharedEventMovementFormComponent implements OnInit, OnChanges {
       && this.totalAmount > 0 && this.sharesValid && this.paymentValid;
   }
 
+  get showBankPromotion(): boolean {
+    return this.payerIsMe && this.paymentMode === 'card';
+  }
+
   onSubmit(): void {
     this.errorMessage = '';
     if (!this.formValid) return;
 
+    if (this.showBankPromotion && this.bankPromotionActive && !this.bankPromotionData) {
+      this.bankPromotionError = 'Debe completar los datos de la promoción bancaria.';
+      return;
+    }
+
     const payerPersonId = this.payerIsMe ? null : Number(this.payerSelection);
+    const createDiscount = this.showBankPromotion && this.bankPromotionActive && !!this.bankPromotionData;
+    const bankPromotionData = this.bankPromotionData;
 
     const request: SharedEventMovementAddRequest = {
       date: this.date,
@@ -248,8 +286,26 @@ export class SharedEventMovementFormComponent implements OnInit, OnChanges {
       : this.sharedEventService.addMovement(this.eventId, request);
 
     obs.subscribe({
-      next: () => {
+      next: (movement) => {
         this.isSaving = false;
+
+        // La promoción bancaria es un recurso independiente del movimiento (mismo patrón que
+        // card-transactions-add): un error acá no debe bloquear el alta ya confirmada del movimiento.
+        if (createDiscount && bankPromotionData && movement.cardTransactionId) {
+          this.cardTransactionDiscountService.create({
+            cardTransactionId: movement.cardTransactionId,
+            amount: bankPromotionData.amount,
+            creditTarget: bankPromotionData.creditTarget,
+            accountId: bankPromotionData.accountId,
+            date: bankPromotionData.date,
+            notes: bankPromotionData.notes
+          }).subscribe({
+            error: (err) => {
+              this.toastService.error(err?.error?.message || 'Error al guardar la promoción bancaria.');
+            }
+          });
+        }
+
         this.toastService.success(this.isEditing ? 'Movimiento actualizado' : 'Movimiento agregado');
         this.saved.emit();
       },
