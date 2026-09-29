@@ -32,6 +32,10 @@ export class CardTransactionsService {
     return this.http.post<any>(`${environment.apiBaseURL}/api/CardTransaction/CardPayments`, cardTransaction);
   }
 
+  registerEmptyMonth(request: any): Observable<any> {
+    return this.http.post<any>(`${environment.apiBaseURL}/api/CardTransaction/CardPayments/NoExpenses`, request);
+  }
+
   getRecurrentCardTransactions(id: number): Observable<RecurrentCardTransactionGet> {
     return this.http.get<RecurrentCardTransactionGet>(`${environment.apiBaseURL}/api/CardTransaction/editRecurrent/${id}`);
   }

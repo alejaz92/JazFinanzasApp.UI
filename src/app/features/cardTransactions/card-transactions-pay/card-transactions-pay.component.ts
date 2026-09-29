@@ -40,6 +40,9 @@ export class CardTransactionsPayComponent implements OnInit {
   reimbursementsPreview: number = 0;
   cardPendingCredit: CardPendingCredit | null = null;
   gastosAutoCalculados: boolean = true;
+  hasQueriedResumen: boolean = false;
+  noExpensesForm!: FormGroup;
+  isSubmittingEmptyMonth: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -77,6 +80,13 @@ export class CardTransactionsPayComponent implements OnInit {
       cardTransactionsArray: this.fb.array([])
     });
 
+    // Tarjeta sin gastos este mes (plan-tarjeta-sin-gastos.md): formulario propio, separado del pago,
+    // para no arrastrar nextClosingDate/nextDueDate del pago normal (ahí son opcionales; acá el sentido
+    // de la acción es justamente cargarlos).
+    this.noExpensesForm = this.fb.group({
+      nextClosingDate: ['', Validators.required],
+      nextDueDate: ['', Validators.required]
+    });
 
     this.loadCards();
     this.loadAccounts();
@@ -95,6 +105,8 @@ export class CardTransactionsPayComponent implements OnInit {
         const paymentMonth = this.cardPaymentForm.get('paymentMonth')?.value;
 
         this.cardTransactionsArray.clear();
+        this.hasQueriedResumen = false;
+        this.noExpensesForm.reset();
 
         return card && paymentMonth
           ? this.cardTransactionService.getPaymentCardTransactions(card, paymentMonth).pipe(
@@ -108,12 +120,17 @@ export class CardTransactionsPayComponent implements OnInit {
       this.cardTransactions = data;
       this.originalTableLength = this.tableLength = this.cardTransactions.length;
       this.populateCardTransactionsArray(this.cardTransactions);
+      this.hasQueriedResumen = true;
 
       if (this.selectedPaymentAssets) {
         this.updateEditOptions();
       }
 
       this.loadReimbursementsPreview(this.cardTransactions);
+
+      if (this.cardTransactions.length === 0) {
+        this.suggestNextDates();
+      }
     });
 
     this.cardPaymentForm.get('paymentAssets')?.valueChanges.subscribe((value) => {
@@ -217,6 +234,35 @@ export class CardTransactionsPayComponent implements OnInit {
   get netPesosAfterReimbursement(): number {
     const totals = this.getTotalValues();
     return Math.round((totals.totalPesos - this.reimbursementsPreview - this.cardCreditApplied) * 100) / 100;
+  }
+
+  // Sin gastos pendientes ni saldo a favor que aplicar: no hay nada que pagar este mes.
+  get showEmptyMonthPanel(): boolean {
+    return this.hasQueriedResumen && this.cardTransactionsArray.length === 0 && this.cardCreditAvailable === 0;
+  }
+
+  // Sugiere el próximo período sumando un mes a las fechas actuales de la tarjeta; quedan editables
+  // por si el ciclo de esa tarjeta no es un mes calendario exacto (D7 del plan).
+  private suggestNextDates(): void {
+    const cardId = this.cardPaymentForm.get('card')?.value;
+    const card = this.cards.find((c) => String(c.id) === String(cardId));
+    if (!card) return;
+
+    this.noExpensesForm.patchValue({
+      nextClosingDate: this.addOneMonthToDateString(card.nextClosingDate),
+      nextDueDate: this.addOneMonthToDateString(card.nextDueDate)
+    });
+  }
+
+  private addOneMonthToDateString(dateStr: string | null): string {
+    if (!dateStr) return '';
+    const [year, month, day] = dateStr.substring(0, 10).split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    date.setMonth(date.getMonth() + 1);
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
   }
 
   populateCardTransactionsArray(cardTransactions: CardTransactionPaymentList[]) {
@@ -629,5 +675,47 @@ refreshCurrencyFormat() {
            }
          });
 
+  }
+
+  onSubmitEmptyMonth(): void {
+    if (this.isSubmittingEmptyMonth) return;
+
+    if (this.noExpensesForm.invalid) {
+      this.noExpensesForm.markAllAsTouched();
+      return;
+    }
+
+    const nextClosingDate = this.noExpensesForm.get('nextClosingDate')?.value;
+    const nextDueDate = this.noExpensesForm.get('nextDueDate')?.value;
+
+    if (nextDueDate < nextClosingDate) {
+      this.toastService.error('El vencimiento no puede ser anterior al cierre.');
+      return;
+    }
+
+    const request = {
+      cardId: parseInt(this.cardPaymentForm.get('card')?.value),
+      paymentMonth: this.cardPaymentForm.get('paymentMonth')?.value + '-01',
+      nextClosingDate,
+      nextDueDate
+    };
+
+    this.isSubmittingEmptyMonth = true;
+    this.cardTransactionService.registerEmptyMonth(request).subscribe({
+      next: () => {
+        this.isSubmittingEmptyMonth = false;
+        this.cardPaymentForm.reset();
+        this.noExpensesForm.reset();
+        this.cardTransactionsArray.clear();
+        this.hasQueriedResumen = false;
+        this.cardPendingCredit = null;
+
+        this.toastService.success('Mes registrado sin gastos');
+      },
+      error: () => {
+        this.isSubmittingEmptyMonth = false;
+        this.toastService.error('Error al registrar el mes sin gastos');
+      }
+    });
   }
 }
