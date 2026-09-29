@@ -1,5 +1,5 @@
 import { Component, effect, inject } from '@angular/core';
-import { NgIf, NgFor, NgClass, DatePipe } from '@angular/common';
+import { NgIf, NgFor, NgClass, NgTemplateOutlet, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import type { EChartsOption } from 'echarts';
@@ -29,7 +29,7 @@ import { InfoButtonComponent } from '../../../shared/components/info-button/info
 @Component({
     selector: 'app-panorama',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, NgClass, RouterLink, DatePipe, CurrencyFiatFormatPipe, ContrastTextPipe, ChartComponent, InfoButtonComponent],
+    imports: [LoadingComponent, NgIf, NgFor, NgClass, NgTemplateOutlet, RouterLink, DatePipe, CurrencyFiatFormatPipe, ContrastTextPipe, ChartComponent, InfoButtonComponent],
     templateUrl: './panorama.component.html',
     styleUrl: './panorama.component.css'
 })

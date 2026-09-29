@@ -33,7 +33,10 @@ export interface DashboardThermometer {
 // Corrección 2026-09-08 (segunda vuelta): se sumó 'PersonDebt' — deudas de gastos sueltos
 // (SharedExpense V1, sin Evento) que antes no entraban a la bandeja pese a ser "deuda relacionada
 // conmigo" (lo que el usuario pidió en la ronda anterior).
-export type DashboardPendingKind = 'CardDue' | 'OpenSharedEvent' | 'PersonDebt' | 'TripWithoutRecentExpense';
+//
+// plan-alerta-cotizaciones, Fase 1: se suma 'StaleQuote' — un activo (o una familia entera) sin
+// cotizar hace uno o más días. Es informativo, sin pantalla propia adonde ir (LinkId siempre null).
+export type DashboardPendingKind = 'CardDue' | 'OpenSharedEvent' | 'PersonDebt' | 'TripWithoutRecentExpense' | 'StaleQuote';
 export type DashboardPendingSeverity = 'info' | 'warning' | 'danger';
 
 export interface DashboardPendingItem {

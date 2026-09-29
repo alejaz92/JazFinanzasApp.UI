@@ -164,6 +164,7 @@
                     <li>Un evento compartido con saldo abierto.</li>
                     <li>Una deuda suelta pendiente con una persona (gastos compartidos sin evento).</li>
                     <li>Un viaje en curso sin gastos cargados hace varios días.</li>
+                    <li>Un activo (o una familia entera) sin cotización actualizada.</li>
                     <li>Cada fila lleva a donde se resuelve. Si no hay nada, dice «Todo al día».</li>
                 </ul>
             </app-info-button>
@@ -171,16 +172,27 @@
         <div class="card-body p-0">
             <p class="text-body-secondary p-3 mb-0" *ngIf="pending.length === 0">Todo al día.</p>
             <div class="list-group list-group-flush" *ngIf="pending.length > 0">
-                <a class="list-group-item d-flex justify-content-between align-items-center" *ngFor="let item of pending" [routerLink]="pendingRoute(item)">
-                    <span>
-                        <i class="bi me-2" [ngClass]="[pendingIcon(item.kind), pendingIconClass(item)]"></i>
-                        {{ item.title }}
-                        <span class="text-body-secondary" *ngIf="item.detail"> — {{ item.detail }}</span>
-                        <span class="text-body-secondary" *ngIf="item.amount != null"> {{ item.amount | currencyFiatFormat }} {{ item.assetSymbol }}</span>
-                    </span>
-                    <span class="badge" [ngClass]="pendingBadgeClass(item)">{{ pendingAction(item.kind) }}</span>
-                </a>
+                <ng-container *ngFor="let item of pending">
+                    <a *ngIf="pendingRoute(item) as route; else pendingRow" class="list-group-item d-flex justify-content-between align-items-center" [routerLink]="route">
+                        <ng-container *ngTemplateOutlet="pendingContent; context: { item: item }"></ng-container>
+                        <span class="badge" [ngClass]="pendingBadgeClass(item)">{{ pendingAction(item.kind) }}</span>
+                    </a>
+                    <ng-template #pendingRow>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <ng-container *ngTemplateOutlet="pendingContent; context: { item: item }"></ng-container>
+                        </div>
+                    </ng-template>
+                </ng-container>
             </div>
         </div>
     </div>
+
+    <ng-template #pendingContent let-item="item">
+        <span>
+            <i class="bi me-2" [ngClass]="[pendingIcon(item.kind), pendingIconClass(item)]"></i>
+            {{ item.title }}
+            <span class="text-body-secondary" *ngIf="item.detail"> — {{ item.detail }}</span>
+            <span class="text-body-secondary" *ngIf="item.amount != null"> {{ item.amount | currencyFiatFormat }} {{ item.assetSymbol }}</span>
+        </span>
+    </ng-template>
 </ng-container>

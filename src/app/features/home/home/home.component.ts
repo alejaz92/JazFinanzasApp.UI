@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { NgIf, NgFor, NgClass, DatePipe } from '@angular/common';
+import { NgIf, NgFor, NgClass, NgTemplateOutlet, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import type { EChartsOption } from 'echarts';
@@ -33,7 +33,7 @@ const AMOUNT_MASK = '••••';
 @Component({
     selector: 'app-home',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, NgClass, RouterLink, DatePipe, ChartComponent],
+    imports: [LoadingComponent, NgIf, NgFor, NgClass, NgTemplateOutlet, RouterLink, DatePipe, ChartComponent],
     templateUrl: './home.component.html',
     styleUrl: './home.component.css'
 })
