@@ -57,7 +57,7 @@
                                         <tbody>
                                             <tr *ngFor="let r of selectedAssetDistribution">
                                                 <td>{{ r.accountName }}</td>
-                                                <td class="text-end">{{ r.nativeBalance | currencyInvestmentFormat }}</td>
+                                                <td class="text-end">{{ r.nativeBalance | currencyInvestmentFormat:(selectedAssetTypeName === 'Moneda') }}</td>
                                                 <td class="text-end">{{ r.balanceInReferenceAsset | currencyFiatFormat }}</td>
                                             </tr>
                                         </tbody>
