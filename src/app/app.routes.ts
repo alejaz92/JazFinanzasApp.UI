@@ -178,6 +178,11 @@ export const routes: Routes = [
     canActivate: [AuthGuard]
   },
   {
+    path: 'stockTransactions/bond-collections',
+    loadComponent: () => import('./features/bondCollections/bond-collections/bond-collections.component').then(m => m.BondCollectionsComponent),
+    canActivate: [AuthGuard]
+  },
+  {
     path: 'currencyExchange',
     loadComponent: () => import('./features/CurrencyExchange/currency-exchange-list/currency-exchange-list.component').then(m => m.CurrencyExchangeListComponent),
     canActivate: [AuthGuard]

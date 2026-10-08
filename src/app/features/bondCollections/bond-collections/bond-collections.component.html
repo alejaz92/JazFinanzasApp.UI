@@ -1,0 +1,220 @@
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Cobros de Bonos</h1>
+        <app-back-button [defaultUrl]="['/stockTransactions']"></app-back-button>
+    </div>
+
+    <div *ngIf="isLoading" class="text-center py-4">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+    </div>
+
+    <ng-container *ngIf="!isLoading">
+
+        <!-- Pendientes de registrar -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Pagos pendientes de registrar</h5>
+            </div>
+            <div class="card-body">
+                <p *ngIf="pending.length === 0" class="text-muted mb-0">
+                    No hay pagos de bonos pendientes de registrar.
+                </p>
+                <div class="table-responsive" *ngIf="pending.length > 0">
+                    <table class="table table-striped table-bordered mb-0">
+                        <thead>
+                            <tr>
+                                <th>Bono</th>
+                                <th>Fecha de pago</th>
+                                <th>Cuenta</th>
+                                <th class="text-end">Tenencia</th>
+                                <th class="text-end">Capital estimado</th>
+                                <th class="text-end">Interés estimado</th>
+                                <th class="text-nowrap" style="width: 80px;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let p of pending" [class.table-active]="isSelected(p)">
+                                <td class="align-middle">
+                                    <strong>{{ p.symbol }}</strong>
+                                    <div class="small text-muted">{{ p.assetName }}</div>
+                                </td>
+                                <td class="align-middle">{{ p.paymentDate | date: 'dd/MM/yyyy' }}</td>
+                                <td class="align-middle">
+                                    {{ p.accountName }}
+                                    <div class="small text-muted">{{ p.portfolioName }}</div>
+                                </td>
+                                <td class="align-middle text-end">{{ p.heldQuantity | number: '1.0-4' }}</td>
+                                <ng-container *ngIf="!p.isIndexed">
+                                    <td class="align-middle text-end">{{ p.currencySymbol }} {{ p.estimatedCapital | number: '1.2-2' }}</td>
+                                    <td class="align-middle text-end">{{ p.currencySymbol }} {{ p.estimatedInterest | number: '1.2-2' }}</td>
+                                </ng-container>
+                                <td *ngIf="p.isIndexed" colspan="2" class="align-middle text-center">
+                                    <span class="badge bg-info text-dark" title="Bono indexado (CER / dólar linked): el monto depende del ajuste y no se conoce de antemano.">
+                                        Monto a confirmar
+                                    </span>
+                                </td>
+                                <td class="align-middle text-center">
+                                    <button class="btn-icon bg-primary" (click)="select(p)" title="Registrar">
+                                        <i class="bi-cash-coin"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario del pago elegido -->
+        <div class="card mb-4" *ngIf="selected">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    Registrar cobro de {{ selected.symbol }} — pago del {{ selected.paymentDate | date: 'dd/MM/yyyy' }}
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">
+                    {{ selected.accountName }} · {{ selected.portfolioName }} · tenencia el día anterior:
+                    {{ selected.heldQuantity | number: '1.0-4' }}.
+                    <ng-container *ngIf="selected.isIndexed">
+                        Es un bono indexado: cargá los montos reales que informa el broker.
+                    </ng-container>
+                    <ng-container *ngIf="!selected.isIndexed">
+                        Los montos son una estimación (tenencia × cronograma): corregilos si el broker acreditó otra cosa.
+                    </ng-container>
+                </p>
+
+                <form [formGroup]="form" (ngSubmit)="onSubmit()">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Fecha de acreditación</label>
+                            <input
+                                type="date"
+                                class="form-control"
+                                formControlName="collectionDate"
+                                [class.is-invalid]="form.get('collectionDate')?.invalid && form.get('collectionDate')?.touched"
+                            >
+                            <div class="invalid-feedback">La fecha es obligatoria.</div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Devolución de capital ({{ selected.currencySymbol }})</label>
+                            <input
+                                type="number"
+                                class="form-control"
+                                formControlName="capitalAmount"
+                                step="0.01"
+                                min="0"
+                                [class.is-invalid]="form.get('capitalAmount')?.invalid && form.get('capitalAmount')?.touched"
+                            >
+                            <div class="invalid-feedback">Ingresá un monto mayor o igual a 0.</div>
+                            <div class="form-text">No cuenta como ingreso en Reportes.</div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Interés ({{ selected.currencySymbol }})</label>
+                            <input
+                                type="number"
+                                class="form-control"
+                                formControlName="interestAmount"
+                                step="0.01"
+                                min="0"
+                                [class.is-invalid]="form.get('interestAmount')?.invalid && form.get('interestAmount')?.touched"
+                            >
+                            <div class="invalid-feedback">Ingresá un monto mayor o igual a 0.</div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Categoría del interés</label>
+                            <select class="form-select" formControlName="interestClassId">
+                                <option [ngValue]="null">-- Seleccionar --</option>
+                                <option *ngFor="let c of incomeClasses" [ngValue]="c.id">{{ c.description }}</option>
+                            </select>
+                            <div class="form-text">Obligatoria si hay interés. Solo categorías de ingreso que cuentan en Reportes.</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 d-flex flex-wrap gap-2">
+                        <app-submit-button [loading]="isSubmitting" label="Registrar" loadingLabel="Registrando..." btnClass="btn btn-primary"></app-submit-button>
+                        <button type="button" class="btn btn-outline-danger" (click)="onDismiss()" [disabled]="isDismissing || isSubmitting"
+                            title="Descarta el aviso sin crear ningún movimiento (por ejemplo, si el broker no pagó).">
+                            No cobré
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" (click)="cancelSelection()">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Registrados -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Cobros registrados</h5>
+            </div>
+            <div class="card-body">
+                <p *ngIf="registered.length === 0" class="text-muted mb-0">
+                    Todavía no hay cobros registrados.
+                </p>
+                <div class="table-responsive" *ngIf="registered.length > 0">
+                    <table class="table table-striped table-bordered mb-0">
+                        <thead>
+                            <tr>
+                                <th>Bono</th>
+                                <th>Fecha de pago</th>
+                                <th>Cuenta</th>
+                                <th>Estado</th>
+                                <th>Acreditado</th>
+                                <th class="text-end">Capital</th>
+                                <th class="text-end">Interés</th>
+                                <th class="text-nowrap" style="width: 80px;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let r of registered">
+                                <td class="align-middle">
+                                    <strong>{{ r.symbol }}</strong>
+                                    <div class="small text-muted">{{ r.assetName }}</div>
+                                </td>
+                                <td class="align-middle">{{ r.paymentDate | date: 'dd/MM/yyyy' }}</td>
+                                <td class="align-middle">
+                                    {{ r.accountName }}
+                                    <div class="small text-muted">{{ r.portfolioName }}</div>
+                                </td>
+                                <td class="align-middle">
+                                    <span class="badge" [ngClass]="statusClass(r.status)" [title]="statusHint(r.status)">
+                                        {{ statusLabel(r.status) }}
+                                    </span>
+                                </td>
+                                <td class="align-middle">
+                                    <span *ngIf="r.collectionDate">{{ r.collectionDate | date: 'dd/MM/yyyy' }}</span>
+                                    <span *ngIf="!r.collectionDate" class="text-muted">—</span>
+                                </td>
+                                <td class="align-middle text-end">{{ r.currencySymbol }} {{ r.capitalAmount | number: '1.2-2' }}</td>
+                                <td class="align-middle text-end">{{ r.currencySymbol }} {{ r.interestAmount | number: '1.2-2' }}</td>
+                                <td class="align-middle text-center">
+                                    <button class="btn-icon bg-danger" (click)="onDelete(r)" title="Eliminar">
+                                        <i class="bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </ng-container>
+</div>
+
+<app-confirm-modal #deleteModal
+    title="Eliminar cobro"
+    [message]="deleteModalMessage"
+    confirmLabel="Eliminar"
+    (confirmed)="onDeleteConfirmed()">
+</app-confirm-modal>
+
+<app-confirm-modal #dismissModal
+    title="No cobré"
+    message="Se descarta este aviso sin crear ningún movimiento. Si más adelante te acreditan el pago, podés eliminar este registro y volver a cargarlo. ¿Continuar?"
+    confirmLabel="Descartar"
+    (confirmed)="onDismissConfirmed()">
+</app-confirm-modal>

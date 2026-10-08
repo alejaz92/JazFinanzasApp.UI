@@ -36,7 +36,9 @@ export interface DashboardThermometer {
 //
 // plan-alerta-cotizaciones, Fase 1: se suma 'StaleQuote' — un activo (o una familia entera) sin
 // cotizar hace uno o más días. Es informativo, sin pantalla propia adonde ir (LinkId siempre null).
-export type DashboardPendingKind = 'CardDue' | 'OpenSharedEvent' | 'PersonDebt' | 'TripWithoutRecentExpense' | 'StaleQuote';
+// plan-amortizaciones-bonos, Fase 6: se suma 'BondCollection' — un pago de bono ya ocurrido y todavía sin
+// registrar (Title = símbolo, Date = fecha de pago, Amount = estimación total, null si el bono es indexado).
+export type DashboardPendingKind = 'CardDue' | 'OpenSharedEvent' | 'PersonDebt' | 'TripWithoutRecentExpense' | 'StaleQuote' | 'BondCollection';
 export type DashboardPendingSeverity = 'info' | 'warning' | 'danger';
 
 export interface DashboardPendingItem {

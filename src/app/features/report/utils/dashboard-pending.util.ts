@@ -12,6 +12,7 @@ const PENDING_META: Record<DashboardPendingKind, { icon: string; action: string 
     PersonDebt: { icon: 'bi-person', action: 'Ver deuda' },
     TripWithoutRecentExpense: { icon: 'bi-airplane', action: 'Cargar gasto' },
     StaleQuote: { icon: 'bi-graph-down-arrow', action: '' },
+    BondCollection: { icon: 'bi-cash-coin', action: 'Registrar' },
 };
 
 // Ícono/acción por default para un `kind` que el frontend todavía no conoce — evita que la bandeja
@@ -66,6 +67,7 @@ export function pendingRoute(item: DashboardPendingItem): string[] | null {
         case 'PersonDebt': return ['/shared-expenses'];
         case 'TripWithoutRecentExpense': return ['/management/trips', String(item.linkId), 'detail'];
         case 'StaleQuote': return null;
+        case 'BondCollection': return ['/stockTransactions/bond-collections'];
         default: return null;
     }
 }
