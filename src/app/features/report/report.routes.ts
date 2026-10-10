@@ -146,6 +146,14 @@ export const reportRoutes: Routes = [
                 data: { usesPeriod: false, portfolioFilter: 'required', includeCashFilter: true }
             },
             {
+                // Próximos cobros de bonos (plan-amortizaciones-bonos, Fase 15) — foto de hoy hacia
+                // adelante, no un rango elegible; los montos van en la moneda de cada bono, así que el
+                // selector de moneda de la barra no le pega y se oculta (mismo criterio que Compartidos).
+                path: 'bond-upcoming',
+                loadComponent: () => import('./bond-upcoming-report/bond-upcoming-report.component').then(m => m.BondUpcomingReportComponent),
+                data: { usesPeriod: false, hideCurrencyFilter: true }
+            },
+            {
                 path: 'contributions-vs-performance',
                 loadComponent: () => import('./contributions-vs-performance/contributions-vs-performance.component').then(m => m.ContributionsVsPerformanceComponent),
                 data: { usesPeriod: false }

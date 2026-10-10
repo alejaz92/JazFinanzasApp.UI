@@ -244,6 +244,58 @@ export interface CryptoDetailReport {
 // nombre viejo (mismo tipo).
 export type AssetDetailReport = CryptoDetailReport;
 
+// plan-amortizaciones-bonos, Fase 15 (T14): próximos cobros de bonos. Los montos están en la moneda
+// en la que paga cada bono (currencySymbol) — no se convierten ni se suman entre monedas distintas.
+export interface BondUpcomingPayment {
+    paymentDate: string;
+    assetId: number;
+    symbol: string;
+    assetName: string;
+    currencySymbol: string;
+    // Tenencia de hoy, sumando todas las cuentas y carteras.
+    heldQuantity: number;
+    // Fracción (0.08 = 8%) del capital original que amortiza; se informa también en un bono indexado.
+    amortizationRate: number;
+    isIndexed: boolean;
+    // null si el bono es indexado: el monto depende del ajuste.
+    estimatedCapital: number | null;
+    estimatedInterest: number | null;
+    estimatedTotal: number | null;
+    residualAfterPer100: number;
+}
+
+export interface BondUpcomingMonth {
+    month: string;
+    currencySymbol: string;
+    capital: number;
+    interest: number;
+    total: number;
+    paymentCount: number;
+    // Pagos indexados del mes, que no suman al total (no tienen monto).
+    indexedPaymentCount: number;
+}
+
+export interface BondUpcomingBond {
+    assetId: number;
+    symbol: string;
+    assetName: string;
+    currencySymbol: string;
+    heldQuantity: number;
+    residualPer100: number;
+    maturity: string;
+    paymentCount: number;
+    totalCapital: number;
+    totalInterest: number;
+    total: number;
+    hasIndexedPayments: boolean;
+}
+
+export interface BondUpcomingReport {
+    payments: BondUpcomingPayment[];
+    months: BondUpcomingMonth[];
+    bonds: BondUpcomingBond[];
+}
+
 export interface ContributionsVsPerformance {
     referenceAssetSymbol: string;
     startMonth: string;
