@@ -7,8 +7,9 @@
             <p>Separa cuánto creció lo invertido porque pusiste plata de cuánto creció porque los precios se movieron:</p>
             <ul class="mb-0">
                 <li><strong>Aportes:</strong> lo que pusiste en compras desde el mes de inicio.</li>
-                <li><strong>Retiros:</strong> lo que sacaste con ventas en ese mismo período.</li>
-                <li><strong>Valorización:</strong> el resto. Es el valor final menos el valor inicial, menos los aportes, más los retiros: lo que se ganó o perdió por movimiento de precios.</li>
+                <li><strong>Retiros:</strong> lo que sacaste con ventas en ese mismo período, y lo que cobraste de bonos (devoluciones de capital e intereses): es plata que salió de lo invertido hacia una cuenta, no una pérdida.</li>
+                <li><strong>Valorización:</strong> el resto. Es el valor final menos el valor inicial, menos los aportes, más los retiros, sin contar los intereses: lo que se ganó o perdió por movimiento de precios.</li>
+                <li><strong>Intereses cobrados:</strong> los intereses que pagaron tus bonos en el período. Es rendimiento, y aparece aparte solo si hubo.</li>
                 <li>Arranca en marzo de 2024 porque los movimientos anteriores son ajustes de saldo, no aportes reales.</li>
             </ul>
         </app-info-button>
@@ -19,7 +20,7 @@
     </p>
 
     <div class="row">
-        <div class="col-md-4 mt-1">
+        <div [class]="hasInterest ? 'col-md-3 mt-1' : 'col-md-4 mt-1'">
             <div class="card">
                 <div class="card-header">Aportes (En {{ data.referenceAssetSymbol }})</div>
                 <div class="card-body">
@@ -27,7 +28,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mt-1">
+        <div [class]="hasInterest ? 'col-md-3 mt-1' : 'col-md-4 mt-1'">
             <div class="card">
                 <div class="card-header">Retiros (En {{ data.referenceAssetSymbol }})</div>
                 <div class="card-body">
@@ -35,13 +36,21 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mt-1">
+        <div [class]="hasInterest ? 'col-md-3 mt-1' : 'col-md-4 mt-1'">
             <div class="card">
                 <div class="card-header">Valorización (En {{ data.referenceAssetSymbol }})</div>
                 <div class="card-body">
-                    <h4 class="card-title mb-0" [class.text-success]="data.valuation >= 0" [class.text-danger]="data.valuation < 0">
-                        {{ data.valuation >= 0 ? '+' : '' }}{{ data.valuation | currencyFiatFormat }}
+                    <h4 class="card-title mb-0" [class.text-success]="priceValuation >= 0" [class.text-danger]="priceValuation < 0">
+                        {{ priceValuation >= 0 ? '+' : '' }}{{ priceValuation | currencyFiatFormat }}
                     </h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mt-1" *ngIf="hasInterest">
+            <div class="card">
+                <div class="card-header">Intereses cobrados (En {{ data.referenceAssetSymbol }})</div>
+                <div class="card-body">
+                    <h4 class="card-title mb-0 text-success">+{{ data.interestCollected | currencyFiatFormat }}</h4>
                 </div>
             </div>
         </div>
@@ -51,9 +60,9 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex align-items-center gap-2">
-                    Valor inicial → Aportes → Retiros → Valorización → Valor final (En {{ data.referenceAssetSymbol }})
+                    Valor inicial → Aportes → Retiros → Valorización<ng-container *ngIf="hasInterest"> → Intereses cobrados</ng-container> → Valor final (En {{ data.referenceAssetSymbol }})
                     <app-info-button title="Cascada de aportes y rendimiento"
-                        text="Una cascada: arranca en el valor de lo invertido a fin del mes anterior al inicio, suma los aportes, resta los retiros, suma o resta la valorización y termina en el valor de hoy. Mostrar la valorización aparte evita atribuirle al buen ojo lo que fue plata que pusiste, y al revés."></app-info-button>
+                        text="Una cascada: arranca en el valor de lo invertido a fin del mes anterior al inicio, suma los aportes, resta los retiros (ventas y cobros de bonos), suma o resta la valorización de precio, suma los intereses cobrados si hubo y termina en el valor de hoy. Mostrar la valorización aparte evita atribuirle al buen ojo lo que fue plata que pusiste, y al revés; y los cobros de bonos no se ven como una pérdida de valor."></app-info-button>
                 </div>
                 <div class="card-body">
                     <app-chart [options]="waterfallOptions" [height]="360"></app-chart>

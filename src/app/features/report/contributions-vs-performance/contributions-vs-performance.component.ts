@@ -10,17 +10,11 @@ import { ChartComponent } from '../../../shared/components/chart/chart.component
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { InfoButtonComponent } from '../../../shared/components/info-button/info-button.component';
-
-interface WaterfallStep {
-    name: string;
-    base: number;
-    delta: number;
-    color: string;
-    displayValue: number;
-}
+import { buildWaterfallSteps, priceValuation } from './contributions-waterfall.util';
 
 // Aportes vs rendimiento (Fase 20, Flujo 5): cascada Valor inicial → Aportes → Retiros →
-// Valorización → Valor final, sobre GetContributionsVsPerformanceAsync (Fase 19). ECharts no tiene
+// Valorización → [Intereses cobrados] → Valor final, sobre GetContributionsVsPerformanceAsync (Fase 19).
+// Los pasos salen de buildWaterfallSteps (contributions-waterfall.util.ts, pura y con spec). ECharts no tiene
 // un tipo "waterfall" nativo — se arma con el truco clásico de dos series de barra apiladas: una
 // "base" transparente (dónde empieza a flotar cada barra) y una "delta" visible (el tramo que se
 // ve), salvo en el primer y último paso, que son barras totales desde 0.
@@ -56,36 +50,23 @@ export class ContributionsVsPerformanceComponent {
         });
     }
 
-    private buildSteps(data: ContributionsVsPerformance): WaterfallStep[] {
-        const status = this.chartTheme.status;
-        const totalColor = this.chartTheme.colorAt(6);
-        const steps: WaterfallStep[] = [];
+    // La valorización que se muestra es la de precio, sin los intereses cobrados de bonos (que van en
+    // su propia barra y tarjeta) — plan-amortizaciones-bonos, Fase 11.
+    get priceValuation(): number {
+        return this.data ? priceValuation(this.data) : 0;
+    }
 
-        steps.push({ name: 'Valor inicial', base: 0, delta: data.initialValue, color: totalColor, displayValue: data.initialValue });
-        let cum = data.initialValue;
-
-        const afterContributions = cum + data.contributed;
-        steps.push({ name: 'Aportes', base: Math.min(cum, afterContributions), delta: data.contributed, color: status.good, displayValue: data.contributed });
-        cum = afterContributions;
-
-        const afterWithdrawals = cum - data.withdrawn;
-        steps.push({ name: 'Retiros', base: Math.min(cum, afterWithdrawals), delta: data.withdrawn, color: status.critical, displayValue: -data.withdrawn });
-        cum = afterWithdrawals;
-
-        const afterValuation = cum + data.valuation;
-        steps.push({
-            name: 'Valorización', base: Math.min(cum, afterValuation), delta: Math.abs(data.valuation),
-            color: data.valuation >= 0 ? status.good : status.critical, displayValue: data.valuation,
-        });
-        cum = afterValuation;
-
-        steps.push({ name: 'Valor final', base: 0, delta: data.finalValue, color: totalColor, displayValue: data.finalValue });
-
-        return steps;
+    // Hubo intereses de bonos cobrados en el período (si el campo no llega, se toma como 0).
+    get hasInterest(): boolean {
+        return (this.data?.interestCollected ?? 0) !== 0;
     }
 
     private renderWaterfall(data: ContributionsVsPerformance): void {
-        const steps = this.buildSteps(data);
+        const steps = buildWaterfallSteps(data, {
+            total: this.chartTheme.colorAt(6),
+            good: this.chartTheme.status.good,
+            critical: this.chartTheme.status.critical,
+        });
         const axisLabel = this.chartTheme.surface.axisLabel;
         const fmt = (v: number) => this.chartTheme.formatNumber(v, { maximumFractionDigits: 0 });
         // Object.is(v, -0): -data.withdrawn con Withdrawn = 0 da -0 en JS — Intl.NumberFormat lo

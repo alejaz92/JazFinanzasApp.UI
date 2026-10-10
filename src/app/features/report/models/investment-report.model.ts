@@ -221,7 +221,10 @@ export interface ContributionsVsPerformance {
     startMonth: string;
     initialValue: number;
     contributed: number;
+    // Incluye lo cobrado de bonos (capital + interés) — plan-amortizaciones-bonos, T12.
     withdrawn: number;
+    // Incluye los intereses cobrados: la valorización de precio pura es valuation - interestCollected.
     valuation: number;
+    interestCollected: number;
     finalValue: number;
 }
