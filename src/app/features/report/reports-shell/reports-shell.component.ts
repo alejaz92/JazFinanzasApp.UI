@@ -264,7 +264,8 @@ export class ReportsShellComponent implements OnInit {
                         { type: 'link', label: 'Detalle', icon: 'bi-coin', route: '/report/crypto' }
                     ]
                 },
-                { type: 'link', label: 'Aportes vs rendimiento', icon: 'bi-bar-chart-steps', route: '/report/contributions-vs-performance' }
+                { type: 'link', label: 'Aportes vs rendimiento', icon: 'bi-bar-chart-steps', route: '/report/contributions-vs-performance' },
+                { type: 'link', label: 'Próximos cobros de bonos', icon: 'bi-calendar2-check', route: '/report/bond-upcoming' }
             ]
         },
         {

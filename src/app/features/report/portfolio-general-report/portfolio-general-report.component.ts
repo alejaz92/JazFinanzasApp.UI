@@ -35,6 +35,7 @@ export class PortfolioGeneralReportComponent {
     portfolios: PortfolioOverviewItem[] = [];
     totalActualValue = 0;
     totalOriginalValue = 0;
+    totalCollectedValue = 0;
 
     distributionOptions: EChartsOption = {};
     originalVsActualOptions: EChartsOption = {};
@@ -60,13 +61,20 @@ export class PortfolioGeneralReportComponent {
             this.portfolios = [...data.portfolios].sort((a, b) => b.actualValue - a.actualValue);
             this.totalActualValue = this.portfolios.reduce((sum, p) => sum + p.actualValue, 0);
             this.totalOriginalValue = this.portfolios.reduce((sum, p) => sum + p.originalValue, 0);
+            this.totalCollectedValue = this.portfolios.reduce((sum, p) => sum + p.collectedValue, 0);
             this.isLoading = false;
             setTimeout(() => this.renderCharts(), 0);
         });
     }
 
+    // plan-amortizaciones-bonos, Fase 9: lo cobrado de bonos se suma al valor actual; el origen no cambia.
     get totalGainLossPct(): number | null {
-        return this.totalOriginalValue > 0 ? (this.totalActualValue / this.totalOriginalValue * 100) - 100 : null;
+        return this.totalOriginalValue > 0 ? ((this.totalActualValue + this.totalCollectedValue) / this.totalOriginalValue * 100) - 100 : null;
+    }
+
+    // La columna «Cobrado» solo aparece si alguna cartera cobró algo de bonos.
+    get hasCollected(): boolean {
+        return this.portfolios.some(p => p.collectedValue !== 0);
     }
 
     private renderCharts(): void {

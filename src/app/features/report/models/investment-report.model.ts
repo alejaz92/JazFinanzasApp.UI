@@ -10,6 +10,9 @@ export interface InvestmentHolding {
     quantity: number;
     originalValue: number;
     actualValue: number;
+    // plan-amortizaciones-bonos, Fase 9: lo ya cobrado de un bono (intereses + devoluciones de
+    // capital), en la moneda de referencia. gainLossPercent ya lo incluye; originalValue no cambia.
+    collectedValue: number;
     gainLossPercent: number | null;
 }
 
@@ -28,6 +31,7 @@ export interface InvestmentOverview {
     referenceAssetSymbol: string;
     totalOriginalValue: number;
     totalActualValue: number;
+    totalCollectedValue: number;
     gainLossPercent: number | null;
     holdings: InvestmentHolding[];
     valueSeries: InvestmentValuePoint[];
@@ -40,6 +44,7 @@ export interface PortfolioOverviewItem {
     isDefault: boolean;
     originalValue: number;
     actualValue: number;
+    collectedValue: number;
     gainLossPercent: number | null;
     sharePercent: number;
 }
@@ -57,6 +62,7 @@ export interface PortfolioHoldingItem {
     quantity: number;
     originalValue: number;
     actualValue: number;
+    collectedValue: number;
     gainLossPercent: number | null;
     // Calculadas en el backend sobre valores sin redondear (2026-09-10) — dividir originalValue/
     // actualValue (ya redondeados a 2 decimales) acá en el frontend daba una cotización levemente
@@ -71,6 +77,7 @@ export interface PortfolioDetailReport {
     referenceAssetSymbol: string;
     originalValue: number;
     actualValue: number;
+    collectedValue: number;
     gainLossPercent: number | null;
     holdings: PortfolioHoldingItem[];
     valueSeries: InvestmentValuePoint[];
@@ -86,6 +93,7 @@ export interface StockTickerReport {
     quantity: number;
     originalValue: number;
     actualValue: number;
+    collectedValue: number;
     gainLossAmount: number;
     gainLossPercent: number | null;
     weightPercent: number;
@@ -97,6 +105,7 @@ export interface StockTypeAggregate {
     tickerCount: number;
     originalValue: number;
     actualValue: number;
+    collectedValue: number;
     gainLossPercent: number | null;
 }
 
@@ -117,7 +126,9 @@ export interface ClosedPosition {
     assetName: string;
     symbol: string;
     assetTypeName: string;
+    // Ya incluye collectedValue (lo cobrado de un bono vendido del todo).
     realizedResult: number;
+    collectedValue: number;
     lastMovementDate: string;
 }
 
@@ -125,6 +136,7 @@ export interface StocksReport {
     referenceAssetSymbol: string;
     totalOriginalValue: number;
     totalActualValue: number;
+    totalCollectedValue: number;
     // Agregados por tipo, siempre sobre el entorno completo — el filtro de la barra (D-11) recorta
     // tickers, no esta lista.
     types: StockTypeAggregate[];
@@ -176,8 +188,30 @@ export interface AssetPosition {
     quantity: number;
     originalValue: number;
     actualValue: number;
+    // plan-amortizaciones-bonos, Fase 12: lo ya cobrado de un bono (moneda de referencia); gainLossPercent lo incluye.
+    collectedValue: number;
     gainLossPercent: number | null;
     weightPercent: number;
+}
+
+// plan-amortizaciones-bonos, Fase 13: estado de un pago del cronograma para el usuario.
+// Registered / Untracked / Dismissed: ya tiene registro de cobro. Pending: ya pasó, tenías el bono y
+// falta registrarlo. Future: todavía no llegó. NotHeld: ya pasó y no tenías el bono ese día.
+export type BondScheduleStatus = 'Registered' | 'Untracked' | 'Dismissed' | 'Pending' | 'Future' | 'NotHeld';
+
+export interface BondPaymentScheduleItem {
+    paymentDate: string;
+    // Por cada 100 nominales originales. Si isIndexed es solo informativo (el monto real depende del ajuste).
+    interestPer100: number;
+    // Fracción (0.08 = 8%) del capital original que amortiza en este pago.
+    amortizationRate: number;
+    // Capital vivo por cada 100 nominales originales DESPUÉS de este pago.
+    residualAfterPer100: number;
+    isIndexed: boolean;
+    status: BondScheduleStatus;
+    // Lo cobrado de este pago, en la moneda del bono (bondCurrencySymbol).
+    collectedCapital: number;
+    collectedInterest: number;
 }
 
 export interface CryptoDetailReport {
@@ -197,6 +231,12 @@ export interface CryptoDetailReport {
     // hoy, ninguna cripto tiene splits cargados), pero viajan igual porque es el mismo endpoint.
     splitEvents: AssetSplitEventMarker[];
     position: AssetPosition | null;
+    // plan-amortizaciones-bonos, Fase 12: vacío / null para un activo sin cronograma (acciones, cripto).
+    bondSchedule: BondPaymentScheduleItem[];
+    // Moneda en la que paga el bono (no la de referencia del reporte).
+    bondCurrencySymbol: string | null;
+    // Capital vivo hoy por cada 100 nominales originales.
+    residualPer100: number | null;
 }
 
 // El detalle de un activo (T17): mismo shape que CryptoDetailReport, el nombre quedó atrás de la
@@ -204,12 +244,67 @@ export interface CryptoDetailReport {
 // nombre viejo (mismo tipo).
 export type AssetDetailReport = CryptoDetailReport;
 
+// plan-amortizaciones-bonos, Fase 15 (T14): próximos cobros de bonos. Los montos están en la moneda
+// en la que paga cada bono (currencySymbol) — no se convierten ni se suman entre monedas distintas.
+export interface BondUpcomingPayment {
+    paymentDate: string;
+    assetId: number;
+    symbol: string;
+    assetName: string;
+    currencySymbol: string;
+    // Tenencia de hoy, sumando todas las cuentas y carteras.
+    heldQuantity: number;
+    // Fracción (0.08 = 8%) del capital original que amortiza; se informa también en un bono indexado.
+    amortizationRate: number;
+    isIndexed: boolean;
+    // null si el bono es indexado: el monto depende del ajuste.
+    estimatedCapital: number | null;
+    estimatedInterest: number | null;
+    estimatedTotal: number | null;
+    residualAfterPer100: number;
+}
+
+export interface BondUpcomingMonth {
+    month: string;
+    currencySymbol: string;
+    capital: number;
+    interest: number;
+    total: number;
+    paymentCount: number;
+    // Pagos indexados del mes, que no suman al total (no tienen monto).
+    indexedPaymentCount: number;
+}
+
+export interface BondUpcomingBond {
+    assetId: number;
+    symbol: string;
+    assetName: string;
+    currencySymbol: string;
+    heldQuantity: number;
+    residualPer100: number;
+    maturity: string;
+    paymentCount: number;
+    totalCapital: number;
+    totalInterest: number;
+    total: number;
+    hasIndexedPayments: boolean;
+}
+
+export interface BondUpcomingReport {
+    payments: BondUpcomingPayment[];
+    months: BondUpcomingMonth[];
+    bonds: BondUpcomingBond[];
+}
+
 export interface ContributionsVsPerformance {
     referenceAssetSymbol: string;
     startMonth: string;
     initialValue: number;
     contributed: number;
+    // Incluye lo cobrado de bonos (capital + interés) — plan-amortizaciones-bonos, T12.
     withdrawn: number;
+    // Incluye los intereses cobrados: la valorización de precio pura es valuation - interestCollected.
     valuation: number;
+    interestCollected: number;
     finalValue: number;
 }

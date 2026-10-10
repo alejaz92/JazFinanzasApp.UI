@@ -1,0 +1,219 @@
+<app-loading [isLoading]="isLoading"></app-loading>
+
+<div *ngIf="!isLoading">
+    <h2 class="mb-3 d-flex align-items-center gap-2">
+        Próximos cobros de bonos
+        <app-info-button title="Cómo leer Próximos cobros de bonos">
+            <p>Lo que te falta cobrar de los bonos que tenés hoy, hasta su vencimiento:</p>
+            <ul class="mb-0">
+                <li><strong>Es una estimación con la tenencia de hoy:</strong> supone que mantenés lo que tenés. Si comprás o vendés, cambia.</li>
+                <li><strong>Capital:</strong> la parte de lo invertido que el bono te devuelve en esa fecha (amortización). <strong>Interés:</strong> el cupón.</li>
+                <li><strong>Moneda:</strong> los montos están en la moneda en la que paga cada bono (se aclara en cada encabezado) y nunca se suman entre monedas distintas.</li>
+                <li><strong>Bonos indexados</strong> (CER, dólar linked): el monto depende del ajuste y no se conoce de antemano. Se muestra la fecha y el porcentaje de capital que amortizan, pero no entran en los totales.</li>
+                <li><strong>Capital vivo:</strong> cuánto del capital original le queda al bono por cada 100 nominales después de ese pago.</li>
+            </ul>
+        </app-info-button>
+    </h2>
+
+    <div class="alert alert-info py-2 small" role="note">
+        <i class="bi-info-circle"></i>
+        Estimación con la tenencia de hoy: supone que mantenés lo que tenés. Los montos están en la moneda en la que paga cada bono.
+    </div>
+
+    <p class="text-body-secondary" *ngIf="!hasPayments">
+        No tenés bonos con pagos por delante. Cuando compres uno con cronograma cargado, acá vas a ver cuándo y cuánto cobrás.
+    </p>
+
+    <ng-container *ngIf="hasPayments && report">
+
+        <!-- Resumen por moneda -->
+        <div class="row" *ngFor="let s of summaries">
+            <div class="col-md-3 mt-1">
+                <div class="card">
+                    <div class="card-header">Hasta el vencimiento (En {{ s.currency }})</div>
+                    <div class="card-body">
+                        <h4 class="card-title mb-0">{{ s.total | currencyFiatFormat }}</h4>
+                        <p class="small text-body-secondary mb-0 mt-1" *ngIf="s.hasIndexed">Sin contar los pagos indexados, que no tienen monto.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mt-1">
+                <div class="card">
+                    <div class="card-header">De capital (En {{ s.currency }})</div>
+                    <div class="card-body">
+                        <h4 class="card-title mb-0">{{ s.capital | currencyFiatFormat }}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mt-1">
+                <div class="card">
+                    <div class="card-header">De interés (En {{ s.currency }})</div>
+                    <div class="card-body">
+                        <h4 class="card-title mb-0 text-success">{{ s.interest | currencyFiatFormat }}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mt-1">
+                <div class="card">
+                    <div class="card-header">Próximo cobro</div>
+                    <div class="card-body" *ngIf="s.next as n">
+                        <h4 class="card-title mb-0">{{ n.paymentDate | date: 'dd/MM/yyyy' }}</h4>
+                        <p class="small text-body-secondary mb-0 mt-1">
+                            {{ n.symbol }} ·
+                            <ng-container *ngIf="n.estimatedTotal != null; else toConfirm">{{ n.estimatedTotal | currencyFiatFormat }}</ng-container>
+                            <ng-template #toConfirm>monto a confirmar</ng-template>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cobros por mes, un gráfico por moneda -->
+        <div class="row mt-4" *ngFor="let c of charts">
+            <div class="col-12 mt-1">
+                <div class="card">
+                    <div class="card-header d-flex align-items-center gap-2">
+                        Cobros por mes (En {{ c.currency }}) — capital e interés
+                        <app-info-button title="Cobros por mes"
+                            text="Cuánto esperás cobrar cada mes, separado en lo que te devuelve el bono de capital y lo que paga de interés. Los bonos suelen pagar dos veces por año, así que ves picos en esos meses."></app-info-button>
+                    </div>
+                    <div class="card-body">
+                        <app-chart [options]="c.options" [height]="320"></app-chart>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total hasta el vencimiento, por bono -->
+        <div class="row mt-4">
+            <div class="col-12 mt-1">
+                <div class="card">
+                    <div class="card-header d-flex align-items-center gap-2">
+                        <h5 class="mb-0">Hasta el vencimiento, por bono</h5>
+                        <app-info-button title="Por bono"
+                            text="Para cada bono que tenés: cuánto tenés, cuánto de su capital original le queda, cuántos pagos faltan, cuándo vence y cuánto vas a cobrar en total hasta entonces."></app-info-button>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm mb-0">
+                                <thead class="table-header-brand">
+                                    <tr>
+                                        <th>Bono</th>
+                                        <th class="text-end">Tenencia</th>
+                                        <th class="text-end">Capital vivo hoy</th>
+                                        <th class="text-end">Pagos que faltan</th>
+                                        <th>Vence</th>
+                                        <th class="text-end">Capital</th>
+                                        <th class="text-end">Interés</th>
+                                        <th class="text-end">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let b of report.bonds">
+                                        <td>
+                                            <strong>{{ b.symbol }}</strong> <span class="text-body-secondary small">({{ b.currencySymbol }})</span>
+                                            <div class="small text-body-secondary">{{ b.assetName }}</div>
+                                        </td>
+                                        <td class="text-end">{{ b.heldQuantity | number: '1.0-4' }}</td>
+                                        <td class="text-end">{{ b.residualPer100 | number: '1.0-2' }} de cada 100</td>
+                                        <td class="text-end">{{ b.paymentCount }}</td>
+                                        <td>{{ b.maturity | date: 'dd/MM/yyyy' }}</td>
+                                        <td class="text-end">{{ b.totalCapital | currencyFiatFormat }}</td>
+                                        <td class="text-end">{{ b.totalInterest | currencyFiatFormat }}</td>
+                                        <td class="text-end">
+                                            <strong>{{ b.total | currencyFiatFormat }}</strong>
+                                            <div class="small text-body-secondary" *ngIf="b.hasIndexedPayments">+ pagos indexados sin monto</div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total por mes -->
+        <div class="row mt-4">
+            <div class="col-md-6 mt-1">
+                <div class="card">
+                    <div class="card-header d-flex align-items-center gap-2">
+                        <h5 class="mb-0">Total por mes</h5>
+                        <app-info-button title="Total por mes"
+                            text="La suma de todos los pagos de cada mes, por moneda. Un mes con bonos indexados avisa cuántos pagos quedaron afuera porque no tienen monto."></app-info-button>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive" style="max-height: 480px;">
+                            <table class="table table-hover table-sm mb-0">
+                                <thead class="table-header-brand">
+                                    <tr>
+                                        <th>Mes</th>
+                                        <th>Moneda</th>
+                                        <th class="text-end">Capital</th>
+                                        <th class="text-end">Interés</th>
+                                        <th class="text-end">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let m of report.months">
+                                        <td class="text-capitalize">{{ monthLabel(m.month) }}</td>
+                                        <td>{{ m.currencySymbol }}</td>
+                                        <td class="text-end">{{ m.capital | currencyFiatFormat }}</td>
+                                        <td class="text-end">{{ m.interest | currencyFiatFormat }}</td>
+                                        <td class="text-end">
+                                            <strong>{{ m.total | currencyFiatFormat }}</strong>
+                                            <div class="small text-body-secondary" *ngIf="m.indexedPaymentCount > 0">+ {{ m.indexedPaymentCount }} indexado{{ m.indexedPaymentCount > 1 ? 's' : '' }} sin monto</div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagos por fecha -->
+            <div class="col-md-6 mt-1">
+                <div class="card">
+                    <div class="card-header d-flex align-items-center gap-2">
+                        <h5 class="mb-0">Pagos por fecha</h5>
+                        <app-info-button title="Pagos por fecha"
+                            text="Cada pago que viene, con su fecha, el bono, lo que devuelve de capital, el interés y el total estimado. «A confirmar» marca un bono indexado, cuyo monto depende del ajuste."></app-info-button>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive" style="max-height: 480px;">
+                            <table class="table table-hover table-sm mb-0">
+                                <thead class="table-header-brand">
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Bono</th>
+                                        <th class="text-end">Capital</th>
+                                        <th class="text-end">Interés</th>
+                                        <th class="text-end">Total</th>
+                                        <th class="text-end">Capital vivo después</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let p of report.payments">
+                                        <td>{{ p.paymentDate | date: 'dd/MM/yyyy' }}</td>
+                                        <td>{{ p.symbol }} <span class="text-body-secondary small">({{ p.currencySymbol }})</span></td>
+                                        <ng-container *ngIf="!p.isIndexed">
+                                            <td class="text-end">{{ (p.estimatedCapital ?? 0) | currencyFiatFormat }}</td>
+                                            <td class="text-end">{{ (p.estimatedInterest ?? 0) | currencyFiatFormat }}</td>
+                                            <td class="text-end"><strong>{{ (p.estimatedTotal ?? 0) | currencyFiatFormat }}</strong></td>
+                                        </ng-container>
+                                        <td *ngIf="p.isIndexed" colspan="3" class="text-center">
+                                            <span class="badge bg-info text-dark">A confirmar</span>
+                                            <span class="small text-body-secondary ms-1">amortiza {{ p.amortizationRate * 100 | number: '1.0-2' }}%</span>
+                                        </td>
+                                        <td class="text-end">{{ p.residualAfterPer100 | number: '1.0-2' }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+</div>

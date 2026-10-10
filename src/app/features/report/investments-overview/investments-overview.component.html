@@ -9,6 +9,7 @@
                 <li><strong>Valor actual:</strong> lo que vale hoy lo que tenés invertido, a la cotización de hoy.</li>
                 <li><strong>Invertido:</strong> lo que pagaste por eso mismo, valuando cada compra con la cotización del día en que se hizo.</li>
                 <li><strong>Ganancia / Pérdida:</strong> la diferencia entre los dos, en porcentaje sobre lo invertido. Queda en guion si no hay un costo conocido (por ejemplo un ajuste de saldo).</li>
+                <li>En los bonos, la ganancia incluye lo que ya cobraste (intereses y devoluciones de capital): se suma al valor actual, y «Invertido» no cambia.</li>
             </ul>
         </app-info-button>
     </h2>
@@ -39,6 +40,9 @@
                         {{ overview.gainLossPercent | currencyInvestmentFormat }} %
                     </h4>
                     <ng-template #noPct><h4 class="card-title mb-0 text-body-secondary">—</h4></ng-template>
+                    <div class="small text-body-secondary mt-1" *ngIf="overview.totalCollectedValue !== 0">
+                        Incluye {{ overview.totalCollectedValue | currencyFiatFormat }} cobrados de bonos
+                    </div>
                 </div>
             </div>
         </div>

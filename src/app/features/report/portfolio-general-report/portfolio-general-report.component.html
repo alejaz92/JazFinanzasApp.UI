@@ -8,7 +8,7 @@
             <ul class="mb-0">
                 <li><strong>Valor total:</strong> lo que valen hoy todas las carteras juntas.</li>
                 <li><strong>Valor de origen:</strong> lo que pagaste por esas tenencias, valuando cada compra con la cotización del día en que se hizo.</li>
-                <li><strong>Ganancia / Pérdida:</strong> la diferencia en porcentaje sobre el valor de origen.</li>
+                <li><strong>Ganancia / Pérdida:</strong> la diferencia en porcentaje sobre el valor de origen. En los bonos incluye lo que ya cobraste (intereses y devoluciones de capital): se suma al valor actual, y el valor de origen no cambia.</li>
                 <li>El interruptor «Incluir efectivo» de la barra suma o no el dinero en cuentas al cálculo.</li>
             </ul>
         </app-info-button>
@@ -40,6 +40,9 @@
                         {{ totalGainLossPct | currencyInvestmentFormat }} %
                     </h4>
                     <ng-template #noPct><h4 class="card-title mb-0 text-body-secondary">—</h4></ng-template>
+                    <div class="small text-body-secondary mt-1" *ngIf="totalCollectedValue !== 0">
+                        Incluye {{ totalCollectedValue | currencyFiatFormat }} cobrados de bonos
+                    </div>
                 </div>
             </div>
         </div>
@@ -81,7 +84,7 @@
                     <div class="card-header d-flex align-items-center gap-2">
                         <h5 class="mb-0">Detalle por Cartera</h5>
                         <app-info-button title="Detalle por cartera"
-                            text="Los mismos números en tabla: valor de origen, valor actual, porcentaje de ganancia o pérdida y qué parte del total representa cada cartera (distribución). Un clic en una fila abre el detalle de esa cartera."></app-info-button>
+                            text="Los mismos números en tabla: valor de origen, valor actual, lo cobrado de bonos (la columna «Cobrado» solo aparece si alguna cartera cobró), porcentaje de ganancia o pérdida y qué parte del total representa cada cartera (distribución). Un clic en una fila abre el detalle de esa cartera."></app-info-button>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
@@ -91,6 +94,7 @@
                                         <th>Cartera</th>
                                         <th class="text-end">Valor de Origen</th>
                                         <th class="text-end">Valor Actual</th>
+                                        <th class="text-end" *ngIf="hasCollected">Cobrado</th>
                                         <th class="text-end">%</th>
                                         <th class="text-end">Distribución</th>
                                     </tr>
@@ -102,6 +106,7 @@
                                         <td>{{ p.portfolioName }} <span class="badge bg-secondary-subtle text-secondary-emphasis" *ngIf="p.isDefault">default</span></td>
                                         <td class="text-end">{{ p.originalValue | currencyFiatFormat }}</td>
                                         <td class="text-end">{{ p.actualValue | currencyFiatFormat }}</td>
+                                        <td class="text-end" *ngIf="hasCollected">{{ p.collectedValue !== 0 ? (p.collectedValue | currencyFiatFormat) : '—' }}</td>
                                         <td class="text-end" [class.text-success]="(p.gainLossPercent ?? 0) >= 0" [class.text-danger]="(p.gainLossPercent ?? 0) < 0">
                                             {{ p.gainLossPercent != null ? (p.gainLossPercent | currencyInvestmentFormat) + ' %' : '—' }}
                                         </td>

@@ -10,7 +10,8 @@ import {
     CryptoOverviewReport,
     CryptoDetailReport,
     AssetDetailReport,
-    ContributionsVsPerformance
+    ContributionsVsPerformance,
+    BondUpcomingReport
 } from '../models/investment-report.model';
 
 @Injectable({
@@ -51,6 +52,12 @@ export class InvestmentReportService {
   // backend, sin romper contrato mientras esa pantalla no migre).
   getAssetDetail(assetId: number, referenceAssetId: number): Observable<AssetDetailReport> {
     return this.http.get<AssetDetailReport>(`${environment.apiBaseURL}/api/investmentreport/Asset/${assetId}/Detail/${referenceAssetId}`);
+  }
+
+  // Próximos cobros de bonos (plan-amortizaciones-bonos, Fase 15): sin moneda de referencia, los montos
+  // vienen en la moneda en la que paga cada bono.
+  getBondUpcoming(): Observable<BondUpcomingReport> {
+    return this.http.get<BondUpcomingReport>(`${environment.apiBaseURL}/api/investmentreport/BondUpcoming`);
   }
 
   getContributionsVsPerformance(assetId: number): Observable<ContributionsVsPerformance> {
