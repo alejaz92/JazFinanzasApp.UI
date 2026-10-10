@@ -188,8 +188,30 @@ export interface AssetPosition {
     quantity: number;
     originalValue: number;
     actualValue: number;
+    // plan-amortizaciones-bonos, Fase 12: lo ya cobrado de un bono (moneda de referencia); gainLossPercent lo incluye.
+    collectedValue: number;
     gainLossPercent: number | null;
     weightPercent: number;
+}
+
+// plan-amortizaciones-bonos, Fase 13: estado de un pago del cronograma para el usuario.
+// Registered / Untracked / Dismissed: ya tiene registro de cobro. Pending: ya pasó, tenías el bono y
+// falta registrarlo. Future: todavía no llegó. NotHeld: ya pasó y no tenías el bono ese día.
+export type BondScheduleStatus = 'Registered' | 'Untracked' | 'Dismissed' | 'Pending' | 'Future' | 'NotHeld';
+
+export interface BondPaymentScheduleItem {
+    paymentDate: string;
+    // Por cada 100 nominales originales. Si isIndexed es solo informativo (el monto real depende del ajuste).
+    interestPer100: number;
+    // Fracción (0.08 = 8%) del capital original que amortiza en este pago.
+    amortizationRate: number;
+    // Capital vivo por cada 100 nominales originales DESPUÉS de este pago.
+    residualAfterPer100: number;
+    isIndexed: boolean;
+    status: BondScheduleStatus;
+    // Lo cobrado de este pago, en la moneda del bono (bondCurrencySymbol).
+    collectedCapital: number;
+    collectedInterest: number;
 }
 
 export interface CryptoDetailReport {
@@ -209,6 +231,12 @@ export interface CryptoDetailReport {
     // hoy, ninguna cripto tiene splits cargados), pero viajan igual porque es el mismo endpoint.
     splitEvents: AssetSplitEventMarker[];
     position: AssetPosition | null;
+    // plan-amortizaciones-bonos, Fase 12: vacío / null para un activo sin cronograma (acciones, cripto).
+    bondSchedule: BondPaymentScheduleItem[];
+    // Moneda en la que paga el bono (no la de referencia del reporte).
+    bondCurrencySymbol: string | null;
+    // Capital vivo hoy por cada 100 nominales originales.
+    residualPer100: number | null;
 }
 
 // El detalle de un activo (T17): mismo shape que CryptoDetailReport, el nombre quedó atrás de la

@@ -7,6 +7,7 @@
             <li><strong>Precio promedio de compra:</strong> lo pagado por lo que compraste dividido la cantidad comprada (solo compras, las ventas no lo mueven).</li>
             <li><strong>Mi posición:</strong> cuánto tenés hoy, cuánto pagaste por eso y cuánto vale.</li>
             <li><strong>Peso en Bolsa:</strong> qué parte del valor total de Bolsa es este ticker, junto con su ganancia o pérdida.</li>
+            <li><strong>En un bono:</strong> «Cobrado» es lo que ya te pagó (intereses y devoluciones de capital) y se suma al valor actual para la ganancia o pérdida; «Capital vivo» es cuánto del capital original le queda por cada 100 nominales. El cronograma de pagos, con el estado de cada uno, está más abajo.</li>
         </ul>
     </app-info-button>
 </h2>
@@ -39,6 +40,8 @@
                     <p class="mb-0 small">Cantidad: <strong>{{ p.quantity | currencyInvestmentFormat }}</strong></p>
                     <p class="mb-0 small">Invertido: <strong>{{ p.originalValue | currencyFiatFormat }}</strong></p>
                     <p class="mb-0 small">Valor Actual: <strong>{{ p.actualValue | currencyFiatFormat }}</strong></p>
+                    <p class="mb-0 small" *ngIf="p.collectedValue !== 0">Cobrado: <strong>{{ p.collectedValue | currencyFiatFormat }}</strong></p>
+                    <p class="mb-0 small" *ngIf="detail.residualPer100 != null">Capital vivo: <strong>{{ detail.residualPer100 | number: '1.0-2' }} de cada 100</strong></p>
                 </div>
                 <ng-template #noPosition>
                     <div class="card-body">
@@ -77,12 +80,77 @@
                             <li>▲ marca una compra y ◆ una venta, en el precio al que la hiciste.</li>
                             <li>La línea horizontal es el precio promedio de compra: por encima de ella, el precio de hoy da ganancia.</li>
                             <li>Si hubo splits, la cotización histórica está ajustada a las unidades de hoy para que las marcas calcen sobre la curva, y debajo se aclara cada split.</li>
+                            <li>En un bono, las líneas punteadas verticales marcan los pagos (cupones y amortizaciones): el escalón de precio que se ve en una amortización es capital que te devolvieron, no una pérdida.</li>
                         </ul>
                     </app-info-button>
                 </div>
                 <div class="card-body">
                     <app-chart [options]="priceOptions" [height]="360"></app-chart>
                     <p class="text-body-secondary small mb-0 mt-2" *ngFor="let s of detail.splitEvents">{{ splitCaption(s) }}</p>
+                    <p class="text-body-secondary small mb-0 mt-2" *ngFor="let p of chartPayments">{{ paymentCaption(p) }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- plan-amortizaciones-bonos, Fase 13: cronograma de pagos del bono, con el estado de cada uno para
+         el usuario. Solo aparece si el activo tiene cronograma cargado. -->
+    <div class="row mt-4" *ngIf="detail.bondSchedule.length > 0">
+        <div class="col-12 mt-1">
+            <div class="card">
+                <div class="card-header d-flex flex-wrap align-items-center gap-2">
+                    <h5 class="mb-0">Cronograma de pagos (En {{ detail.bondCurrencySymbol }})</h5>
+                    <app-info-button title="Cronograma de pagos">
+                        <p>Los pagos fijos del bono, en la moneda en la que paga, con lo que pasó con cada uno:</p>
+                        <ul class="mb-0">
+                            <li><strong>Interés (por 100):</strong> lo que paga de interés por cada 100 nominales originales. En un bono indexado (CER, dólar linked) depende del ajuste y no se conoce de antemano.</li>
+                            <li><strong>Amortiza:</strong> el porcentaje del capital original que devuelve en esa fecha.</li>
+                            <li><strong>Capital vivo:</strong> cuánto del capital original queda por cada 100 nominales después de ese pago. Por eso un bono que ya amortizó cotiza por debajo de 100 sin que sea una pérdida.</li>
+                            <li><strong>Estado:</strong> «Cobrado» si ya lo registraste, «Pendiente de registrar» si ya pasó y tenías el bono, «Próximo» si todavía no llegó, «No lo tenías» si no lo tenías ese día.</li>
+                            <li><strong>Cobrado:</strong> lo que registraste de ese pago (capital + interés), sumando todas tus cuentas.</li>
+                        </ul>
+                    </app-info-button>
+                    <span class="ms-auto small text-body-secondary" *ngIf="detail.residualPer100 != null">
+                        Capital vivo hoy: <strong>{{ detail.residualPer100 | number: '1.0-2' }}</strong> de cada 100 nominales originales
+                    </span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm mb-0">
+                            <thead class="table-header-brand">
+                                <tr>
+                                    <th>Fecha de pago</th>
+                                    <th>Estado</th>
+                                    <th class="text-end">Interés (por 100)</th>
+                                    <th class="text-end">Amortiza</th>
+                                    <th class="text-end">Capital vivo después</th>
+                                    <th class="text-end">Cobrado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let i of detail.bondSchedule" [class.text-body-secondary]="i.status === 'Future' || i.status === 'NotHeld'">
+                                    <td>{{ i.paymentDate | date: 'dd/MM/yyyy' }}</td>
+                                    <td>
+                                        <span class="badge" [ngClass]="statusClass(i.status)">{{ statusLabel(i.status) }}</span>
+                                        <a *ngIf="i.status === 'Pending'" class="ms-2 small" [routerLink]="['/stockTransactions/bond-collections']">Registrar</a>
+                                    </td>
+                                    <td class="text-end">
+                                        <span *ngIf="!i.isIndexed">{{ i.interestPer100 | number: '1.2-4' }}</span>
+                                        <span *ngIf="i.isIndexed" title="Bono indexado: el monto depende del ajuste">—</span>
+                                    </td>
+                                    <td class="text-end">{{ i.amortizationRate > 0 ? formatAmortizationPercent(i.amortizationRate) + ' %' : '—' }}</td>
+                                    <td class="text-end">{{ i.residualAfterPer100 | number: '1.0-2' }}</td>
+                                    <td class="text-end">
+                                        <ng-container *ngIf="i.collectedCapital + i.collectedInterest !== 0; else noCollected">
+                                            {{ (i.collectedCapital + i.collectedInterest) | currencyFiatFormat }}
+                                            <div class="small text-body-secondary">capital {{ i.collectedCapital | currencyFiatFormat }} · interés {{ i.collectedInterest | currencyFiatFormat }}</div>
+                                        </ng-container>
+                                        <ng-template #noCollected>—</ng-template>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>

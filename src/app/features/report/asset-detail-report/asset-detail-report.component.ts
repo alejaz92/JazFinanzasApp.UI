@@ -1,9 +1,13 @@
 import { Component, effect, inject } from '@angular/core';
-import { NgIf, NgFor, DatePipe } from '@angular/common';
+import { NgIf, NgFor, NgClass, DatePipe, DecimalPipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import type { EChartsOption } from 'echarts';
 
 import { InvestmentReportService } from '../services/investment-report.service';
-import { AssetDetailReport } from '../models/investment-report.model';
+import { AssetDetailReport, BondPaymentScheduleItem } from '../models/investment-report.model';
+import {
+    formatAmortizationPercent, paymentCaption, paymentMarkerLabel, paymentsInRange, statusClass, statusLabel
+} from './bond-schedule.util';
 import { ReportContextService } from '../../../shared/services/report-context.service';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
@@ -24,7 +28,7 @@ import { InfoButtonComponent } from '../../../shared/components/info-button/info
 @Component({
     selector: 'app-asset-detail-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, DatePipe, ChartComponent, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, MovementTypePipe, CommerceTypePipe, InfoButtonComponent],
+    imports: [LoadingComponent, NgIf, NgFor, NgClass, DatePipe, DecimalPipe, RouterLink, ChartComponent, CurrencyFiatFormatPipe, CurrencyInvestmentFormatPipe, MovementTypePipe, CommerceTypePipe, InfoButtonComponent],
     templateUrl: './asset-detail-report.component.html',
     styleUrl: './asset-detail-report.component.css'
 })
@@ -35,6 +39,14 @@ export class AssetDetailReportComponent {
 
     isLoadingDetail = true;
     detail: AssetDetailReport | null = null;
+
+    // plan-amortizaciones-bonos, Fase 13: los pagos del bono que caen dentro de la curva de cotización
+    // (los mismos 12 meses), marcados con una línea vertical y explicados en una leyenda debajo.
+    chartPayments: BondPaymentScheduleItem[] = [];
+    protected readonly paymentCaption = paymentCaption;
+    protected readonly statusLabel = statusLabel;
+    protected readonly statusClass = statusClass;
+    protected readonly formatAmortizationPercent = formatAmortizationPercent;
 
     priceOptions: EChartsOption = {};
 
@@ -80,6 +92,19 @@ export class AssetDetailReportComponent {
             label: { formatter: `Split ${s.splitRatio}:1`, color: axisLabel, position: 'insideEndTop' as const },
         }));
 
+        // Fase 13: una línea vertical por cada pago del bono dentro de la ventana de la curva, con el
+        // mismo mecanismo que los splits — el escalón de precio de una amortización tiene su explicación
+        // a la vista y no se lee como una pérdida.
+        const priceFrom = priceData.length > 0 ? (priceData[0][0] as number) : null;
+        const priceTo = priceData.length > 0 ? (priceData[priceData.length - 1][0] as number) : null;
+        this.chartPayments = paymentsInRange(detail.bondSchedule ?? [], priceFrom, priceTo);
+        const paymentLines = this.chartPayments.map(p => ({
+            xAxis: new Date(p.paymentDate).getTime(),
+            name: paymentCaption(p),
+            label: { formatter: paymentMarkerLabel(p), color: axisLabel, position: 'insideStartTop' as const },
+            lineStyle: { color: this.chartTheme.colorAt(4), type: 'dotted' as const },
+        }));
+
         this.priceOptions = {
             color: [this.chartTheme.colorAt(2)],
             grid: { left: 70, right: 20, top: 20, bottom: 40 },
@@ -94,6 +119,7 @@ export class AssetDetailReportComponent {
                         data: [
                             { yAxis: detail.averageBuyPrice, name: 'Precio promedio de compra', lineStyle: { color: axisLabel, type: 'dashed' }, label: { formatter: `Promedio de compra: ${fmt(detail.averageBuyPrice)}`, color: axisLabel } },
                             ...splitLines.map(l => ({ ...l, lineStyle: { color: status.warning, type: 'dashed' as const } })),
+                            ...paymentLines,
                         ],
                     },
                 },
