@@ -21,6 +21,7 @@ interface HoldingGroup {
     quantity: number;
     originalValue: number;
     actualValue: number;
+    collectedValue: number;
     gainLossPercent: number | null;
     accounts: PortfolioHoldingItem[];
     // Cuentas con Cantidad 0 (posición totalmente cerrada, ver GetPortfolioHoldingsAsync): se
@@ -83,24 +84,31 @@ export class PortfolioReportComponent {
         this.expandedKey = this.expandedKey === key ? null : key;
     }
 
+    // La columna «Cobrado» solo aparece si algún activo de la cartera cobró algo.
+    get hasCollected(): boolean {
+        return this.holdingGroups.some(g => g.collectedValue !== 0);
+    }
+
     private groupByAsset(holdings: PortfolioHoldingItem[]): HoldingGroup[] {
         const map = new Map<string, HoldingGroup>();
         for (const h of holdings) {
             const key = `${h.assetType}|${h.assetName}|${h.symbol}`;
             let group = map.get(key);
             if (!group) {
-                group = { key, assetType: h.assetType, assetName: h.assetName, symbol: h.symbol, quantity: 0, originalValue: 0, actualValue: 0, gainLossPercent: null, accounts: [], visibleAccounts: [] };
+                group = { key, assetType: h.assetType, assetName: h.assetName, symbol: h.symbol, quantity: 0, originalValue: 0, actualValue: 0, collectedValue: 0, gainLossPercent: null, accounts: [], visibleAccounts: [] };
                 map.set(key, group);
             }
             group.quantity += h.quantity;
             group.originalValue += h.originalValue;
             group.actualValue += h.actualValue;
+            group.collectedValue += h.collectedValue;
             group.accounts.push(h);
         }
 
         const groups = Array.from(map.values());
         for (const g of groups) {
-            g.gainLossPercent = g.originalValue > 0 ? (g.actualValue / g.originalValue * 100) - 100 : null;
+            // plan-amortizaciones-bonos, Fase 9: lo cobrado de un bono se suma al valor actual.
+            g.gainLossPercent = g.originalValue > 0 ? ((g.actualValue + g.collectedValue) / g.originalValue * 100) - 100 : null;
             g.visibleAccounts = g.accounts.filter(a => a.quantity !== 0);
         }
         // Mismo criterio que visibleAccounts, un nivel más arriba (2026-09-10): si TODAS las cuentas

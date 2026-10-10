@@ -10,6 +10,9 @@ export interface InvestmentHolding {
     quantity: number;
     originalValue: number;
     actualValue: number;
+    // plan-amortizaciones-bonos, Fase 9: lo ya cobrado de un bono (intereses + devoluciones de
+    // capital), en la moneda de referencia. gainLossPercent ya lo incluye; originalValue no cambia.
+    collectedValue: number;
     gainLossPercent: number | null;
 }
 
@@ -28,6 +31,7 @@ export interface InvestmentOverview {
     referenceAssetSymbol: string;
     totalOriginalValue: number;
     totalActualValue: number;
+    totalCollectedValue: number;
     gainLossPercent: number | null;
     holdings: InvestmentHolding[];
     valueSeries: InvestmentValuePoint[];
@@ -40,6 +44,7 @@ export interface PortfolioOverviewItem {
     isDefault: boolean;
     originalValue: number;
     actualValue: number;
+    collectedValue: number;
     gainLossPercent: number | null;
     sharePercent: number;
 }
@@ -57,6 +62,7 @@ export interface PortfolioHoldingItem {
     quantity: number;
     originalValue: number;
     actualValue: number;
+    collectedValue: number;
     gainLossPercent: number | null;
     // Calculadas en el backend sobre valores sin redondear (2026-09-10) — dividir originalValue/
     // actualValue (ya redondeados a 2 decimales) acá en el frontend daba una cotización levemente
@@ -71,6 +77,7 @@ export interface PortfolioDetailReport {
     referenceAssetSymbol: string;
     originalValue: number;
     actualValue: number;
+    collectedValue: number;
     gainLossPercent: number | null;
     holdings: PortfolioHoldingItem[];
     valueSeries: InvestmentValuePoint[];
@@ -86,6 +93,7 @@ export interface StockTickerReport {
     quantity: number;
     originalValue: number;
     actualValue: number;
+    collectedValue: number;
     gainLossAmount: number;
     gainLossPercent: number | null;
     weightPercent: number;
@@ -97,6 +105,7 @@ export interface StockTypeAggregate {
     tickerCount: number;
     originalValue: number;
     actualValue: number;
+    collectedValue: number;
     gainLossPercent: number | null;
 }
 
@@ -117,7 +126,9 @@ export interface ClosedPosition {
     assetName: string;
     symbol: string;
     assetTypeName: string;
+    // Ya incluye collectedValue (lo cobrado de un bono vendido del todo).
     realizedResult: number;
+    collectedValue: number;
     lastMovementDate: string;
 }
 
@@ -125,6 +136,7 @@ export interface StocksReport {
     referenceAssetSymbol: string;
     totalOriginalValue: number;
     totalActualValue: number;
+    totalCollectedValue: number;
     // Agregados por tipo, siempre sobre el entorno completo — el filtro de la barra (D-11) recorta
     // tickers, no esta lista.
     types: StockTypeAggregate[];

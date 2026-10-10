@@ -8,7 +8,7 @@
             <ul class="mb-0">
                 <li><strong>Valor actual:</strong> lo que vale hoy, a la cotización de hoy.</li>
                 <li><strong>Invertido:</strong> lo que pagaste, valuando cada compra con la cotización del día en que se hizo.</li>
-                <li><strong>Ganancia / Pérdida:</strong> la diferencia en porcentaje sobre lo invertido.</li>
+                <li><strong>Ganancia / Pérdida:</strong> la diferencia en porcentaje sobre lo invertido. En los bonos incluye lo que ya cobraste (intereses y devoluciones de capital): se suma al valor actual, y «Invertido» no cambia.</li>
                 <li><strong>Tickers:</strong> cuántos activos tenés vivos (y, con «Incluir cerradas», cuántas posiciones ya vendidas del todo).</li>
                 <li>El filtro «Tipo» de la barra acota toda la pantalla a un tipo de activo.</li>
             </ul>
@@ -44,6 +44,9 @@
                             {{ totalGainLossPct | currencyInvestmentFormat }} %
                         </h4>
                         <ng-template #noPct><h4 class="card-title mb-0 text-body-secondary">—</h4></ng-template>
+                        <div class="small text-body-secondary mt-1" *ngIf="totalCollectedValue !== 0">
+                            Incluye {{ totalCollectedValue | currencyFiatFormat }} cobrados de bonos
+                        </div>
                     </div>
                 </div>
             </div>
@@ -123,6 +126,7 @@
                             <p>Un renglón por tipo de activo; un clic lo abre y muestra sus tickers, y un clic en un ticker lleva a su detalle:</p>
                             <ul class="mb-0">
                                 <li><strong>Invertido y Valor actual:</strong> lo pagado y lo que vale hoy.</li>
+                                <li><strong>Cobrado:</strong> lo que ya te pagó un bono (intereses y devoluciones de capital). Se suma al valor actual para calcular el %. Solo aparece si algún bono cobró.</li>
                                 <li><strong>%:</strong> ganancia o pérdida sobre lo invertido.</li>
                                 <li><strong>Peso en Bolsa:</strong> qué parte del valor total de Bolsa representa.</li>
                                 <li>Podés ordenar tocando el encabezado de las columnas con flecha.</li>
@@ -144,6 +148,7 @@
                                         <th class="text-end" role="button" (click)="sortBy('actualValue')">
                                             Valor Actual <i class="bi" [ngClass]="sortColumn === 'actualValue' ? (sortDirection === 'asc' ? 'bi-caret-up-fill' : 'bi-caret-down-fill') : 'bi-caret-down'"></i>
                                         </th>
+                                        <th class="text-end" *ngIf="hasCollected">Cobrado</th>
                                         <th class="text-end" role="button" (click)="sortBy('gainLossPercent')">
                                             % <i class="bi" [ngClass]="sortColumn === 'gainLossPercent' ? (sortDirection === 'asc' ? 'bi-caret-up-fill' : 'bi-caret-down-fill') : 'bi-caret-down'"></i>
                                         </th>
@@ -160,6 +165,7 @@
                                             <td class="text-end">{{ g.tickerCount }}</td>
                                             <td class="text-end">{{ g.originalValue | currencyFiatFormat }}</td>
                                             <td class="text-end">{{ g.actualValue | currencyFiatFormat }}</td>
+                                            <td class="text-end" *ngIf="hasCollected">{{ g.collectedValue !== 0 ? (g.collectedValue | currencyFiatFormat) : '—' }}</td>
                                             <td class="text-end" [class.text-success]="(g.gainLossPercent ?? 0) >= 0" [class.text-danger]="(g.gainLossPercent ?? 0) < 0">
                                                 {{ g.gainLossPercent != null ? (g.gainLossPercent | currencyInvestmentFormat) + ' %' : '—' }}
                                             </td>
@@ -172,6 +178,7 @@
                                                 <td class="text-end">{{ t.quantity | currencyInvestmentFormat }}</td>
                                                 <td class="text-end">{{ t.originalValue | currencyFiatFormat }}</td>
                                                 <td class="text-end">{{ t.actualValue | currencyFiatFormat }}</td>
+                                                <td class="text-end" *ngIf="hasCollected">{{ t.collectedValue !== 0 ? (t.collectedValue | currencyFiatFormat) : '—' }}</td>
                                                 <td class="text-end" [class.text-success]="(t.gainLossPercent ?? 0) >= 0" [class.text-danger]="(t.gainLossPercent ?? 0) < 0">
                                                     {{ t.gainLossPercent != null ? (t.gainLossPercent | currencyInvestmentFormat) + ' %' : '—' }}
                                                 </td>
@@ -186,6 +193,7 @@
                                         <td class="text-end">{{ tickers.length }}</td>
                                         <td class="text-end">{{ totalOriginalValue | currencyFiatFormat }}</td>
                                         <td class="text-end">{{ totalActualValue | currencyFiatFormat }}</td>
+                                        <td class="text-end" *ngIf="hasCollected">{{ totalCollectedValue | currencyFiatFormat }}</td>
                                         <td class="text-end" [class.text-success]="(totalGainLossPct ?? 0) >= 0" [class.text-danger]="(totalGainLossPct ?? 0) < 0">
                                             {{ totalGainLossPct != null ? (totalGainLossPct | currencyInvestmentFormat) + ' %' : '—' }}
                                         </td>
@@ -205,7 +213,7 @@
                     <div class="card-header d-flex align-items-center gap-2">
                         <h5 class="mb-0">Posiciones Cerradas — Resultado Realizado (En {{ referenceAssetSymbol }})</h5>
                         <app-info-button title="Posiciones cerradas"
-                            text="Activos que ya vendiste por completo. El resultado realizado es lo que cobraste por las ventas menos lo que pagaste por las compras, cada movimiento con la cotización de su fecha. Solo aparece con «Incluir cerradas» activado en la barra."></app-info-button>
+                            text="Activos que ya vendiste por completo. El resultado realizado es lo que cobraste por las ventas menos lo que pagaste por las compras, cada movimiento con la cotización de su fecha; en un bono incluye también lo que cobraste de intereses y amortizaciones. Solo aparece con «Incluir cerradas» activado en la barra."></app-info-button>
                     </div>
                     <div class="card-body p-0">
                         <p class="text-body-secondary p-3 mb-0" *ngIf="closedPositions.length === 0">No hay posiciones vendidas del todo.</p>

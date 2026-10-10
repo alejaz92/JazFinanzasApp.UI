@@ -21,6 +21,7 @@ interface TypeGroup {
     tickerCount: number;
     originalValue: number;
     actualValue: number;
+    collectedValue: number;
     gainLossPercent: number | null;
     tickers: StockTickerReport[];
 }
@@ -46,6 +47,7 @@ export class StocksReportComponent {
     referenceAssetSymbol = '';
     totalOriginalValue = 0;
     totalActualValue = 0;
+    totalCollectedValue = 0;
     tickers: StockTickerReport[] = [];
     closedPositions: ClosedPosition[] = [];
     groups: TypeGroup[] = [];
@@ -68,8 +70,14 @@ export class StocksReportComponent {
         });
     }
 
+    // plan-amortizaciones-bonos, Fase 9: lo cobrado de bonos se suma al valor actual; lo invertido no cambia.
     get totalGainLossPct(): number | null {
-        return this.totalOriginalValue > 0 ? (this.totalActualValue / this.totalOriginalValue * 100) - 100 : null;
+        return this.totalOriginalValue > 0 ? ((this.totalActualValue + this.totalCollectedValue) / this.totalOriginalValue * 100) - 100 : null;
+    }
+
+    // La columna «Cobrado» solo aparece si algún activo listado cobró algo (no ensucia la vista de acciones).
+    get hasCollected(): boolean {
+        return this.tickers.some(t => t.collectedValue !== 0);
     }
 
     private load(assetId: number, assetTypeId: number, includeClosed: boolean): void {
@@ -78,6 +86,7 @@ export class StocksReportComponent {
             this.referenceAssetSymbol = data.referenceAssetSymbol;
             this.totalOriginalValue = data.totalOriginalValue;
             this.totalActualValue = data.totalActualValue;
+            this.totalCollectedValue = data.totalCollectedValue ?? 0;
             this.tickers = data.tickers;
             this.closedPositions = data.closedPositions;
             this.groups = this.buildGroups(data.tickers);
@@ -123,16 +132,17 @@ export class StocksReportComponent {
         for (const t of tickers) {
             let group = map.get(t.assetTypeName);
             if (!group) {
-                group = { key: t.assetTypeName, assetTypeName: t.assetTypeName, tickerCount: 0, originalValue: 0, actualValue: 0, gainLossPercent: null, tickers: [] };
+                group = { key: t.assetTypeName, assetTypeName: t.assetTypeName, tickerCount: 0, originalValue: 0, actualValue: 0, collectedValue: 0, gainLossPercent: null, tickers: [] };
                 map.set(t.assetTypeName, group);
             }
             group.tickerCount++;
             group.originalValue += t.originalValue;
             group.actualValue += t.actualValue;
+            group.collectedValue += t.collectedValue;
             group.tickers.push(t);
         }
         const groups = Array.from(map.values());
-        for (const g of groups) g.gainLossPercent = g.originalValue > 0 ? (g.actualValue / g.originalValue * 100) - 100 : null;
+        for (const g of groups) g.gainLossPercent = g.originalValue > 0 ? ((g.actualValue + g.collectedValue) / g.originalValue * 100) - 100 : null;
         return groups;
     }
 

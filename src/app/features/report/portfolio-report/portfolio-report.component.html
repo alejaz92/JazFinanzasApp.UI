@@ -5,7 +5,7 @@
         <ul class="mb-0">
             <li><strong>Valor actual:</strong> lo que vale hoy lo que tiene la cartera.</li>
             <li><strong>Valor de origen:</strong> lo que pagaste, valuando cada compra con la cotización del día en que se hizo.</li>
-            <li><strong>Ganancia / Pérdida:</strong> la diferencia en porcentaje sobre el valor de origen.</li>
+            <li><strong>Ganancia / Pérdida:</strong> la diferencia en porcentaje sobre el valor de origen. En los bonos incluye lo que ya cobraste (intereses y devoluciones de capital): se suma al valor actual, y el valor de origen no cambia.</li>
             <li>El interruptor «Incluir efectivo» de la barra suma o no el dinero en cuentas al cálculo.</li>
         </ul>
     </app-info-button>
@@ -40,6 +40,9 @@
                         {{ detail.gainLossPercent | currencyInvestmentFormat }} %
                     </h4>
                     <ng-template #noPct><h4 class="card-title mb-0 text-body-secondary">—</h4></ng-template>
+                    <div class="small text-body-secondary mt-1" *ngIf="detail.collectedValue !== 0">
+                        Incluye {{ detail.collectedValue | currencyFiatFormat }} cobrados de bonos
+                    </div>
                 </div>
             </div>
         </div>
@@ -82,6 +85,7 @@
                         <ul class="mb-0">
                             <li><strong>Cotización de origen:</strong> el precio promedio al que compraste (valor de origen dividido cantidad).</li>
                             <li><strong>Cotización actual:</strong> el precio de hoy en el mercado.</li>
+                            <li><strong>Cobrado:</strong> lo que ya te pagó un bono (intereses y devoluciones de capital). Se suma al valor actual para calcular el %. Solo aparece si algún activo cobró.</li>
                             <li><strong>%:</strong> ganancia o pérdida del activo sobre su valor de origen.</li>
                             <li>Si el activo está en más de una cuenta, la fila se abre con un clic para ver cada cuenta.</li>
                         </ul>
@@ -99,6 +103,7 @@
                                     <th class="text-end">Valor de Origen</th>
                                     <th class="text-end">Cotización Actual</th>
                                     <th class="text-end">Valor Actual</th>
+                                    <th class="text-end" *ngIf="hasCollected">Cobrado</th>
                                     <th class="text-end">%</th>
                                 </tr>
                             </thead>
@@ -119,6 +124,7 @@
                                              grupo, para no reintroducir el mismo problema de redondeo por cuenta (2026-09-10). -->
                                         <td class="text-end">{{ g.visibleAccounts.length > 0 ? (g.visibleAccounts[0].currentQuote | currencyQuoteFormat) : '—' }}</td>
                                         <td class="text-end">{{ g.actualValue | currencyFiatFormat }}</td>
+                                        <td class="text-end" *ngIf="hasCollected">{{ g.collectedValue !== 0 ? (g.collectedValue | currencyFiatFormat) : '—' }}</td>
                                         <td class="text-end" [class.text-success]="(g.gainLossPercent ?? 0) >= 0" [class.text-danger]="(g.gainLossPercent ?? 0) < 0">
                                             {{ g.gainLossPercent != null ? (g.gainLossPercent | currencyInvestmentFormat) + ' %' : '—' }}
                                         </td>
@@ -134,6 +140,7 @@
                                             <td class="text-end">{{ a.originalValue | currencyFiatFormat }}</td>
                                             <td class="text-end">{{ a.currentQuote != null ? (a.currentQuote | currencyQuoteFormat) : '—' }}</td>
                                             <td class="text-end">{{ a.actualValue | currencyFiatFormat }}</td>
+                                            <td class="text-end" *ngIf="hasCollected">{{ a.collectedValue !== 0 ? (a.collectedValue | currencyFiatFormat) : '—' }}</td>
                                             <td class="text-end" [class.text-success]="(a.gainLossPercent ?? 0) >= 0" [class.text-danger]="(a.gainLossPercent ?? 0) < 0">
                                                 {{ a.gainLossPercent != null ? (a.gainLossPercent | currencyInvestmentFormat) + ' %' : '—' }}
                                             </td>
