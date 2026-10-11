@@ -88,7 +88,7 @@
 
                 <form [formGroup]="form" (ngSubmit)="onSubmit()">
                     <div class="row g-3">
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <label class="form-label">Fecha de acreditación</label>
                             <input
                                 type="date"
@@ -98,7 +98,7 @@
                             >
                             <div class="invalid-feedback">La fecha es obligatoria.</div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <label class="form-label">Devolución de capital ({{ selected.currencySymbol }})</label>
                             <input
                                 type="number"
@@ -111,7 +111,7 @@
                             <div class="invalid-feedback">Ingresá un monto mayor o igual a 0.</div>
                             <div class="form-text">No cuenta como ingreso en Reportes.</div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <label class="form-label">Interés ({{ selected.currencySymbol }})</label>
                             <input
                                 type="number"
@@ -122,24 +122,20 @@
                                 [class.is-invalid]="form.get('interestAmount')?.invalid && form.get('interestAmount')?.touched"
                             >
                             <div class="invalid-feedback">Ingresá un monto mayor o igual a 0.</div>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Categoría del interés</label>
-                            <select class="form-select" formControlName="interestClassId">
-                                <option [ngValue]="null">-- Seleccionar --</option>
-                                <option *ngFor="let c of incomeClasses" [ngValue]="c.id">{{ c.description }}</option>
-                            </select>
-                            <div class="form-text">Obligatoria si hay interés. Solo categorías de ingreso que cuentan en Reportes.</div>
+                            <div class="form-text">Cuenta como ingreso en Reportes (categoría «Dividendos, Intereses y Ganancias Inversiones»).</div>
                         </div>
                     </div>
 
                     <div class="mt-3 d-flex flex-wrap gap-2">
                         <app-submit-button [loading]="isSubmitting" label="Registrar" loadingLabel="Registrando..." btnClass="btn btn-primary"></app-submit-button>
                         <button type="button" class="btn btn-outline-danger" (click)="onDismiss()" [disabled]="isDismissing || isSubmitting"
-                            title="Descarta el aviso sin crear ningún movimiento (por ejemplo, si el broker no pagó).">
+                            title="Descarta este aviso sin crear ningún movimiento ni tocar saldos: usalo si el broker no pagó, si ya no tenés el bono o si no querés llevar este cobro. Se puede deshacer desde la lista de registrados.">
                             No cobré
                         </button>
                         <button type="button" class="btn btn-outline-secondary" (click)="cancelSelection()">Cancelar</button>
+                    </div>
+                    <div class="form-text mt-2">
+                        <strong>No cobré</strong> descarta el aviso sin crear movimientos ni tocar saldos (si el broker no pagó o no querés llevar este cobro). <strong>Cancelar</strong> solo cierra el formulario y el aviso sigue pendiente.
                     </div>
                 </form>
             </div>

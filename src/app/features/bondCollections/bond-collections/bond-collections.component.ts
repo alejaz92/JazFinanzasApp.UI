@@ -8,8 +8,6 @@ import {
     BondCollectionPending,
     BondCollectionStatus
 } from '../models/bondCollection.model';
-import { TransactionClassService } from '../../transactionClass/services/transaction-class.service';
-import { TransactionClass } from '../../transactionClass/models/transactionClass.model';
 import { ToastService } from '../../../core/services/toast.service';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
@@ -29,8 +27,6 @@ export class BondCollectionsComponent implements OnInit {
 
     pending: BondCollectionPending[] = [];
     registered: BondCollectionListItem[] = [];
-    incomeClasses: TransactionClass[] = [];
-    private lastInterestClassId: number | null = null;
 
     isLoading = true;
     isSubmitting = false;
@@ -47,7 +43,6 @@ export class BondCollectionsComponent implements OnInit {
     constructor(
         private fb: FormBuilder,
         private bondCollectionService: BondCollectionService,
-        private transactionClassService: TransactionClassService,
         private toastService: ToastService
     ) { }
 
@@ -55,22 +50,11 @@ export class BondCollectionsComponent implements OnInit {
         this.form = this.fb.group({
             collectionDate: ['', Validators.required],
             capitalAmount: [0, [Validators.required, Validators.min(0)]],
-            interestAmount: [0, [Validators.required, Validators.min(0)]],
-            interestClassId: [null as number | null]
+            interestAmount: [0, [Validators.required, Validators.min(0)]]
         });
 
-        // La categoría del interés tiene que ser de ingreso y contar como ingreso en Reportes (el
-        // backend lo valida igual); la de capital no se elige: va siempre a "Ingreso Inversiones".
-        forkJoin({
-            classes: this.transactionClassService.getAllTransactionClasses(),
-            lastClassId: this.bondCollectionService.getLastInterestClassId()
-        }).subscribe({
-            next: ({ classes, lastClassId }) => {
-                this.incomeClasses = classes.filter(c => c.incExp === 'I' && c.countsAsIncomeExpense);
-                this.lastInterestClassId = lastClassId ?? null;
-            },
-            error: () => this.toastService.error('Error al cargar las categorías.')
-        });
+        // Las categorías no se eligen: el capital va siempre a "Ingreso Inversiones" y el interés a
+        // "Dividendos, Intereses y Ganancias Inversiones" (las dos de sistema; las resuelve el backend).
 
         this.reload();
     }
@@ -102,15 +86,11 @@ export class BondCollectionsComponent implements OnInit {
 
     select(item: BondCollectionPending): void {
         this.selected = item;
-        const interestClassId = this.incomeClasses.some(c => c.id === this.lastInterestClassId)
-            ? this.lastInterestClassId
-            : null;
         this.form.reset({
             collectionDate: item.paymentDate.substring(0, 10),
             // Bono indexado: no hay estimación, se arranca en 0 y el usuario carga lo que informa el broker.
             capitalAmount: item.estimatedCapital ?? 0,
-            interestAmount: item.estimatedInterest ?? 0,
-            interestClassId
+            interestAmount: item.estimatedInterest ?? 0
         });
     }
 
@@ -134,12 +114,6 @@ export class BondCollectionsComponent implements OnInit {
             return;
         }
 
-        const interestClassId = this.form.value.interestClassId as number | null;
-        if (this.interestAmountValue > 0 && interestClassId === null) {
-            this.toastService.error('Elegí la categoría del interés.');
-            return;
-        }
-
         this.isSubmitting = true;
         this.bondCollectionService.register({
             bondPaymentId: this.selected.bondPaymentId,
@@ -147,13 +121,11 @@ export class BondCollectionsComponent implements OnInit {
             portfolioId: this.selected.portfolioId,
             collectionDate: this.form.value.collectionDate,
             capitalAmount: this.capitalAmountValue,
-            interestAmount: this.interestAmountValue,
-            interestTransactionClassId: this.interestAmountValue > 0 ? interestClassId : null
+            interestAmount: this.interestAmountValue
         }).subscribe({
             next: () => {
                 this.isSubmitting = false;
                 this.toastService.success('Cobro registrado correctamente.');
-                if (this.interestAmountValue > 0) this.lastInterestClassId = interestClassId;
                 this.selected = null;
                 this.reload();
             },

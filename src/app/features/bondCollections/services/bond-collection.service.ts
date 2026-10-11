@@ -26,12 +26,6 @@ export class BondCollectionService {
         return this.http.get<BondCollectionListItem[]>(this.baseUrl);
     }
 
-    // Categoría de interés usada en el último cobro registrado (null si nunca registró uno) — para
-    // precargar el formulario. El backend responde 204 sin cuerpo cuando no hay ninguna.
-    getLastInterestClassId(): Observable<number | null> {
-        return this.http.get<number | null>(`${this.baseUrl}/last-interest-class`);
-    }
-
     register(dto: BondCollectionRegister): Observable<number> {
         return this.http.post<number>(`${this.baseUrl}/register`, dto);
     }

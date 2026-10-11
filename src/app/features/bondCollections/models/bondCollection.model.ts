@@ -42,7 +42,6 @@ export interface BondCollectionRegister {
     collectionDate: string;
     capitalAmount: number;
     interestAmount: number;
-    interestTransactionClassId: number | null;
 }
 
 export interface BondCollectionDismiss {
