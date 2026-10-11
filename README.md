@@ -10,7 +10,7 @@ SPA Angular de JazFinanzasApp — finanzas personales e inversiones. Permite reg
 - **Cuentas** — Alta, edición y eliminación de cuentas bancarias/billeteras, con tipos de activos asociados.
 - **Tarjetas** — Gestión de tarjetas de crédito y sus cuotas/pagos recurrentes.
 - **Transacciones** — Registro de ingresos y egresos con categorías personalizables, devoluciones y edición.
-- **Inversiones** — Acciones, criptomonedas y portfolios, con seguimiento de posición y precio promedio.
+- **Inversiones** — Acciones, criptomonedas, bonos y portfolios, con seguimiento de posición y precio promedio. Los bonos tienen cronograma de pagos, registro de cobros de capital e interés (con aviso en Inicio de los pendientes), el cobrado se suma al resultado en Bolsa, Carteras y Aportes vs rendimiento, y hay un reporte de próximos cobros.
 - **Cambio de moneda** — Operaciones de compra/venta de divisas fiat y transferencias entre portfolios.
 - **Gastos compartidos** — Registro y reembolso de gastos compartidos entre personas (feature en desarrollo).
 - **Reportes y balance** — Dashboard con gráficos de distribución (Chart.js / ECharts), últimas transacciones, cuotas pendientes y resumen financiero global.
