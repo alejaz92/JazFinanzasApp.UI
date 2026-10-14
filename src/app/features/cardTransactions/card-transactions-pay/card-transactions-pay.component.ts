@@ -75,14 +75,15 @@ export class CardTransactionsPayComponent implements OnInit {
       pesosPayment: ['', Validators.required],
       cardExpenses: [''],
       cardCreditApplied: [0],
-      nextClosingDate: [''],
-      nextDueDate: [''],
+      // Obligatorias (hotfix 2026-10-14): si el pago se registra sin ellas la tarjeta queda con el cierre
+      // viejo y el aviso de vencimiento sigue apareciendo aunque el mes ya esté pagado.
+      nextClosingDate: ['', Validators.required],
+      nextDueDate: ['', Validators.required],
       cardTransactionsArray: this.fb.array([])
     });
 
     // Tarjeta sin gastos este mes (plan-tarjeta-sin-gastos.md): formulario propio, separado del pago,
-    // para no arrastrar nextClosingDate/nextDueDate del pago normal (ahí son opcionales; acá el sentido
-    // de la acción es justamente cargarlos).
+    // para no arrastrar nextClosingDate/nextDueDate del pago normal.
     this.noExpensesForm = this.fb.group({
       nextClosingDate: ['', Validators.required],
       nextDueDate: ['', Validators.required]
@@ -128,9 +129,7 @@ export class CardTransactionsPayComponent implements OnInit {
 
       this.loadReimbursementsPreview(this.cardTransactions);
 
-      if (this.cardTransactions.length === 0) {
-        this.suggestNextDates();
-      }
+      this.suggestNextDates();
     });
 
     this.cardPaymentForm.get('paymentAssets')?.valueChanges.subscribe((value) => {
@@ -248,10 +247,12 @@ export class CardTransactionsPayComponent implements OnInit {
     const card = this.cards.find((c) => String(c.id) === String(cardId));
     if (!card) return;
 
-    this.noExpensesForm.patchValue({
+    const suggested = {
       nextClosingDate: this.addOneMonthToDateString(card.nextClosingDate),
       nextDueDate: this.addOneMonthToDateString(card.nextDueDate)
-    });
+    };
+    this.noExpensesForm.patchValue(suggested);
+    this.cardPaymentForm.patchValue(suggested, { emitEvent: false });
   }
 
   private addOneMonthToDateString(dateStr: string | null): string {
@@ -611,6 +612,20 @@ refreshCurrencyFormat() {
       return;
     }
 
+    // Un input date con la fecha a medio tipear devuelve '' aunque en pantalla se vean números.
+    const nextClosingDate = formValues.nextClosingDate;
+    const nextDueDate = formValues.nextDueDate;
+    if (!nextClosingDate || !nextDueDate) {
+      this.cardPaymentForm.controls['nextClosingDate'].markAsTouched();
+      this.cardPaymentForm.controls['nextDueDate'].markAsTouched();
+      this.toastService.error('Cargá el próximo cierre y vencimiento de la tarjeta.');
+      return;
+    }
+    if (nextDueDate < nextClosingDate) {
+      this.toastService.error('El vencimiento no puede ser anterior al cierre.');
+      return;
+    }
+
     // check if there are any rows with missing values, except for the disabled inputs
     const incompleteRow = this.cardTransactionsArray.controls.find((control) => this.isRowIncomplete(control as FormGroup));
     if (incompleteRow) {
@@ -646,8 +661,8 @@ refreshCurrencyFormat() {
         dolarAmount: 0,
         cardExpenses: this.parseAmount(this.cardPaymentForm.get('cardExpenses')?.value),
         cardCreditApplied: this.cardCreditApplied,
-        nextClosingDate: this.cardPaymentForm.get('nextClosingDate')?.value || null,
-        nextDueDate: this.cardPaymentForm.get('nextDueDate')?.value || null,
+        nextClosingDate,
+        nextDueDate,
         cardTransactions: cardTransactions
       }
 
