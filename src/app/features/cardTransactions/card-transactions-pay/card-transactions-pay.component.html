@@ -128,10 +128,18 @@
                             <div class="form-group mb-3">
                                 <label for="nextClosingDate" class="form-label">Próximo cierre</label>
                                 <input type="date" class="form-control" id="nextClosingDate" formControlName="nextClosingDate">
+                                <div *ngIf="cardPaymentForm.controls['nextClosingDate'].touched && cardPaymentForm.controls['nextClosingDate'].invalid"
+                                    class="text-danger mt-2">
+                                    Debe cargar el próximo cierre.
+                                </div>
                             </div>
                             <div class="form-group mb-3">
                                 <label for="nextDueDate" class="form-label">Próximo vencimiento</label>
                                 <input type="date" class="form-control" id="nextDueDate" formControlName="nextDueDate">
+                                <div *ngIf="cardPaymentForm.controls['nextDueDate'].touched && cardPaymentForm.controls['nextDueDate'].invalid"
+                                    class="text-danger mt-2">
+                                    Debe cargar el próximo vencimiento.
+                                </div>
                             </div>
                         </fieldset>
                     </div>
