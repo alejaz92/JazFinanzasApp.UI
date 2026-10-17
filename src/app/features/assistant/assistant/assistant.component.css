@@ -1,0 +1,12 @@
+/* En la lista, el titular se corta en dos renglones para que el historial no se vuelva interminable. */
+.history-headline {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* El texto del cuerpo (markdown) conserva el espacio entre párrafos de Bootstrap. */
+:host ::ng-deep app-assistant-markdown p:last-child {
+    margin-bottom: 0.75rem;
+}
