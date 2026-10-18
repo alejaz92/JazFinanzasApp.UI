@@ -14,6 +14,7 @@ SPA Angular de JazFinanzasApp — finanzas personales e inversiones. Permite reg
 - **Cambio de moneda** — Operaciones de compra/venta de divisas fiat y transferencias entre portfolios.
 - **Gastos compartidos** — Registro y reembolso de gastos compartidos entre personas (feature en desarrollo).
 - **Reportes y balance** — Dashboard con gráficos de distribución (Chart.js / ECharts), últimas transacciones, cuotas pendientes y resumen financiero global.
+- **Asistente** — Devoluciones con IA (cierre de mes y mitad de mes) en una tarjeta de Inicio y en la pantalla `/assistant`, con historial, cifras a revisar, calificación y regenerar; hallazgos del asistente y alertas por reglas en la bandeja de pendientes. Solo aparece para los usuarios que lo tienen habilitado.
 - **PWA** — Instalable como Progressive Web App con soporte offline básico.
 
 Arquitectura del frontend (NgModules, estructura de `src/app/`, pipes compartidos) documentada en [CLAUDE.md](./CLAUDE.md).

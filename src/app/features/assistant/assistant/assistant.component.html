@@ -1,0 +1,208 @@
+<h2 class="mb-3 d-flex align-items-center gap-2">
+    Asistente
+    <app-info-button title="Cómo funciona el asistente">
+        <p>El asistente lee los números que la app ya calcula y los cuenta en castellano. <strong>No hace cuentas ni carga nada</strong>: todo número que aparece sale de tus reportes.</p>
+        <ul class="mb-0">
+            <li><strong>Cierre de mes:</strong> cómo cerró el mes que terminó, contra el anterior y contra el promedio. Se genera solo la primera vez que entrás a la app después de que el mes terminó.</li>
+            <li><strong>Mitad de mes:</strong> cómo viene el mes en curso. Se genera solo a partir del día 15.</li>
+            <li><strong>Cifras a revisar:</strong> si un número del texto no se encuentra en los datos que recibió el asistente, la devolución queda marcada para que lo mires con cuidado.</li>
+            <li><strong>Hallazgos:</strong> cosas fuera de lo normal que las reglas fijas no prevén. Aparecen en la bandeja de Inicio y se pueden descartar y calificar.</li>
+            <li><strong>Tope:</strong> cada devolución cuesta unos centavos de dólar. Al llegar al tope del mes el asistente deja de generar hasta el mes siguiente.</li>
+        </ul>
+    </app-info-button>
+</h2>
+
+<app-loading [isLoading]="isLoadingStatus"></app-loading>
+
+<div class="alert alert-secondary" *ngIf="!isLoadingStatus && status && !status.enabled">
+    El asistente no está habilitado para tu usuario.
+</div>
+
+<ng-container *ngIf="!isLoadingStatus && status && status.enabled">
+
+    <!-- Uso del mes contra el tope -->
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="d-flex justify-content-between flex-wrap gap-1">
+                <div class="text-body-secondary small">Gasto del asistente este mes</div>
+                <div class="small text-body-secondary">Se renueva el {{ renewsOnLabel }}</div>
+            </div>
+            <div class="fs-5 fw-semibold">
+                {{ usd(status.spentUsd) }}
+                <span class="fs-6 fw-normal text-body-secondary">de {{ usd(status.monthlyBudgetUsd) }}</span>
+            </div>
+            <div class="progress mt-1" role="progressbar" [attr.aria-valuenow]="usagePercent" aria-valuemin="0" aria-valuemax="100" style="height: 8px;">
+                <div class="progress-bar" [ngClass]="usageBarClass" [style.width.%]="usagePercent"></div>
+            </div>
+            <div class="small text-danger mt-2" *ngIf="status.budgetReached">
+                Se alcanzó el tope del mes: el asistente no genera devoluciones hasta el {{ renewsOnLabel }}.
+            </div>
+            <div class="small text-warning-emphasis mt-2" *ngIf="!status.budgetReached && usagePercent >= 80">
+                Pasaste el 80 % del tope: la revisión semanal se saltea y solo se generan las devoluciones.
+            </div>
+        </div>
+    </div>
+
+    <ul class="nav nav-tabs mb-3">
+        <li class="nav-item">
+            <button type="button" class="nav-link" [class.active]="tab === 'reviews'" (click)="selectTab('reviews')">Devoluciones</button>
+        </li>
+        <li class="nav-item">
+            <button type="button" class="nav-link" [class.active]="tab === 'findings'" (click)="selectTab('findings')">Hallazgos</button>
+        </li>
+    </ul>
+
+    <!-- ── Devoluciones ─────────────────────────────────────────────────────────────────────────────── -->
+    <div class="row" *ngIf="tab === 'reviews'">
+        <div class="col-lg-4 mb-3">
+            <div class="btn-group w-100 mb-2" role="group" aria-label="Filtro por tipo">
+                <button type="button" class="btn btn-sm" [ngClass]="kindFilter === 'all' ? 'btn-primary' : 'btn-outline-primary'" (click)="setKindFilter('all')">Todas</button>
+                <button type="button" class="btn btn-sm" [ngClass]="kindFilter === 'MonthClose' ? 'btn-primary' : 'btn-outline-primary'" (click)="setKindFilter('MonthClose')">Cierre de mes</button>
+                <button type="button" class="btn btn-sm" [ngClass]="kindFilter === 'MidMonth' ? 'btn-primary' : 'btn-outline-primary'" (click)="setKindFilter('MidMonth')">Mitad de mes</button>
+            </div>
+
+            <app-loading [isLoading]="isLoadingHistory"></app-loading>
+
+            <p class="text-body-secondary" *ngIf="!isLoadingHistory && history.length === 0">
+                Todavía no hay devoluciones. Se generan solas al entrar a Inicio: el cierre del mes que terminó y, desde el día 15, la de mitad de mes.
+            </p>
+
+            <div class="list-group" *ngIf="!isLoadingHistory && history.length > 0">
+                <button type="button" class="list-group-item list-group-item-action" *ngFor="let h of history"
+                        [class.active]="selected?.id === h.id" (click)="openReview(h.id)">
+                    <div class="d-flex justify-content-between align-items-start gap-2">
+                        <strong>{{ periodLabel(h.kind, h.periodStart) }}</strong>
+                        <span class="d-flex gap-1 flex-shrink-0">
+                            <i class="bi bi-exclamation-triangle-fill" *ngIf="h.hasUnverifiedFigures" title="Cifras a revisar"></i>
+                            <i class="bi bi-hand-thumbs-up-fill" *ngIf="h.rating === 1" title="Útil"></i>
+                            <i class="bi bi-hand-thumbs-down-fill" *ngIf="h.rating === -1" title="No útil"></i>
+                            <span class="badge text-bg-danger" *ngIf="h.status === 'Failed'">Falló</span>
+                        </span>
+                    </div>
+                    <div class="small history-headline" *ngIf="h.headline">{{ h.headline }}</div>
+                </button>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <app-loading [isLoading]="isLoadingDetail"></app-loading>
+
+            <div class="card" *ngIf="selected && !isLoadingDetail">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                        <div>
+                            <h4 class="mb-0">{{ periodLabel(selected.kind, selected.periodStart) }}</h4>
+                            <div class="small text-body-secondary">
+                                Datos hasta el {{ dayMonth(selected.cutoffDate) }} ·
+                                generada el {{ toDate(selected.createdAt) | date:'dd/MM/yyyy HH:mm' }}
+                            </div>
+                        </div>
+                        <div>
+                            <app-submit-button *ngIf="canRegenerate" type="button" label="Regenerar" loadingLabel="Generando..."
+                                               btnClass="btn btn-outline-primary btn-sm" [loading]="isRegenerating"
+                                               [disabled]="status.budgetReached" (click)="askRegenerate()"></app-submit-button>
+                        </div>
+                    </div>
+                    <div class="small text-body-secondary mt-1" *ngIf="isRegenerating">
+                        Generando una versión nueva: tarda alrededor de 30 segundos.
+                    </div>
+
+                    <!-- Falló -->
+                    <div class="alert alert-danger mt-3 mb-0" *ngIf="selected.status === 'Failed'">
+                        <strong>No se pudo generar esta devolución.</strong>
+                        <div>{{ selected.errorMessage }}</div>
+                    </div>
+
+                    <ng-container *ngIf="selected.status === 'Ready'">
+                        <!-- Cifras a revisar -->
+                        <div class="alert alert-warning mt-3" *ngIf="selected.unverifiedFigures.length > 0">
+                            <strong><i class="bi bi-exclamation-triangle-fill me-1"></i>Cifras a revisar</strong>
+                            <div class="small">Estas cifras del texto no se encontraron en los datos que recibió el asistente. Pueden ser correctas, pero conviene verificarlas:</div>
+                            <ul class="mb-0 mt-1">
+                                <li *ngFor="let f of selected.unverifiedFigures">{{ f }}</li>
+                            </ul>
+                        </div>
+
+                        <h5 class="mt-3">{{ selected.headline }}</h5>
+                        <ul class="mb-3">
+                            <li *ngFor="let h of selected.highlights">{{ h }}</li>
+                        </ul>
+
+                        <app-assistant-markdown [text]="selected.body"></app-assistant-markdown>
+
+                        <div class="small text-body-secondary">
+                            Instrucciones {{ selected.promptVersion }} · modelo {{ selected.model }}
+                        </div>
+
+                        <hr>
+
+                        <!-- Calificación -->
+                        <h6>¿Te sirvió esta devolución?</h6>
+                        <div class="d-flex gap-2 mb-2">
+                            <button type="button" class="btn btn-sm" [ngClass]="ratingDraft === 1 ? 'btn-success' : 'btn-outline-success'" (click)="setRating(1)">
+                                <i class="bi bi-hand-thumbs-up me-1"></i>Útil
+                            </button>
+                            <button type="button" class="btn btn-sm" [ngClass]="ratingDraft === -1 ? 'btn-danger' : 'btn-outline-danger'" (click)="setRating(-1)">
+                                <i class="bi bi-hand-thumbs-down me-1"></i>No útil
+                            </button>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="wrongFigures" [(ngModel)]="wrongFiguresDraft">
+                            <label class="form-check-label" for="wrongFigures">Tiene un dato mal</label>
+                        </div>
+                        <textarea class="form-control mb-2" rows="2" maxlength="1000" [(ngModel)]="commentDraft"
+                                  placeholder="Comentario (opcional): qué faltó, qué sobró, qué ya sabías..."></textarea>
+                        <app-submit-button type="button" label="Guardar calificación" loadingLabel="Guardando..."
+                                           btnClass="btn btn-primary btn-sm" [loading]="isSavingFeedback"
+                                           [disabled]="ratingDraft === null" (click)="saveFeedback()"></app-submit-button>
+                    </ng-container>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Hallazgos ────────────────────────────────────────────────────────────────────────────────── -->
+    <div *ngIf="tab === 'findings'">
+        <app-loading [isLoading]="isLoadingFindings"></app-loading>
+
+        <p class="text-body-secondary" *ngIf="!isLoadingFindings && findingsLoaded && findings.length === 0">
+            Todavía no hay hallazgos. El asistente los busca en cada devolución y una vez por semana; puede no encontrar nada, y eso está bien.
+        </p>
+
+        <div class="list-group" *ngIf="!isLoadingFindings && findings.length > 0">
+            <div class="list-group-item" *ngFor="let f of findings">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                    <strong>{{ f.title }}</strong>
+                    <span class="d-flex gap-1 flex-shrink-0">
+                        <span class="badge text-bg-warning" *ngIf="f.unverifiedFigures.length > 0" title="Alguna cifra no se encontró en los datos">Cifras a revisar</span>
+                        <span class="badge" [ngClass]="findingStatusClass(f.status)">{{ findingStatusLabel(f.status) }}</span>
+                    </span>
+                </div>
+                <div>{{ f.detail }}</div>
+                <div class="small text-body-secondary mt-1">
+                    Encontrado el {{ toDate(f.createdAt) | date:'dd/MM/yyyy' }}
+                    <ng-container *ngIf="f.status === 'Active'"> · vence el {{ toDate(f.expiresAt) | date:'dd/MM/yyyy' }}</ng-container>
+                    · {{ ratingLabel(f.rating) }}
+                </div>
+                <div class="d-flex gap-2 mt-2">
+                    <button type="button" class="btn btn-sm" [ngClass]="f.rating === 1 ? 'btn-success' : 'btn-outline-success'"
+                            [disabled]="busyFindingId === f.id" (click)="rateFinding(f, 1)">
+                        <i class="bi bi-hand-thumbs-up me-1"></i>Útil
+                    </button>
+                    <button type="button" class="btn btn-sm" [ngClass]="f.rating === -1 ? 'btn-danger' : 'btn-outline-danger'"
+                            [disabled]="busyFindingId === f.id" (click)="rateFinding(f, -1)">
+                        <i class="bi bi-hand-thumbs-down me-1"></i>No útil
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" *ngIf="f.status === 'Active'"
+                            [disabled]="busyFindingId === f.id" (click)="dismissFinding(f)">
+                        Descartar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-container>
+
+<app-confirm-modal #regenerateModal title="Regenerar devolución"
+    message="Se va a generar una versión nueva con el asistente: cuesta alrededor de US$ 0,12 y tarda unos 30 segundos. La versión actual queda guardada."
+    confirmLabel="Regenerar" (confirmed)="regenerate()"></app-confirm-modal>

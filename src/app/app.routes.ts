@@ -218,6 +218,13 @@ export const routes: Routes = [
     canActivate: [AuthGuard]
   },
   {
+    // plan-devoluciones-llm, Fase 11. Todavía sin entrada de menú (llega en la Fase 12): se entra por la URL.
+    // ?review=<id> abre una devolución puntual (lo usa "Leer completa" de la tarjeta de Inicio).
+    path: 'assistant',
+    loadComponent: () => import('./features/assistant/assistant/assistant.component').then(m => m.AssistantComponent),
+    canActivate: [AuthGuard]
+  },
+  {
     path: 'resetPassword',
     loadComponent: () => import('./features/user/reset-password/reset-password.component').then(m => m.ResetPasswordComponent),
     canActivate: [AuthGuard]

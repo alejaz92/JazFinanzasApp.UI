@@ -38,7 +38,13 @@ export interface DashboardThermometer {
 // cotizar hace uno o más días. Es informativo, sin pantalla propia adonde ir (LinkId siempre null).
 // plan-amortizaciones-bonos, Fase 6: se suma 'BondCollection' — un pago de bono ya ocurrido y todavía sin
 // registrar (Title = símbolo, Date = fecha de pago, Amount = estimación total, null si el bono es indexado).
-export type DashboardPendingKind = 'CardDue' | 'OpenSharedEvent' | 'PersonDebt' | 'TripWithoutRecentExpense' | 'StaleQuote' | 'BondCollection';
+//
+// plan-devoluciones-llm, Fase 10: se suman cinco tipos. CategorySpike / LargeMovement / MissingIncome son alertas por
+// reglas fijas (Title = categoría, LinkId = id de la categoría). AssistantFinding es un hallazgo del asistente
+// (FindingId para descartarlo o calificarlo desde la bandeja) y AssistantQualityReviewDue avisa que toca una revisión
+// de calidad; estos dos solo llegan si el asistente está habilitado.
+export type DashboardPendingKind = 'CardDue' | 'OpenSharedEvent' | 'PersonDebt' | 'TripWithoutRecentExpense' | 'StaleQuote' | 'BondCollection'
+    | 'CategorySpike' | 'LargeMovement' | 'MissingIncome' | 'AssistantFinding' | 'AssistantQualityReviewDue';
 export type DashboardPendingSeverity = 'info' | 'warning' | 'danger';
 
 export interface DashboardPendingItem {
@@ -49,6 +55,8 @@ export interface DashboardPendingItem {
     assetSymbol: string | null;
     date: string | null;
     linkId: number | null;
+    // Solo para AssistantFinding.
+    findingId: number | null;
     severity: DashboardPendingSeverity;
 }
 

@@ -5,6 +5,7 @@ import { AuthService } from 'src/app/features/auth/services/auth.service';
 import { UserService } from 'src/app/features/user/services/user.service';
 import { NgIf } from '@angular/common';
 import { ThemeService } from '../../services/theme.service';
+import { AssistantService } from 'src/app/features/assistant/services/assistant.service';
 
 @Component({
     selector: 'app-navbar',
@@ -16,10 +17,15 @@ export class NavbarComponent implements OnInit {
   username: string = '';
   isAdmin: boolean = false;
 
+  // La entrada "Asistente" solo se muestra si el asistente está habilitado para el usuario (plan-devoluciones-llm, D12).
+  assistantEnabled: boolean = false;
+  private assistantChecked = false;
+
   constructor(
     public router: Router,
     private authService: AuthService,
     private userService: UserService,
+    private assistantService: AssistantService,
     public themeService: ThemeService) { }
 
 
@@ -31,9 +37,24 @@ export class NavbarComponent implements OnInit {
         
         this.loadUsername();
         this.isAdmin = this.authService.isAdmin();
+        this.loadAssistantAccess();
+      } else {
+        // Al volver a /login puede entrar otro usuario: se vuelve a consultar.
+        this.assistantEnabled = false;
+        this.assistantChecked = false;
       }
 
-    });        
+    });
+  }
+
+  // Una sola consulta por sesión (no una por navegación). Si falla, la entrada simplemente no aparece.
+  private loadAssistantAccess(): void {
+    if (this.assistantChecked) return;
+    this.assistantChecked = true;
+    this.assistantService.getStatus().subscribe({
+      next: status => this.assistantEnabled = status.enabled,
+      error: () => this.assistantEnabled = false
+    });
   }
 
   loadUsername(): void {
