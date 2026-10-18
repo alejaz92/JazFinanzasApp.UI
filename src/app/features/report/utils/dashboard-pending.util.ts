@@ -13,6 +13,14 @@ const PENDING_META: Record<DashboardPendingKind, { icon: string; action: string 
     TripWithoutRecentExpense: { icon: 'bi-airplane', action: 'Cargar gasto' },
     StaleQuote: { icon: 'bi-graph-down-arrow', action: '' },
     BondCollection: { icon: 'bi-cash-coin', action: 'Registrar' },
+    // plan-devoluciones-llm, Fase 12. Las tres alertas por reglas llevan al reporte donde se ve el detalle; el
+    // hallazgo del asistente y el aviso de revisión no tienen pantalla adonde ir: el primero se resuelve con sus
+    // propios botones (descartar, útil, no útil) y el segundo es una tarea que se hace fuera de la app.
+    CategorySpike: { icon: 'bi-graph-up-arrow', action: 'Ver categorías' },
+    LargeMovement: { icon: 'bi-exclamation-diamond', action: 'Ver categorías' },
+    MissingIncome: { icon: 'bi-cash-stack', action: 'Ver ingresos' },
+    AssistantFinding: { icon: 'bi-stars', action: '' },
+    AssistantQualityReviewDue: { icon: 'bi-clipboard-check', action: '' },
 };
 
 // Ícono/acción por default para un `kind` que el frontend todavía no conoce — evita que la bandeja
@@ -68,6 +76,11 @@ export function pendingRoute(item: DashboardPendingItem): string[] | null {
         case 'TripWithoutRecentExpense': return ['/management/trips', String(item.linkId), 'detail'];
         case 'StaleQuote': return null;
         case 'BondCollection': return ['/stockTransactions/bond-collections'];
+        case 'CategorySpike':
+        case 'LargeMovement': return ['/report/inc-exp-by-category'];
+        case 'MissingIncome': return ['/report/inc-income'];
+        case 'AssistantFinding':
+        case 'AssistantQualityReviewDue': return null;
         default: return null;
     }
 }

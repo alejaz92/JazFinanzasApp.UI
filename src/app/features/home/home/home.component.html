@@ -98,6 +98,9 @@
             </div>
         </div>
 
+        <!-- Asistente: devolución más reciente (plan-devoluciones-llm, Fase 12). Solo aparece si está habilitado. -->
+        <app-assistant-card [hideAmounts]="amountsHidden"></app-assistant-card>
+
         <!-- 5.3 Bandeja de pendientes -->
         <div class="card mb-3">
             <div class="card-header">Requiere tu atención</div>
@@ -110,8 +113,12 @@
                             <span class="badge" [ngClass]="pendingBadgeClass(item)">{{ pendingAction(item.kind) }}</span>
                         </a>
                         <ng-template #pendingRow>
-                            <div class="list-group-item d-flex justify-content-between align-items-center">
-                                <ng-container *ngTemplateOutlet="pendingContent; context: { item: item }"></ng-container>
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <ng-container *ngTemplateOutlet="pendingContent; context: { item: item }"></ng-container>
+                                </div>
+                                <app-finding-actions *ngIf="item.kind === 'AssistantFinding' && item.findingId != null"
+                                                     [findingId]="item.findingId" (dismissed)="onFindingDismissed($event)"></app-finding-actions>
                             </div>
                         </ng-template>
                     </ng-container>
@@ -121,8 +128,8 @@
 
         <ng-template #pendingContent let-item="item">
             <span>
-                <i class="bi me-2" [ngClass]="[pendingIcon(item.kind), pendingIconClass(item)]"></i>{{ item.title }}
-                <span class="text-body-secondary" *ngIf="item.detail"> — {{ item.detail }}</span>
+                <i class="bi me-2" [ngClass]="[pendingIcon(item.kind), pendingIconClass(item)]"></i>{{ shown(item.title) }}
+                <span class="text-body-secondary" *ngIf="item.detail"> — {{ shown(item.detail) }}</span>
                 <span class="text-body-secondary" *ngIf="item.amount != null"> {{ fmt(item.amount) }} {{ item.assetSymbol }}</span>
             </span>
         </ng-template>

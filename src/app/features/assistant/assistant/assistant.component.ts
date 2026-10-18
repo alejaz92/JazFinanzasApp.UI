@@ -75,11 +75,18 @@ export class AssistantComponent implements OnInit {
         const param = Number(this.route.snapshot.queryParamMap.get('review'));
         this.requestedReviewId = Number.isFinite(param) && param > 0 ? param : null;
 
+        // ?tab=findings abre la pestaña de hallazgos ("Ver todos" de la bandeja).
+        // Se carga recién cuando se sabe que el asistente está habilitado (abajo).
+        if (this.route.snapshot.queryParamMap.get('tab') === 'findings') this.tab = 'findings';
+
         this.assistantService.getStatus().subscribe({
             next: status => {
                 this.status = status;
                 this.isLoadingStatus = false;
-                if (status.enabled) this.loadHistory();
+                if (status.enabled) {
+                    this.loadHistory();
+                    if (this.tab === 'findings') this.loadFindings();
+                }
             },
             error: () => {
                 this.isLoadingStatus = false;

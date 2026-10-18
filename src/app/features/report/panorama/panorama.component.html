@@ -165,6 +165,8 @@
                     <li>Una deuda suelta pendiente con una persona (gastos compartidos sin evento).</li>
                     <li>Un viaje en curso sin gastos cargados hace varios días.</li>
                     <li>Un activo (o una familia entera) sin cotización actualizada.</li>
+                    <li>Una categoría que este mes va muy por encima de su promedio, un egreso mucho mayor que cualquier otro de su categoría, o un ingreso habitual que todavía no llegó.</li>
+                    <li>Un hallazgo del asistente, si lo tenés habilitado: se puede calificar y descartar desde acá.</li>
                     <li>Cada fila lleva a donde se resuelve. Si no hay nada, dice «Todo al día».</li>
                 </ul>
             </app-info-button>
@@ -178,8 +180,12 @@
                         <span class="badge" [ngClass]="pendingBadgeClass(item)">{{ pendingAction(item.kind) }}</span>
                     </a>
                     <ng-template #pendingRow>
-                        <div class="list-group-item d-flex justify-content-between align-items-center">
-                            <ng-container *ngTemplateOutlet="pendingContent; context: { item: item }"></ng-container>
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <ng-container *ngTemplateOutlet="pendingContent; context: { item: item }"></ng-container>
+                            </div>
+                            <app-finding-actions *ngIf="item.kind === 'AssistantFinding' && item.findingId != null"
+                                                 [findingId]="item.findingId" (dismissed)="onFindingDismissed($event)"></app-finding-actions>
                         </div>
                     </ng-template>
                 </ng-container>

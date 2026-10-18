@@ -133,6 +133,15 @@ export function parseMarkdown(markdown: string | null | undefined): MarkdownBloc
     return blocks;
 }
 
+// Oculta los montos de un texto ("$85.000", "US$ 17.019,22") para el ojo de "ocultar montos" de Inicio: el texto
+// de una devolución o de un hallazgo los trae escritos y no pasan por el formateo de la pantalla. Un punto o una
+// coma al final de la frase no forman parte del monto.
+const MONEY = /(?:US\$|u\$s|\$)\s?-?\d(?:[\d.,]*\d)?/gi;
+
+export function maskMoney(text: string | null | undefined, mask = '••••'): string {
+    return (text ?? '').replace(MONEY, mask);
+}
+
 // Porcentaje del tope gastado, acotado a 0-100 para la barra.
 export function usagePercent(spentUsd: number, budgetUsd: number): number {
     if (!budgetUsd || budgetUsd <= 0) return 0;

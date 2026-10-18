@@ -1,4 +1,4 @@
-import { formatDayMonth, formatUsd, parseInline, parseMarkdown, parseUtc, reviewKindLabel, reviewPeriodLabel, usagePercent } from './assistant.util';
+import { formatDayMonth, formatUsd, maskMoney, parseInline, parseMarkdown, parseUtc, reviewKindLabel, reviewPeriodLabel, usagePercent } from './assistant.util';
 
 describe('assistant.util', () => {
 
@@ -123,6 +123,24 @@ describe('assistant.util', () => {
 
         it('is zero without a budget', () => {
             expect(usagePercent(1, 0)).toBe(0);
+        });
+    });
+
+    describe('maskMoney', () => {
+        it('hides pesos and dollars amounts', () => {
+            expect(maskMoney('Gasto de $2.284.215 y patrimonio de US$ 17.019,22.')).toBe('Gasto de •••• y patrimonio de ••••.');
+        });
+
+        it('keeps the final period of the sentence and leaves percentages and dates alone', () => {
+            expect(maskMoney('Subió 8,9 % hasta $85.000. El 16/10 no pasó nada.')).toBe('Subió 8,9 % hasta ••••. El 16/10 no pasó nada.');
+        });
+
+        it('handles a minus sign and a small amount', () => {
+            expect(maskMoney('Resultado de -$73.226 y $5')).toBe('Resultado de -•••• y ••••');
+        });
+
+        it('returns an empty text for null', () => {
+            expect(maskMoney(null)).toBe('');
         });
     });
 
