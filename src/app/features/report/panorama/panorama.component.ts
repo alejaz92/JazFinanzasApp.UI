@@ -8,8 +8,6 @@ import { DashboardService } from '../services/dashboard.service';
 import { Dashboard, DashboardPendingItem } from '../models/dashboard.model';
 import { NetWorthService } from '../services/net-worth.service';
 import { NetWorthTotal, NetWorthMonthlyPoint } from '../models/net-worth.model';
-import { IncomeExpenseService } from '../services/income-expense.service';
-import { IncExpEvolutionPoint } from '../models/income-expense.model';
 import { pendingIcon, pendingAction, pendingRoute, pendingBadgeClass, pendingIconClass } from '../utils/dashboard-pending.util';
 import { ReportContextService } from '../../../shared/services/report-context.service';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
@@ -23,9 +21,8 @@ import { FindingActionsComponent } from '../../assistant/components/finding-acti
 // Panorama (Fase 17, Flujo 1 del plan): pantalla de entrada de Reportes. Compone tres fuentes que
 // ya existen, sin recalcular nada: DashboardService (Fase 16 — indicadores, termómetro, pendientes),
 // NetWorthService (la valoración total multi-moneda de "Saldos"/Patrimonio → General, D-9, más la
-// serie mensual para la línea y el anillo) e IncomeExpenseService.getEvolution (el promedio móvil de
-// 6 meses ya calculado por Ingresos y Egresos → Evolución, D-A — reutilizado acá para "gasto del mes
-// contra el promedio" en vez de duplicar ese cálculo).
+// serie mensual para la línea y el anillo). Desde plan-devoluciones-llm-v2.md (Fase 4) el gasto del mes y su
+// promedio también vienen del dashboard, medidos por fecha de compra, igual que el termómetro.
 
 @Component({
     selector: 'app-panorama',
@@ -37,7 +34,6 @@ import { FindingActionsComponent } from '../../assistant/components/finding-acti
 export class PanoramaComponent {
     private readonly dashboardService = inject(DashboardService);
     private readonly netWorthService = inject(NetWorthService);
-    private readonly incomeExpenseService = inject(IncomeExpenseService);
     private readonly chartTheme = inject(ChartThemeService);
     protected readonly reportContext = inject(ReportContextService);
 
@@ -52,7 +48,6 @@ export class PanoramaComponent {
     thermometer: Dashboard['thermometer'] | null = null;
     pending: DashboardPendingItem[] = [];
     monthly: NetWorthMonthlyPoint[] = [];
-    lastEvolutionPoint: IncExpEvolutionPoint | null = null;
 
     netWorthLineOptions: EChartsOption = {};
     compositionOptions: EChartsOption = {};
@@ -75,14 +70,12 @@ export class PanoramaComponent {
 
         forkJoin({
             dashboard: this.dashboardService.getDashboard(assetId),
-            monthly: this.netWorthService.getMonthlySeries(assetId),
-            evolution: this.incomeExpenseService.getEvolution(assetId, 6)
-        }).subscribe(({ dashboard, monthly, evolution }) => {
+            monthly: this.netWorthService.getMonthlySeries(assetId)
+        }).subscribe(({ dashboard, monthly }) => {
             this.indicators = dashboard.indicators;
             this.thermometer = dashboard.thermometer;
             this.pending = dashboard.pending;
             this.monthly = monthly;
-            this.lastEvolutionPoint = evolution.length > 0 ? evolution[evolution.length - 1] : null;
             this.isLoadingDashboard = false;
             setTimeout(() => this.renderCharts(), 0);
         });
@@ -142,10 +135,6 @@ export class PanoramaComponent {
     get thermometerPct(): number {
         if (!this.thermometer || this.thermometer.projectedMonthEndAmount <= 0) return 0;
         return Math.min(100, (this.thermometer.monthToDateAmount / this.thermometer.projectedMonthEndAmount) * 100);
-    }
-
-    get lastExpenseMovingAverage(): number | null {
-        return this.lastEvolutionPoint?.expenseMovingAverage ?? null;
     }
 
     protected readonly pendingIcon = pendingIcon;

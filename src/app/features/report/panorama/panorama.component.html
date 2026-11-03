@@ -4,8 +4,8 @@
         <p>Un resumen de cómo estás hoy, en la moneda elegida arriba. Cada tarjeta lleva al reporte que la desarrolla:</p>
         <ul class="mb-0">
             <li><strong>Patrimonio:</strong> lo que tenés en cuentas e inversiones a la cotización de hoy, y cuánto cambió contra el cierre del mes pasado.</li>
-            <li><strong>Resultado del mes:</strong> ingresos menos egresos del mes en curso, contra el resultado del mes pasado completo.</li>
-            <li><strong>Gasto del mes:</strong> lo gastado en el mes en curso y, debajo, el promedio de los últimos 6 meses.</li>
+            <li><strong>Resultado del mes:</strong> ingresos menos gasto del mes en curso, contra el resultado del mes pasado completo. El gasto se cuenta por fecha de compra: una compra con tarjeta suma el día en que la hiciste, no cuando pagás el resumen.</li>
+            <li><strong>Gasto del mes:</strong> lo gastado en el mes en curso (por fecha de compra, igual que el resultado) y, debajo, el promedio de los 6 meses anteriores.</li>
             <li><strong>Tarjetas a pagar:</strong> lo que vence este mes sumando todas tus tarjetas (en pesos) y la fecha del próximo vencimiento.</li>
             <li><strong>Saldo compartido:</strong> cuánto te deben (positivo) o debés (negativo) en gastos compartidos, separado por moneda.</li>
         </ul>
@@ -64,9 +64,9 @@
             <a class="card h-100 text-decoration-none text-reset" [routerLink]="['/report/inc-exp-evolution']" queryParamsHandling="preserve">
                 <div class="card-body">
                     <div class="text-body-secondary small">Gasto del mes</div>
-                    <div class="fs-5 fw-semibold">{{ (lastEvolutionPoint?.expense ?? 0) | currencyFiatFormat }}</div>
-                    <div class="small text-body-secondary" *ngIf="lastExpenseMovingAverage != null">
-                        Promedio 6 meses: {{ lastExpenseMovingAverage | currencyFiatFormat }}
+                    <div class="fs-5 fw-semibold">{{ indicators.monthExpense | currencyFiatFormat }}</div>
+                    <div class="small text-body-secondary">
+                        Promedio 6 meses: {{ indicators.monthExpenseAverage | currencyFiatFormat }}
                     </div>
                 </div>
             </a>
