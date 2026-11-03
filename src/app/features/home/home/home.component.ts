@@ -17,7 +17,6 @@ import { ChartThemeService } from '../../../shared/services/chart-theme.service'
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { ToastService } from '../../../core/services/toast.service';
 import { AssistantCardComponent } from '../../assistant/components/assistant-card/assistant-card.component';
-import { FindingActionsComponent } from '../../assistant/components/finding-actions/finding-actions.component';
 import { maskMoney } from '../../assistant/utils/assistant.util';
 
 // Ocultar montos (pedido del usuario tras ver la Fase 18): Inicio se ve sin ningún clic de por
@@ -36,7 +35,7 @@ const AMOUNT_MASK = '••••';
 @Component({
     selector: 'app-home',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, NgClass, NgTemplateOutlet, RouterLink, DatePipe, ChartComponent, AssistantCardComponent, FindingActionsComponent],
+    imports: [LoadingComponent, NgIf, NgFor, NgClass, NgTemplateOutlet, RouterLink, DatePipe, ChartComponent, AssistantCardComponent],
     templateUrl: './home.component.html',
     styleUrl: './home.component.css'
 })
@@ -69,15 +68,10 @@ export class HomeComponent implements OnInit {
     protected readonly pendingBadgeClass = pendingBadgeClass;
     protected readonly pendingIconClass = pendingIconClass;
 
-    // El título y el detalle de un aviso pueden traer montos escritos (un hallazgo del asistente, una alerta): con el
+    // El título y el detalle de un aviso pueden traer montos escritos (una alerta del asistente): con el
     // ojo de "ocultar montos" cerrado se enmascaran igual que el resto de los números de la pantalla.
     protected shown(text: string | null): string {
         return this.amountsHidden ? maskMoney(text) : (text ?? '');
-    }
-
-    // Un hallazgo descartado desde la bandeja sale de la lista sin recargar Inicio.
-    protected onFindingDismissed(findingId: number): void {
-        this.pending = this.pending.filter(p => p.findingId !== findingId);
     }
 
     ngOnInit(): void {

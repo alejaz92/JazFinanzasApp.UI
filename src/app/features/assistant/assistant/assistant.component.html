@@ -3,10 +3,10 @@
     <app-info-button title="Cómo funciona el asistente">
         <p>El asistente lee los números que la app ya calcula y los cuenta en castellano. <strong>No hace cuentas ni carga nada</strong>: todo número que aparece sale de tus reportes.</p>
         <ul class="mb-0">
-            <li><strong>Cierre de mes:</strong> cómo cerró el mes que terminó, contra el anterior y contra el promedio. Se genera solo la primera vez que entrás a la app después de que el mes terminó.</li>
-            <li><strong>Mitad de mes:</strong> cómo viene el mes en curso. Se genera solo a partir del día 15.</li>
+            <li><strong>Cierre de mes:</strong> cómo cerró el mes que terminó, contra el anterior y contra el promedio. Se prepara sola de madrugada, a partir del día 2 y cuando el mes ya está completo (cotizaciones de fin de mes y cobros de bonos); si algo falta, a más tardar el día 7.</li>
+            <li><strong>Mitad de mes:</strong> cómo viene el mes en curso. Se prepara sola a partir del día 15.</li>
             <li><strong>Cifras a revisar:</strong> si un número del texto no se encuentra en los datos que recibió el asistente, la devolución queda marcada para que lo mires con cuidado.</li>
-            <li><strong>Hallazgos:</strong> cosas fuera de lo normal que las reglas fijas no prevén. Aparecen en la bandeja de Inicio y se pueden descartar y calificar.</li>
+            <li><strong>Hallazgos:</strong> cosas fuera de lo normal que las reglas fijas no prevén. Aparecen dentro de la tarjeta del asistente en Inicio y se pueden descartar y calificar.</li>
             <li><strong>Tope:</strong> cada devolución cuesta unos centavos de dólar. Al llegar al tope del mes el asistente deja de generar hasta el mes siguiente.</li>
         </ul>
     </app-info-button>
@@ -19,6 +19,12 @@
 </div>
 
 <ng-container *ngIf="!isLoadingStatus && status && status.enabled">
+
+    <!-- Una pasada se está preparando (de madrugada o a pedido): se consulta de nuevo cada pocos segundos -->
+    <div class="alert alert-info d-flex align-items-center gap-2" *ngIf="preparing">
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        <span>Se está preparando una devolución. Esta pantalla se actualiza sola cuando termina.</span>
+    </div>
 
     <!-- Uso del mes contra el tope -->
     <div class="card mb-3">
@@ -114,6 +120,14 @@
                     </div>
 
                     <ng-container *ngIf="selected.status === 'Ready'">
+                        <!-- Datos que faltaban al prepararla -->
+                        <div class="alert alert-secondary mt-3" *ngIf="selected.dataNotes?.length">
+                            <strong><i class="bi bi-info-circle me-1"></i>Armada sin todos los datos</strong>
+                            <ul class="mb-0 mt-1">
+                                <li *ngFor="let n of selected.dataNotes">{{ n }}</li>
+                            </ul>
+                        </div>
+
                         <!-- Cifras a revisar -->
                         <div class="alert alert-warning mt-3" *ngIf="selected.unverifiedFigures.length > 0">
                             <strong><i class="bi bi-exclamation-triangle-fill me-1"></i>Cifras a revisar</strong>

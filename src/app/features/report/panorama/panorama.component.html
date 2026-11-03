@@ -184,8 +184,6 @@
                             <div class="d-flex justify-content-between align-items-center">
                                 <ng-container *ngTemplateOutlet="pendingContent; context: { item: item }"></ng-container>
                             </div>
-                            <app-finding-actions *ngIf="item.kind === 'AssistantFinding' && item.findingId != null"
-                                                 [findingId]="item.findingId" (dismissed)="onFindingDismissed($event)"></app-finding-actions>
                         </div>
                     </ng-template>
                 </ng-container>

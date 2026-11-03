@@ -16,7 +16,6 @@ import { ChartThemeService } from '../../../shared/services/chart-theme.service'
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { ContrastTextPipe } from '../../../shared/pipes/contrastText/contrast-text.pipe';
 import { InfoButtonComponent } from '../../../shared/components/info-button/info-button.component';
-import { FindingActionsComponent } from '../../assistant/components/finding-actions/finding-actions.component';
 
 // Panorama (Fase 17, Flujo 1 del plan): pantalla de entrada de Reportes. Compone tres fuentes que
 // ya existen, sin recalcular nada: DashboardService (Fase 16 — indicadores, termómetro, pendientes),
@@ -27,7 +26,7 @@ import { FindingActionsComponent } from '../../assistant/components/finding-acti
 @Component({
     selector: 'app-panorama',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, NgClass, NgTemplateOutlet, RouterLink, DatePipe, CurrencyFiatFormatPipe, ContrastTextPipe, ChartComponent, InfoButtonComponent, FindingActionsComponent],
+    imports: [LoadingComponent, NgIf, NgFor, NgClass, NgTemplateOutlet, RouterLink, DatePipe, CurrencyFiatFormatPipe, ContrastTextPipe, ChartComponent, InfoButtonComponent],
     templateUrl: './panorama.component.html',
     styleUrl: './panorama.component.css'
 })
@@ -143,8 +142,4 @@ export class PanoramaComponent {
     protected readonly pendingBadgeClass = pendingBadgeClass;
     protected readonly pendingIconClass = pendingIconClass;
 
-    // Un hallazgo descartado desde la bandeja sale de la lista sin recargar el Panorama.
-    protected onFindingDismissed(findingId: number): void {
-        this.pending = this.pending.filter(p => p.findingId !== findingId);
-    }
 }
