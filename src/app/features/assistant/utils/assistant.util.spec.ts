@@ -139,6 +139,15 @@ describe('assistant.util', () => {
             expect(maskMoney('Resultado de -$73.226 y $5')).toBe('Resultado de -•••• y ••••');
         });
 
+        it('hides amounts written with the currency code (ARS / USD)', () => {
+            expect(maskMoney('Gasto de ARS 2.284.215 (USD 1.580,40) este mes.')).toBe('Gasto de •••• (••••) este mes.');
+            expect(maskMoney('Resultado de ARS -73.226.')).toBe('Resultado de ••••.');
+        });
+
+        it('does not mistake words that end in ars or usd for a currency', () => {
+            expect(maskMoney('Compraste 12 pares y 3 bars')).toBe('Compraste 12 pares y 3 bars');
+        });
+
         it('returns an empty text for null', () => {
             expect(maskMoney(null)).toBe('');
         });
