@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { NgClass, NgFor, NgIf, NgTemplateOutlet } from '@angular/common';
+import { NgFor, NgIf } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 import { AssistantService } from '../../services/assistant.service';
@@ -9,18 +9,6 @@ import { FindingActionsComponent } from '../finding-actions/finding-actions.comp
 
 type CardState = 'loading' | 'visible' | 'hidden';
 
-// Las tres formas de mostrar titular, puntos y hallazgos (plan-devoluciones-llm-v2.md, D9). Se alternan desde la propia tarjeta
-// mientras dura la verificación, para elegir viéndolas con datos reales; una fase posterior saca las que no queden.
-export type CardVariant = 'full' | 'compact' | 'points';
-
-export const CARD_VARIANT_STORAGE_KEY = 'assistantCardVariant';
-
-export const CARD_VARIANTS: { id: CardVariant; label: string; help: string }[] = [
-    { id: 'full', label: 'Completa', help: 'Titular, los tres puntos y los hallazgos con su detalle' },
-    { id: 'compact', label: 'Compacta', help: 'Titular y los hallazgos; los tres puntos, plegados' },
-    { id: 'points', label: 'Puntos', help: 'Titular y los tres puntos; los hallazgos, plegados' }
-];
-
 // Tarjeta del asistente en Inicio (plan-devoluciones-llm-v2.md, D7 y D9). Muestra la última devolución y, adentro, los hallazgos
 // activos con sus botones (ya no pasan por la bandeja). **Ya no genera sola**: las devoluciones las prepara de madrugada un servicio
 // aparte; si falta una, la tarjeta dice por qué todavía no está ("se prepara esta madrugada", "espera a que el mes esté completo",
@@ -28,10 +16,13 @@ export const CARD_VARIANTS: { id: CardVariant; label: string; help: string }[] =
 //
 // Si el asistente no está habilitado para el usuario, o cualquier consulta falla sin nada para mostrar, la tarjeta no aparece:
 // Inicio no tiene que mostrar errores ni un hueco por algo que es un extra.
+//
+// Forma de la tarjeta (plan-devoluciones-llm-v2.md, Fase 15): titular y los tres puntos a la vista, y los hallazgos plegados detrás de
+// "Hallazgos (n)". Es la variante que el usuario eligió viéndolas con datos reales (2026-11-06) entre tres que se alternaban desde la tarjeta.
 @Component({
     selector: 'app-assistant-card',
     standalone: true,
-    imports: [NgIf, NgFor, NgClass, NgTemplateOutlet, RouterLink, FindingActionsComponent],
+    imports: [NgIf, NgFor, RouterLink, FindingActionsComponent],
     template: `
         <div class="card mb-3" *ngIf="state === 'visible'">
             <div class="card-header d-flex justify-content-between align-items-center gap-2 flex-wrap">
@@ -40,10 +31,6 @@ export const CARD_VARIANTS: { id: CardVariant; label: string; help: string }[] =
                     <span class="text-body-secondary" *ngIf="review"> — {{ periodLabel }}</span>
                 </span>
                 <span class="d-flex align-items-center gap-2">
-                    <span class="btn-group btn-group-sm" role="group" aria-label="Forma de la tarjeta" *ngIf="review">
-                        <button type="button" class="btn btn-outline-secondary" *ngFor="let v of variants"
-                                [ngClass]="{ active: variant === v.id }" [title]="v.help" (click)="setVariant(v.id)">{{ v.label }}</button>
-                    </span>
                     <a class="small" [routerLink]="['/assistant']">Ver historial</a>
                 </span>
             </div>
@@ -76,35 +63,24 @@ export const CARD_VARIANTS: { id: CardVariant; label: string; help: string }[] =
                 <ng-container *ngIf="review">
                     <h6 class="mb-2">{{ text(review.headline) }}</h6>
 
-                    <!-- Completa y Puntos: los tres puntos a la vista -->
-                    <ul class="mb-2" *ngIf="variant !== 'compact'">
+                    <ul class="mb-2">
                         <li *ngFor="let h of review.highlights">{{ text(h) }}</li>
                     </ul>
 
-                    <!-- Compacta: los tres puntos plegados -->
-                    <ng-container *ngIf="variant === 'compact'">
-                        <button type="button" class="btn btn-link btn-sm p-0 mb-2" (click)="expanded = !expanded">
-                            {{ expanded ? 'Ocultar los puntos' : 'Ver los puntos' }}
-                        </button>
-                        <ul class="mb-2" *ngIf="expanded">
-                            <li *ngFor="let h of review.highlights">{{ text(h) }}</li>
-                        </ul>
-                    </ng-container>
-
-                    <!-- Hallazgos -->
+                    <!-- Hallazgos: plegados detrás de un botón -->
                     <ng-container *ngIf="findings.length > 0">
-                        <ng-container *ngIf="variant === 'points'; else findingsOpen">
-                            <button type="button" class="btn btn-link btn-sm p-0 mb-2" (click)="expanded = !expanded">
-                                {{ expanded ? 'Ocultar los hallazgos' : 'Hallazgos (' + findings.length + ')' }}
-                            </button>
-                            <ng-container *ngIf="expanded">
-                                <ng-container *ngTemplateOutlet="findingsList; context: { detail: true }"></ng-container>
-                            </ng-container>
-                        </ng-container>
-                        <ng-template #findingsOpen>
-                            <div class="small text-body-secondary mb-1"><i class="bi bi-lightbulb me-1"></i>Hallazgos</div>
-                            <ng-container *ngTemplateOutlet="findingsList; context: { detail: variant === 'full' }"></ng-container>
-                        </ng-template>
+                        <button type="button" class="btn btn-link btn-sm p-0 mb-2" (click)="expanded = !expanded">
+                            {{ expanded ? 'Ocultar los hallazgos' : 'Hallazgos (' + findings.length + ')' }}
+                        </button>
+                        <div class="list-group list-group-flush mb-1" *ngIf="expanded">
+                            <div class="list-group-item px-0 py-2" *ngFor="let f of findings">
+                                <div>
+                                    <i class="bi bi-stars me-1"></i>{{ text(f.title) }}
+                                    <span class="text-body-secondary" *ngIf="f.detail"> — {{ text(f.detail) }}</span>
+                                </div>
+                                <app-finding-actions [findingId]="f.id" (dismissed)="onFindingDismissed($event)"></app-finding-actions>
+                            </div>
+                        </div>
                     </ng-container>
 
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-2">
@@ -119,18 +95,6 @@ export const CARD_VARIANTS: { id: CardVariant; label: string; help: string }[] =
                 </ng-container>
             </div>
         </div>
-
-        <ng-template #findingsList let-detail="detail">
-            <div class="list-group list-group-flush mb-1">
-                <div class="list-group-item px-0 py-2" *ngFor="let f of findings">
-                    <div>
-                        <i class="bi bi-stars me-1"></i>{{ text(f.title) }}
-                        <span class="text-body-secondary" *ngIf="detail && f.detail"> — {{ text(f.detail) }}</span>
-                    </div>
-                    <app-finding-actions [findingId]="f.id" (dismissed)="onFindingDismissed($event)"></app-finding-actions>
-                </div>
-            </div>
-        </ng-template>
     `
 })
 export class AssistantCardComponent implements OnInit, OnDestroy {
@@ -150,8 +114,7 @@ export class AssistantCardComponent implements OnInit, OnDestroy {
     missingLabel = '';
     errorMessage = '';
 
-    variants = CARD_VARIANTS;
-    variant: CardVariant = 'full';
+    // Los hallazgos están plegados hasta que se toca "Hallazgos (n)".
     expanded = false;
 
     // Cada cuánto vuelve a preguntar mientras algo se está preparando, y hasta cuándo (unos 5 minutos): pasado eso la pasada se da por
@@ -164,7 +127,6 @@ export class AssistantCardComponent implements OnInit, OnDestroy {
     constructor(private assistantService: AssistantService) { }
 
     ngOnInit(): void {
-        this.variant = this.readVariant();
         this.assistantService.getStatus().subscribe({
             next: status => {
                 if (!status.enabled) {
@@ -187,14 +149,6 @@ export class AssistantCardComponent implements OnInit, OnDestroy {
 
     text(value: string | null | undefined): string {
         return this.hideAmounts ? maskMoney(value) : (value ?? '');
-    }
-
-    setVariant(variant: CardVariant): void {
-        this.variant = variant;
-        this.expanded = false;
-        try {
-            localStorage.setItem(CARD_VARIANT_STORAGE_KEY, variant);
-        } catch { /* sin almacenamiento: la elección vale hasta recargar */ }
     }
 
     onFindingDismissed(findingId: number): void {
@@ -276,13 +230,5 @@ export class AssistantCardComponent implements OnInit, OnDestroy {
         if (!this.preparing || this.polls >= AssistantCardComponent.MaxPolls) return;
         this.polls++;
         this.pollHandle = setTimeout(() => this.load(), AssistantCardComponent.PollMs);
-    }
-
-    private readVariant(): CardVariant {
-        try {
-            const stored = localStorage.getItem(CARD_VARIANT_STORAGE_KEY);
-            if (stored === 'full' || stored === 'compact' || stored === 'points') return stored;
-        } catch { /* ver setVariant */ }
-        return 'full';
     }
 }

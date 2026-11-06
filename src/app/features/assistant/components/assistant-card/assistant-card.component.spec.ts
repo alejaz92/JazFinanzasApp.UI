@@ -2,13 +2,14 @@ import { ComponentFixture, TestBed, fakeAsync, tick, discardPeriodicTasks } from
 import { provideRouter } from '@angular/router';
 import { NEVER, of, throwError } from 'rxjs';
 
-import { AssistantCardComponent, CARD_VARIANT_STORAGE_KEY } from './assistant-card.component';
+import { AssistantCardComponent } from './assistant-card.component';
 import { AssistantService } from '../../services/assistant.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { AssistantFinding, AssistantLatest, AssistantReview, AssistantStatus } from '../../models/assistant.model';
 
 // plan-devoluciones-llm-v2.md, Fase 9 — la tarjeta de Inicio ya no genera sola (las prepara el servicio de madrugada): estos tests
-// cubren qué muestra con cada respuesta del backend, las tres variantes y los hallazgos de adentro, sin pegarle nunca a la API.
+// cubren qué muestra con cada respuesta del backend y los hallazgos de adentro (plegados), sin pegarle nunca a la API. Fase 15: quedó
+// una sola forma de la tarjeta, la que el usuario eligió.
 describe('AssistantCardComponent', () => {
     let fixture: ComponentFixture<AssistantCardComponent>;
     let component: AssistantCardComponent;
@@ -48,7 +49,6 @@ describe('AssistantCardComponent', () => {
     }
 
     beforeEach(() => {
-        localStorage.removeItem(CARD_VARIANT_STORAGE_KEY);
         service = jasmine.createSpyObj<AssistantService>('AssistantService', ['getStatus', 'getLatest', 'generate', 'getFindings', 'updateFinding']);
         service.getStatus.and.returnValue(of(enabled));
         service.getLatest.and.returnValue(of(latest()));
@@ -63,8 +63,6 @@ describe('AssistantCardComponent', () => {
             ]
         });
     });
-
-    afterEach(() => localStorage.removeItem(CARD_VARIANT_STORAGE_KEY));
 
     it('does not show anything, and does not ask for the latest review, when the assistant is not enabled', () => {
         service.getStatus.and.returnValue(of({ ...enabled, enabled: false }));
@@ -265,22 +263,51 @@ describe('AssistantCardComponent', () => {
     describe('findings inside the card (D9)', () => {
         beforeEach(() => service.getFindings.and.returnValue(of([finding(10), finding(11, 'Delivery subió', 'Tercer mes seguido.')])));
 
-        it('shows them under the points in the full variant, with their detail and buttons', () => {
+        function expand(): void {
+            component.expanded = true;
+            fixture.detectChanges();
+        }
+
+        it('shows the points in view and the findings folded behind a "Hallazgos (n)" button', () => {
             create();
 
+            expect(text()).toContain('Gasto 8,9 % más que agosto');
+            expect(text()).toContain('Hallazgos (2)');
+            expect(text()).not.toContain('Poco gasto en supermercado');
+            expect((fixture.nativeElement as HTMLElement).querySelectorAll('app-finding-actions').length).toBe(0);
+        });
+
+        it('unfolds them with their detail and buttons, and folds them back', () => {
+            create();
+
+            expand();
             expect(text()).toContain('Poco gasto en supermercado');
             expect(text()).toContain('Casi no hubo gasto este mes.');
+            expect(text()).toContain('Ocultar los hallazgos');
             expect((fixture.nativeElement as HTMLElement).querySelectorAll('app-finding-actions').length).toBe(2);
+
+            component.expanded = false;
+            fixture.detectChanges();
+            expect(text()).not.toContain('Poco gasto en supermercado');
+        });
+
+        it('has no button when there are no findings', () => {
+            service.getFindings.and.returnValue(of([]));
+            create();
+
+            expect(text()).not.toContain('Hallazgos (');
         });
 
         it('takes a dismissed finding out of the list', () => {
             create();
+            expand();
 
             component.onFindingDismissed(10);
             fixture.detectChanges();
 
             expect(text()).not.toContain('Poco gasto en supermercado');
             expect(text()).toContain('Delivery subió');
+            expect(text()).toContain('Ocultar los hallazgos');
         });
 
         it('masks the amounts of a finding when the amounts are hidden', () => {
@@ -289,7 +316,9 @@ describe('AssistantCardComponent', () => {
             component = fixture.componentInstance;
             component.hideAmounts = true;
             fixture.detectChanges();
+            expand();
 
+            expect(text()).toContain('Delivery');
             expect(text()).not.toContain('160.000');
         });
 
@@ -299,63 +328,6 @@ describe('AssistantCardComponent', () => {
 
             expect(component.state).toBe('visible');
             expect(component.findings).toEqual([]);
-        });
-    });
-
-    describe('variants', () => {
-        beforeEach(() => service.getFindings.and.returnValue(of([finding(10)])));
-
-        it('starts in the full variant', () => {
-            create();
-
-            expect(component.variant).toBe('full');
-            expect(text()).toContain('Gasto 8,9 % más que agosto');
-        });
-
-        it('compact: findings in view and the points folded behind a button', () => {
-            create();
-            component.setVariant('compact');
-            fixture.detectChanges();
-
-            expect(text()).toContain('Poco gasto en supermercado');
-            expect(text()).not.toContain('Casi no hubo gasto este mes.');
-            expect(text()).not.toContain('Gasto 8,9 % más que agosto');
-
-            component.expanded = true;
-            fixture.detectChanges();
-            expect(text()).toContain('Gasto 8,9 % más que agosto');
-        });
-
-        it('points: the points in view and the findings folded behind a button', () => {
-            create();
-            component.setVariant('points');
-            fixture.detectChanges();
-
-            expect(text()).toContain('Gasto 8,9 % más que agosto');
-            expect(text()).toContain('Hallazgos (1)');
-            expect(text()).not.toContain('Poco gasto en supermercado');
-
-            component.expanded = true;
-            fixture.detectChanges();
-            expect(text()).toContain('Poco gasto en supermercado');
-        });
-
-        it('remembers the choice', () => {
-            create();
-            component.setVariant('points');
-
-            expect(localStorage.getItem(CARD_VARIANT_STORAGE_KEY)).toBe('points');
-
-            fixture.destroy();
-            create();
-            expect(component.variant).toBe('points');
-        });
-
-        it('ignores a stored value it does not know', () => {
-            localStorage.setItem(CARD_VARIANT_STORAGE_KEY, 'otra');
-            create();
-
-            expect(component.variant).toBe('full');
         });
     });
 });
