@@ -50,6 +50,8 @@ export interface AssistantReview {
     body: string | null;
     // "Cifras a revisar": las del texto que no se encontraron en los datos.
     unverifiedFigures: string[];
+    // Lo que faltaba en los datos al prepararla ("armada sin…"); vacío si estaba todo.
+    dataNotes: string[];
     errorMessage: string | null;
     promptVersion: string | null;
     model: string | null;
@@ -57,12 +59,22 @@ export interface AssistantReview {
     feedback: AssistantFeedback | null;
 }
 
+// Por qué todavía no está la devolución que falta (plan-devoluciones-llm-v2.md, D7).
+export type AssistantLatestOutlook = 'Scheduled' | 'WaitingForData' | 'LastRunFailed' | 'SchedulerNotRun';
+
 export interface AssistantLatest {
     state: 'Ready' | 'NotGenerated' | 'Empty';
     missingKind: AssistantReviewKind | null;
     missingPeriodStart: string | null;
+    // Con state NotGenerated trae igual la última devolución que hay, para seguir mostrándola.
     review: AssistantReview | null;
     weeklyScanDue: boolean;
+    // Hay una pasada generándose ahora (a pedido o de madrugada).
+    preparing: boolean;
+    // Solo con state NotGenerated.
+    outlook: AssistantLatestOutlook | null;
+    // Con WaitingForData: lo que le falta al mes.
+    outlookNotes: string[];
 }
 
 export interface AssistantFinding {

@@ -133,10 +133,10 @@ export function parseMarkdown(markdown: string | null | undefined): MarkdownBloc
     return blocks;
 }
 
-// Oculta los montos de un texto ("$85.000", "US$ 17.019,22") para el ojo de "ocultar montos" de Inicio: el texto
+// Oculta los montos de un texto ("ARS 85.000", "USD 17.019,22"; también "$85.000" y "US$ 17.019,22") para el ojo de "ocultar montos" de Inicio: el texto
 // de una devolución o de un hallazgo los trae escritos y no pasan por el formateo de la pantalla. Un punto o una
 // coma al final de la frase no forman parte del monto.
-const MONEY = /(?:US\$|u\$s|\$)\s?-?\d(?:[\d.,]*\d)?/gi;
+const MONEY = /(?:US\$|u\$s|\b(?:ARS|USD)|\$)\s?-?\d(?:[\d.,]*\d)?/gi;
 
 export function maskMoney(text: string | null | undefined, mask = '••••'): string {
     return (text ?? '').replace(MONEY, mask);

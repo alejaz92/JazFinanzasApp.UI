@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -33,7 +33,7 @@ type KindFilter = 'all' | 'MonthClose' | 'MidMonth';
     templateUrl: './assistant.component.html',
     styleUrl: './assistant.component.css'
 })
-export class AssistantComponent implements OnInit {
+export class AssistantComponent implements OnInit, OnDestroy {
     private readonly assistantService = inject(AssistantService);
     private readonly toastService = inject(ToastService);
     private readonly route = inject(ActivatedRoute);
@@ -68,6 +68,13 @@ export class AssistantComponent implements OnInit {
     findingsLoaded = false;
     busyFindingId: number | null = null;
 
+    // Una pasada se está preparando (D7): se consulta cada pocos segundos, hasta unos 5 minutos, y al terminar se recarga el historial.
+    preparing = false;
+    private static readonly PollMs = 5000;
+    private static readonly MaxPolls = 60;
+    private polls = 0;
+    private pollHandle: ReturnType<typeof setTimeout> | null = null;
+
     // Si el detalle viene de un link ("Leer completa" en Inicio, Fase 12): ?review=<id>.
     private requestedReviewId: number | null = null;
 
@@ -86,12 +93,32 @@ export class AssistantComponent implements OnInit {
                 if (status.enabled) {
                     this.loadHistory();
                     if (this.tab === 'findings') this.loadFindings();
+                    this.checkPreparing();
                 }
             },
             error: () => {
                 this.isLoadingStatus = false;
                 this.toastService.error('No se pudo consultar el estado del asistente.');
             }
+        });
+    }
+
+    ngOnDestroy(): void {
+        if (this.pollHandle) clearTimeout(this.pollHandle);
+    }
+
+    private checkPreparing(): void {
+        this.assistantService.getLatest().subscribe({
+            next: latest => {
+                const wasPreparing = this.preparing;
+                this.preparing = !!latest.preparing;
+                if (wasPreparing && !this.preparing) this.loadHistory();
+                if (this.preparing && this.polls < AssistantComponent.MaxPolls) {
+                    this.polls++;
+                    this.pollHandle = setTimeout(() => this.checkPreparing(), AssistantComponent.PollMs);
+                }
+            },
+            error: () => { this.preparing = false; }
         });
     }
 

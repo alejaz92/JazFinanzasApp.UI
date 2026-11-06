@@ -12,6 +12,9 @@ export interface DashboardIndicators {
     netWorthChangeVsPreviousMonth: number;
     monthResult: number;
     monthResultPreviousMonth: number;
+    // Gasto del mes en curso por fecha de compra y su promedio de los 6 meses anteriores (plan-devoluciones-llm-v2.md, Fase 4).
+    monthExpense: number;
+    monthExpenseAverage: number;
     // Siempre en pesos, no en referenceAssetSymbol — mismo criterio que la tabla de Tarjetas → General.
     cardsDueAmountInPesos: number;
     cardsNextDueDate: string | null;
