@@ -14,7 +14,8 @@ SPA Angular de JazFinanzasApp — finanzas personales e inversiones. Permite reg
 - **Cambio de moneda** — Operaciones de compra/venta de divisas fiat y transferencias entre portfolios.
 - **Gastos compartidos** — Registro y reembolso de gastos compartidos entre personas (feature en desarrollo).
 - **Reportes y balance** — Dashboard con gráficos de distribución (Chart.js / ECharts), últimas transacciones, cuotas pendientes y resumen financiero global.
-- **Asistente** — Devoluciones con IA (cierre de mes y mitad de mes) en una tarjeta de Inicio y en la pantalla `/assistant`, con historial, cifras a revisar, calificación y regenerar; hallazgos del asistente y alertas por reglas en la bandeja de pendientes. Solo aparece para los usuarios que lo tienen habilitado.
+- **Asistente** — Devoluciones con IA (cierre de mes y mitad de mes), **preparadas de madrugada** por un servicio aparte. Una tarjeta en Inicio muestra el titular y los tres puntos, con los hallazgos plegados detrás de "Hallazgos (n)" (con sus botones de útil, no útil y descartar); si falta una devolución dice por qué ("se prepara esta madrugada", "espera a que el mes esté completo", "falló anoche") y ofrece "Generar ahora"; mientras se prepara se actualiza sola. La pantalla `/assistant` tiene el historial, las cifras a revisar, "armada sin…" (lo que faltaba en los datos), calificación y regenerar. Las alertas por reglas siguen en la bandeja de pendientes.
+- **Panorama e Inicio** — El termómetro, el "Resultado del mes" y el "Gasto del mes" cuentan el gasto por fecha de compra y descuentan lo que reintegran otros (gasto propio), igual que el asistente; los reportes de Ingresos y Egresos siguen mostrando lo que salió de las cuentas. Solo aparece para los usuarios que lo tienen habilitado.
 - **PWA** — Instalable como Progressive Web App con soporte offline básico.
 
 Arquitectura del frontend (NgModules, estructura de `src/app/`, pipes compartidos) documentada en [CLAUDE.md](./CLAUDE.md).
