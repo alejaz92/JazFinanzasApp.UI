@@ -189,9 +189,11 @@
                         <h5>Gastos Tarjeta</h5>
                     </div>
                     <div class="card-body">
-                        <div *ngIf="reimbursementsPreview > 0 || cardCreditApplied > 0" class="alert alert-info" role="alert">
-                            <div *ngIf="reimbursementsPreview > 0">
-                                Hay <strong>{{ reimbursementsPreview | currencyFiatFormat }}</strong> en reintegros aplicables a estos gastos.
+                        <div *ngIf="reimbursementsPreview > 0 || cardCreditAvailable > 0" class="alert alert-info" role="alert">
+                            <div *ngIf="cardCreditApplied <= 0">
+                                Reintegros:
+                                <strong>{{ reimbursementsPreview | currencyFiatFormat }}</strong> cobrados ·
+                                <strong>{{ cardCreditAvailable | currencyFiatFormat }}</strong> en la tarjeta
                             </div>
                             <div *ngIf="cardCreditApplied > 0">
                                 Se usaron <strong>{{ cardCreditApplied | currencyFiatFormat }}</strong> del saldo a favor de la tarjeta.
