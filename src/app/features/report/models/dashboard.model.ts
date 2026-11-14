@@ -6,23 +6,6 @@ export interface DashboardSharedBalance {
     net: number;
 }
 
-export interface DashboardIndicators {
-    referenceAssetSymbol: string;
-    available: number;
-    netWorthGross: number;
-    netWorthNet: number;
-    netWorthChangeVsPreviousMonth: number;
-    monthResult: number;
-    monthResultPreviousMonth: number;
-    // Gasto del mes en curso por fecha de compra y su promedio de los 6 meses anteriores (plan-devoluciones-llm-v2.md, Fase 4).
-    monthExpense: number;
-    monthExpenseAverage: number;
-    // Siempre en pesos, no en referenceAssetSymbol — mismo criterio que la tabla de Tarjetas → General.
-    cardsDueAmountInPesos: number;
-    cardsNextDueDate: string | null;
-    sharedBalances: DashboardSharedBalance[];
-}
-
 export interface DashboardThermometer {
     monthToDateAmount: number;
     previousMonthSameDayAmount: number;
@@ -65,15 +48,8 @@ export interface DashboardPendingItem {
     severity: DashboardPendingSeverity;
 }
 
-export interface Dashboard {
-    indicators: DashboardIndicators;
-    thermometer: DashboardThermometer;
-    pending: DashboardPendingItem[];
-}
-
-// plan-inicio-rapido.md, Fase 5 (D2): el mismo resumen partido en bloques que se piden por separado, para pintar cada uno apenas llega.
-// Cada campo es el mismo que ya traía `Dashboard`; lo nuevo (serie mensual, "hay cuentas" y totales por moneda) reemplaza a lo que Inicio y
-// Panorama pedían aparte (Monthly, ByAccount y General).
+// plan-inicio-rapido.md (D2): el resumen de Inicio y del Panorama se pide en cuatro bloques por separado, para pintar cada uno apenas llega.
+// El de patrimonio trae además la serie mensual, "hay cuentas" y los totales por moneda, que antes se pedían aparte (Monthly, ByAccount y General).
 export interface DashboardNetWorth {
     referenceAssetSymbol: string;
     available: number;
