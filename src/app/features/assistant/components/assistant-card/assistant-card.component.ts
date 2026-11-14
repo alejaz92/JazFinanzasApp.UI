@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { NgFor, NgIf } from '@angular/common';
+import { NgClass, NgFor, NgIf } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 import { AssistantService } from '../../services/assistant.service';
@@ -22,19 +22,31 @@ type CardState = 'loading' | 'visible' | 'hidden';
 @Component({
     selector: 'app-assistant-card',
     standalone: true,
-    imports: [NgIf, NgFor, RouterLink, FindingActionsComponent],
+    imports: [NgIf, NgFor, NgClass, RouterLink, FindingActionsComponent],
     template: `
         <div class="card mb-3" *ngIf="state === 'visible'">
             <div class="card-header d-flex justify-content-between align-items-center gap-2 flex-wrap">
-                <span>
-                    <i class="bi bi-stars me-1"></i>Asistente
-                    <span class="text-body-secondary" *ngIf="review"> — {{ periodLabel }}</span>
-                </span>
+                <!-- Plegada por defecto: el encabezado dice de qué período es y cuántos hallazgos hay; la devolución se abre con un clic. -->
+                <button type="button" *ngIf="review; else plainTitle"
+                        class="btn btn-link text-reset text-decoration-none p-0 d-flex align-items-center gap-2 text-start"
+                        (click)="toggle()" [attr.aria-expanded]="open" aria-controls="assistant-card-review">
+                    <i class="bi" [ngClass]="open ? 'bi-chevron-down' : 'bi-chevron-right'"></i>
+                    <span>
+                        <i class="bi bi-stars me-1"></i>Asistente
+                        <span class="text-body-secondary"> — {{ periodLabel }}</span>
+                    </span>
+                    <span class="badge bg-primary" *ngIf="!open && findings.length > 0">
+                        {{ findings.length }} {{ findings.length === 1 ? 'hallazgo' : 'hallazgos' }}
+                    </span>
+                </button>
+                <ng-template #plainTitle>
+                    <span><i class="bi bi-stars me-1"></i>Asistente</span>
+                </ng-template>
                 <span class="d-flex align-items-center gap-2">
                     <a class="small" [routerLink]="['/assistant']">Ver historial</a>
                 </span>
             </div>
-            <div class="card-body">
+            <div class="card-body" *ngIf="hasBody">
                 <!-- Qué pasa con la devolución que falta -->
                 <div *ngIf="preparing" class="d-flex align-items-center gap-2 text-body-secondary mb-2">
                     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
@@ -59,8 +71,8 @@ type CardState = 'loading' | 'visible' | 'hidden';
                     <div class="small text-body-secondary">{{ errorMessage }}</div>
                 </div>
 
-                <!-- La devolución -->
-                <ng-container *ngIf="review">
+                <!-- La devolución (plegada hasta que se abre el encabezado) -->
+                <ng-container *ngIf="review && open">
                     <h6 class="mb-2">{{ text(review.headline) }}</h6>
 
                     <ul class="mb-2">
@@ -117,6 +129,12 @@ export class AssistantCardComponent implements OnInit, OnDestroy {
     // Los hallazgos están plegados hasta que se toca "Hallazgos (n)".
     expanded = false;
 
+    // La devolución (titular, puntos y hallazgos) va plegada por defecto, igual que la bandeja "Requiere tu atención" (plan-inicio-rapido.md,
+    // D9): lo primero que se ve en Inicio son los números, no un texto. Lo que hay que atender (una devolución que falta, que se prepara o que
+    // falló, con su botón "Generar ahora") queda siempre a la vista. Se recuerda si el usuario la abrió, con la protección habitual de localStorage.
+    open = false;
+    static readonly OpenStorageKey = 'jaz-home-assistant-open';
+
     // Cada cuánto vuelve a preguntar mientras algo se está preparando, y hasta cuándo (unos 5 minutos): pasado eso la pasada se da por
     // interrumpida en el backend y no tiene sentido seguir preguntando.
     static readonly PollMs = 5000;
@@ -127,6 +145,12 @@ export class AssistantCardComponent implements OnInit, OnDestroy {
     constructor(private assistantService: AssistantService) { }
 
     ngOnInit(): void {
+        try {
+            this.open = localStorage.getItem(AssistantCardComponent.OpenStorageKey) === 'true';
+        } catch {
+            // Sin localStorage arranca plegada.
+        }
+
         this.assistantService.getStatus().subscribe({
             next: status => {
                 if (!status.enabled) {
@@ -141,6 +165,20 @@ export class AssistantCardComponent implements OnInit, OnDestroy {
 
     ngOnDestroy(): void {
         if (this.pollHandle) clearTimeout(this.pollHandle);
+    }
+
+    toggle(): void {
+        this.open = !this.open;
+        try {
+            localStorage.setItem(AssistantCardComponent.OpenStorageKey, String(this.open));
+        } catch {
+            // Sin localStorage la preferencia simplemente no persiste entre recargas.
+        }
+    }
+
+    // El cuerpo de la tarjeta se dibuja si hay algo que mostrar: la devolución abierta o algo que atender (preparando, generando, aviso, error).
+    get hasBody(): boolean {
+        return (!!this.review && this.open) || this.preparing || this.generating || !!this.notice || !!this.errorMessage;
     }
 
     get periodLabel(): string {
