@@ -1,21 +1,17 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { NgIf, NgFor, NgClass, NgTemplateOutlet, DatePipe } from '@angular/common';
+import { NgIf, NgFor, NgClass, NgTemplateOutlet, NgSwitch, NgSwitchCase, NgSwitchDefault, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { forkJoin } from 'rxjs';
 import type { EChartsOption } from 'echarts';
 
 import { UserService } from '../../user/services/user.service';
 import { AssetService } from '../../asset/services/asset.service';
 import { DashboardService } from '../../report/services/dashboard.service';
-import { Dashboard, DashboardPendingItem } from '../../report/models/dashboard.model';
-import { NetWorthService } from '../../report/services/net-worth.service';
+import { BlockState, DashboardCommitments, DashboardMonth, DashboardNetWorth, DashboardPendingItem } from '../../report/models/dashboard.model';
 import { NetWorthMonthlyPoint } from '../../report/models/net-worth.model';
-import { pendingIcon, pendingAction, pendingRoute, pendingBadgeClass, pendingIconClass } from '../../report/utils/dashboard-pending.util';
-import { LoadingComponent } from '../../../core/components/loading/loading.component';
+import { pendingIcon, pendingAction, pendingRoute, pendingBadgeClass, pendingIconClass, pendingSummary, pendingSeverityBadgeClass } from '../../report/utils/dashboard-pending.util';
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
-import { ToastService } from '../../../core/services/toast.service';
 import { AssistantCardComponent } from '../../assistant/components/assistant-card/assistant-card.component';
 import { maskMoney } from '../../assistant/utils/assistant.util';
 
@@ -26,16 +22,22 @@ import { maskMoney } from '../../assistant/utils/assistant.util';
 const HIDE_AMOUNTS_STORAGE_KEY = 'jaz-hide-amounts';
 const AMOUNT_MASK = '••••';
 
+// La bandeja "Requiere tu atención" va plegada por defecto (plan-inicio-rapido.md, D9) y se recuerda si el usuario la abrió.
+const PENDING_OPEN_STORAGE_KEY = 'jaz-home-pending-open';
+
 // Inicio (Fase 18, sección 5 del plan, versión "Mínimo" tras la comparación en vivo de 3
 // variantes): saludo y acciones rápidas, indicadores, bandeja de pendientes y patrimonio (línea +
 // composición) — sin selector de moneda ni de período (principio 5: "Inicio responde por hoy... no
 // se filtra ni se configura"), así que usa siempre la moneda de referencia principal del usuario.
 // "Mis cuentas" y "Actividad reciente" (5.5/5.6) se sacaron: ya están a un clic (Patrimonio → Por
 // cuenta, Movimientos) y hacían que la pantalla no entrara en un solo scroll.
+//
+// plan-inicio-rapido.md, Fase 5: el resumen ya no se pide entero. Cuatro bloques (patrimonio, mes, compromisos y pendientes)
+// se piden a la vez y cada uno se dibuja apenas llega, con su propio estado de carga y su propio "Reintentar" si falla (D8).
 @Component({
     selector: 'app-home',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, NgClass, NgTemplateOutlet, RouterLink, DatePipe, ChartComponent, AssistantCardComponent],
+    imports: [NgIf, NgFor, NgClass, NgTemplateOutlet, NgSwitch, NgSwitchCase, NgSwitchDefault, RouterLink, DatePipe, ChartComponent, AssistantCardComponent],
     templateUrl: './home.component.html',
     styleUrl: './home.component.css'
 })
@@ -43,21 +45,25 @@ export class HomeComponent implements OnInit {
     private readonly userService = inject(UserService);
     private readonly assetService = inject(AssetService);
     private readonly dashboardService = inject(DashboardService);
-    private readonly netWorthService = inject(NetWorthService);
     private readonly chartTheme = inject(ChartThemeService);
-    private readonly toastService = inject(ToastService);
     private readonly currencyPipe = new CurrencyFiatFormatPipe();
 
-    isLoading = true;
     userName = '';
     amountsHidden = false;
 
-    // Sin movimientos cargados (5.8): en vez del resto de la pantalla, se muestra la guía de 3 pasos.
-    isFirstUse = false;
+    // Un estado por bloque: cada uno se dibuja, falla y se reintenta por su cuenta.
+    netWorthState: BlockState = 'loading';
+    monthState: BlockState = 'loading';
+    commitmentsState: BlockState = 'loading';
+    pendingState: BlockState = 'loading';
 
-    indicators: Dashboard['indicators'] | null = null;
+    netWorth: DashboardNetWorth | null = null;
+    month: DashboardMonth | null = null;
+    commitments: DashboardCommitments | null = null;
     pending: DashboardPendingItem[] = [];
-    monthly: NetWorthMonthlyPoint[] = [];
+    pendingOpen = false;
+
+    private referenceAssetId: number | null = null;
 
     netWorthLineOptions: EChartsOption = {};
     compositionOptions: EChartsOption = {};
@@ -77,46 +83,133 @@ export class HomeComponent implements OnInit {
     ngOnInit(): void {
         try {
             this.amountsHidden = localStorage.getItem(HIDE_AMOUNTS_STORAGE_KEY) === 'true';
+            this.pendingOpen = localStorage.getItem(PENDING_OPEN_STORAGE_KEY) === 'true';
         } catch {
-            // localStorage puede no estar disponible (navegación privada) — se queda visible.
+            // localStorage puede no estar disponible (navegación privada) — todo se queda como el default.
         }
 
         this.userService.getUserData().subscribe(user => this.userName = user.name);
 
+        // Compromisos y pendientes no dependen de la moneda de referencia: salen ya, sin esperar a saber cuál es.
+        this.loadCommitments();
+        this.loadPending();
+        this.loadReferenceAssetThen(() => { this.loadNetWorth(); this.loadMonth(); });
+    }
+
+    // ── Carga por bloque ────────────────────────────────────────────────────────────────────
+
+    // Patrimonio y mes dependen de la moneda de referencia principal; se averigua una sola vez y se reutiliza al reintentar.
+    private loadReferenceAssetThen(load: () => void): void {
+        if (this.referenceAssetId != null) {
+            load();
+            return;
+        }
+
+        this.netWorthState = 'loading';
+        this.monthState = 'loading';
         this.assetService.getReferenceAssets().subscribe({
             next: assets => {
                 const main = assets.find(a => a.isMainReference) ?? assets[0];
-                if (main) this.load(main.id);
-                else this.isLoading = false;
+                if (!main) {
+                    // Sin moneda de referencia no hay nada que calcular: se dibuja lo que haya, sin patrimonio ni mes.
+                    this.netWorthState = 'ready';
+                    this.monthState = 'ready';
+                    return;
+                }
+                this.referenceAssetId = main.id;
+                load();
             },
             error: () => {
-                this.isLoading = false;
-                this.toastService.error('Error al cargar los datos de Inicio');
+                this.netWorthState = 'error';
+                this.monthState = 'error';
             }
         });
     }
 
-    private load(assetId: number): void {
-        forkJoin({
-            dashboard: this.dashboardService.getDashboard(assetId),
-            monthly: this.netWorthService.getMonthlySeries(assetId),
-            accounts: this.netWorthService.getByAccount(assetId)
-        }).subscribe({
-            next: ({ dashboard, monthly, accounts }) => {
-                this.indicators = dashboard.indicators;
-                this.pending = dashboard.pending;
-                this.monthly = monthly;
+    retryNetWorth = (): void => this.loadReferenceAssetThen(() => this.loadNetWorth());
+    retryMonth = (): void => this.loadReferenceAssetThen(() => this.loadMonth());
+    retryCommitments = (): void => this.loadCommitments();
+    retryPending = (): void => this.loadPending();
+
+    private loadNetWorth(): void {
+        this.netWorthState = 'loading';
+        this.dashboardService.getNetWorth(this.referenceAssetId!).subscribe({
+            next: data => {
+                this.netWorth = data;
+                this.netWorthState = 'ready';
                 // GetAccountBalancesAsync (backend) solo trae cuentas con al menos un movimiento — sin
                 // ninguna, no hay nada que mostrar en el resto de la pantalla (5.8).
-                this.isFirstUse = accounts.length === 0;
-                this.isLoading = false;
-                if (!this.isFirstUse) setTimeout(() => this.renderCharts(), 0);
+                if (data.hasAccounts) setTimeout(() => this.renderCharts(), 0);
             },
-            error: () => {
-                this.isLoading = false;
-                this.toastService.error('Error al cargar los datos de Inicio');
-            }
+            error: () => this.netWorthState = 'error'
         });
+    }
+
+    private loadMonth(): void {
+        this.monthState = 'loading';
+        this.dashboardService.getMonth(this.referenceAssetId!).subscribe({
+            next: data => {
+                this.month = data;
+                this.monthState = 'ready';
+            },
+            error: () => this.monthState = 'error'
+        });
+    }
+
+    private loadCommitments(): void {
+        this.commitmentsState = 'loading';
+        this.dashboardService.getCommitments().subscribe({
+            next: data => {
+                this.commitments = data;
+                this.commitmentsState = 'ready';
+            },
+            error: () => this.commitmentsState = 'error'
+        });
+    }
+
+    private loadPending(): void {
+        this.pendingState = 'loading';
+        this.dashboardService.getPending().subscribe({
+            next: items => {
+                this.pending = items;
+                this.pendingState = 'ready';
+            },
+            error: () => this.pendingState = 'error'
+        });
+    }
+
+    // ── Estado derivado ─────────────────────────────────────────────────────────────────────
+
+    // 5.8 Primer uso: solo se sabe cuando llegó el patrimonio. Hasta entonces (y si falla) se dibujan los bloques normales.
+    get isFirstUse(): boolean {
+        return this.netWorthState === 'ready' && this.netWorth != null && !this.netWorth.hasAccounts;
+    }
+
+    get monthly(): NetWorthMonthlyPoint[] {
+        return this.netWorth?.monthly ?? [];
+    }
+
+    // Bandeja plegable (D9): el encabezado resume cuántos avisos hay y la gravedad más alta.
+    get pendingCount(): number {
+        return pendingSummary(this.pending).count;
+    }
+
+    get pendingSummaryBadgeClass(): string {
+        return pendingSeverityBadgeClass(pendingSummary(this.pending).severity);
+    }
+
+    get canTogglePending(): boolean {
+        return this.pendingState === 'ready' && this.pending.length > 0;
+    }
+
+    togglePending(): void {
+        if (!this.canTogglePending) return;
+        this.pendingOpen = !this.pendingOpen;
+        try {
+            localStorage.setItem(PENDING_OPEN_STORAGE_KEY, String(this.pendingOpen));
+        } catch {
+            // Sin localStorage la preferencia simplemente no persiste entre recargas.
+        }
     }
 
     toggleAmountsHidden(): void {
@@ -181,10 +274,10 @@ export class HomeComponent implements OnInit {
     }
 
     get netWorthChangeIsPositive(): boolean {
-        return (this.indicators?.netWorthChangeVsPreviousMonth ?? 0) >= 0;
+        return (this.netWorth?.netWorthChangeVsPreviousMonth ?? 0) >= 0;
     }
 
     get monthResultIsPositive(): boolean {
-        return (this.indicators?.monthResult ?? 0) >= 0;
+        return (this.month?.monthResult ?? 0) >= 0;
     }
 }
