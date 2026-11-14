@@ -48,7 +48,12 @@ describe('AssistantCardComponent', () => {
         return (fixture.nativeElement as HTMLElement).textContent ?? '';
     }
 
+    const openKey = AssistantCardComponent.OpenStorageKey;
+
+    // La tarjeta arranca plegada; casi todos los tests miran el contenido de la devolución, así que arrancan con la tarjeta abierta
+    // (lo que el usuario dejó guardado). Los de "plegada por defecto" borran esa preferencia antes de crearla.
     beforeEach(() => {
+        localStorage.setItem(openKey, 'true');
         service = jasmine.createSpyObj<AssistantService>('AssistantService', ['getStatus', 'getLatest', 'generate', 'getFindings', 'updateFinding']);
         service.getStatus.and.returnValue(of(enabled));
         service.getLatest.and.returnValue(of(latest()));
@@ -63,6 +68,8 @@ describe('AssistantCardComponent', () => {
             ]
         });
     });
+
+    afterEach(() => localStorage.removeItem(openKey));
 
     it('does not show anything, and does not ask for the latest review, when the assistant is not enabled', () => {
         service.getStatus.and.returnValue(of({ ...enabled, enabled: false }));
@@ -138,6 +145,108 @@ describe('AssistantCardComponent', () => {
         expect(text()).not.toContain('17.019,22');
         expect(text()).toContain('••••');
         expect(text()).toContain('8,9 %');
+    });
+
+    // Plegada por defecto, como la bandeja "Requiere tu atención" (plan-inicio-rapido.md, D9).
+    describe('folded by default', () => {
+        beforeEach(() => localStorage.removeItem(openKey));
+
+        it('shows only the header (period and findings count) until it is opened', () => {
+            service.getFindings.and.returnValue(of([finding(10), finding(11)]));
+            create();
+
+            expect(component.state).toBe('visible');
+            expect(component.open).toBeFalse();
+            expect(text()).toContain('Asistente');
+            expect(text()).toContain('Cierre de septiembre 2026');
+            expect(text()).toContain('2 hallazgos');
+            expect(text()).toContain('Ver historial');
+            expect(text()).not.toContain('Septiembre cerró con ARS 2.284.215 de gasto');
+            expect(text()).not.toContain('Gasto 8,9 % más que agosto');
+            expect(text()).not.toContain('Leer completa');
+            expect((fixture.nativeElement as HTMLElement).querySelector('.card-body')).toBeNull();
+        });
+
+        it('opens and folds with a click on the header, and remembers it', () => {
+            create();
+            const header = (fixture.nativeElement as HTMLElement).querySelector('.card-header button') as HTMLButtonElement;
+
+            header.click();
+            fixture.detectChanges();
+            expect(component.open).toBeTrue();
+            expect(localStorage.getItem(openKey)).toBe('true');
+            expect(text()).toContain('Septiembre cerró con ARS 2.284.215 de gasto');
+            expect(text()).toContain('Leer completa');
+
+            header.click();
+            fixture.detectChanges();
+            expect(component.open).toBeFalse();
+            expect(localStorage.getItem(openKey)).toBe('false');
+            expect(text()).not.toContain('Septiembre cerró');
+        });
+
+        it('starts open when the user left it open', () => {
+            localStorage.setItem(openKey, 'true');
+            create();
+
+            expect(component.open).toBeTrue();
+            expect(text()).toContain('Septiembre cerró con ARS 2.284.215 de gasto');
+        });
+
+        it('does not show the findings count while open, and uses the singular for one', () => {
+            service.getFindings.and.returnValue(of([finding(10)]));
+            create();
+            expect(text()).toContain('1 hallazgo');
+            expect(text()).not.toContain('1 hallazgos');
+
+            component.open = true;
+            fixture.detectChanges();
+            expect(text()).not.toContain('1 hallazgo ');
+        });
+
+        it('keeps what needs attention in view even folded: the missing-review notice with its "Generar ahora" button', () => {
+            service.getLatest.and.returnValue(of(missing({ review: review({ id: 5, kind: 'MidMonth', periodStart: '2026-08-01T00:00:00' }) })));
+            create();
+
+            expect(component.open).toBeFalse();
+            expect(text()).toContain('se prepara esta madrugada');
+            expect(text()).toContain('Generar ahora');
+            expect(text()).not.toContain('Agosto venía parejo');
+        });
+
+        it('keeps the "preparing" line in view even folded', () => {
+            service.getLatest.and.returnValue(of(latest({ preparing: true })));
+            create();
+
+            expect(text()).toContain('Preparando una devolución nueva');
+        });
+
+        it('has no toggle, only the title, when there is no review yet (just a notice)', () => {
+            service.getLatest.and.returnValue(of(missing()));
+            create();
+
+            expect((fixture.nativeElement as HTMLElement).querySelector('.card-header button')).toBeNull();
+            expect(text()).toContain('La devolución de cierre de septiembre 2026 se prepara esta madrugada');
+        });
+
+        it('starts folded without error when localStorage is not available', () => {
+            spyOn(Storage.prototype, 'getItem').and.throwError('sin acceso');
+            create();
+
+            expect(component.open).toBeFalse();
+            expect(component.state).toBe('visible');
+        });
+
+        it('masks the amounts in the header and body when the amounts are hidden', () => {
+            localStorage.setItem(openKey, 'true');
+            fixture = TestBed.createComponent(AssistantCardComponent);
+            component = fixture.componentInstance;
+            component.hideAmounts = true;
+            fixture.detectChanges();
+
+            expect(text()).not.toContain('2.284.215');
+            expect(text()).toContain('••••');
+        });
     });
 
     describe('when a review is missing (D7)', () => {
