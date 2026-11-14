@@ -1,83 +1,149 @@
 import { Component, effect, inject } from '@angular/core';
-import { NgIf, NgFor, NgClass, NgTemplateOutlet, DatePipe } from '@angular/common';
+import { NgIf, NgFor, NgClass, NgTemplateOutlet, NgSwitch, NgSwitchCase, NgSwitchDefault, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { forkJoin } from 'rxjs';
 import type { EChartsOption } from 'echarts';
 
 import { DashboardService } from '../services/dashboard.service';
-import { Dashboard, DashboardPendingItem } from '../models/dashboard.model';
-import { NetWorthService } from '../services/net-worth.service';
+import { BlockState, DashboardCommitments, DashboardMonth, DashboardNetWorth, DashboardPendingItem } from '../models/dashboard.model';
 import { NetWorthTotal, NetWorthMonthlyPoint } from '../models/net-worth.model';
 import { pendingIcon, pendingAction, pendingRoute, pendingBadgeClass, pendingIconClass } from '../utils/dashboard-pending.util';
 import { ReportContextService } from '../../../shared/services/report-context.service';
-import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { ContrastTextPipe } from '../../../shared/pipes/contrastText/contrast-text.pipe';
 import { InfoButtonComponent } from '../../../shared/components/info-button/info-button.component';
 
-// Panorama (Fase 17, Flujo 1 del plan): pantalla de entrada de Reportes. Compone tres fuentes que
-// ya existen, sin recalcular nada: DashboardService (Fase 16 — indicadores, termómetro, pendientes),
-// NetWorthService (la valoración total multi-moneda de "Saldos"/Patrimonio → General, D-9, más la
-// serie mensual para la línea y el anillo). Desde plan-devoluciones-llm-v2.md (Fase 4) el gasto del mes y su
-// promedio también vienen del dashboard, medidos por fecha de compra, igual que el termómetro.
+// Panorama (Fase 17, Flujo 1 del plan): pantalla de entrada de Reportes. Compone fuentes que ya
+// existen, sin recalcular nada: DashboardService (Fase 16 — indicadores, termómetro, pendientes) y la
+// valoración total multi-moneda de "Saldos"/Patrimonio → General (D-9) más la serie mensual para la
+// línea y el anillo. Desde plan-devoluciones-llm-v2.md (Fase 4) el gasto del mes y su promedio también
+// vienen del dashboard, medidos por fecha de compra, igual que el termómetro.
+//
+// plan-inicio-rapido.md, Fase 6: igual que Inicio, el resumen ya no se pide entero. Cuatro bloques (patrimonio, mes, compromisos y
+// pendientes) se piden a la vez y cada uno se dibuja apenas llega, con su propio estado de carga y su propio "Reintentar" (D8). Patrimonio y
+// mes dependen de la moneda elegida arriba (se vuelven a pedir al cambiarla); compromisos y pendientes no, así que se piden una sola vez.
+// El bloque de patrimonio trae también los totales por moneda de referencia (antes `General`) y la serie mensual (antes `Monthly`).
 
 @Component({
     selector: 'app-panorama',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, NgClass, NgTemplateOutlet, RouterLink, DatePipe, CurrencyFiatFormatPipe, ContrastTextPipe, ChartComponent, InfoButtonComponent],
+    imports: [NgIf, NgFor, NgClass, NgTemplateOutlet, NgSwitch, NgSwitchCase, NgSwitchDefault, RouterLink, DatePipe, CurrencyFiatFormatPipe, ContrastTextPipe, ChartComponent, InfoButtonComponent],
     templateUrl: './panorama.component.html',
     styleUrl: './panorama.component.css'
 })
 export class PanoramaComponent {
     private readonly dashboardService = inject(DashboardService);
-    private readonly netWorthService = inject(NetWorthService);
     private readonly chartTheme = inject(ChartThemeService);
     protected readonly reportContext = inject(ReportContextService);
 
-    // La valoración total de arriba de todo no depende de la moneda elegida (D-9: "en cada moneda de
-    // referencia" — todas a la vez, como "Saldos") — se carga una sola vez.
-    isLoadingTotals = true;
-    totals: NetWorthTotal[] = [];
+    // Un estado por bloque: cada uno se dibuja, falla y se reintenta por su cuenta.
+    netWorthState: BlockState = 'loading';
+    monthState: BlockState = 'loading';
+    commitmentsState: BlockState = 'loading';
+    pendingState: BlockState = 'loading';
 
-    isLoadingDashboard = false;
-    dashboardRequested = false;
-    indicators: Dashboard['indicators'] | null = null;
-    thermometer: Dashboard['thermometer'] | null = null;
+    netWorth: DashboardNetWorth | null = null;
+    month: DashboardMonth | null = null;
+    commitments: DashboardCommitments | null = null;
     pending: DashboardPendingItem[] = [];
-    monthly: NetWorthMonthlyPoint[] = [];
 
     netWorthLineOptions: EChartsOption = {};
     compositionOptions: EChartsOption = {};
 
     constructor() {
+        // Compromisos y pendientes no dependen de la moneda elegida: salen ya, una sola vez.
+        this.loadCommitments();
+        this.loadPending();
+
         effect(() => {
             const assetId = this.reportContext.currencyAssetId();
-            if (assetId != null) this.loadForCurrency(assetId);
-        });
-
-        this.netWorthService.getGeneral().subscribe(data => {
-            this.totals = data.totals;
-            this.isLoadingTotals = false;
+            if (assetId != null) {
+                this.loadNetWorth(assetId);
+                this.loadMonth(assetId);
+            }
         });
     }
 
-    private loadForCurrency(assetId: number): void {
-        this.isLoadingDashboard = true;
-        this.dashboardRequested = true;
+    // ── Carga por bloque ────────────────────────────────────────────────────────────────────
 
-        forkJoin({
-            dashboard: this.dashboardService.getDashboard(assetId),
-            monthly: this.netWorthService.getMonthlySeries(assetId)
-        }).subscribe(({ dashboard, monthly }) => {
-            this.indicators = dashboard.indicators;
-            this.thermometer = dashboard.thermometer;
-            this.pending = dashboard.pending;
-            this.monthly = monthly;
-            this.isLoadingDashboard = false;
-            setTimeout(() => this.renderCharts(), 0);
+    // Si el usuario cambia de moneda mientras un pedido está en vuelo, la respuesta de la moneda anterior se descarta.
+    private isCurrent(assetId: number): boolean {
+        return this.reportContext.currencyAssetId() === assetId;
+    }
+
+    retryNetWorth = (): void => this.withCurrency(id => this.loadNetWorth(id));
+    retryMonth = (): void => this.withCurrency(id => this.loadMonth(id));
+    retryCommitments = (): void => this.loadCommitments();
+    retryPending = (): void => this.loadPending();
+
+    private withCurrency(load: (assetId: number) => void): void {
+        const assetId = this.reportContext.currencyAssetId();
+        if (assetId != null) load(assetId);
+    }
+
+    private loadNetWorth(assetId: number): void {
+        this.netWorthState = 'loading';
+        this.dashboardService.getNetWorth(assetId).subscribe({
+            next: data => {
+                if (!this.isCurrent(assetId)) return;
+                this.netWorth = data;
+                this.netWorthState = 'ready';
+                setTimeout(() => this.renderCharts(), 0);
+            },
+            error: () => { if (this.isCurrent(assetId)) this.netWorthState = 'error'; }
         });
+    }
+
+    private loadMonth(assetId: number): void {
+        this.monthState = 'loading';
+        this.dashboardService.getMonth(assetId).subscribe({
+            next: data => {
+                if (!this.isCurrent(assetId)) return;
+                this.month = data;
+                this.monthState = 'ready';
+            },
+            error: () => { if (this.isCurrent(assetId)) this.monthState = 'error'; }
+        });
+    }
+
+    private loadCommitments(): void {
+        this.commitmentsState = 'loading';
+        this.dashboardService.getCommitments().subscribe({
+            next: data => {
+                this.commitments = data;
+                this.commitmentsState = 'ready';
+            },
+            error: () => this.commitmentsState = 'error'
+        });
+    }
+
+    private loadPending(): void {
+        this.pendingState = 'loading';
+        this.dashboardService.getPending().subscribe({
+            next: items => {
+                this.pending = items;
+                this.pendingState = 'ready';
+            },
+            error: () => this.pendingState = 'error'
+        });
+    }
+
+    // ── Estado derivado ─────────────────────────────────────────────────────────────────────
+
+    // Todavía no se eligió una moneda arriba: no hay nada que pedir de patrimonio ni de mes.
+    get currencyChosen(): boolean {
+        return this.reportContext.currencyAssetId() != null;
+    }
+
+    // La valoración total de arriba de todo no depende de la moneda elegida (D-9: "en cada moneda de referencia" — todas a la vez, como
+    // "Saldos"): sale del bloque de patrimonio.
+    get totals(): NetWorthTotal[] {
+        return this.netWorth?.totals ?? [];
+    }
+
+    get monthly(): NetWorthMonthlyPoint[] {
+        return this.netWorth?.monthly ?? [];
     }
 
     private renderCharts(): void {
@@ -124,16 +190,17 @@ export class PanoramaComponent {
     }
 
     get netWorthChangeIsPositive(): boolean {
-        return (this.indicators?.netWorthChangeVsPreviousMonth ?? 0) >= 0;
+        return (this.netWorth?.netWorthChangeVsPreviousMonth ?? 0) >= 0;
     }
 
     get monthResultIsPositive(): boolean {
-        return (this.indicators?.monthResult ?? 0) >= 0;
+        return (this.month?.monthResult ?? 0) >= 0;
     }
 
     get thermometerPct(): number {
-        if (!this.thermometer || this.thermometer.projectedMonthEndAmount <= 0) return 0;
-        return Math.min(100, (this.thermometer.monthToDateAmount / this.thermometer.projectedMonthEndAmount) * 100);
+        const thermometer = this.month?.thermometer;
+        if (!thermometer || thermometer.projectedMonthEndAmount <= 0) return 0;
+        return Math.min(100, (thermometer.monthToDateAmount / thermometer.projectedMonthEndAmount) * 100);
     }
 
     protected readonly pendingIcon = pendingIcon;

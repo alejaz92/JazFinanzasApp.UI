@@ -1,5 +1,5 @@
 import { DashboardPendingItem } from '../models/dashboard.model';
-import { pendingAction, pendingIcon, pendingRoute } from './dashboard-pending.util';
+import { pendingAction, pendingIcon, pendingRoute, pendingSeverityBadgeClass, pendingSummary } from './dashboard-pending.util';
 
 function item(kind: DashboardPendingItem['kind']): DashboardPendingItem {
     return { kind, title: 'AL30', detail: null, amount: null, assetSymbol: null, date: null, linkId: null, findingId: null, severity: 'warning' };
@@ -44,5 +44,27 @@ describe('dashboard-pending.util', () => {
         for (const kind of ['CategorySpike', 'LargeMovement', 'MissingIncome'] as const) {
             expect(pendingIcon(kind)).not.toBe('bi-info-circle');
         }
+    });
+
+    // plan-inicio-rapido.md, Fase 5 (D9): el encabezado de la bandeja plegada.
+    describe('pendingSummary', () => {
+        const withSeverity = (severity: DashboardPendingItem['severity']): DashboardPendingItem => ({ ...item('CardDue'), severity });
+
+        it('sin avisos: cantidad 0 y sin gravedad', () => {
+            expect(pendingSummary([])).toEqual({ count: 0, severity: null });
+        });
+
+        it('cuenta los avisos y se queda con la gravedad más alta (danger > warning > info)', () => {
+            expect(pendingSummary([withSeverity('info'), withSeverity('info')])).toEqual({ count: 2, severity: 'info' });
+            expect(pendingSummary([withSeverity('info'), withSeverity('warning')])).toEqual({ count: 2, severity: 'warning' });
+            expect(pendingSummary([withSeverity('warning'), withSeverity('danger'), withSeverity('info')])).toEqual({ count: 3, severity: 'danger' });
+        });
+
+        it('el color del contador sigue a la gravedad, y sin gravedad queda neutro', () => {
+            expect(pendingSeverityBadgeClass('danger')).toBe('bg-danger');
+            expect(pendingSeverityBadgeClass('warning')).toBe('bg-warning text-dark');
+            expect(pendingSeverityBadgeClass('info')).toBe('bg-primary');
+            expect(pendingSeverityBadgeClass(null)).toBe('bg-secondary');
+        });
     });
 });

@@ -50,6 +50,22 @@ export function pendingBadgeClass(item: DashboardPendingItem): string {
     return SEVERITY_CLASS[item.severity];
 }
 
+// plan-inicio-rapido.md, D9: la bandeja de Inicio va plegada, así que su encabezado dice cuántos avisos hay y el color de la
+// gravedad más alta (peligro > aviso > info) — para no esconder que hay algo urgente.
+const SEVERITY_RANK: Record<DashboardPendingSeverity, number> = { info: 0, warning: 1, danger: 2 };
+
+export function pendingSummary(items: DashboardPendingItem[]): { count: number; severity: DashboardPendingSeverity | null } {
+    let worst: DashboardPendingSeverity | null = null;
+    for (const item of items) {
+        if (worst === null || (SEVERITY_RANK[item.severity] ?? 0) > SEVERITY_RANK[worst]) worst = item.severity;
+    }
+    return { count: items.length, severity: worst };
+}
+
+export function pendingSeverityBadgeClass(severity: DashboardPendingSeverity | null): string {
+    return severity ? SEVERITY_CLASS[severity] : 'bg-secondary';
+}
+
 const SEVERITY_ICON_CLASS: Record<DashboardPendingSeverity, string> = {
     info: '',
     warning: 'text-warning',

@@ -1,3 +1,5 @@
+import { NetWorthMonthlyPoint, NetWorthTotal } from './net-worth.model';
+
 export interface DashboardSharedBalance {
     assetId: number;
     assetSymbol: string;
@@ -68,3 +70,37 @@ export interface Dashboard {
     thermometer: DashboardThermometer;
     pending: DashboardPendingItem[];
 }
+
+// plan-inicio-rapido.md, Fase 5 (D2): el mismo resumen partido en bloques que se piden por separado, para pintar cada uno apenas llega.
+// Cada campo es el mismo que ya traía `Dashboard`; lo nuevo (serie mensual, "hay cuentas" y totales por moneda) reemplaza a lo que Inicio y
+// Panorama pedían aparte (Monthly, ByAccount y General).
+export interface DashboardNetWorth {
+    referenceAssetSymbol: string;
+    available: number;
+    netWorthGross: number;
+    netWorthNet: number;
+    netWorthChangeVsPreviousMonth: number;
+    // false si ninguna cuenta tiene movimientos: se muestra la guía de primer uso.
+    hasAccounts: boolean;
+    monthly: NetWorthMonthlyPoint[];
+    totals: NetWorthTotal[];
+}
+
+export interface DashboardMonth {
+    referenceAssetSymbol: string;
+    monthResult: number;
+    monthResultPreviousMonth: number;
+    monthExpense: number;
+    monthExpenseAverage: number;
+    thermometer: DashboardThermometer;
+}
+
+export interface DashboardCommitments {
+    // Siempre en pesos, no en la moneda de referencia.
+    cardsDueAmountInPesos: number;
+    cardsNextDueDate: string | null;
+    sharedBalances: DashboardSharedBalance[];
+}
+
+// Estado de carga de cada bloque: cada uno se muestra, falla y se reintenta por su cuenta.
+export type BlockState = 'loading' | 'ready' | 'error';

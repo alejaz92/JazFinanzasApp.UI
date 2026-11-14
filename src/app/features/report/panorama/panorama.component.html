@@ -12,94 +12,165 @@
     </app-info-button>
 </h2>
 
-<app-loading [isLoading]="isLoadingTotals"></app-loading>
-
-<div class="row" *ngIf="!isLoadingTotals">
-    <div class="col-12" [ngClass]="{ 'col-md-12': totals.length === 1, 'col-md-6': totals.length >= 2 }" *ngFor="let t of totals">
-        <a class="card mb-3 text-center text-decoration-none" [routerLink]="['/report/networth-general']" queryParamsHandling="preserve"
-           [style.backgroundColor]="t.color" [style.color]="t.color | contrastText">
-            <div class="card-header d-flex align-items-center gap-2 justify-content-center">
-                Valor Total en {{ t.symbol }}
-                <app-info-button title="Valor total"
-                    text="Todo lo que tenés (cuentas, bolsa, cripto y bonos) expresado en esta moneda a la cotización de hoy. Es el total bruto: no descuenta la deuda de tarjeta, eso se ve en Patrimonio → General."></app-info-button>
-            </div>
-            <div class="card-body">
-                <h4 class="card-title mb-0">{{ t.grossBalance | currencyFiatFormat }}</h4>
-            </div>
-        </a>
+<!-- Plantillas de un indicador mientras su bloque carga o si falla (plan-inicio-rapido.md, D8): cada bloque por su cuenta. -->
+<ng-template #cardLoading let-label="label">
+    <div class="card h-100">
+        <div class="card-body">
+            <div class="text-body-secondary small">{{ label }}</div>
+            <div class="placeholder-glow"><span class="placeholder col-8 fs-5"></span></div>
+        </div>
     </div>
-</div>
+</ng-template>
+<ng-template #cardError let-label="label" let-retry="retry">
+    <div class="card h-100">
+        <div class="card-body">
+            <div class="text-body-secondary small">{{ label }}</div>
+            <div class="small text-danger">No se pudo cargar</div>
+            <button type="button" class="btn btn-link btn-sm p-0" (click)="retry()">Reintentar</button>
+        </div>
+    </div>
+</ng-template>
 
-<p class="text-body-secondary" *ngIf="!isLoadingTotals && !dashboardRequested">Elegí una moneda arriba para ver el resto del panorama.</p>
+<p class="text-body-secondary" *ngIf="!currencyChosen">Elegí una moneda arriba para ver el resto del panorama.</p>
 
-<app-loading [isLoading]="isLoadingDashboard"></app-loading>
+<ng-container *ngIf="currencyChosen">
+    <!-- Valor total en cada moneda de referencia (llega con el bloque de patrimonio) -->
+    <div class="row" *ngIf="netWorthState === 'loading'">
+        <div class="col-12 mb-3">
+            <ng-container *ngTemplateOutlet="cardLoading; context: { label: 'Valor Total' }"></ng-container>
+        </div>
+    </div>
+    <div class="row" *ngIf="netWorthState === 'error'">
+        <div class="col-12 mb-3">
+            <ng-container *ngTemplateOutlet="cardError; context: { label: 'Valor Total', retry: retryNetWorth }"></ng-container>
+        </div>
+    </div>
+    <div class="row" *ngIf="netWorthState === 'ready'">
+        <div class="col-12" [ngClass]="{ 'col-md-12': totals.length === 1, 'col-md-6': totals.length >= 2 }" *ngFor="let t of totals">
+            <a class="card mb-3 text-center text-decoration-none" [routerLink]="['/report/networth-general']" queryParamsHandling="preserve"
+               [style.backgroundColor]="t.color" [style.color]="t.color | contrastText">
+                <div class="card-header d-flex align-items-center gap-2 justify-content-center">
+                    Valor Total en {{ t.symbol }}
+                    <app-info-button title="Valor total"
+                        text="Todo lo que tenés (cuentas, bolsa, cripto y bonos) expresado en esta moneda a la cotización de hoy. Es el total bruto: no descuenta la deuda de tarjeta, eso se ve en Patrimonio → General."></app-info-button>
+                </div>
+                <div class="card-body">
+                    <h4 class="card-title mb-0">{{ t.grossBalance | currencyFiatFormat }}</h4>
+                </div>
+            </a>
+        </div>
+    </div>
 
-<ng-container *ngIf="!isLoadingTotals && dashboardRequested && !isLoadingDashboard && indicators && thermometer">
-    <!-- Fila de indicadores -->
+    <!-- Fila de indicadores: cada uno se dibuja cuando llega su bloque -->
     <div class="row">
+        <!-- Patrimonio -->
         <div class="col-6 col-md-4 col-lg mb-3">
-            <a class="card h-100 text-decoration-none text-reset" [routerLink]="['/report/networth-general']" queryParamsHandling="preserve">
-                <div class="card-body">
-                    <div class="text-body-secondary small">Patrimonio</div>
-                    <div class="fs-5 fw-semibold">{{ indicators.netWorthGross | currencyFiatFormat }}</div>
-                    <div class="small" [class.text-success]="netWorthChangeIsPositive" [class.text-danger]="!netWorthChangeIsPositive">
-                        <i class="bi" [ngClass]="netWorthChangeIsPositive ? 'bi-arrow-up-right' : 'bi-arrow-down-right'"></i>
-                        {{ indicators.netWorthChangeVsPreviousMonth | currencyFiatFormat }} vs mes pasado
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-6 col-md-4 col-lg mb-3">
-            <a class="card h-100 text-decoration-none text-reset" [routerLink]="['/report/inc-exp-summary']" queryParamsHandling="preserve">
-                <div class="card-body">
-                    <div class="text-body-secondary small">Resultado del mes</div>
-                    <div class="fs-5 fw-semibold" [class.text-success]="monthResultIsPositive" [class.text-danger]="!monthResultIsPositive">
-                        {{ indicators.monthResult | currencyFiatFormat }}
-                    </div>
-                    <div class="small text-body-secondary">Mes pasado: {{ indicators.monthResultPreviousMonth | currencyFiatFormat }}</div>
-                </div>
-            </a>
-        </div>
-        <div class="col-6 col-md-4 col-lg mb-3">
-            <a class="card h-100 text-decoration-none text-reset" [routerLink]="['/report/inc-exp-evolution']" queryParamsHandling="preserve">
-                <div class="card-body">
-                    <div class="text-body-secondary small">Gasto del mes</div>
-                    <div class="fs-5 fw-semibold">{{ indicators.monthExpense | currencyFiatFormat }}</div>
-                    <div class="small text-body-secondary">
-                        Promedio 6 meses: {{ indicators.monthExpenseAverage | currencyFiatFormat }}
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-6 col-md-4 col-lg mb-3">
-            <a class="card h-100 text-decoration-none text-reset" [routerLink]="['/report/cards-general']" queryParamsHandling="preserve">
-                <div class="card-body">
-                    <div class="text-body-secondary small">Tarjetas a pagar</div>
-                    <div class="fs-5 fw-semibold">{{ indicators.cardsDueAmountInPesos | currencyFiatFormat }}</div>
-                    <div class="small text-body-secondary">
-                        {{ indicators.cardsNextDueDate ? ('Vence ' + (indicators.cardsNextDueDate | date:'dd/MM/yyyy')) : 'Sin vencimientos próximos' }}
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-6 col-md-4 col-lg mb-3">
-            <a class="card h-100 text-decoration-none text-reset" [routerLink]="['/shared-events']">
-                <div class="card-body">
-                    <div class="text-body-secondary small">Saldo compartido</div>
-                    <ng-container *ngIf="indicators.sharedBalances.length > 0; else noSharedBalance">
-                        <div class="fs-5 fw-semibold" *ngFor="let b of indicators.sharedBalances">
-                            {{ b.net | currencyFiatFormat }} <span class="small text-body-secondary">{{ b.assetSymbol }}</span>
+            <ng-container [ngSwitch]="netWorthState">
+                <ng-container *ngSwitchCase="'loading'">
+                    <ng-container *ngTemplateOutlet="cardLoading; context: { label: 'Patrimonio' }"></ng-container>
+                </ng-container>
+                <ng-container *ngSwitchCase="'error'">
+                    <ng-container *ngTemplateOutlet="cardError; context: { label: 'Patrimonio', retry: retryNetWorth }"></ng-container>
+                </ng-container>
+                <a *ngSwitchDefault class="card h-100 text-decoration-none text-reset" [routerLink]="['/report/networth-general']" queryParamsHandling="preserve">
+                    <div class="card-body">
+                        <div class="text-body-secondary small">Patrimonio</div>
+                        <div class="fs-5 fw-semibold">{{ (netWorth?.netWorthGross ?? 0) | currencyFiatFormat }}</div>
+                        <div class="small" [class.text-success]="netWorthChangeIsPositive" [class.text-danger]="!netWorthChangeIsPositive">
+                            <i class="bi" [ngClass]="netWorthChangeIsPositive ? 'bi-arrow-up-right' : 'bi-arrow-down-right'"></i>
+                            {{ (netWorth?.netWorthChangeVsPreviousMonth ?? 0) | currencyFiatFormat }} vs mes pasado
                         </div>
-                    </ng-container>
-                    <ng-template #noSharedBalance>
-                        <div class="fs-5 fw-semibold">{{ 0 | currencyFiatFormat }}</div>
-                    </ng-template>
-                </div>
-            </a>
+                    </div>
+                </a>
+            </ng-container>
+        </div>
+        <!-- Resultado del mes -->
+        <div class="col-6 col-md-4 col-lg mb-3">
+            <ng-container [ngSwitch]="monthState">
+                <ng-container *ngSwitchCase="'loading'">
+                    <ng-container *ngTemplateOutlet="cardLoading; context: { label: 'Resultado del mes' }"></ng-container>
+                </ng-container>
+                <ng-container *ngSwitchCase="'error'">
+                    <ng-container *ngTemplateOutlet="cardError; context: { label: 'Resultado del mes', retry: retryMonth }"></ng-container>
+                </ng-container>
+                <a *ngSwitchDefault class="card h-100 text-decoration-none text-reset" [routerLink]="['/report/inc-exp-summary']" queryParamsHandling="preserve">
+                    <div class="card-body">
+                        <div class="text-body-secondary small">Resultado del mes</div>
+                        <div class="fs-5 fw-semibold" [class.text-success]="monthResultIsPositive" [class.text-danger]="!monthResultIsPositive">
+                            {{ (month?.monthResult ?? 0) | currencyFiatFormat }}
+                        </div>
+                        <div class="small text-body-secondary">Mes pasado: {{ (month?.monthResultPreviousMonth ?? 0) | currencyFiatFormat }}</div>
+                    </div>
+                </a>
+            </ng-container>
+        </div>
+        <!-- Gasto del mes -->
+        <div class="col-6 col-md-4 col-lg mb-3">
+            <ng-container [ngSwitch]="monthState">
+                <ng-container *ngSwitchCase="'loading'">
+                    <ng-container *ngTemplateOutlet="cardLoading; context: { label: 'Gasto del mes' }"></ng-container>
+                </ng-container>
+                <ng-container *ngSwitchCase="'error'">
+                    <ng-container *ngTemplateOutlet="cardError; context: { label: 'Gasto del mes', retry: retryMonth }"></ng-container>
+                </ng-container>
+                <a *ngSwitchDefault class="card h-100 text-decoration-none text-reset" [routerLink]="['/report/inc-exp-evolution']" queryParamsHandling="preserve">
+                    <div class="card-body">
+                        <div class="text-body-secondary small">Gasto del mes</div>
+                        <div class="fs-5 fw-semibold">{{ (month?.monthExpense ?? 0) | currencyFiatFormat }}</div>
+                        <div class="small text-body-secondary">
+                            Promedio 6 meses: {{ (month?.monthExpenseAverage ?? 0) | currencyFiatFormat }}
+                        </div>
+                    </div>
+                </a>
+            </ng-container>
+        </div>
+        <!-- Tarjetas a pagar -->
+        <div class="col-6 col-md-4 col-lg mb-3">
+            <ng-container [ngSwitch]="commitmentsState">
+                <ng-container *ngSwitchCase="'loading'">
+                    <ng-container *ngTemplateOutlet="cardLoading; context: { label: 'Tarjetas a pagar' }"></ng-container>
+                </ng-container>
+                <ng-container *ngSwitchCase="'error'">
+                    <ng-container *ngTemplateOutlet="cardError; context: { label: 'Tarjetas a pagar', retry: retryCommitments }"></ng-container>
+                </ng-container>
+                <a *ngSwitchDefault class="card h-100 text-decoration-none text-reset" [routerLink]="['/report/cards-general']" queryParamsHandling="preserve">
+                    <div class="card-body">
+                        <div class="text-body-secondary small">Tarjetas a pagar</div>
+                        <div class="fs-5 fw-semibold">{{ (commitments?.cardsDueAmountInPesos ?? 0) | currencyFiatFormat }}</div>
+                        <div class="small text-body-secondary">
+                            {{ commitments?.cardsNextDueDate ? ('Vence ' + (commitments?.cardsNextDueDate | date:'dd/MM/yyyy')) : 'Sin vencimientos próximos' }}
+                        </div>
+                    </div>
+                </a>
+            </ng-container>
+        </div>
+        <!-- Saldo compartido -->
+        <div class="col-6 col-md-4 col-lg mb-3">
+            <ng-container [ngSwitch]="commitmentsState">
+                <ng-container *ngSwitchCase="'loading'">
+                    <ng-container *ngTemplateOutlet="cardLoading; context: { label: 'Saldo compartido' }"></ng-container>
+                </ng-container>
+                <ng-container *ngSwitchCase="'error'">
+                    <ng-container *ngTemplateOutlet="cardError; context: { label: 'Saldo compartido', retry: retryCommitments }"></ng-container>
+                </ng-container>
+                <a *ngSwitchDefault class="card h-100 text-decoration-none text-reset" [routerLink]="['/shared-events']">
+                    <div class="card-body">
+                        <div class="text-body-secondary small">Saldo compartido</div>
+                        <ng-container *ngIf="(commitments?.sharedBalances?.length ?? 0) > 0; else noSharedBalance">
+                            <div class="fs-5 fw-semibold" *ngFor="let b of commitments?.sharedBalances">
+                                {{ b.net | currencyFiatFormat }} <span class="small text-body-secondary">{{ b.assetSymbol }}</span>
+                            </div>
+                        </ng-container>
+                        <ng-template #noSharedBalance>
+                            <div class="fs-5 fw-semibold">{{ 0 | currencyFiatFormat }}</div>
+                        </ng-template>
+                    </div>
+                </a>
+            </ng-container>
         </div>
     </div>
 
-    <!-- Termómetro del mes -->
+    <!-- Termómetro del mes (llega con el bloque del mes) -->
     <div class="card mb-3">
         <div class="card-header d-flex align-items-center gap-2">
             Termómetro del mes
@@ -114,19 +185,47 @@
             </app-info-button>
         </div>
         <div class="card-body">
-            <div class="progress mb-2" style="height: 10px;">
-                <div class="progress-bar" role="progressbar" [style.width.%]="thermometerPct"></div>
-            </div>
-            <div class="d-flex flex-wrap justify-content-between small text-body-secondary">
-                <span>Llevo gastado: <strong class="text-body">{{ thermometer.monthToDateAmount | currencyFiatFormat }}</strong> (día {{ thermometer.daysElapsed }} de {{ thermometer.daysInMonth }})</span>
-                <span>Mismo día mes pasado: <strong class="text-body">{{ thermometer.previousMonthSameDayAmount | currencyFiatFormat }}</strong></span>
-                <span>Proyección de cierre: <strong class="text-body">{{ thermometer.projectedMonthEndAmount | currencyFiatFormat }}</strong></span>
-            </div>
+            <ng-container [ngSwitch]="monthState">
+                <div *ngSwitchCase="'loading'" class="placeholder-glow">
+                    <span class="placeholder col-12 mb-2" style="height: 10px"></span>
+                    <span class="placeholder col-8"></span>
+                </div>
+                <div *ngSwitchCase="'error'" class="small">
+                    <span class="text-danger me-2">No se pudo cargar</span>
+                    <button type="button" class="btn btn-link btn-sm p-0" (click)="retryMonth()">Reintentar</button>
+                </div>
+                <ng-container *ngSwitchDefault>
+                    <ng-container *ngIf="month?.thermometer as thermometer">
+                        <div class="progress mb-2" style="height: 10px;">
+                            <div class="progress-bar" role="progressbar" [style.width.%]="thermometerPct"></div>
+                        </div>
+                        <div class="d-flex flex-wrap justify-content-between small text-body-secondary">
+                            <span>Llevo gastado: <strong class="text-body">{{ thermometer.monthToDateAmount | currencyFiatFormat }}</strong> (día {{ thermometer.daysElapsed }} de {{ thermometer.daysInMonth }})</span>
+                            <span>Mismo día mes pasado: <strong class="text-body">{{ thermometer.previousMonthSameDayAmount | currencyFiatFormat }}</strong></span>
+                            <span>Proyección de cierre: <strong class="text-body">{{ thermometer.projectedMonthEndAmount | currencyFiatFormat }}</strong></span>
+                        </div>
+                    </ng-container>
+                </ng-container>
+            </ng-container>
         </div>
     </div>
 
-    <!-- Línea de patrimonio + Anillo de composición -->
-    <div class="row" *ngIf="monthly.length > 0">
+    <!-- Línea de patrimonio + Anillo de composición (llegan con el bloque de patrimonio) -->
+    <div class="row" *ngIf="netWorthState === 'loading'">
+        <div class="col-md-8 mb-3">
+            <div class="card">
+                <div class="card-header">Patrimonio — últimos 12 meses</div>
+                <div class="card-body placeholder-glow"><span class="placeholder col-12" style="height: 280px"></span></div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-header">Composición de hoy</div>
+                <div class="card-body placeholder-glow"><span class="placeholder col-12" style="height: 280px"></span></div>
+            </div>
+        </div>
+    </div>
+    <div class="row" *ngIf="netWorthState === 'ready' && monthly.length > 0">
         <div class="col-md-8 mb-3">
             <a class="card text-decoration-none text-reset" [routerLink]="['/report/networth-general']" queryParamsHandling="preserve">
                 <div class="card-header d-flex align-items-center gap-2">
@@ -153,7 +252,7 @@
         </div>
     </div>
 
-    <!-- Lo que necesita atención -->
+    <!-- Lo que necesita atención (llega con su propio bloque, sin frenar al resto) -->
     <div class="card mb-3">
         <div class="card-header d-flex align-items-center gap-2">
             Lo que necesita atención
@@ -172,8 +271,13 @@
             </app-info-button>
         </div>
         <div class="card-body p-0">
-            <p class="text-body-secondary p-3 mb-0" *ngIf="pending.length === 0">Todo al día.</p>
-            <div class="list-group list-group-flush" *ngIf="pending.length > 0">
+            <p class="text-body-secondary p-3 mb-0" *ngIf="pendingState === 'loading'">Buscando avisos…</p>
+            <div class="p-3 small" *ngIf="pendingState === 'error'">
+                <span class="text-danger me-2">No se pudo cargar</span>
+                <button type="button" class="btn btn-link btn-sm p-0" (click)="retryPending()">Reintentar</button>
+            </div>
+            <p class="text-body-secondary p-3 mb-0" *ngIf="pendingState === 'ready' && pending.length === 0">Todo al día.</p>
+            <div class="list-group list-group-flush" *ngIf="pendingState === 'ready' && pending.length > 0">
                 <ng-container *ngFor="let item of pending">
                     <a *ngIf="pendingRoute(item) as route; else pendingRow" class="list-group-item d-flex justify-content-between align-items-center" [routerLink]="route">
                         <ng-container *ngTemplateOutlet="pendingContent; context: { item: item }"></ng-container>

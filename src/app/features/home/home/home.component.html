@@ -1,6 +1,4 @@
-<app-loading [isLoading]="isLoading"></app-loading>
-
-<div class="container-fluid py-3" *ngIf="!isLoading">
+<div class="container-fluid py-3">
 
     <!-- 5.1 Barra de saludo y acciones rápidas -->
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
@@ -27,6 +25,25 @@
         </div>
     </div>
 
+    <!-- Plantillas de un indicador mientras su bloque carga o si falla (plan-inicio-rapido.md, D8): cada bloque por su cuenta. -->
+    <ng-template #cardLoading let-label="label">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="text-body-secondary small">{{ label }}</div>
+                <div class="placeholder-glow"><span class="placeholder col-8 fs-5"></span></div>
+            </div>
+        </div>
+    </ng-template>
+    <ng-template #cardError let-label="label" let-retry="retry">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="text-body-secondary small">{{ label }}</div>
+                <div class="small text-danger">No se pudo cargar</div>
+                <button type="button" class="btn btn-link btn-sm p-0" (click)="retry()">Reintentar</button>
+            </div>
+        </div>
+    </ng-template>
+
     <!-- 5.8 Primer uso: reemplaza el resto de la pantalla -->
     <div class="card" *ngIf="isFirstUse">
         <div class="card-body text-center py-5">
@@ -41,72 +58,131 @@
         </div>
     </div>
 
-    <ng-container *ngIf="!isFirstUse && indicators">
-        <!-- 5.2 Fila de indicadores -->
+    <ng-container *ngIf="!isFirstUse">
+        <!-- 5.2 Fila de indicadores: cada uno se dibuja cuando llega su bloque -->
         <div class="row">
+            <!-- Patrimonio: Disponible -->
             <div class="col-6 col-md-4 col-lg mb-3">
-                <a class="card h-100 text-decoration-none text-reset" [routerLink]="['/report/networth-by-account']">
-                    <div class="card-body">
-                        <div class="text-body-secondary small">Disponible</div>
-                        <div class="fs-5 fw-semibold">{{ fmt(indicators.available) }}</div>
-                    </div>
-                </a>
-            </div>
-            <div class="col-6 col-md-4 col-lg mb-3">
-                <a class="card h-100 text-decoration-none text-reset" [routerLink]="['/report/networth-general']">
-                    <div class="card-body">
-                        <div class="text-body-secondary small">Patrimonio total</div>
-                        <div class="fs-5 fw-semibold">{{ fmt(indicators.netWorthGross) }}</div>
-                    </div>
-                </a>
-            </div>
-            <div class="col-6 col-md-4 col-lg mb-3">
-                <a class="card h-100 text-decoration-none text-reset" [routerLink]="['/report/inc-exp-summary']">
-                    <div class="card-body">
-                        <div class="text-body-secondary small">Resultado del mes</div>
-                        <div class="fs-5 fw-semibold" [class.text-success]="monthResultIsPositive" [class.text-danger]="!monthResultIsPositive">
-                            {{ fmt(indicators.monthResult) }}
+                <ng-container [ngSwitch]="netWorthState">
+                    <ng-container *ngSwitchCase="'loading'">
+                        <ng-container *ngTemplateOutlet="cardLoading; context: { label: 'Disponible' }"></ng-container>
+                    </ng-container>
+                    <ng-container *ngSwitchCase="'error'">
+                        <ng-container *ngTemplateOutlet="cardError; context: { label: 'Disponible', retry: retryNetWorth }"></ng-container>
+                    </ng-container>
+                    <a *ngSwitchDefault class="card h-100 text-decoration-none text-reset" [routerLink]="['/report/networth-by-account']">
+                        <div class="card-body">
+                            <div class="text-body-secondary small">Disponible</div>
+                            <div class="fs-5 fw-semibold">{{ fmt(netWorth?.available ?? 0) }}</div>
                         </div>
-                    </div>
-                </a>
+                    </a>
+                </ng-container>
             </div>
+            <!-- Patrimonio: Patrimonio total -->
             <div class="col-6 col-md-4 col-lg mb-3">
-                <a class="card h-100 text-decoration-none text-reset" [routerLink]="['/report/cards-general']">
-                    <div class="card-body">
-                        <div class="text-body-secondary small">Tarjetas a pagar</div>
-                        <div class="fs-5 fw-semibold">{{ fmt(indicators.cardsDueAmountInPesos) }}</div>
-                        <div class="small text-body-secondary" *ngIf="indicators.cardsNextDueDate">
-                            Vence {{ indicators.cardsNextDueDate | date:'dd/MM/yyyy' }}
+                <ng-container [ngSwitch]="netWorthState">
+                    <ng-container *ngSwitchCase="'loading'">
+                        <ng-container *ngTemplateOutlet="cardLoading; context: { label: 'Patrimonio total' }"></ng-container>
+                    </ng-container>
+                    <ng-container *ngSwitchCase="'error'">
+                        <ng-container *ngTemplateOutlet="cardError; context: { label: 'Patrimonio total', retry: retryNetWorth }"></ng-container>
+                    </ng-container>
+                    <a *ngSwitchDefault class="card h-100 text-decoration-none text-reset" [routerLink]="['/report/networth-general']">
+                        <div class="card-body">
+                            <div class="text-body-secondary small">Patrimonio total</div>
+                            <div class="fs-5 fw-semibold">{{ fmt(netWorth?.netWorthGross ?? 0) }}</div>
                         </div>
-                    </div>
-                </a>
+                    </a>
+                </ng-container>
             </div>
+            <!-- Mes: Resultado del mes -->
             <div class="col-6 col-md-4 col-lg mb-3">
-                <a class="card h-100 text-decoration-none text-reset" [routerLink]="['/shared-events']">
-                    <div class="card-body">
-                        <div class="text-body-secondary small">Saldo compartido</div>
-                        <ng-container *ngIf="indicators.sharedBalances.length > 0; else noSharedBalance">
-                            <div class="fs-5 fw-semibold" *ngFor="let b of indicators.sharedBalances">
-                                {{ fmt(b.net) }} <span class="small text-body-secondary">{{ b.assetSymbol }}</span>
+                <ng-container [ngSwitch]="monthState">
+                    <ng-container *ngSwitchCase="'loading'">
+                        <ng-container *ngTemplateOutlet="cardLoading; context: { label: 'Resultado del mes' }"></ng-container>
+                    </ng-container>
+                    <ng-container *ngSwitchCase="'error'">
+                        <ng-container *ngTemplateOutlet="cardError; context: { label: 'Resultado del mes', retry: retryMonth }"></ng-container>
+                    </ng-container>
+                    <a *ngSwitchDefault class="card h-100 text-decoration-none text-reset" [routerLink]="['/report/inc-exp-summary']">
+                        <div class="card-body">
+                            <div class="text-body-secondary small">Resultado del mes</div>
+                            <div class="fs-5 fw-semibold" [class.text-success]="monthResultIsPositive" [class.text-danger]="!monthResultIsPositive">
+                                {{ fmt(month?.monthResult ?? 0) }}
                             </div>
-                        </ng-container>
-                        <ng-template #noSharedBalance>
-                            <div class="fs-5 fw-semibold">{{ fmt(0) }}</div>
-                        </ng-template>
-                    </div>
-                </a>
+                        </div>
+                    </a>
+                </ng-container>
+            </div>
+            <!-- Compromisos: Tarjetas a pagar -->
+            <div class="col-6 col-md-4 col-lg mb-3">
+                <ng-container [ngSwitch]="commitmentsState">
+                    <ng-container *ngSwitchCase="'loading'">
+                        <ng-container *ngTemplateOutlet="cardLoading; context: { label: 'Tarjetas a pagar' }"></ng-container>
+                    </ng-container>
+                    <ng-container *ngSwitchCase="'error'">
+                        <ng-container *ngTemplateOutlet="cardError; context: { label: 'Tarjetas a pagar', retry: retryCommitments }"></ng-container>
+                    </ng-container>
+                    <a *ngSwitchDefault class="card h-100 text-decoration-none text-reset" [routerLink]="['/report/cards-general']">
+                        <div class="card-body">
+                            <div class="text-body-secondary small">Tarjetas a pagar</div>
+                            <div class="fs-5 fw-semibold">{{ fmt(commitments?.cardsDueAmountInPesos ?? 0) }}</div>
+                            <div class="small text-body-secondary" *ngIf="commitments?.cardsNextDueDate">
+                                Vence {{ commitments?.cardsNextDueDate | date:'dd/MM/yyyy' }}
+                            </div>
+                        </div>
+                    </a>
+                </ng-container>
+            </div>
+            <!-- Compromisos: Saldo compartido -->
+            <div class="col-6 col-md-4 col-lg mb-3">
+                <ng-container [ngSwitch]="commitmentsState">
+                    <ng-container *ngSwitchCase="'loading'">
+                        <ng-container *ngTemplateOutlet="cardLoading; context: { label: 'Saldo compartido' }"></ng-container>
+                    </ng-container>
+                    <ng-container *ngSwitchCase="'error'">
+                        <ng-container *ngTemplateOutlet="cardError; context: { label: 'Saldo compartido', retry: retryCommitments }"></ng-container>
+                    </ng-container>
+                    <a *ngSwitchDefault class="card h-100 text-decoration-none text-reset" [routerLink]="['/shared-events']">
+                        <div class="card-body">
+                            <div class="text-body-secondary small">Saldo compartido</div>
+                            <ng-container *ngIf="(commitments?.sharedBalances?.length ?? 0) > 0; else noSharedBalance">
+                                <div class="fs-5 fw-semibold" *ngFor="let b of commitments?.sharedBalances">
+                                    {{ fmt(b.net) }} <span class="small text-body-secondary">{{ b.assetSymbol }}</span>
+                                </div>
+                            </ng-container>
+                            <ng-template #noSharedBalance>
+                                <div class="fs-5 fw-semibold">{{ fmt(0) }}</div>
+                            </ng-template>
+                        </div>
+                    </a>
+                </ng-container>
             </div>
         </div>
 
         <!-- Asistente: devolución más reciente (plan-devoluciones-llm, Fase 12). Solo aparece si está habilitado. -->
         <app-assistant-card [hideAmounts]="amountsHidden"></app-assistant-card>
 
-        <!-- 5.3 Bandeja de pendientes -->
+        <!-- 5.3 Bandeja de pendientes: plegada por defecto, con la cantidad de avisos y el color de la gravedad más alta
+             (plan-inicio-rapido.md, D9). Se dibuja cuando llega su bloque, sin frenar al resto. -->
         <div class="card mb-3">
-            <div class="card-header">Requiere tu atención</div>
-            <div class="card-body p-0">
-                <p class="text-body-secondary p-3 mb-0" *ngIf="pending.length === 0">Todo al día.</p>
-                <div class="list-group list-group-flush" *ngIf="pending.length > 0">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <button type="button" class="btn btn-link text-reset text-decoration-none p-0 d-flex align-items-center gap-2 flex-grow-1 text-start"
+                        [disabled]="!canTogglePending" (click)="togglePending()"
+                        [attr.aria-expanded]="pendingOpen" aria-controls="home-pending-list">
+                    <i class="bi" [ngClass]="pendingOpen ? 'bi-chevron-down' : 'bi-chevron-right'" *ngIf="canTogglePending"></i>
+                    <span>Requiere tu atención</span>
+                    <span class="badge" [ngClass]="pendingSummaryBadgeClass" *ngIf="canTogglePending">{{ pendingCount }}</span>
+                    <span class="small text-body-secondary" *ngIf="pendingState === 'loading'">Buscando avisos…</span>
+                    <span class="small text-body-secondary" *ngIf="pendingState === 'ready' && pending.length === 0">Todo al día.</span>
+                </button>
+                <span class="small" *ngIf="pendingState === 'error'">
+                    <span class="text-danger me-2">No se pudo cargar</span>
+                    <button type="button" class="btn btn-link btn-sm p-0" (click)="retryPending()">Reintentar</button>
+                </span>
+            </div>
+            <div id="home-pending-list" class="card-body p-0" *ngIf="pendingOpen && canTogglePending">
+                <div class="list-group list-group-flush">
                     <ng-container *ngFor="let item of pending">
                         <a *ngIf="pendingRoute(item) as route; else pendingRow" class="list-group-item d-flex justify-content-between align-items-center" [routerLink]="route">
                             <ng-container *ngTemplateOutlet="pendingContent; context: { item: item }"></ng-container>
@@ -132,8 +208,22 @@
             </span>
         </ng-template>
 
-        <!-- 5.4 Patrimonio: evolución y composición -->
-        <div class="row" *ngIf="monthly.length > 0">
+        <!-- 5.4 Patrimonio: evolución y composición (llegan con el bloque de patrimonio) -->
+        <div class="row" *ngIf="netWorthState === 'loading'">
+            <div class="col-md-8 mb-3">
+                <div class="card">
+                    <div class="card-header">Patrimonio — últimos 12 meses</div>
+                    <div class="card-body placeholder-glow"><span class="placeholder col-12" style="height: 260px"></span></div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-header">Composición de hoy</div>
+                    <div class="card-body placeholder-glow"><span class="placeholder col-12" style="height: 260px"></span></div>
+                </div>
+            </div>
+        </div>
+        <div class="row" *ngIf="netWorthState === 'ready' && monthly.length > 0">
             <div class="col-md-8 mb-3">
                 <a class="card text-decoration-none text-reset" [routerLink]="['/report/networth-general']">
                     <div class="card-header">Patrimonio — últimos 12 meses</div>
