@@ -4,7 +4,8 @@ import type { EChartsOption, ECElementEvent } from 'echarts';
 
 import { IncomeExpenseService } from '../services/income-expense.service';
 import { SpendingCalendar } from '../models/income-expense.model';
-import { ReportContextService } from '../../../shared/services/report-context.service';
+import { ReportContextService, SpendingMeasure } from '../../../shared/services/report-context.service';
+import { SpendingMeasureNoticeComponent } from '../../../shared/components/spending-measure-notice/spending-measure-notice.component';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
@@ -22,7 +23,7 @@ const WEEKDAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
 @Component({
     selector: 'app-inc-exp-calendar-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, DatePipe, CurrencyFiatFormatPipe, ChartComponent, InfoButtonComponent],
+    imports: [SpendingMeasureNoticeComponent, LoadingComponent, NgIf, NgFor, DatePipe, CurrencyFiatFormatPipe, ChartComponent, InfoButtonComponent],
     templateUrl: './inc-exp-calendar-report.component.html',
     styleUrl: './inc-exp-calendar-report.component.css'
 })
@@ -52,14 +53,22 @@ export class IncExpCalendarReportComponent {
     constructor() {
         effect(() => {
             const assetId = this.reportContext.currencyAssetId();
-            if (assetId != null) this.load(assetId);
+            // Leer la medida acá hace que el reporte se vuelva a pedir al mover el interruptor de la barra.
+            const measure = this.reportContext.spendingMeasure();
+            if (assetId != null) this.load(assetId, measure);
         });
     }
 
-    private load(assetId: number): void {
+    // Vuelve a pedir el reporte con la moneda y la medida elegidas en la barra (al cambiar de mes, de año o de ventana).
+    private reload(): void {
+        const assetId = this.reportContext.currencyAssetId();
+        if (assetId != null) this.load(assetId, this.reportContext.spendingMeasure());
+    }
+
+    private load(assetId: number, measure: SpendingMeasure): void {
         this.isLoading = true;
         this.dataRequested = true;
-        this.incomeExpenseService.getCalendar(assetId, this.year).subscribe(data => {
+        this.incomeExpenseService.getCalendar(assetId, this.year, measure).subscribe(data => {
             this.data = data;
             this.isLoading = false;
             setTimeout(() => this.renderCharts(), 0);
@@ -68,14 +77,12 @@ export class IncExpCalendarReportComponent {
 
     previousYear(): void {
         this.year--;
-        const assetId = this.reportContext.currencyAssetId();
-        if (assetId != null) this.load(assetId);
+        this.reload();
     }
 
     nextYear(): void {
         this.year++;
-        const assetId = this.reportContext.currencyAssetId();
-        if (assetId != null) this.load(assetId);
+        this.reload();
     }
 
     // Drill-down: clic en un día del mapa de calor abre el panel lateral con sus movimientos

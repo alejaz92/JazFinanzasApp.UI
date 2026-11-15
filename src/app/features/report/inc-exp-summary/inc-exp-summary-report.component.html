@@ -7,6 +7,8 @@
     </div>
 </div>
 
+<app-spending-measure-notice [measure]="reportContext.spendingMeasure()"></app-spending-measure-notice>
+
 <p class="text-body-secondary" *ngIf="!dataRequested">Elegí una moneda arriba para ver el resumen del mes.</p>
 
 <app-loading [isLoading]="isLoading"></app-loading>
@@ -49,9 +51,16 @@
         <app-info-button title="Cómo cerró el mes">
             <p>Una cascada: arranca con los ingresos del mes, cada escalón resta una categoría de egreso (de la más grande a la más chica) y termina en el resultado del mes.</p>
             <ul class="mb-0">
-                <li>Cuenta lo de tus cuentas: ingresos y egresos con categoría. Quedan afuera los cambios de moneda y las categorías que no cuentan como ingreso o egreso.</li>
-                <li>Un consumo de tarjeta cuenta cuando se paga la cuota, no cuando se hizo la compra.</li>
-                <li>Cada movimiento se convierte a la moneda elegida con la cotización de su fecha.</li>
+                @if (reportContext.spendingMeasure() === 'purchase') {
+                    <li>Los egresos son el gasto del mes: lo que pagaste directo desde tus cuentas, más cada compra con tarjeta repartida en sus cuotas (una por mes, por tu parte, sin lo que te devuelven otros ni los descuentos del banco) y los cargos recurrentes de tarjeta en cada mes en que estuvieron activos.</li>
+                    <li>Una compra con tarjeta cuenta desde el mes del primer resumen que la cobra: si la hiciste después del cierre, desde el mes siguiente. El pago del resumen no suma, porque ya contó en la compra; por eso el mes no depende de cuándo lo cargues.</li>
+                    <li>Los ingresos son los que entraron a tus cuentas. Quedan afuera los cambios de moneda y las categorías que no cuentan como ingreso o egreso.</li>
+                    <li>Cada monto se convierte a la moneda elegida: lo pagado desde las cuentas con su cotización y las cuotas de tarjeta con la cotización blue del día de cada cuota.</li>
+                } @else {
+                    <li>Cuenta lo que salió de tus cuentas: ingresos y egresos con categoría. Quedan afuera los cambios de moneda y las categorías que no cuentan como ingreso o egreso.</li>
+                    <li>Un consumo de tarjeta cuenta cuando se paga la cuota, no cuando se hizo la compra: el pago del resumen se carga con fecha del día 1 del mes de las compras, y mientras no esté cargado ese gasto de tarjeta falta.</li>
+                    <li>Cada movimiento se convierte a la moneda elegida con la cotización de su fecha.</li>
+                }
             </ul>
         </app-info-button>
     </div>

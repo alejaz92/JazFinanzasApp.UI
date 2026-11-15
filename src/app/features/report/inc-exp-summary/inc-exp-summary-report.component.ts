@@ -4,7 +4,8 @@ import type { EChartsOption } from 'echarts';
 
 import { IncomeExpenseService } from '../services/income-expense.service';
 import { IncExpWaterfall } from '../models/income-expense.model';
-import { ReportContextService } from '../../../shared/services/report-context.service';
+import { ReportContextService, SpendingMeasure } from '../../../shared/services/report-context.service';
+import { SpendingMeasureNoticeComponent } from '../../../shared/components/spending-measure-notice/spending-measure-notice.component';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
@@ -14,7 +15,7 @@ import { InfoButtonComponent } from '../../../shared/components/info-button/info
 @Component({
     selector: 'app-inc-exp-summary-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, CurrencyFiatFormatPipe, ChartComponent, InfoButtonComponent],
+    imports: [SpendingMeasureNoticeComponent, LoadingComponent, NgIf, NgFor, CurrencyFiatFormatPipe, ChartComponent, InfoButtonComponent],
     templateUrl: './inc-exp-summary-report.component.html',
     styleUrl: './inc-exp-summary-report.component.css'
 })
@@ -34,15 +35,23 @@ export class IncExpSummaryReportComponent {
     constructor() {
         effect(() => {
             const assetId = this.reportContext.currencyAssetId();
-            if (assetId != null) this.load(assetId);
+            // Leer la medida acá hace que el reporte se vuelva a pedir al mover el interruptor de la barra.
+            const measure = this.reportContext.spendingMeasure();
+            if (assetId != null) this.load(assetId, measure);
         });
     }
 
-    private load(assetId: number): void {
+    // Vuelve a pedir el reporte con la moneda y la medida elegidas en la barra (al cambiar de mes, de año o de ventana).
+    private reload(): void {
+        const assetId = this.reportContext.currencyAssetId();
+        if (assetId != null) this.load(assetId, this.reportContext.spendingMeasure());
+    }
+
+    private load(assetId: number, measure: SpendingMeasure): void {
         this.isLoading = true;
         this.dataRequested = true;
         const monthParam = this.toMonthParam(this.currentMonth);
-        this.incomeExpenseService.getWaterfall(assetId, monthParam).subscribe(data => {
+        this.incomeExpenseService.getWaterfall(assetId, monthParam, measure).subscribe(data => {
             this.waterfall = data;
             this.isLoading = false;
             setTimeout(() => this.renderWaterfall(), 0);
@@ -51,14 +60,12 @@ export class IncExpSummaryReportComponent {
 
     previousMonth(): void {
         this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() - 1, 1);
-        const assetId = this.reportContext.currencyAssetId();
-        if (assetId != null) this.load(assetId);
+        this.reload();
     }
 
     nextMonth(): void {
         this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() + 1, 1);
-        const assetId = this.reportContext.currencyAssetId();
-        if (assetId != null) this.load(assetId);
+        this.reload();
     }
 
     get monthLabel(): string {

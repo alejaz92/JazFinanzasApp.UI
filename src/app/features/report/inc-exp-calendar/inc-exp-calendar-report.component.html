@@ -7,6 +7,8 @@
     </div>
 </div>
 
+<app-spending-measure-notice [measure]="reportContext.spendingMeasure()"></app-spending-measure-notice>
+
 <p class="text-body-secondary" *ngIf="!dataRequested">Elegí una moneda arriba para ver el calendario de gastos.</p>
 
 <app-loading [isLoading]="isLoading"></app-loading>
@@ -15,8 +17,14 @@
     <div class="card mb-3">
         <div class="card-header d-flex align-items-center gap-2">
             Un cuadradito por día — clic para ver los movimientos
-            <app-info-button title="Calendario de gastos"
-                text="Cada cuadradito es un día del año elegido: cuanto más intenso el color, más se gastó ese día (la escala de arriba va de cero al día más caro del año). Con un clic se abren los movimientos de ese día. Cuenta lo mismo que el Resumen del mes: egresos con categoría, y las cuotas de tarjeta el día que se pagan."></app-info-button>
+            <app-info-button title="Calendario de gastos">
+                <p>Cada cuadradito es un día del año elegido: cuanto más intenso el color, más se gastó ese día (la escala de arriba va de cero al día más caro del año). Con un clic se abren los movimientos de ese día.</p>
+                @if (reportContext.spendingMeasure() === 'purchase') {
+                    <p class="mb-0">Cuenta lo mismo que el Resumen del mes: lo pagado directo desde las cuentas y cada cuota de una compra con tarjeta en el día del mes en que compraste (una compra hecha después del cierre, el día 1 del mes siguiente). Los cargos recurrentes de tarjeta no tienen un día de compra, así que no se pintan en el mapa ni entran en el promedio por día de la semana.</p>
+                } @else {
+                    <p class="mb-0">Cuenta lo mismo que el Resumen del mes: egresos con categoría, y la tarjeta el día en que se carga el pago del resumen, que es casi siempre el día 1: por eso el día 1 de cada mes se ve tan cargado.</p>
+                }
+            </app-info-button>
         </div>
         <div class="card-body">
             <app-chart [options]="calendarOptions" [height]="220" (chartClick)="onCalendarClick($event)"></app-chart>
@@ -27,7 +35,7 @@
         <div class="card-header d-flex align-items-center gap-2">
             Gasto promedio por día de la semana
             <app-info-button title="Gasto promedio por día de la semana"
-                text="Cuánto se gasta en promedio un lunes, un martes, etc. El promedio divide por todas las veces que ese día ocurrió en el año, incluidos los días en que no gastaste nada, no solo por los días con gasto."></app-info-button>
+                text="Cuánto se gasta en promedio un lunes, un martes, etc. El promedio divide por todas las veces que ese día ocurrió en el año, incluidos los días en que no gastaste nada, no solo por los días con gasto. Un día que todavía no llegó no entra en el promedio."></app-info-button>
         </div>
         <div class="card-body">
             <app-chart [options]="weekdayOptions" [height]="260"></app-chart>

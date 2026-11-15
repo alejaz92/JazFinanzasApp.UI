@@ -6,6 +6,7 @@ import type { EChartsOption } from 'echarts';
 import { IncomeExpenseService } from '../services/income-expense.service';
 import { TagSpending } from '../models/income-expense.model';
 import { ReportContextService } from '../../../shared/services/report-context.service';
+import { SpendingMeasureNoticeComponent } from '../../../shared/components/spending-measure-notice/spending-measure-notice.component';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
@@ -17,7 +18,7 @@ const MONTHS = 6;
 @Component({
     selector: 'app-inc-exp-by-tag-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, CurrencyFiatFormatPipe, ChartComponent, InfoButtonComponent],
+    imports: [SpendingMeasureNoticeComponent, LoadingComponent, NgIf, NgFor, CurrencyFiatFormatPipe, ChartComponent, InfoButtonComponent],
     templateUrl: './inc-exp-by-tag-report.component.html',
     styleUrl: './inc-exp-by-tag-report.component.css'
 })

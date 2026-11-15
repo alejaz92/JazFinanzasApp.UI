@@ -67,3 +67,52 @@ describe('ReportContextService', () => {
     expect(service.period().preset).toBe('last-year');
   });
 });
+
+// plan-ingresos-egresos-por-fecha-de-compra.md, Fase 8 — la medida con la que cuenta el gasto vive en la URL (`medida=cuentas`; `compra`, el default,
+// se omite), igual que el resto de la barra de filtros de Reportes.
+describe('ReportContextService — medida del gasto', () => {
+  let service: ReportContextService;
+  let router: Router;
+
+  beforeEach(async () => {
+    TestBed.configureTestingModule({ providers: [provideRouter([{ path: '**', component: DummyComponent }])] });
+    router = TestBed.inject(Router);
+    await router.navigateByUrl('/report/inc-exp-summary');
+    service = TestBed.inject(ReportContextService);
+  });
+
+  it('cuenta por compra por defecto', () => {
+    expect(service.spendingMeasure()).toBe('purchase');
+  });
+
+  it('lee de la URL que se pidió lo que salió de las cuentas', async () => {
+    await router.navigateByUrl('/report/inc-exp-summary?medida=cuentas');
+
+    expect(service.spendingMeasure()).toBe('accounts');
+  });
+
+  it('un valor desconocido en la URL cae en la medida por defecto', async () => {
+    await router.navigateByUrl('/report/inc-exp-summary?medida=otra-cosa');
+
+    expect(service.spendingMeasure()).toBe('purchase');
+  });
+
+  it('al elegir las cuentas lo escribe en la URL', async () => {
+    service.setSpendingMeasure('accounts');
+    await new Promise(resolve => setTimeout(resolve));
+
+    expect(router.url).toContain('medida=cuentas');
+    expect(service.spendingMeasure()).toBe('accounts');
+  });
+
+  it('al volver a la compra saca el parámetro de la URL, porque es el default', async () => {
+    await router.navigateByUrl('/report/inc-exp-summary?medida=cuentas&currency=1');
+
+    service.setSpendingMeasure('purchase');
+    await new Promise(resolve => setTimeout(resolve));
+
+    expect(router.url).not.toContain('medida');
+    expect(router.url).toContain('currency=1'); // lo demás de la barra no se toca
+    expect(service.spendingMeasure()).toBe('purchase');
+  });
+});

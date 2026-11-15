@@ -17,7 +17,7 @@ import { PersonService } from '../../people/services/person.service';
 import { Person } from '../../people/models/person.model';
 import { SharedEventService } from '../../shared-events/services/shared-event.service';
 import { SharedEventListItem } from '../../shared-events/models/shared-event.model';
-import { ReportContextService, PeriodPreset } from '../../../shared/services/report-context.service';
+import { ReportContextService, PeriodPreset, SpendingMeasure } from '../../../shared/services/report-context.service';
 import { ReportFavoriteService } from '../services/report-favorite.service';
 import { ReportFavorite } from '../models/report-favorite.model';
 import { ToastService } from '../../../core/services/toast.service';
@@ -122,6 +122,10 @@ export class ReportsShellComponent implements OnInit {
     // report.routes.ts y esta barra se encarga de mostrarlo y de mantenerlo en la URL.
     readonly cardFilterMode = signal<CardFilterMode>('none');
     readonly showRecurringFilter = signal(false);
+
+    // Fase 8 del plan de Ingresos y Egresos por fecha de compra: el interruptor de con qué medida cuenta el gasto (compra o lo que salió de las
+    // cuentas) — mismo criterio que showRecurringFilter: el hijo lo declara en report.routes.ts (`spendingMeasureFilter`).
+    readonly showSpendingMeasureFilter = signal(false);
 
     // Corrección 2026-09-10: mismo criterio para Carteras — Detalle y Cryptos — Detalle, cuyos
     // selectores (Cartera / Crypto) vivían sueltos en el cuerpo de cada pantalla, fuera de la barra.
@@ -369,6 +373,7 @@ export class ReportsShellComponent implements OnInit {
         this.usesPeriod.set(data?.['usesPeriod'] ?? true);
         this.cardFilterMode.set(data?.['cardFilter'] ?? 'none');
         this.showRecurringFilter.set(data?.['showRecurringFilter'] ?? false);
+        this.showSpendingMeasureFilter.set(data?.['spendingMeasureFilter'] ?? false);
         this.portfolioFilterMode.set(data?.['portfolioFilter'] ?? 'none');
         this.cryptoFilterMode.set(data?.['cryptoFilter'] ?? 'none');
         this.showIncludeCashFilter.set(data?.['includeCashFilter'] ?? false);
@@ -502,6 +507,10 @@ export class ReportsShellComponent implements OnInit {
 
     onIncludeRecurringChange(value: boolean): void {
         this.reportContext.setIncludeRecurring(value);
+    }
+
+    onSpendingMeasureChange(measure: SpendingMeasure): void {
+        this.reportContext.setSpendingMeasure(measure);
     }
 
     onIncludeCashChange(value: boolean): void {
