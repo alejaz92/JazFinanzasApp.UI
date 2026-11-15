@@ -54,4 +54,29 @@ describe('IncomeExpenseService — medida del gasto', () => {
 
     expect(urlOf(/ByTag\/1/)).not.toContain('measure');
   });
+
+  // ── El detalle de lo que compone el gasto (Fase 9) ──────────────────────────────────────────────
+
+  it('el detalle de una categoría pide las filas del mes con `to` exclusivo y el filtro de categoría', () => {
+    service.getSpendingRows(1, '2026-10-01', '2026-11-01', { categoryId: 5 }).subscribe();
+
+    const url = urlOf(/SpendingRows\/1/);
+    expect(url).toContain('from=2026-10-01&to=2026-11-01');
+    expect(url).toContain('&categoryId=5');
+    expect(url).not.toContain('tagId');
+  });
+
+  it('el detalle de una etiqueta manda el filtro de etiqueta y no el de categoría', () => {
+    service.getSpendingRows(1, '2026-05-01', '2026-11-01', { tagId: 9 }).subscribe();
+
+    const url = urlOf(/SpendingRows\/1/);
+    expect(url).toContain('&tagId=9');
+    expect(url).not.toContain('categoryId');
+  });
+
+  it('el detalle de un día no manda ningún filtro', () => {
+    service.getSpendingRows(2, '2026-10-05', '2026-10-06').subscribe();
+
+    expect(urlOf(/SpendingRows\/2/)).toMatch(/from=2026-10-05&to=2026-10-06$/);
+  });
 });

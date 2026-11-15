@@ -14,13 +14,24 @@
 <app-loading [isLoading]="isLoading"></app-loading>
 
 <ng-container *ngIf="dataRequested && !isLoading && data">
+    <!-- Con la medida de compra: los cargos recurrentes de cada mes, aparte del mapa (decisión G1) -->
+    <div class="card mb-3" *ngIf="reportContext.spendingMeasure() === 'purchase' && recurringMonths.length > 0" data-testid="recurring-line">
+        <div class="card-body py-2">
+            <div class="small text-body-secondary mb-1">Cargos recurrentes de tarjeta de cada mes: no tienen un día de compra, por eso no están en el mapa.</div>
+            <div class="d-flex flex-wrap gap-2">
+                <span class="badge text-bg-light border" *ngFor="let m of recurringMonths">{{ m.label }}: {{ m.amount | currencyFiatFormat }}</span>
+            </div>
+            <div class="small mt-1"><strong>Total del año:</strong> {{ recurringYearTotal | currencyFiatFormat }}</div>
+        </div>
+    </div>
+
     <div class="card mb-3">
         <div class="card-header d-flex align-items-center gap-2">
             Un cuadradito por día — clic para ver los movimientos
             <app-info-button title="Calendario de gastos">
-                <p>Cada cuadradito es un día del año elegido: cuanto más intenso el color, más se gastó ese día (la escala de arriba va de cero al día más caro del año). Con un clic se abren los movimientos de ese día.</p>
+                <p>Cada cuadradito es un día del año elegido: cuanto más intenso el color, más se gastó ese día (la escala de arriba va de cero al día más caro del año). Con un clic se abren los gastos de ese día.</p>
                 @if (reportContext.spendingMeasure() === 'purchase') {
-                    <p class="mb-0">Cuenta lo mismo que el Resumen del mes: lo pagado directo desde las cuentas y cada cuota de una compra con tarjeta en el día del mes en que compraste (una compra hecha después del cierre, el día 1 del mes siguiente). Los cargos recurrentes de tarjeta no tienen un día de compra, así que no se pintan en el mapa ni entran en el promedio por día de la semana.</p>
+                    <p class="mb-0">Cuenta lo mismo que el Resumen del mes: lo pagado directo desde las cuentas y cada cuota de una compra con tarjeta en el día del mes en que compraste (una compra hecha después del cierre, el día 1 del mes siguiente). Los cargos recurrentes de tarjeta no tienen un día de compra, así que no se pintan en el mapa ni entran en el promedio por día de la semana: se muestran aparte, en la línea de arriba, mes por mes y con su total del año.</p>
                 } @else {
                     <p class="mb-0">Cuenta lo mismo que el Resumen del mes: egresos con categoría, y la tarjeta el día en que se carga el pago del resumen, que es casi siempre el día 1: por eso el día 1 de cada mes se ve tan cargado.</p>
                 }
@@ -46,31 +57,44 @@
 <!-- Detalle: panel lateral con los movimientos del día elegido -->
 <div #drawerRef class="offcanvas offcanvas-end" tabindex="-1">
     <div class="offcanvas-header">
-        <h5 class="offcanvas-title">Movimientos — {{ selectedDate | date:'dd/MM/yyyy':'UTC' }}</h5>
+        <h5 class="offcanvas-title">{{ reportContext.spendingMeasure() === 'purchase' ? 'Gasto' : 'Movimientos' }} — {{ selectedDate | date:'dd/MM/yyyy':'UTC' }}</h5>
         <button type="button" class="btn-close" (click)="closeDetail()"></button>
     </div>
     <div class="offcanvas-body">
         <app-loading [isLoading]="isLoadingMovements"></app-loading>
-        <p class="text-body-secondary small" *ngIf="!isLoadingMovements && dayMovements.length === 0">
-            No hay movimientos para mostrar.
-        </p>
-        <div class="table-responsive" *ngIf="!isLoadingMovements && dayMovements.length > 0">
-            <table class="table table-sm table-hover">
-                <thead>
-                    <tr>
-                        <th>Detalle</th>
-                        <th>Cuenta</th>
-                        <th class="text-end">Monto</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let m of dayMovements">
-                        <td>{{ m.detail }}</td>
-                        <td>{{ m.accountName }}</td>
-                        <td class="text-end" [class.text-danger]="m.amount < 0" [class.text-success]="m.amount >= 0">{{ m.amount | currencyFiatFormat }}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+
+        <!-- Con la medida de compra: lo que compone el día, gasto por gasto -->
+        <ng-container *ngIf="reportContext.spendingMeasure() === 'purchase'; else accountMovements">
+            <p class="text-body-secondary small" *ngIf="!isLoadingMovements && dayRows.length === 0">
+                No hay gastos para mostrar.
+            </p>
+            <app-spending-rows-table *ngIf="!isLoadingMovements && dayRows.length > 0"
+                [rows]="dayRows" [selectedAssetId]="reportContext.currencyAssetId()" [showDate]="false"></app-spending-rows-table>
+        </ng-container>
+
+        <!-- Con la medida de cuentas: los movimientos de cuenta, como siempre -->
+        <ng-template #accountMovements>
+            <p class="text-body-secondary small" *ngIf="!isLoadingMovements && dayMovements.length === 0">
+                No hay movimientos para mostrar.
+            </p>
+            <div class="table-responsive" *ngIf="!isLoadingMovements && dayMovements.length > 0">
+                <table class="table table-sm table-hover">
+                    <thead>
+                        <tr>
+                            <th>Detalle</th>
+                            <th>Cuenta</th>
+                            <th class="text-end">Monto</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let m of dayMovements">
+                            <td>{{ m.detail }}</td>
+                            <td>{{ m.accountName }}</td>
+                            <td class="text-end" [class.text-danger]="m.amount < 0" [class.text-success]="m.amount >= 0">{{ m.amount | currencyFiatFormat }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </ng-template>
     </div>
 </div>

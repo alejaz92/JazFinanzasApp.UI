@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment.development';
 import { SpendingMeasure } from '../../../shared/services/report-context.service';
-import { IncExpWaterfall, IncExpEvolutionPoint, SpendingByCategory, TagSpending, SpendingCalendar, IncomeCategorySeries, IncomeComposition, IncomeCategoryDay } from '../models/income-expense.model';
+import { IncExpWaterfall, IncExpEvolutionPoint, SpendingByCategory, TagSpending, SpendingCalendar, SpendingRow, IncomeCategorySeries, IncomeComposition, IncomeCategoryDay } from '../models/income-expense.model';
 
 @Injectable({
     providedIn: 'root'
@@ -33,6 +33,15 @@ export class IncomeExpenseService {
 
     getCalendar(assetId: number, year: number, measure: SpendingMeasure): Observable<SpendingCalendar> {
         return this.http.get<SpendingCalendar>(`${environment.apiBaseURL}/api/IncomeExpenseReport/Calendar/${assetId}?year=${year}&measure=${measure}`);
+    }
+
+    // El detalle de lo que compone el gasto por compra (Fase 9): las filas de [from, to) (`to` es exclusivo, yyyy-MM-dd), las más recientes primero, de una
+    // categoría o de una etiqueta si se piden. Solo tiene sentido con la medida de compra: con la de cuentas el detalle sigue siendo la lista de movimientos.
+    getSpendingRows(assetId: number, from: string, to: string, filters?: { categoryId?: number; tagId?: number }): Observable<SpendingRow[]> {
+        let url = `${environment.apiBaseURL}/api/IncomeExpenseReport/SpendingRows/${assetId}?from=${from}&to=${to}`;
+        if (filters?.categoryId != null) url += `&categoryId=${filters.categoryId}`;
+        if (filters?.tagId != null) url += `&tagId=${filters.tagId}`;
+        return this.http.get<SpendingRow[]>(url);
     }
 
     getIncomeComposition(assetId: number, month: string): Observable<IncomeComposition> {

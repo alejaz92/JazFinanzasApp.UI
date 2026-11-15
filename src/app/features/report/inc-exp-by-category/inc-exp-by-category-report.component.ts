@@ -3,7 +3,7 @@ import { NgIf, NgFor, DatePipe } from '@angular/common';
 import type { EChartsOption, ECElementEvent } from 'echarts';
 
 import { IncomeExpenseService } from '../services/income-expense.service';
-import { CategoryDetail, SpendingByCategory } from '../models/income-expense.model';
+import { CategoryDetail, SpendingByCategory, SpendingRow } from '../models/income-expense.model';
 import { ReportContextService, SpendingMeasure } from '../../../shared/services/report-context.service';
 import { SpendingMeasureNoticeComponent } from '../../../shared/components/spending-measure-notice/spending-measure-notice.component';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
@@ -13,6 +13,7 @@ import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat
 import { TransactionService } from '../../transaction/services/transaction.service';
 import { Transaction } from '../../transaction/models/transaction.model';
 import { InfoButtonComponent } from '../../../shared/components/info-button/info-button.component';
+import { SpendingRowsTableComponent } from '../../../shared/components/spending-rows-table/spending-rows-table.component';
 
 declare const bootstrap: any;
 
@@ -29,7 +30,7 @@ interface TreemapNode {
 @Component({
     selector: 'app-inc-exp-by-category-report',
     standalone: true,
-    imports: [SpendingMeasureNoticeComponent, LoadingComponent, NgIf, NgFor, DatePipe, CurrencyFiatFormatPipe, ChartComponent, InfoButtonComponent],
+    imports: [SpendingMeasureNoticeComponent, SpendingRowsTableComponent, LoadingComponent, NgIf, NgFor, DatePipe, CurrencyFiatFormatPipe, ChartComponent, InfoButtonComponent],
     templateUrl: './inc-exp-by-category-report.component.html',
     styleUrl: './inc-exp-by-category-report.component.css'
 })
@@ -48,6 +49,8 @@ export class IncExpByCategoryReportComponent {
 
     selectedCategory: CategoryDetail | null = null;
     categoryMovements: Transaction[] = [];
+    // Con la medida de compra el panel muestra lo que compone el número (Fase 9) y no la lista de movimientos de cuenta.
+    categoryRows: SpendingRow[] = [];
     isLoadingMovements = false;
     detailTrendOptions: EChartsOption = {};
 
@@ -70,6 +73,8 @@ export class IncExpByCategoryReportComponent {
     }
 
     private load(assetId: number, measure: SpendingMeasure): void {
+        // Un panel abierto es de la medida, el mes y la moneda anteriores: al volver a pedir el reporte se cierra.
+        this.closeDetail();
         this.isLoading = true;
         this.dataRequested = true;
         const monthParam = this.toMonthParam(this.currentMonth);
@@ -132,6 +137,7 @@ export class IncExpByCategoryReportComponent {
     closeDetail(): void {
         this.selectedCategory = null;
         this.categoryMovements = [];
+        this.categoryRows = [];
         this.drawerInstance?.hide();
     }
 
@@ -140,6 +146,16 @@ export class IncExpByCategoryReportComponent {
         const from = this.toMonthParam(this.currentMonth);
         const nextMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() + 1, 1);
         const to = this.toMonthParam(nextMonth);
+
+        const assetId = this.reportContext.currencyAssetId();
+        if (this.reportContext.spendingMeasure() === 'purchase' && assetId != null) {
+            this.incomeExpenseService.getSpendingRows(assetId, from, to, { categoryId: category.categoryId }).subscribe(rows => {
+                this.categoryRows = rows;
+                this.isLoadingMovements = false;
+            });
+            return;
+        }
+
         this.transactionService.getTransactions(1, 50, { classId: category.categoryId, from, to }).subscribe(res => {
             this.categoryMovements = res.transactions;
             this.isLoadingMovements = false;

@@ -23,7 +23,11 @@
                 <p>Un mapa de bloques del mes elegido:</p>
                 <ul class="mb-0">
                     <li>El tamaño de cada bloque es lo gastado en esa categoría; los más grandes son los que más pesaron.</li>
-                    <li>Con un clic se abre un panel con la tendencia de los últimos 6 meses de esa categoría y los movimientos que la componen.</li>
+                    @if (reportContext.spendingMeasure() === 'purchase') {
+                        <li>Con un clic se abre un panel con la tendencia de los últimos 6 meses de esa categoría y lo que compone el número, gasto por gasto: lo pagado desde cada cuenta, las cuotas de tarjeta ("cuota 2 de 6", con la fecha y lo que costó la compra), los recurrentes y, si la compra era compartida, tu parte junto al total. Al pie, la suma, que es el número del bloque.</li>
+                    } @else {
+                        <li>Con un clic se abre un panel con la tendencia de los últimos 6 meses de esa categoría y los movimientos de cuenta que la componen.</li>
+                    }
                     @if (reportContext.spendingMeasure() === 'purchase') {
                         <li>Cuenta lo mismo que el Resumen del mes: lo pagado directo desde las cuentas, cada compra con tarjeta repartida en cuotas (una por mes, por tu parte) y los cargos recurrentes en cada mes. La tendencia de 6 meses usa la misma medida.</li>
                     } @else {
@@ -41,7 +45,7 @@
 <!-- Detalle: panel lateral con la tendencia de 6 meses y los movimientos de la categoría elegida -->
 <div #drawerRef class="offcanvas offcanvas-end" tabindex="-1">
     <div class="offcanvas-header">
-        <h5 class="offcanvas-title">Movimientos — {{ selectedCategory?.categoryName }}</h5>
+        <h5 class="offcanvas-title">{{ reportContext.spendingMeasure() === 'purchase' ? 'Gasto' : 'Movimientos' }} — {{ selectedCategory?.categoryName }}</h5>
         <button type="button" class="btn-close" (click)="closeDetail()"></button>
     </div>
     <div class="offcanvas-body">
@@ -51,28 +55,41 @@
         </div>
 
         <app-loading [isLoading]="isLoadingMovements"></app-loading>
-        <p class="text-body-secondary small" *ngIf="!isLoadingMovements && categoryMovements.length === 0">
-            No hay movimientos para mostrar.
-        </p>
-        <div class="table-responsive" *ngIf="!isLoadingMovements && categoryMovements.length > 0">
-            <table class="table table-sm table-hover">
-                <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Detalle</th>
-                        <th>Cuenta</th>
-                        <th class="text-end">Monto</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let m of categoryMovements">
-                        <td class="text-nowrap">{{ m.date | date:'dd/MM/yyyy' }}</td>
-                        <td>{{ m.detail }}</td>
-                        <td>{{ m.accountName }}</td>
-                        <td class="text-end" [class.text-danger]="m.amount < 0" [class.text-success]="m.amount >= 0">{{ m.amount | currencyFiatFormat }}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+
+        <!-- Con la medida de compra: lo que compone el número, gasto por gasto (cuotas, recurrentes, parte propia) -->
+        <ng-container *ngIf="reportContext.spendingMeasure() === 'purchase'; else accountMovements">
+            <p class="text-body-secondary small" *ngIf="!isLoadingMovements && categoryRows.length === 0">
+                No hay gastos para mostrar.
+            </p>
+            <app-spending-rows-table *ngIf="!isLoadingMovements && categoryRows.length > 0"
+                [rows]="categoryRows" [selectedAssetId]="reportContext.currencyAssetId()"></app-spending-rows-table>
+        </ng-container>
+
+        <!-- Con la medida de cuentas: los movimientos de cuenta, como siempre -->
+        <ng-template #accountMovements>
+            <p class="text-body-secondary small" *ngIf="!isLoadingMovements && categoryMovements.length === 0">
+                No hay movimientos para mostrar.
+            </p>
+            <div class="table-responsive" *ngIf="!isLoadingMovements && categoryMovements.length > 0">
+                <table class="table table-sm table-hover">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Detalle</th>
+                            <th>Cuenta</th>
+                            <th class="text-end">Monto</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let m of categoryMovements">
+                            <td class="text-nowrap">{{ m.date | date:'dd/MM/yyyy' }}</td>
+                            <td>{{ m.detail }}</td>
+                            <td>{{ m.accountName }}</td>
+                            <td class="text-end" [class.text-danger]="m.amount < 0" [class.text-success]="m.amount >= 0">{{ m.amount | currencyFiatFormat }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </ng-template>
     </div>
 </div>
