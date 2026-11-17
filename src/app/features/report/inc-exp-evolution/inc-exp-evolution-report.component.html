@@ -6,6 +6,8 @@
     </div>
 </div>
 
+<app-spending-measure-notice [measure]="reportContext.spendingMeasure()"></app-spending-measure-notice>
+
 <p class="text-body-secondary" *ngIf="!dataRequested">Elegí una moneda arriba para ver la evolución.</p>
 
 <app-loading [isLoading]="isLoading"></app-loading>
@@ -16,6 +18,11 @@
         Ingreso, egreso y resultado acumulado
         <app-info-button title="Ingreso, egreso y resultado acumulado">
             <p>Mes a mes, con los mismos criterios de qué cuenta que el Resumen del mes:</p>
+            @if (reportContext.spendingMeasure() === 'purchase') {
+                <p>Una compra en cuotas pesa en cada mes en que cae una cuota y no entera en el mes de la compra, y el mes en curso ya incluye las cuotas que caen más adelante en el mes. Por eso un mes con una compra grande no se dispara como si se hubiera pagado de una vez.</p>
+            } @else {
+                <p>La tarjeta aparece en el mes en que se carga el pago de su resumen, así que el mes en curso puede mostrar menos gasto del real hasta que se cargue.</p>
+            }
             <ul class="mb-0">
                 <li><strong>Barras:</strong> los ingresos hacia arriba y los egresos hacia abajo (se dibujan en negativo para enfrentarlos).</li>
                 <li><strong>Línea continua:</strong> resultado acumulado, la suma de ingresos menos egresos desde el primer mes del gráfico.</li>

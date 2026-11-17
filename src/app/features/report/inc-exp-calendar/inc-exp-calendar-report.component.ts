@@ -3,8 +3,9 @@ import { NgIf, NgFor, DatePipe } from '@angular/common';
 import type { EChartsOption, ECElementEvent } from 'echarts';
 
 import { IncomeExpenseService } from '../services/income-expense.service';
-import { SpendingCalendar } from '../models/income-expense.model';
-import { ReportContextService } from '../../../shared/services/report-context.service';
+import { SpendingCalendar, SpendingRow } from '../models/income-expense.model';
+import { ReportContextService, SpendingMeasure } from '../../../shared/services/report-context.service';
+import { SpendingMeasureNoticeComponent } from '../../../shared/components/spending-measure-notice/spending-measure-notice.component';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
@@ -12,17 +13,19 @@ import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat
 import { TransactionService } from '../../transaction/services/transaction.service';
 import { Transaction } from '../../transaction/models/transaction.model';
 import { InfoButtonComponent } from '../../../shared/components/info-button/info-button.component';
+import { SpendingRowsTableComponent } from '../../../shared/components/spending-rows-table/spending-rows-table.component';
 
 declare const bootstrap: any;
 
 const WEEKDAY_LABELS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 // Lunes a domingo para la lectura habitual de una semana en Argentina; el backend numera 0=domingo.
 const WEEKDAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
+const MONTH_LABELS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 
 @Component({
     selector: 'app-inc-exp-calendar-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, DatePipe, CurrencyFiatFormatPipe, ChartComponent, InfoButtonComponent],
+    imports: [SpendingMeasureNoticeComponent, SpendingRowsTableComponent, LoadingComponent, NgIf, NgFor, DatePipe, CurrencyFiatFormatPipe, ChartComponent, InfoButtonComponent],
     templateUrl: './inc-exp-calendar-report.component.html',
     styleUrl: './inc-exp-calendar-report.component.css'
 })
@@ -44,6 +47,8 @@ export class IncExpCalendarReportComponent {
     // corrección 2026-09-04): drill-down sin redirigir a /transactions.
     selectedDate: string | null = null;
     dayMovements: Transaction[] = [];
+    // Con la medida de compra el panel muestra lo que compone el día (Fase 9), sin los recurrentes, que no están en el mapa.
+    dayRows: SpendingRow[] = [];
     isLoadingMovements = false;
 
     @ViewChild('drawerRef') private drawerRef?: ElementRef<HTMLElement>;
@@ -52,14 +57,24 @@ export class IncExpCalendarReportComponent {
     constructor() {
         effect(() => {
             const assetId = this.reportContext.currencyAssetId();
-            if (assetId != null) this.load(assetId);
+            // Leer la medida acá hace que el reporte se vuelva a pedir al mover el interruptor de la barra.
+            const measure = this.reportContext.spendingMeasure();
+            if (assetId != null) this.load(assetId, measure);
         });
     }
 
-    private load(assetId: number): void {
+    // Vuelve a pedir el reporte con la moneda y la medida elegidas en la barra (al cambiar de mes, de año o de ventana).
+    private reload(): void {
+        const assetId = this.reportContext.currencyAssetId();
+        if (assetId != null) this.load(assetId, this.reportContext.spendingMeasure());
+    }
+
+    private load(assetId: number, measure: SpendingMeasure): void {
+        // Un panel abierto es de la medida, el año y la moneda anteriores: al volver a pedir el reporte se cierra.
+        this.closeDetail();
         this.isLoading = true;
         this.dataRequested = true;
-        this.incomeExpenseService.getCalendar(assetId, this.year).subscribe(data => {
+        this.incomeExpenseService.getCalendar(assetId, this.year, measure).subscribe(data => {
             this.data = data;
             this.isLoading = false;
             setTimeout(() => this.renderCharts(), 0);
@@ -68,14 +83,12 @@ export class IncExpCalendarReportComponent {
 
     previousYear(): void {
         this.year--;
-        const assetId = this.reportContext.currencyAssetId();
-        if (assetId != null) this.load(assetId);
+        this.reload();
     }
 
     nextYear(): void {
         this.year++;
-        const assetId = this.reportContext.currencyAssetId();
-        if (assetId != null) this.load(assetId);
+        this.reload();
     }
 
     // Drill-down: clic en un día del mapa de calor abre el panel lateral con sus movimientos
@@ -101,11 +114,32 @@ export class IncExpCalendarReportComponent {
     closeDetail(): void {
         this.selectedDate = null;
         this.dayMovements = [];
+        this.dayRows = [];
         this.drawerInstance?.hide();
+    }
+
+    // Los cargos recurrentes de cada mes (decisión G1): no tienen un día de compra, así que van aparte del mapa.
+    get recurringMonths(): { label: string; amount: number }[] {
+        return (this.data?.recurringByMonth ?? []).map(m => ({ label: MONTH_LABELS[Number(m.month.substring(5, 7)) - 1], amount: m.amount }));
+    }
+
+    get recurringYearTotal(): number {
+        return Math.round((this.data?.recurringByMonth ?? []).reduce((sum, m) => sum + m.amount, 0) * 100) / 100;
     }
 
     private loadMovements(from: string, to: string): void {
         this.isLoadingMovements = true;
+
+        const assetId = this.reportContext.currencyAssetId();
+        if (this.reportContext.spendingMeasure() === 'purchase' && assetId != null) {
+            this.incomeExpenseService.getSpendingRows(assetId, from, to).subscribe(rows => {
+                // Un recurrente cae el día 1 de cada mes en el cálculo, pero no se pinta en el mapa: tampoco se lista acá, para que el panel sume lo mismo que el día.
+                this.dayRows = rows.filter(r => r.kind !== 'CardRecurring');
+                this.isLoadingMovements = false;
+            });
+            return;
+        }
+
         this.transactionService.getTransactions(1, 50, { from, to }).subscribe(res => {
             this.dayMovements = res.transactions;
             this.isLoadingMovements = false;

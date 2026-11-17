@@ -15,6 +15,17 @@ export interface ReportPeriod {
 const DEFAULT_PERIOD: PeriodPreset = 'this-month';
 
 /**
+ * Con qué medida cuentan el gasto los reportes de Ingresos y Egresos (plan-ingresos-egresos-por-fecha-de-compra.md, decisión B):
+ * 'purchase' = cada compra con tarjeta cuenta una cuota por mes, por la parte propia (el gasto del mes, la medida por defecto);
+ * 'accounts' = lo que salió de las cuentas, donde la tarjeta cuenta cuando se carga el pago del resumen. Es el valor del parámetro
+ * `measure` de los endpoints.
+ */
+export type SpendingMeasure = 'purchase' | 'accounts';
+
+/** El valor del parámetro `medida` de la URL de cada medida; `compra` es el default y se omite del enlace. */
+const MEASURE_URL_VALUE: Record<SpendingMeasure, string> = { purchase: 'compra', accounts: 'cuentas' };
+
+/**
  * Período y moneda de toda la sección de Reportes, elegidos una sola vez
  * en `reports-shell` y persistidos en los query params de la URL — así
  * sobreviven a la recarga y un reporte configurado se puede compartir
@@ -63,6 +74,11 @@ export class ReportContextService {
   private readonly personId = signal<number | null>(null);
   private readonly eventId = signal<number | null>(null);
 
+  // Fase 8 del plan de Ingresos y Egresos por fecha de compra: con qué medida cuentan el gasto Resumen, Evolución, Por categoría y
+  // Calendario. Mismo criterio que el resto de la barra: vive en la URL (`medida=cuentas`, y `compra` —el default— se omite) para que
+  // sobreviva a la recarga y se guarde en un favorito. Por etiqueta no la usa: mide siempre por compra.
+  private readonly measure = signal<SpendingMeasure>('purchase');
+
   readonly period = computed<ReportPeriod>(() => ({
     preset: this.periodPreset(),
     from: this.customFrom() ?? undefined,
@@ -81,6 +97,7 @@ export class ReportContextService {
   readonly selectedTripId = this.tripId.asReadonly();
   readonly selectedPersonId = this.personId.asReadonly();
   readonly selectedEventId = this.eventId.asReadonly();
+  readonly spendingMeasure = this.measure.asReadonly();
 
   constructor() {
     this.readFromUrl(this.router.url);
@@ -149,6 +166,11 @@ export class ReportContextService {
     this.navigate({ eventId });
   }
 
+  setSpendingMeasure(measure: SpendingMeasure): void {
+    // Se omite de la URL en su valor default (compra) para no ensuciar el enlace en el caso común.
+    this.navigate({ medida: measure === 'purchase' ? null : MEASURE_URL_VALUE[measure] });
+  }
+
   private readFromUrl(url: string): void {
     const qp = this.router.parseUrl(url).queryParams;
     this.periodPreset.set(this.isPreset(qp['period']) ? qp['period'] : DEFAULT_PERIOD);
@@ -166,6 +188,8 @@ export class ReportContextService {
     this.tripId.set(qp['tripId'] != null ? Number(qp['tripId']) : null);
     this.personId.set(qp['personId'] != null ? Number(qp['personId']) : null);
     this.eventId.set(qp['eventId'] != null ? Number(qp['eventId']) : null);
+    // Cualquier valor que no sea `cuentas` es la medida por defecto: un enlace viejo o mal escrito no rompe nada.
+    this.measure.set(qp['medida'] === MEASURE_URL_VALUE.accounts ? 'accounts' : 'purchase');
   }
 
   private isPreset(value: unknown): value is PeriodPreset {

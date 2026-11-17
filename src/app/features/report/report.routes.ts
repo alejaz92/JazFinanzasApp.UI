@@ -37,17 +37,17 @@ export const reportRoutes: Routes = [
                 // no el filtro de período compartido de la barra de Reportes (mismo criterio que Patrimonio).
                 path: 'inc-exp-summary',
                 loadComponent: () => import('./inc-exp-summary/inc-exp-summary-report.component').then(m => m.IncExpSummaryReportComponent),
-                data: { usesPeriod: false }
+                data: { usesPeriod: false, spendingMeasureFilter: true }
             },
             {
                 path: 'inc-exp-evolution',
                 loadComponent: () => import('./inc-exp-evolution/inc-exp-evolution-report.component').then(m => m.IncExpEvolutionReportComponent),
-                data: { usesPeriod: false }
+                data: { usesPeriod: false, spendingMeasureFilter: true }
             },
             {
                 path: 'inc-exp-by-category',
                 loadComponent: () => import('./inc-exp-by-category/inc-exp-by-category-report.component').then(m => m.IncExpByCategoryReportComponent),
-                data: { usesPeriod: false }
+                data: { usesPeriod: false, spendingMeasureFilter: true }
             },
             {
                 path: 'inc-exp-by-tag',
@@ -57,7 +57,7 @@ export const reportRoutes: Routes = [
             {
                 path: 'inc-exp-calendar',
                 loadComponent: () => import('./inc-exp-calendar/inc-exp-calendar-report.component').then(m => m.IncExpCalendarReportComponent),
-                data: { usesPeriod: false }
+                data: { usesPeriod: false, spendingMeasureFilter: true }
             },
             {
                 // Ingresos (corrección 2026-09-04 sobre la Fase 13) — composición de un mes elegido

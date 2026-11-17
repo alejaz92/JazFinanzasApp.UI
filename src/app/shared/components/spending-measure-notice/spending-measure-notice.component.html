@@ -1,0 +1,13 @@
+<p class="small text-body-secondary mb-3 d-flex gap-2 align-items-start" role="note" data-testid="spending-measure-notice">
+    <i class="bi-info-circle mt-1" aria-hidden="true"></i>
+    @if (measure === 'purchase') {
+        <span>
+            Las compras con tarjeta cuentan una cuota por mes, desde el mes de su primer resumen y en el día en que compraste (las hechas después del cierre,
+            el día 1 del mes siguiente), por tu parte (sin lo que te devuelven otros). Los cargos recurrentes cuentan en cada mes.
+        </span>
+    } @else {
+        <span>
+            Lo que salió de tus cuentas: la tarjeta cuenta cuando se carga el pago del resumen, fechado el día 1 del mes.
+        </span>
+    }
+</p>

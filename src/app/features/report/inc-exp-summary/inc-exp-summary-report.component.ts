@@ -3,8 +3,9 @@ import { NgIf, NgFor } from '@angular/common';
 import type { EChartsOption } from 'echarts';
 
 import { IncomeExpenseService } from '../services/income-expense.service';
-import { IncExpWaterfall } from '../models/income-expense.model';
-import { ReportContextService } from '../../../shared/services/report-context.service';
+import { CardReconciliation, IncExpWaterfall } from '../models/income-expense.model';
+import { ReportContextService, SpendingMeasure } from '../../../shared/services/report-context.service';
+import { SpendingMeasureNoticeComponent } from '../../../shared/components/spending-measure-notice/spending-measure-notice.component';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
 import { ChartComponent } from '../../../shared/components/chart/chart.component';
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
@@ -14,7 +15,7 @@ import { InfoButtonComponent } from '../../../shared/components/info-button/info
 @Component({
     selector: 'app-inc-exp-summary-report',
     standalone: true,
-    imports: [LoadingComponent, NgIf, NgFor, CurrencyFiatFormatPipe, ChartComponent, InfoButtonComponent],
+    imports: [SpendingMeasureNoticeComponent, LoadingComponent, NgIf, NgFor, CurrencyFiatFormatPipe, ChartComponent, InfoButtonComponent],
     templateUrl: './inc-exp-summary-report.component.html',
     styleUrl: './inc-exp-summary-report.component.css'
 })
@@ -29,36 +30,115 @@ export class IncExpSummaryReportComponent {
     currentMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
     waterfall: IncExpWaterfall | null = null;
 
+    // "Cómo se llega al gasto con tarjeta" (Fase 10, decisión E1): un bloque plegable que pide su detalle recién cuando se abre, y solo con la medida de compra.
+    // Está siempre en la página (oculto, no desmontado) para que su tabla entre en la exportación a Excel del reporte.
+    reconciliation: CardReconciliation | null = null;
+    reconciliationOpen = false;
+    isLoadingReconciliation = false;
+    reconciliationFailed = false;
+    private reconciliationMonth: string | null = null;
+
     waterfallOptions: EChartsOption = {};
 
     constructor() {
         effect(() => {
             const assetId = this.reportContext.currencyAssetId();
-            if (assetId != null) this.load(assetId);
+            // Leer la medida acá hace que el reporte se vuelva a pedir al mover el interruptor de la barra.
+            const measure = this.reportContext.spendingMeasure();
+            if (assetId != null) this.load(assetId, measure);
         });
     }
 
-    private load(assetId: number): void {
+    // Vuelve a pedir el reporte con la moneda y la medida elegidas en la barra (al cambiar de mes, de año o de ventana).
+    private reload(): void {
+        const assetId = this.reportContext.currencyAssetId();
+        if (assetId != null) this.load(assetId, this.reportContext.spendingMeasure());
+    }
+
+    private load(assetId: number, measure: SpendingMeasure): void {
         this.isLoading = true;
         this.dataRequested = true;
         const monthParam = this.toMonthParam(this.currentMonth);
-        this.incomeExpenseService.getWaterfall(assetId, monthParam).subscribe(data => {
+        this.incomeExpenseService.getWaterfall(assetId, monthParam, measure).subscribe(data => {
             this.waterfall = data;
             this.isLoading = false;
             setTimeout(() => this.renderWaterfall(), 0);
         });
+        // Si el bloque está abierto, sigue al mes que se está mirando (solo se vuelve a pedir si cambió el mes).
+        this.ensureReconciliation();
+    }
+
+    // Con la medida de cuentas no hay conciliación que mostrar: lo que se explica es el gasto por compra.
+    get showReconciliation(): boolean {
+        return this.reportContext.spendingMeasure() === 'purchase' && this.waterfall != null;
+    }
+
+    toggleReconciliation(): void {
+        this.reconciliationOpen = !this.reconciliationOpen;
+        if (this.reconciliationOpen) this.ensureReconciliation();
+    }
+
+    retryReconciliation(): void {
+        this.reconciliationMonth = null;
+        this.ensureReconciliation();
+    }
+
+    private ensureReconciliation(): void {
+        const month = this.toMonthParam(this.currentMonth);
+        if (!this.reconciliationOpen || this.reportContext.spendingMeasure() !== 'purchase' || this.reconciliationMonth === month) return;
+
+        this.reconciliationMonth = month;
+        this.reconciliation = null;
+        this.reconciliationFailed = false;
+        this.isLoadingReconciliation = true;
+        this.incomeExpenseService.getCardReconciliation(month).subscribe({
+            next: data => {
+                // Una respuesta de un mes que ya no es el que se mira se descarta.
+                if (this.reconciliationMonth !== month) return;
+                this.reconciliation = data;
+                this.isLoadingReconciliation = false;
+            },
+            error: () => {
+                if (this.reconciliationMonth !== month) return;
+                this.reconciliationMonth = null; // para que "Reintentar" vuelva a pedir
+                this.reconciliationFailed = true;
+                this.isLoadingReconciliation = false;
+            }
+        });
+    }
+
+    // Con la medida de cuentas, un mes con cargos de tarjeta y sin resumen cargado tiene el gasto de tarjeta sin contar (decisión D5, Flujo 6).
+    get showStatementMissing(): boolean {
+        return this.reportContext.spendingMeasure() === 'accounts' && this.waterfall?.cardStatementMissing === true;
+    }
+
+    get statementMonthName(): string {
+        return this.currentMonth.toLocaleDateString('es-AR', { month: 'long' });
+    }
+
+    get hasDollars(): boolean {
+        const d = this.reconciliation?.dollars;
+        return !!d && (d.statementAmount !== 0 || d.spending !== 0);
+    }
+
+    /** Los centavos de redondeo solo se muestran si hay (la mayoría de los meses dan cero). */
+    get hasRounding(): boolean {
+        return !!this.reconciliation && (Math.abs(this.reconciliation.pesos.rounding) >= 0.01 || Math.abs(this.reconciliation.dollars.rounding) >= 0.01);
+    }
+
+    /** Un monto en dólares ("US$ 10,00"): las secciones en dólares de la conciliación van en su moneda. */
+    formatUsd(value: number): string {
+        return 'US$ ' + value.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
     previousMonth(): void {
         this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() - 1, 1);
-        const assetId = this.reportContext.currencyAssetId();
-        if (assetId != null) this.load(assetId);
+        this.reload();
     }
 
     nextMonth(): void {
         this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() + 1, 1);
-        const assetId = this.reportContext.currencyAssetId();
-        if (assetId != null) this.load(assetId);
+        this.reload();
     }
 
     get monthLabel(): string {

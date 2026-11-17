@@ -253,6 +253,18 @@
       </div>
     }
 
+    @if (showSpendingMeasureFilter()) {
+      <div class="btn-group btn-group-sm" role="group" aria-label="Con qué medida cuenta el gasto"
+           title="Con qué medida cuenta el gasto: cada compra con tarjeta repartida en cuotas, o lo que salió de las cuentas">
+        <input type="radio" class="btn-check" name="reportSpendingMeasure" id="reportMeasurePurchase" autocomplete="off"
+               [checked]="reportContext.spendingMeasure() === 'purchase'" (change)="onSpendingMeasureChange('purchase')">
+        <label class="btn btn-outline-primary" for="reportMeasurePurchase">Gasto por fecha de compra</label>
+        <input type="radio" class="btn-check" name="reportSpendingMeasure" id="reportMeasureAccounts" autocomplete="off"
+               [checked]="reportContext.spendingMeasure() === 'accounts'" (change)="onSpendingMeasureChange('accounts')">
+        <label class="btn btn-outline-primary" for="reportMeasureAccounts">Lo que salió de las cuentas</label>
+      </div>
+    }
+
     @if (showIncludeCashFilter()) {
       <div class="form-check form-switch mb-0" title="Incluir dinero en cuentas (efectivo) en el cálculo">
         <input class="form-check-input" type="checkbox" id="reportIncludeCash"

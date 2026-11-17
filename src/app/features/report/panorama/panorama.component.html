@@ -4,8 +4,8 @@
         <p>Un resumen de cómo estás hoy, en la moneda elegida arriba. Cada tarjeta lleva al reporte que la desarrolla:</p>
         <ul class="mb-0">
             <li><strong>Patrimonio:</strong> lo que tenés en cuentas e inversiones a la cotización de hoy, y cuánto cambió contra el cierre del mes pasado.</li>
-            <li><strong>Resultado del mes:</strong> ingresos menos gasto del mes en curso, contra el resultado del mes pasado completo. El gasto se cuenta por fecha de compra: una compra con tarjeta suma el día en que la hiciste, no cuando pagás el resumen.</li>
-            <li><strong>Gasto del mes:</strong> lo gastado en el mes en curso (por fecha de compra, igual que el resultado) y, debajo, el promedio de los 6 meses anteriores.</li>
+            <li><strong>Resultado del mes:</strong> ingresos menos gasto del mes en curso, contra el resultado del mes pasado completo. Es el mismo número que el Resumen del mes de Ingresos y Egresos (con su medida por defecto, "Gasto por fecha de compra"), y la tarjeta lleva a ese reporte. El gasto cuenta una cuota por mes: cada compra con tarjeta suma repartida en sus cuotas y por tu parte, desde el mes de su primer resumen, no cuando pagás el resumen.</li>
+            <li><strong>Gasto del mes:</strong> lo gastado en el mes en curso, el mismo número que "Egresos" del Resumen del mes (la tarjeta lleva ahí), y, debajo, el promedio de los 6 meses anteriores.</li>
             <li><strong>Tarjetas a pagar:</strong> lo que vence este mes sumando todas tus tarjetas (en pesos) y la fecha del próximo vencimiento.</li>
             <li><strong>Saldo compartido:</strong> cuánto te deben (positivo) o debés (negativo) en gastos compartidos, separado por moneda.</li>
         </ul>
@@ -93,7 +93,7 @@
                 <ng-container *ngSwitchCase="'error'">
                     <ng-container *ngTemplateOutlet="cardError; context: { label: 'Resultado del mes', retry: retryMonth }"></ng-container>
                 </ng-container>
-                <a *ngSwitchDefault class="card h-100 text-decoration-none text-reset" [routerLink]="['/report/inc-exp-summary']" queryParamsHandling="preserve">
+                <a *ngSwitchDefault class="card h-100 text-decoration-none text-reset" [routerLink]="['/report/inc-exp-summary']" [queryParams]="{ medida: null }" queryParamsHandling="merge">
                     <div class="card-body">
                         <div class="text-body-secondary small">Resultado del mes</div>
                         <div class="fs-5 fw-semibold" [class.text-success]="monthResultIsPositive" [class.text-danger]="!monthResultIsPositive">
@@ -113,7 +113,7 @@
                 <ng-container *ngSwitchCase="'error'">
                     <ng-container *ngTemplateOutlet="cardError; context: { label: 'Gasto del mes', retry: retryMonth }"></ng-container>
                 </ng-container>
-                <a *ngSwitchDefault class="card h-100 text-decoration-none text-reset" [routerLink]="['/report/inc-exp-evolution']" queryParamsHandling="preserve">
+                <a *ngSwitchDefault class="card h-100 text-decoration-none text-reset" [routerLink]="['/report/inc-exp-summary']" [queryParams]="{ medida: null }" queryParamsHandling="merge">
                     <div class="card-body">
                         <div class="text-body-secondary small">Gasto del mes</div>
                         <div class="fs-5 fw-semibold">{{ (month?.monthExpense ?? 0) | currencyFiatFormat }}</div>
