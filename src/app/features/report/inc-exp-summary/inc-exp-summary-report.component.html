@@ -14,6 +14,12 @@
 <app-loading [isLoading]="isLoading"></app-loading>
 
 <ng-container *ngIf="dataRequested && !isLoading && waterfall">
+    <!-- Con la medida de cuentas y el resumen de la tarjeta sin cargar: el gasto de tarjeta del mes falta -->
+    <div class="alert alert-warning small d-flex gap-2 align-items-start" role="alert" *ngIf="showStatementMissing" data-testid="statement-missing">
+        <i class="bi-exclamation-triangle mt-1" aria-hidden="true"></i>
+        <span>El resumen de tarjeta de {{ statementMonthName }} todavía no está cargado: el gasto con tarjeta de este mes falta.</span>
+    </div>
+
     <div class="row mb-3">
         <div class="col-md-3">
             <div class="card text-center mb-3">
@@ -95,3 +101,76 @@
         </div>
     </div>
 </ng-container>
+
+<!-- Cómo se llega al gasto con tarjeta (decisión E1): plegable, siempre en el DOM para que la tabla se exporte a Excel -->
+<div class="card mt-3" *ngIf="showReconciliation" data-testid="card-reconciliation">
+    <div class="card-header d-flex align-items-center gap-2">
+        <button type="button" class="btn btn-link p-0 text-decoration-none text-reset fw-semibold d-flex align-items-center gap-2"
+                (click)="toggleReconciliation()" [attr.aria-expanded]="reconciliationOpen" aria-controls="reconciliationBody" data-testid="reconciliation-toggle">
+            <i [class]="reconciliationOpen ? 'bi-chevron-down' : 'bi-chevron-right'" aria-hidden="true"></i>
+            Cómo se llega al gasto con tarjeta
+        </button>
+        <app-info-button title="Cómo se llega al gasto con tarjeta">
+            <p>Parte del resumen del mes del reporte de Tarjetas (todas las cuotas y recurrentes que vencen ese mes, de todas las categorías) y llega, restando, al gasto con tarjeta que cuenta este reporte:</p>
+            <ul>
+                <li><strong>Lo que reintegran otros:</strong> la parte de los demás en gastos y eventos compartidos.</li>
+                <li><strong>Los descuentos del banco.</strong></li>
+                <li><strong>Lo de categorías que no cuentan como egreso</strong> (por ejemplo, lo cargado en "Inversiones").</li>
+                <li><strong>Centavos de redondeo:</strong> solo aparecen si los hay; no son un descuento.</li>
+            </ul>
+            <p class="mb-0">Siempre en pesos. Lo que se gastó en dólares se muestra aparte, en dólares, y se convierte con la cotización blue. El primer renglón, en pesos, coincide con lo que muestra Tarjetas.</p>
+        </app-info-button>
+    </div>
+    <div class="card-body" id="reconciliationBody" [hidden]="!reconciliationOpen">
+        <app-loading [isLoading]="isLoadingReconciliation"></app-loading>
+        <p class="small text-danger mb-0" *ngIf="reconciliationFailed">
+            No se pudo cargar la conciliación.
+            <button type="button" class="btn btn-link btn-sm p-0 align-baseline" (click)="retryReconciliation()">Reintentar</button>
+        </p>
+
+        <ng-container *ngIf="reconciliation && !isLoadingReconciliation">
+            <div class="table-responsive">
+                <table class="table table-sm mb-2">
+                    <thead class="table-header-brand">
+                        <tr>
+                            <th>Concepto</th>
+                            <th class="text-end">Monto</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="2" class="fw-semibold">En pesos</td></tr>
+                        <tr><td>Cuotas y recurrentes del resumen del mes (como las lista Tarjetas)</td><td class="text-end">{{ reconciliation.pesos.statementAmount | currencyFiatFormat }}</td></tr>
+                        <tr><td>Menos lo que reintegran otros (gastos y eventos compartidos)</td><td class="text-end">{{ -reconciliation.pesos.othersShare | currencyFiatFormat }}</td></tr>
+                        <tr><td>Menos los descuentos del banco</td><td class="text-end">{{ -reconciliation.pesos.discounts | currencyFiatFormat }}</td></tr>
+                        <tr><td>Menos lo de categorías que no cuentan como egreso</td><td class="text-end">{{ -reconciliation.pesos.notCounted | currencyFiatFormat }}</td></tr>
+                        <tr *ngIf="hasRounding"><td>Centavos de redondeo</td><td class="text-end">{{ -reconciliation.pesos.rounding | currencyFiatFormat }}</td></tr>
+                        <tr class="fw-semibold"><td>Gasto con tarjeta en pesos</td><td class="text-end">{{ reconciliation.pesos.spending | currencyFiatFormat }}</td></tr>
+
+                        <ng-container *ngIf="hasDollars">
+                            <tr><td colspan="2" class="fw-semibold">En dólares</td></tr>
+                            <tr><td>Cuotas y recurrentes del resumen del mes (como las lista Tarjetas)</td><td class="text-end">{{ formatUsd(reconciliation.dollars.statementAmount) }}</td></tr>
+                            <tr><td>Menos lo que reintegran otros (gastos y eventos compartidos)</td><td class="text-end">{{ formatUsd(-reconciliation.dollars.othersShare) }}</td></tr>
+                            <tr><td>Menos los descuentos del banco</td><td class="text-end">{{ formatUsd(-reconciliation.dollars.discounts) }}</td></tr>
+                            <tr><td>Menos lo de categorías que no cuentan como egreso</td><td class="text-end">{{ formatUsd(-reconciliation.dollars.notCounted) }}</td></tr>
+                            <tr><td>Gasto con tarjeta en dólares</td><td class="text-end">{{ formatUsd(reconciliation.dollars.spending) }}</td></tr>
+                            <tr><td>Esos dólares, convertidos a pesos con la blue de cada cuota</td><td class="text-end">{{ reconciliation.dollarsInPesos | currencyFiatFormat }}</td></tr>
+                        </ng-container>
+
+                        <tr class="fw-semibold table-active"><td>Gasto con tarjeta del mes</td><td class="text-end" data-testid="reconciliation-total">{{ reconciliation.totalPesos | currencyFiatFormat }}</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="small text-body-secondary mb-1" *ngIf="hasDollars" data-testid="reconciliation-rate">
+                Los dólares se convierten con la cotización blue de la fecha de cada cuota<span *ngIf="reconciliation.blueRateUsed != null"> ({{ reconciliation.blueRateUsed | currencyFiatFormat }} por dólar, en promedio este mes)</span>.
+                El reporte de Tarjetas usa en cambio la cotización de tarjeta: en pesos coincide con él, y en el total convertido de los dólares no.
+            </p>
+            <p class="small text-body-secondary mb-0" *ngIf="reconciliation.underpaidInstallmentsCount > 0" data-testid="reconciliation-underpaid">
+                {{ reconciliation.underpaidInstallmentsCount }} {{ reconciliation.underpaidInstallmentsCount === 1 ? 'cuota se pagó' : 'cuotas se pagaron' }} este mes por menos de lo que valía
+                ({{ reconciliation.underpaidInstallmentsAmount | currencyFiatFormat }} de diferencia) en compras sin reparto cargado: suele ser la parte de otros que se cobró por fuera de la app.
+                Esas compras figuran enteras en tu gasto.
+            </p>
+        </ng-container>
+    </div>
+</div>
+

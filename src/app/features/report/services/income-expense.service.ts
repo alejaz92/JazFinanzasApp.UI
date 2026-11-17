@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment.development';
 import { SpendingMeasure } from '../../../shared/services/report-context.service';
-import { IncExpWaterfall, IncExpEvolutionPoint, SpendingByCategory, TagSpending, SpendingCalendar, SpendingRow, IncomeCategorySeries, IncomeComposition, IncomeCategoryDay } from '../models/income-expense.model';
+import { IncExpWaterfall, IncExpEvolutionPoint, SpendingByCategory, TagSpending, SpendingCalendar, SpendingRow, CardReconciliation, IncomeCategorySeries, IncomeComposition, IncomeCategoryDay } from '../models/income-expense.model';
 
 @Injectable({
     providedIn: 'root'
@@ -42,6 +42,11 @@ export class IncomeExpenseService {
         if (filters?.categoryId != null) url += `&categoryId=${filters.categoryId}`;
         if (filters?.tagId != null) url += `&tagId=${filters.tagId}`;
         return this.http.get<SpendingRow[]>(url);
+    }
+
+    // Cómo se llega, desde el resumen del mes del reporte de Tarjetas, al gasto con tarjeta del mes (Fase 10). Siempre en pesos: no lleva moneda.
+    getCardReconciliation(month: string): Observable<CardReconciliation> {
+        return this.http.get<CardReconciliation>(`${environment.apiBaseURL}/api/IncomeExpenseReport/CardReconciliation?month=${month}`);
     }
 
     getIncomeComposition(assetId: number, month: string): Observable<IncomeComposition> {

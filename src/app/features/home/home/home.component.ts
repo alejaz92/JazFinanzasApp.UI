@@ -13,6 +13,7 @@ import { ChartComponent } from '../../../shared/components/chart/chart.component
 import { ChartThemeService } from '../../../shared/services/chart-theme.service';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { AssistantCardComponent } from '../../assistant/components/assistant-card/assistant-card.component';
+import { InfoButtonComponent } from '../../../shared/components/info-button/info-button.component';
 import { maskMoney } from '../../assistant/utils/assistant.util';
 
 // Ocultar montos (pedido del usuario tras ver la Fase 18): Inicio se ve sin ningún clic de por
@@ -37,7 +38,7 @@ const PENDING_OPEN_STORAGE_KEY = 'jaz-home-pending-open';
 @Component({
     selector: 'app-home',
     standalone: true,
-    imports: [NgIf, NgFor, NgClass, NgTemplateOutlet, NgSwitch, NgSwitchCase, NgSwitchDefault, RouterLink, DatePipe, ChartComponent, AssistantCardComponent],
+    imports: [NgIf, NgFor, NgClass, NgTemplateOutlet, NgSwitch, NgSwitchCase, NgSwitchDefault, RouterLink, DatePipe, ChartComponent, AssistantCardComponent, InfoButtonComponent],
     templateUrl: './home.component.html',
     styleUrl: './home.component.css'
 })

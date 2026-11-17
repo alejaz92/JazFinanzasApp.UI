@@ -10,6 +10,38 @@ export interface IncExpWaterfall {
     totalExpense: number;
     result: number;
     previousMonthResult: number;
+    previousTotalIncome: number;
+    /**
+     * Solo con la medida de cuentas: el mes tiene cargos de tarjeta pero ningún pago de cuota fechado en él, o sea que el resumen todavía no se cargó y el gasto de
+     * tarjeta de este mes falta. Con la medida de compra va en falso.
+     */
+    cardStatementMissing: boolean;
+}
+
+/** Una moneda de la conciliación: statementAmount - othersShare - discounts - notCounted - rounding = spending. */
+export interface CardReconciliationSection {
+    /** Las cuotas y recurrentes del mes, todas las categorías: lo que lista el resumen del mes del reporte de Tarjetas. */
+    statementAmount: number;
+    othersShare: number;
+    discounts: number;
+    notCounted: number;
+    /** Centavos de redondeo (positivos o negativos): no son un descuento. */
+    rounding: number;
+    spending: number;
+}
+
+/** "Cómo se llega al gasto con tarjeta" de un mes (plan-ingresos-egresos-por-fecha-de-compra.md, D5): siempre en pesos, con los dólares aparte. */
+export interface CardReconciliation {
+    month: string;
+    pesos: CardReconciliationSection;
+    dollars: CardReconciliationSection;
+    /** Los dólares del gasto, convertidos con la cotización blue de la fecha de cada cuota, y la cotización media que eso implica (null sin gasto en dólares). */
+    dollarsInPesos: number;
+    blueRateUsed: number | null;
+    totalPesos: number;
+    /** Decisión H: cuotas del mes pagadas por menos de lo que valen, en compras sin reparto cargado. */
+    underpaidInstallmentsCount: number;
+    underpaidInstallmentsAmount: number;
 }
 
 export interface IncExpEvolutionPoint {
