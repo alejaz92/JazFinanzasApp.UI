@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 import { TransactionClassAddComponent } from './transaction-class-add.component';
+import { provideToastr } from 'ngx-toastr';
 
 describe('TransactionClassAddComponent', () => {
   let component: TransactionClassAddComponent;
@@ -13,6 +14,7 @@ describe('TransactionClassAddComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
     imports: [HttpClientTestingModule, RouterTestingModule, FormsModule, TransactionClassAddComponent],
+    providers: [provideToastr()],
     schemas: [NO_ERRORS_SCHEMA]
 });
     fixture = TestBed.createComponent(TransactionClassAddComponent);

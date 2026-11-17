@@ -5,6 +5,7 @@ import { NgxPaginationModule } from 'ngx-pagination';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 import { CurrencyExchangeListComponent } from './currency-exchange-list.component';
+import { provideToastr } from 'ngx-toastr';
 
 describe('CurrencyExchangeListComponent', () => {
   let component: CurrencyExchangeListComponent;
@@ -13,6 +14,7 @@ describe('CurrencyExchangeListComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
     imports: [HttpClientTestingModule, RouterTestingModule, NgxPaginationModule, CurrencyExchangeListComponent],
+    providers: [provideToastr()],
     schemas: [NO_ERRORS_SCHEMA]
 });
     fixture = TestBed.createComponent(CurrencyExchangeListComponent);

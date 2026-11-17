@@ -4,6 +4,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 import { ExchangeAddComponent } from './exchange-add.component';
+import { provideToastr } from 'ngx-toastr';
 
 describe('ExchangeAddComponent', () => {
   let component: ExchangeAddComponent;
@@ -12,6 +13,7 @@ describe('ExchangeAddComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
     imports: [HttpClientTestingModule, RouterTestingModule, ExchangeAddComponent],
+    providers: [provideToastr()],
     schemas: [NO_ERRORS_SCHEMA]
 });
     fixture = TestBed.createComponent(ExchangeAddComponent);

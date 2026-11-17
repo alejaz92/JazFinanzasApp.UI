@@ -3,6 +3,7 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { AccountAssetTypeComponent } from './account-assetType.component';
+import { provideToastr } from 'ngx-toastr';
 
 
 describe('AccountAssettypeComponent', () => {
@@ -12,6 +13,7 @@ describe('AccountAssettypeComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
     imports: [HttpClientTestingModule, RouterTestingModule, AccountAssetTypeComponent],
+    providers: [provideToastr()],
     schemas: [NO_ERRORS_SCHEMA]
 });
     fixture = TestBed.createComponent(AccountAssetTypeComponent);

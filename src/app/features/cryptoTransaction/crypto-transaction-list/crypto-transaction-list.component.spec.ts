@@ -4,6 +4,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 import { CryptoTransactionListComponent } from './crypto-transaction-list.component';
+import { provideToastr } from 'ngx-toastr';
 
 describe('CryptoTransactionListComponent', () => {
   let component: CryptoTransactionListComponent;
@@ -12,6 +13,7 @@ describe('CryptoTransactionListComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
     imports: [HttpClientTestingModule, RouterTestingModule, CryptoTransactionListComponent],
+    providers: [provideToastr()],
     schemas: [NO_ERRORS_SCHEMA]
 });
     fixture = TestBed.createComponent(CryptoTransactionListComponent);

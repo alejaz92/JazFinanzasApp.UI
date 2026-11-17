@@ -4,6 +4,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 import { StockTransactionListComponent } from './stock-transaction-list.component';
+import { provideToastr } from 'ngx-toastr';
 
 describe('StockTransactionListComponent', () => {
   let component: StockTransactionListComponent;
@@ -12,6 +13,7 @@ describe('StockTransactionListComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
     imports: [HttpClientTestingModule, RouterTestingModule, StockTransactionListComponent],
+    providers: [provideToastr()],
     schemas: [NO_ERRORS_SCHEMA]
 });
     fixture = TestBed.createComponent(StockTransactionListComponent);

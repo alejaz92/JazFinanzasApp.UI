@@ -4,6 +4,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 import { AssetManagementComponent } from './asset-management.component';
+import { provideToastr } from 'ngx-toastr';
 
 describe('AssetManagementComponent', () => {
   let component: AssetManagementComponent;
@@ -12,6 +13,7 @@ describe('AssetManagementComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
     imports: [HttpClientTestingModule, RouterTestingModule, AssetManagementComponent],
+    providers: [provideToastr()],
     schemas: [NO_ERRORS_SCHEMA]
 });
     fixture = TestBed.createComponent(AssetManagementComponent);

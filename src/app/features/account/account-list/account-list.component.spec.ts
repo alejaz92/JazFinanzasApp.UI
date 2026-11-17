@@ -4,6 +4,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 import { AccountListComponent } from './account-list.component';
+import { provideToastr } from 'ngx-toastr';
 
 describe('AccountListComponent', () => {
   let component: AccountListComponent;
@@ -12,6 +13,7 @@ describe('AccountListComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
     imports: [HttpClientTestingModule, RouterTestingModule, AccountListComponent],
+    providers: [provideToastr()],
     schemas: [NO_ERRORS_SCHEMA]
 });
     fixture = TestBed.createComponent(AccountListComponent);

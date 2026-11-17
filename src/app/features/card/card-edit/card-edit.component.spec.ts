@@ -4,6 +4,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 import { CardEditComponent } from './card-edit.component';
+import { provideToastr } from 'ngx-toastr';
 
 describe('CardEditComponent', () => {
   let component: CardEditComponent;
@@ -12,6 +13,7 @@ describe('CardEditComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
     imports: [HttpClientTestingModule, RouterTestingModule, CardEditComponent],
+    providers: [provideToastr()],
     schemas: [NO_ERRORS_SCHEMA]
 });
     fixture = TestBed.createComponent(CardEditComponent);
