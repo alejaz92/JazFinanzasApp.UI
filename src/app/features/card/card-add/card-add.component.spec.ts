@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 import { CardAddComponent } from './card-add.component';
+import { provideToastr } from 'ngx-toastr';
 
 describe('CardAddComponent', () => {
   let component: CardAddComponent;
@@ -13,6 +14,7 @@ describe('CardAddComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
     imports: [HttpClientTestingModule, RouterTestingModule, FormsModule, CardAddComponent],
+    providers: [provideToastr()],
     schemas: [NO_ERRORS_SCHEMA]
 });
     fixture = TestBed.createComponent(CardAddComponent);

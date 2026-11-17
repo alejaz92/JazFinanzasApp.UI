@@ -4,6 +4,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 import { RegisterComponent } from './register.component';
+import { provideToastr } from 'ngx-toastr';
 
 describe('RegisterComponent', () => {
   let component: RegisterComponent;
@@ -12,6 +13,7 @@ describe('RegisterComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
     imports: [HttpClientTestingModule, RouterTestingModule, RegisterComponent],
+    providers: [provideToastr()],
     schemas: [NO_ERRORS_SCHEMA]
 });
     fixture = TestBed.createComponent(RegisterComponent);

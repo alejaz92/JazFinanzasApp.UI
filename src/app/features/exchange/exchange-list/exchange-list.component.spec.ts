@@ -5,6 +5,7 @@ import { NgxPaginationModule } from 'ngx-pagination';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 import { ExchangeListComponent } from './exchange-list.component';
+import { provideToastr } from 'ngx-toastr';
 
 describe('ExchangeListComponent', () => {
   let component: ExchangeListComponent;
@@ -13,6 +14,7 @@ describe('ExchangeListComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
     imports: [HttpClientTestingModule, RouterTestingModule, NgxPaginationModule, ExchangeListComponent],
+    providers: [provideToastr()],
     schemas: [NO_ERRORS_SCHEMA]
 });
     fixture = TestBed.createComponent(ExchangeListComponent);

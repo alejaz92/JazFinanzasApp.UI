@@ -4,6 +4,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 import { CardTransactionsEditRecurrentComponent } from './card-transactions-edit-recurrent.component';
+import { provideToastr } from 'ngx-toastr';
 
 describe('CardTransactionsEditRecurrentComponent', () => {
   let component: CardTransactionsEditRecurrentComponent;
@@ -12,6 +13,7 @@ describe('CardTransactionsEditRecurrentComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
     imports: [HttpClientTestingModule, RouterTestingModule, CardTransactionsEditRecurrentComponent],
+    providers: [provideToastr()],
     schemas: [NO_ERRORS_SCHEMA]
 });
     fixture = TestBed.createComponent(CardTransactionsEditRecurrentComponent);

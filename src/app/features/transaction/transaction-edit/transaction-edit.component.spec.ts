@@ -4,6 +4,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 import { TransactionEditComponent } from './transaction-edit.component';
+import { provideToastr } from 'ngx-toastr';
 
 describe('TransactionEditComponent', () => {
   let component: TransactionEditComponent;
@@ -12,6 +13,7 @@ describe('TransactionEditComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
     imports: [HttpClientTestingModule, RouterTestingModule, TransactionEditComponent],
+    providers: [provideToastr()],
     schemas: [NO_ERRORS_SCHEMA]
 });
     fixture = TestBed.createComponent(TransactionEditComponent);

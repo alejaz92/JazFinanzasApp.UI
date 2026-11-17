@@ -4,6 +4,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 import { ProfileComponent } from './profile.component';
+import { provideToastr } from 'ngx-toastr';
 
 describe('ProfileComponent', () => {
   let component: ProfileComponent;
@@ -12,6 +13,7 @@ describe('ProfileComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
     imports: [HttpClientTestingModule, RouterTestingModule, ProfileComponent],
+    providers: [provideToastr()],
     schemas: [NO_ERRORS_SCHEMA]
 });
     fixture = TestBed.createComponent(ProfileComponent);

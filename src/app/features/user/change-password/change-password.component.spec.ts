@@ -4,6 +4,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 import { ChangePasswordComponent } from './change-password.component';
+import { provideToastr } from 'ngx-toastr';
 
 describe('ChangePasswordComponent', () => {
   let component: ChangePasswordComponent;
@@ -12,6 +13,7 @@ describe('ChangePasswordComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
     imports: [HttpClientTestingModule, RouterTestingModule, ChangePasswordComponent],
+    providers: [provideToastr()],
     schemas: [NO_ERRORS_SCHEMA]
 });
     fixture = TestBed.createComponent(ChangePasswordComponent);

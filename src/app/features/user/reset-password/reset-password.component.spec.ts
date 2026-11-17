@@ -4,6 +4,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 import { ResetPasswordComponent } from './reset-password.component';
+import { provideToastr } from 'ngx-toastr';
 
 describe('ResetPasswordComponent', () => {
   let component: ResetPasswordComponent;
@@ -12,6 +13,7 @@ describe('ResetPasswordComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
     imports: [HttpClientTestingModule, RouterTestingModule, ResetPasswordComponent],
+    providers: [provideToastr()],
     schemas: [NO_ERRORS_SCHEMA]
 });
     fixture = TestBed.createComponent(ResetPasswordComponent);

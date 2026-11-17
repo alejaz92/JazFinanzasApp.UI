@@ -4,6 +4,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 import { CurrencyExchangeAddComponent } from './currency-exchange-add.component';
+import { provideToastr } from 'ngx-toastr';
 
 describe('CurrencyExchangeAddComponent', () => {
   let component: CurrencyExchangeAddComponent;
@@ -12,6 +13,7 @@ describe('CurrencyExchangeAddComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
     imports: [HttpClientTestingModule, RouterTestingModule, CurrencyExchangeAddComponent],
+    providers: [provideToastr()],
     schemas: [NO_ERRORS_SCHEMA]
 });
     fixture = TestBed.createComponent(CurrencyExchangeAddComponent);
