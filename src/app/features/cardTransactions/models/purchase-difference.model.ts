@@ -18,6 +18,10 @@ export interface PurchaseDifference {
 export interface PurchaseDifferenceContext {
     // La compra: su detalle y, si tiene cuotas, qué cuota es ("2/6").
     detail: string;
+    // Opcionales: la pantalla de compras que no cierran habla de toda la compra y no de una cuota, así que pone su propio título y su propio texto
+    // (con la diferencia incluida). Sin ellos se usan los del formulario de pago.
+    title?: string;
+    summary?: string;
     installmentLabel?: string;
     // Cuota menos lo pagado, con signo y en la moneda de la compra: positiva si se pagó de menos, negativa si se pagó de más.
     difference: number;

@@ -26,7 +26,12 @@
                 <i class="bi-plus-lg text-white"></i>
             </a>
         </div>
-        <a class="btn btn-warning" [routerLink]="['/cardTransactions/pay']">Pago Tarjeta</a>
+        <div class="d-flex align-items-center gap-2">
+            <a class="btn btn-outline-secondary" [routerLink]="['/cardTransactions/mismatches']" title="Compras cuyas cuotas se pagaron por un monto que ningún reparto ni descuento explica">
+                <i class="bi bi-calculator me-1"></i>Compras que no cierran
+            </a>
+            <a class="btn btn-warning" [routerLink]="['/cardTransactions/pay']">Pago Tarjeta</a>
+        </div>
     </div>
 
     <!-- avisos de cierre/vencimiento de tarjeta (Flujo 3) -->

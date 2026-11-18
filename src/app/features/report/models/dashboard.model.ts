@@ -31,8 +31,11 @@ export interface DashboardThermometer {
 // reglas fijas (Title = categoría, LinkId = id de la categoría). AssistantFinding es un hallazgo del asistente
 // (FindingId para descartarlo o calificarlo desde la bandeja) y AssistantQualityReviewDue avisa que toca una revisión
 // de calidad; estos dos solo llegan si el asistente está habilitado.
+//
+// plan-repartos-y-descuentos-faltantes.md, Fase 8: se suma 'CardPurchaseMismatch' — hay compras con tarjeta cuyas cuotas se pagaron por un monto que
+// ningún reparto ni descuento explica (Detail trae la cantidad). Lleva a la pantalla "Compras que no cierran"; no usa LinkId.
 export type DashboardPendingKind = 'CardDue' | 'OpenSharedEvent' | 'PersonDebt' | 'TripWithoutRecentExpense' | 'StaleQuote' | 'BondCollection'
-    | 'CategorySpike' | 'LargeMovement' | 'MissingIncome' | 'AssistantFinding' | 'AssistantQualityReviewDue';
+    | 'CategorySpike' | 'LargeMovement' | 'MissingIncome' | 'AssistantFinding' | 'AssistantQualityReviewDue' | 'CardPurchaseMismatch';
 export type DashboardPendingSeverity = 'info' | 'warning' | 'danger';
 
 export interface DashboardPendingItem {

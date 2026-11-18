@@ -83,6 +83,15 @@ describe('PurchaseDifferenceDialogComponent', () => {
     expect((fixture.nativeElement as HTMLElement).textContent!).not.toContain('El total de la compra estaba mal cargado');
   });
 
+  it('should use the title and the text of the context when it brings its own', () => {
+    prepare({ ...lessContext, title: 'Se pagó de menos', summary: 'Las cuotas pagadas de «Coto» salieron $ 18.000,00 menos de lo que valen.' });
+
+    expect(component.title).toBe('Se pagó de menos');
+    const text = (fixture.nativeElement as HTMLElement).textContent!;
+    expect(text).toContain('Las cuotas pagadas de «Coto» salieron $ 18.000,00 menos de lo que valen.');
+    expect(text).not.toContain('La cuota de');
+  });
+
   it('should show the amounts in dollars when the purchase is in dollars', () => {
     prepare({ ...lessContext, difference: 5, symbol: 'US$' });
     expect((fixture.nativeElement as HTMLElement).textContent!).toContain('US$ 5,00');

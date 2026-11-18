@@ -59,7 +59,7 @@ export class PurchaseDifferenceDialogComponent implements OnInit {
   }
 
   get title(): string {
-    return this.paidLess ? 'Pagás menos que la cuota' : 'Pagás más que la cuota';
+    return this.context?.title ?? (this.paidLess ? 'Pagás menos que la cuota' : 'Pagás más que la cuota');
   }
 
   // Lo que todavía falta repartir entre las personas (negativo si se repartió de más).

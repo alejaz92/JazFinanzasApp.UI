@@ -7,7 +7,8 @@
       </div>
 
       <div class="modal-body" *ngIf="context">
-        <p>
+        <p *ngIf="context.summary">{{ context.summary }}</p>
+        <p *ngIf="!context.summary">
           La cuota de <strong>{{ context.detail }}</strong>
           <span *ngIf="context.installmentLabel"> ({{ context.installmentLabel }})</span>
           {{ paidLess ? 'sale menos de lo que vale' : 'sale más de lo que vale' }}.

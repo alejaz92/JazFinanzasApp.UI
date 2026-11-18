@@ -1,0 +1,97 @@
+<app-loading [isLoading]="isLoading"></app-loading>
+
+<div class="container-fluid mt-4" *ngIf="!isLoading">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
+        <h1 class="mb-0">Compras que no cierran</h1>
+        <app-back-button [defaultUrl]="['/cardTransactions']"></app-back-button>
+    </div>
+
+    <p class="text-muted">
+        Una compra con tarjeta cierra cuando lo que dejaste de pagar de sus cuotas coincide con el reparto y los descuentos cargados.
+        Si no coincide, esa compra cuenta de más como gasto tuyo. Explicar la diferencia no mueve ningún saldo: solo deja registrado qué fue.
+    </p>
+
+    <div class="alert alert-danger" *ngIf="loadFailed">
+        No se pudo cargar la lista.
+        <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="load()">Reintentar</button>
+    </div>
+
+    <ng-container *ngIf="!loadFailed">
+        <div class="mb-3" *ngIf="mismatches.length > 0">
+            <span class="badge text-bg-warning me-2">{{ underpaidCount }} pagadas de menos</span>
+            <span class="badge text-bg-info" *ngIf="overpaidCount > 0">{{ overpaidCount }} pagadas de más</span>
+        </div>
+
+        <div class="table-responsive" *ngIf="mismatches.length > 0; else allClose">
+            <table class="table table-striped table-bordered align-middle">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Detalle</th>
+                        <th>Tarjeta</th>
+                        <th class="text-end">Total</th>
+                        <th class="text-center">Cuotas pagadas</th>
+                        <th class="text-end">Pagado</th>
+                        <th class="text-end">Explicado</th>
+                        <th class="text-end">Diferencia</th>
+                        <th style="min-width: 210px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let m of mismatches">
+                        <td class="text-nowrap">{{ m.date | date: 'dd/MM/yyyy' }}</td>
+                        <td>{{ m.detail }}</td>
+                        <td>{{ m.cardName }}</td>
+                        <td class="text-end text-nowrap">{{ m.totalAmount | currencyFiatFormat: symbolOf(m) }}</td>
+                        <td class="text-center">{{ m.paidInstallments }}/{{ m.installments }}</td>
+                        <td class="text-end text-nowrap">{{ m.paid | currencyFiatFormat: symbolOf(m) }}</td>
+                        <td class="text-end text-nowrap">{{ m.explained | currencyFiatFormat: symbolOf(m) }}</td>
+                        <td class="text-end text-nowrap">
+                            {{ m.difference | currencyFiatFormat: symbolOf(m) }}
+                            <div><span class="badge" [ngClass]="isPaidLess(m) ? 'text-bg-warning' : 'text-bg-info'">{{ directionLabel(m) }}</span></div>
+                        </td>
+                        <td>
+                            <div class="d-flex flex-wrap gap-2">
+                                <button type="button" class="btn btn-sm btn-primary" *ngIf="canExplain(m)" [disabled]="isSaving" (click)="explain(m)">
+                                    <i class="bi bi-chat-left-text me-1"></i>Explicar
+                                </button>
+
+                                <!-- Corregir la cuota: si lo que está mal es el monto que se pagó, se edita esa transacción (acá sí se mueve el saldo). -->
+                                <a class="btn btn-sm btn-outline-secondary" *ngIf="m.payments.length === 1"
+                                   [routerLink]="['/transactions', m.payments[0].transactionId]" [queryParams]="{ returnTo: returnUrl }">
+                                    <i class="bi bi-pencil-square me-1"></i>Corregir la cuota
+                                </a>
+                                <div class="dropdown" *ngIf="m.payments.length > 1">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-pencil-square me-1"></i>Corregir una cuota
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li *ngFor="let p of m.payments">
+                                            <a class="dropdown-item" [routerLink]="['/transactions', p.transactionId]" [queryParams]="{ returnTo: returnUrl }">
+                                                {{ p.date | date: 'MM/yyyy' }} — {{ p.amount | currencyFiatFormat: symbolOf(m) }}
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="small text-muted mt-1" *ngIf="hint(m) as text">{{ text }}</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <ng-template #allClose>
+            <div class="alert alert-success d-flex align-items-center">
+                <i class="bi bi-check-circle me-2 fs-4"></i>
+                <div>
+                    <strong>Todas tus compras con tarjeta cierran.</strong>
+                    Cada diferencia entre lo que valen las cuotas y lo que pagaste está explicada por un reparto o un descuento.
+                </div>
+            </div>
+        </ng-template>
+    </ng-container>
+</div>
+
+<!-- Fuera del contenedor: el diálogo tiene que existir aunque la lista todavía se esté cargando. -->
+<app-purchase-difference-dialog #differenceDialog (chosen)="onDifferenceChosen($event)"></app-purchase-difference-dialog>

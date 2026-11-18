@@ -21,6 +21,8 @@ const PENDING_META: Record<DashboardPendingKind, { icon: string; action: string 
     MissingIncome: { icon: 'bi-cash-stack', action: 'Ver ingresos' },
     AssistantFinding: { icon: 'bi-stars', action: '' },
     AssistantQualityReviewDue: { icon: 'bi-clipboard-check', action: '' },
+    // plan-repartos-y-descuentos-faltantes.md, Fase 8: compras con tarjeta que no cierran; se explican en su propia pantalla.
+    CardPurchaseMismatch: { icon: 'bi-calculator', action: 'Revisar' },
 };
 
 // Ícono/acción por default para un `kind` que el frontend todavía no conoce — evita que la bandeja
@@ -92,6 +94,7 @@ export function pendingRoute(item: DashboardPendingItem): string[] | null {
         case 'TripWithoutRecentExpense': return ['/management/trips', String(item.linkId), 'detail'];
         case 'StaleQuote': return null;
         case 'BondCollection': return ['/stockTransactions/bond-collections'];
+        case 'CardPurchaseMismatch': return ['/cardTransactions/mismatches'];
         case 'CategorySpike':
         case 'LargeMovement': return ['/report/inc-exp-by-category'];
         case 'MissingIncome': return ['/report/inc-income'];
