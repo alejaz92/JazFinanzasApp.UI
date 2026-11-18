@@ -1,3 +1,5 @@
+import { PurchaseDifference } from './purchase-difference.model';
+
 export interface CardTransactionPaymentList {
     cardTransactionId: number;
     date: string;
@@ -13,4 +15,6 @@ export interface CardTransactionPaymentList {
     installmentAmount: number;
     valueInPesos: number;
     pay: boolean | true;
+    // Qué fue la diferencia entre el valor de la cuota y lo que se paga (plan-repartos-y-descuentos-faltantes.md, D5). Opcional.
+    difference?: PurchaseDifference;
   }

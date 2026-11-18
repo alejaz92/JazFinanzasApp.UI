@@ -261,7 +261,9 @@
                                               class="form-control small-font-input" 
                                               formControlName="installmentAmount"                                              
                                               appCurrencyInput
+                                              (blur)="onAmountBlur(cardTransaction)"
                                             >
+                                              <span *ngIf="selectedPaymentAssets === 'Pesos+Dolar' && differenceLabel(cardTransaction) as label" class="badge mt-1" [ngClass]="differenceBadgeClass(cardTransaction)">{{ label }}</span>
                                         </td>
                                   
                                         <td>
@@ -271,7 +273,9 @@
                                                 class="form-control small-font-input"  
                                                 formControlName="valueInPesos"                                          
                                                 appCurrencyInput
+                                                (blur)="onAmountBlur(cardTransaction)"
                                             >
+                                                <span *ngIf="selectedPaymentAssets !== 'Pesos+Dolar' && differenceLabel(cardTransaction) as label" class="badge mt-1" [ngClass]="differenceBadgeClass(cardTransaction)">{{ label }}</span>
                                         </td>
                                         <!-- <td>{{cardTransaction.value.installmentAmount}}</td>
                                         <td>{{cardTransaction.value.valueInPesos}}</td> -->
@@ -318,4 +322,7 @@
         </div>
 
     </form>
+
+    <!-- Fuera del form: pregunta qué fue la diferencia cuando una cuota se paga por un monto distinto de su valor. -->
+    <app-purchase-difference-dialog #differenceDialog (chosen)="onDifferenceChosen($event)"></app-purchase-difference-dialog>
 </div>
