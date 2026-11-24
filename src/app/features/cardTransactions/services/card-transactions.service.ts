@@ -6,6 +6,8 @@ import { environment } from 'src/environments/environment.development';
 import { CardTransactionsAdd } from '../models/cardTransactions-add.model';
 import { CardTransactionPaymentList } from '../models/CardTransactionPayment-List.model';
 import { RecurrentCardTransactionGet, RecurrentCardTransactionPut } from '../models/CardTransaction-recurrent.model';
+import { CardPurchaseMismatch } from '../models/card-purchase-mismatch.model';
+import { PurchaseDifference } from '../models/purchase-difference.model';
 
 
 @Injectable({
@@ -30,6 +32,16 @@ export class CardTransactionsService {
 
   createCardPayment(cardTransaction: any): Observable<any> {
     return this.http.post<any>(`${environment.apiBaseURL}/api/CardTransaction/CardPayments`, cardTransaction);
+  }
+
+  // Las compras con tarjeta que no cierran: lo que se dejó de pagar de sus cuotas no coincide con su reparto y sus descuentos (plan-repartos-y-descuentos-faltantes.md).
+  getPurchaseMismatches(): Observable<CardPurchaseMismatch[]> {
+    return this.http.get<CardPurchaseMismatch[]>(`${environment.apiBaseURL}/api/CardTransaction/mismatches`);
+  }
+
+  // Explica la diferencia de una compra ya pagada: un descuento, la parte de otras personas o un total mal cargado. No toca ningún saldo.
+  explainPurchaseDifference(cardTransactionId: number, difference: PurchaseDifference): Observable<void> {
+    return this.http.post<void>(`${environment.apiBaseURL}/api/CardTransaction/${cardTransactionId}/difference`, difference);
   }
 
   registerEmptyMonth(request: any): Observable<any> {

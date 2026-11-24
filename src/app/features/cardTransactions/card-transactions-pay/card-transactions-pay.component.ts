@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormArray, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { AbstractControl, FormBuilder, FormGroup, FormArray, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AccountService } from 'src/app/features/account/services/account.service';
 import { CardService } from 'src/app/features/card/services/card.service';
 import { CardTransactionsService } from '../services/card-transactions.service';
@@ -12,18 +12,29 @@ import { CardTransactionDiscountService } from 'src/app/features/card-transactio
 import { CardPendingCredit } from 'src/app/features/card-transaction-discount/models/card-transaction-discount.model';
 import { catchError, merge, of, switchMap } from 'rxjs';
 import { LoadingComponent } from '../../../core/components/loading/loading.component';
-import { NgIf, NgFor, DatePipe } from '@angular/common';
+import { NgIf, NgFor, NgClass, DatePipe } from '@angular/common';
 import { CurrencyInputDirective } from '../../../shared/directives/currency-input.directive';
 import { CurrencyFiatFormatPipe } from '../../../shared/pipes/currencyFiatFormat/currency-fiat-format.pipe';
 import { ToastService } from '../../../core/services/toast.service';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 import { SubmitButtonComponent } from '../../../shared/components/submit-button/submit-button.component';
+import { PurchaseDifferenceDialogComponent } from '../purchase-difference-dialog/purchase-difference-dialog.component';
+import { PurchaseDifference, PurchaseDifferenceChoice, PurchaseDifferencePerson, differenceThreshold } from '../models/purchase-difference.model';
+
+// Lo que el usuario respondió sobre la diferencia de una cuota editada (plan-repartos-y-descuentos-faltantes.md, D5). `Later` es "lo veo después": no se
+// manda nada y la compra queda en la lista de las que no cierran.
+interface RowDifference {
+  // Cuota menos lo pagado en el momento de responder: si el monto cambia, la respuesta ya no vale y se vuelve a preguntar.
+  amount: number;
+  state: 'Discount' | 'People' | 'FixTotal' | 'Later';
+  people?: PurchaseDifferencePerson[];
+}
 
 @Component({
     selector: 'app-card-transactions-pay',
     templateUrl: './card-transactions-pay.component.html',
     styleUrls: ['./card-transactions-pay.component.css'],
-    imports: [LoadingComponent, NgIf, FormsModule, ReactiveFormsModule, NgFor, CurrencyInputDirective, BackButtonComponent, DatePipe, CurrencyFiatFormatPipe, SubmitButtonComponent]
+    imports: [LoadingComponent, NgIf, NgClass, FormsModule, ReactiveFormsModule, NgFor, CurrencyInputDirective, BackButtonComponent, DatePipe, CurrencyFiatFormatPipe, SubmitButtonComponent, PurchaseDifferenceDialogComponent]
 })
 export class CardTransactionsPayComponent implements OnInit {
   isLoading: boolean = true;
@@ -43,6 +54,11 @@ export class CardTransactionsPayComponent implements OnInit {
   hasQueriedResumen: boolean = false;
   noExpensesForm!: FormGroup;
   isSubmittingEmptyMonth: boolean = false;
+
+  @ViewChild('differenceDialog') differenceDialog?: PurchaseDifferenceDialogComponent;
+  // La respuesta de cada cuota editada con una diferencia, y la cuota por la que se está preguntando ahora.
+  private rowDifferences = new Map<AbstractControl, RowDifference>();
+  private askingRow: { control: AbstractControl; difference: number } | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -269,6 +285,7 @@ export class CardTransactionsPayComponent implements OnInit {
   populateCardTransactionsArray(cardTransactions: CardTransactionPaymentList[]) {
     const cardTransactionsArray = this.cardTransactionsArray;
     cardTransactionsArray.clear();
+    this.rowDifferences.clear();
 
     
     cardTransactions.forEach(transaction => {
@@ -303,6 +320,8 @@ export class CardTransactionsPayComponent implements OnInit {
 
   updateEditOptions() {
     const paymentAssets = this.selectedPaymentAssets;
+    // Al cambiar cómo se paga se vuelve a los valores originales de las cuotas: lo respondido sobre una diferencia ya no vale.
+    this.rowDifferences.clear();
 
     this.cardTransactionsArray.controls.forEach((control) => {
       if (paymentAssets === 'Pesos') {
@@ -647,7 +666,8 @@ refreshCurrencyFormat() {
         assetId: parseInt(control.get('assetId')?.value),
         installment: control.get('installment')?.value,
         installmentAmount: parseFloat(control.get('installmentAmount')?.value) || 0,
-        valueInPesos: parseFloat(control.get('valueInPesos')?.value) || 0
+        valueInPesos: parseFloat(control.get('valueInPesos')?.value) || 0,
+        difference: this.differenceFor(control)
       }));
 
 
@@ -690,6 +710,124 @@ refreshCurrencyFormat() {
            }
          });
 
+  }
+
+  // ── La diferencia entre el valor de la cuota y lo que se paga (plan-repartos-y-descuentos-faltantes.md, Fase 7) ─────────────────────────────
+
+  // Cuota menos lo pagado, en la moneda de la compra, o null si no hay nada que preguntar. Solo se compara en la misma moneda: pagar en pesos una
+  // compra en dólares se edita por el tipo de cambio, no por un descuento. Las filas manuales y los recurrentes (que cambian de precio) no se comparan.
+  private differenceOf(control: AbstractControl): { difference: number; symbol: string } | null {
+    if (control.get('isManual')?.value || !control.get('pay')?.value) return null;
+    if (!(Number(control.get('cardTransactionId')?.value) > 0)) return null;
+    if (control.get('installment')?.value === 'Recurrente') return null;
+
+    let original: unknown;
+    let edited: unknown;
+    let symbol = '$';
+    if (this.selectedPaymentAssets === 'Pesos') {
+      if (Number(control.get('assetId')?.value) !== 1) return null;
+      original = control.get('originalValueInPesos')?.value;
+      edited = control.get('valueInPesos')?.value;
+    } else if (this.selectedPaymentAssets === 'Pesos+Dolar') {
+      original = control.get('originalInstallmentAmount')?.value;
+      edited = control.get('installmentAmount')?.value;
+      symbol = Number(control.get('assetId')?.value) === 1 ? '$' : 'US$';
+    } else {
+      return null;
+    }
+
+    // Un monto vacío o en cero es una fila incompleta, no una diferencia.
+    const editedAmount = this.parseAmount(edited);
+    if (editedAmount <= 0) return null;
+
+    const difference = Math.round((this.parseAmount(original) - editedAmount) * 100) / 100;
+    return Math.abs(difference) > differenceThreshold(symbol) ? { difference, symbol } : null;
+  }
+
+  // Al salir del monto de una cuota: si quedó distinto de su valor, pregunta qué fue la diferencia (salvo que ya se haya respondido para ese monto).
+  onAmountBlur(control: AbstractControl): void {
+    const found = this.differenceOf(control);
+    if (!found) {
+      this.rowDifferences.delete(control);
+      return;
+    }
+
+    const answered = this.rowDifferences.get(control);
+    if (answered && Math.abs(answered.amount - found.difference) <= 0.01) return;
+
+    // El monto cambió: la respuesta anterior era de otra diferencia.
+    this.rowDifferences.delete(control);
+    this.askingRow = { control, difference: found.difference };
+
+    const installment = String(control.get('installment')?.value ?? '');
+    this.differenceDialog?.open({
+      detail: control.get('detail')?.value ?? '',
+      installmentLabel: installment || undefined,
+      difference: found.difference,
+      symbol: found.symbol,
+      // Corregir el total solo si se paga de más y la compra es de una sola cuota ("1/1").
+      allowFixTotal: found.difference < 0 && installment.endsWith('/1'),
+      allowRevert: true
+    });
+  }
+
+  onDifferenceChosen(choice: PurchaseDifferenceChoice): void {
+    const asking = this.askingRow;
+    this.askingRow = null;
+    if (!asking) return;
+
+    switch (choice.kind) {
+      case 'Revert':
+        this.revertRow(asking.control);
+        break;
+      case 'People':
+        this.rowDifferences.set(asking.control, { amount: asking.difference, state: 'People', people: choice.people });
+        break;
+      default:
+        this.rowDifferences.set(asking.control, { amount: asking.difference, state: choice.kind });
+        break;
+    }
+  }
+
+  // "Es un error": la cuota vuelve al valor que tenía.
+  private revertRow(control: AbstractControl): void {
+    if (this.selectedPaymentAssets === 'Pesos') {
+      control.get('valueInPesos')?.setValue(control.get('originalValueInPesos')?.value);
+    } else {
+      control.get('installmentAmount')?.setValue(control.get('originalInstallmentAmount')?.value);
+    }
+    this.rowDifferences.delete(control);
+    this.refreshCurrencyFormat();
+  }
+
+  // Lo que se manda al backend para esa fila: solo una explicación que sigue valiendo para el monto actual. "Lo veo después" no manda nada.
+  private differenceFor(control: AbstractControl): PurchaseDifference | undefined {
+    const answered = this.rowDifferences.get(control);
+    if (!answered || answered.state === 'Later') return undefined;
+
+    const current = this.differenceOf(control);
+    if (!current || Math.abs(current.difference - answered.amount) > 0.01) return undefined;
+
+    return answered.state === 'People'
+      ? { kind: 'People', people: answered.people }
+      : { kind: answered.state };
+  }
+
+  // Lo que se muestra debajo del monto de la cuota editada.
+  differenceLabel(control: AbstractControl): string | null {
+    const answered = this.rowDifferences.get(control);
+    if (!answered) return null;
+
+    switch (answered.state) {
+      case 'Discount': return 'Descuento del banco';
+      case 'People': return answered.people && answered.people.length === 1 ? 'Parte de 1 persona' : `Parte de ${answered.people?.length ?? 0} personas`;
+      case 'FixTotal': return 'Corrige el total de la compra';
+      default: return 'Sin explicar';
+    }
+  }
+
+  differenceBadgeClass(control: AbstractControl): string {
+    return this.rowDifferences.get(control)?.state === 'Later' ? 'text-bg-warning' : 'text-bg-success';
   }
 
   onSubmitEmptyMonth(): void {

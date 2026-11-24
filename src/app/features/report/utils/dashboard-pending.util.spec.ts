@@ -19,6 +19,13 @@ describe('dashboard-pending.util', () => {
         expect(pendingRoute(item(unknown))).toBeNull();
     });
 
+    // plan-repartos-y-descuentos-faltantes.md, Fase 8
+    it('el aviso de compras que no cierran lleva a su pantalla, con acción "Revisar"', () => {
+        expect(pendingRoute(item('CardPurchaseMismatch'))).toEqual(['/cardTransactions/mismatches']);
+        expect(pendingAction('CardPurchaseMismatch')).toBe('Revisar');
+        expect(pendingIcon('CardPurchaseMismatch')).toBe('bi-calculator');
+    });
+
     it('StaleQuote sigue sin ruta (informativo)', () => {
         expect(pendingRoute(item('StaleQuote'))).toBeNull();
     });

@@ -148,6 +148,11 @@ export const routes: Routes = [
     canActivate: [AuthGuard]
   },
   {
+    path: 'cardTransactions/mismatches',
+    loadComponent: () => import('./features/cardTransactions/card-transactions-mismatches/card-transactions-mismatches.component').then(m => m.CardTransactionsMismatchesComponent),
+    canActivate: [AuthGuard]
+  },
+  {
     path: 'cardTransactions/editRecurrent/:id',
     loadComponent: () => import('./features/cardTransactions/card-transactions-edit-recurrent/card-transactions-edit-recurrent.component').then(m => m.CardTransactionsEditRecurrentComponent),
     canActivate: [AuthGuard]
