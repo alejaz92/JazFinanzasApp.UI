@@ -263,7 +263,7 @@
                                               appCurrencyInput
                                               (blur)="onAmountBlur(cardTransaction)"
                                             >
-                                              <span *ngIf="selectedPaymentAssets === 'Pesos+Dolar' && differenceLabel(cardTransaction) as label" class="badge mt-1" [ngClass]="differenceBadgeClass(cardTransaction)">{{ label }}</span>
+                                              <span *ngIf="selectedPaymentAssets === 'Pesos+Dolar' && differenceLabel(cardTransaction) as label" class="badge mt-1 text-bg-success">{{ label }}</span>
                                         </td>
                                   
                                         <td>
@@ -275,7 +275,7 @@
                                                 appCurrencyInput
                                                 (blur)="onAmountBlur(cardTransaction)"
                                             >
-                                                <span *ngIf="selectedPaymentAssets !== 'Pesos+Dolar' && differenceLabel(cardTransaction) as label" class="badge mt-1" [ngClass]="differenceBadgeClass(cardTransaction)">{{ label }}</span>
+                                                <span *ngIf="selectedPaymentAssets !== 'Pesos+Dolar' && differenceLabel(cardTransaction) as label" class="badge mt-1 text-bg-success">{{ label }}</span>
                                         </td>
                                         <!-- <td>{{cardTransaction.value.installmentAmount}}</td>
                                         <td>{{cardTransaction.value.valueInPesos}}</td> -->

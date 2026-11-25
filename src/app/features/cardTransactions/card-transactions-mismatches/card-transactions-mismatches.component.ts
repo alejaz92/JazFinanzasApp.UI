@@ -125,8 +125,9 @@ export class CardTransactionsMismatchesComponent implements OnInit {
   onDifferenceChosen(choice: PurchaseDifferenceChoice): void {
     const m = this.asking;
     this.asking = null;
-    // "Lo veo después" (o cerrar el diálogo): no se carga nada y la compra sigue en la lista.
-    if (!m || choice.kind === 'Later' || choice.kind === 'Revert') return;
+    // Cancelar (o cerrar el diálogo): no se carga nada y la compra sigue en la lista. Las opciones de una suscripción y "es un error" no se
+    // ofrecen acá.
+    if (!m || (choice.kind !== 'Discount' && choice.kind !== 'People' && choice.kind !== 'FixTotal')) return;
 
     const body: PurchaseDifference = choice.kind === 'People'
       ? { kind: 'People', people: choice.people }
