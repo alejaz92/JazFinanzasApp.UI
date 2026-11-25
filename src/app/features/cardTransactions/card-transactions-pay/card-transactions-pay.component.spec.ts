@@ -96,7 +96,8 @@ describe('CardTransactionsPayComponent', () => {
 
       expect(openSpy).toHaveBeenCalledTimes(1);
       expect(openSpy.calls.mostRecent().args[0]).toEqual(jasmine.objectContaining({
-        detail: 'Compra Coto', installmentLabel: '1/1', difference: 18000, symbol: '$', allowFixTotal: false, allowRevert: true
+        detail: 'Compra Coto', installmentLabel: '1/1', difference: 18000, symbol: '$', allowFixTotal: false, allowRevert: true,
+        required: true, recurring: false, paidAmount: 82000
       }));
     });
 
@@ -163,9 +164,21 @@ describe('CardTransactionsPayComponent', () => {
       expect(openSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('should not ask about manual rows, recurring charges, rows that are not being paid or unknown payment mode', () => {
-      load([row({ cardTransactionId: 0 }), row({ installment: 'Recurrente' }), row({ pay: false })]);
+    it('should ask about a subscription too, with its own options', () => {
+      load([row({ installment: 'Recurrente' })]);
+      control().get('valueInPesos')!.setValue(115000);
+
+      component.onAmountBlur(control());
+
+      expect(openSpy.calls.mostRecent().args[0]).toEqual(jasmine.objectContaining({
+        difference: -15000, recurring: true, required: true, paidAmount: 115000, allowFixTotal: false
+      }));
+    });
+
+    it('should not ask about manual rows, rows that are not being paid or unknown payment mode', () => {
+      load([row({ cardTransactionId: 0 }), row({ installment: 'Recurrente', pay: false }), row({ pay: false })]);
       component.cardTransactionsArray.at(0).get('isManual')!.setValue(true);
+      control(1).get('pay')!.setValue(false);
       control(2).get('pay')!.setValue(false);
       [0, 1, 2].forEach(i => control(i).get('valueInPesos')!.setValue(50000));
 
@@ -213,13 +226,23 @@ describe('CardTransactionsPayComponent', () => {
       component.onAmountBlur(control(1));
       component.onDifferenceChosen({ kind: 'People', people: [{ personId: 1, amount: 10000 }, { personId: 2, amount: 8000 }] });
       component.onAmountBlur(control(2));
-      component.onDifferenceChosen({ kind: 'Later' });
+      component.onDifferenceChosen({ kind: 'FixTotal' });
 
       expect(component.differenceLabel(control(0))).toBe('Descuento del banco');
       expect(component.differenceLabel(control(1))).toBe('Parte de 2 personas');
-      expect(component.differenceLabel(control(2))).toBe('Sin explicar');
-      expect(component.differenceBadgeClass(control(0))).toBe('text-bg-success');
-      expect(component.differenceBadgeClass(control(2))).toBe('text-bg-warning');
+      expect(component.differenceLabel(control(2))).toBe('Corrige el total de la compra');
+    });
+
+    it('should name the answers of a subscription', () => {
+      load([row({ installment: 'Recurrente' }), row({ cardTransactionId: 21, installment: 'Recurrente' }), row({ cardTransactionId: 22, installment: 'Recurrente' })]);
+      [0, 1, 2].forEach(i => control(i).get('valueInPesos')!.setValue(82000));
+
+      (['Discount', 'PriceChange', 'ThisTimeOnly'] as const).forEach((kind, i) => {
+        component.onAmountBlur(control(i));
+        component.onDifferenceChosen({ kind });
+      });
+
+      expect([0, 1, 2].map(i => component.differenceLabel(control(i)))).toEqual(['Descuento de este mes', 'Cambió el precio', 'Solo por esta vez']);
     });
 
     it('should put the value of the installment back when the user says it was a mistake', () => {
@@ -291,16 +314,38 @@ describe('CardTransactionsPayComponent', () => {
         expect(sentRow().difference).toEqual({ kind: 'FixTotal' });
       });
 
-      it('should send nothing for "later": the payment goes through and the purchase stays in the list of the ones that do not close', () => {
+      it('should not send the payment while a difference has no answer, and ask about it', () => {
         load([row()]);
         control().get('valueInPesos')!.setValue(82000);
+
+        component.onSubmit();
+
+        expect(createSpy).not.toHaveBeenCalled();
+        expect(openSpy).toHaveBeenCalledTimes(1);
+      });
+
+      it('should send nothing about a subscription paid differently only this time', () => {
+        load([row({ installment: 'Recurrente' })]);
+        control().get('valueInPesos')!.setValue(82000);
         component.onAmountBlur(control());
-        component.onDifferenceChosen({ kind: 'Later' });
+        component.onDifferenceChosen({ kind: 'ThisTimeOnly' });
 
         component.onSubmit();
 
         expect(createSpy).toHaveBeenCalledTimes(1);
         expect(sentRow().difference).toBeUndefined();
+        expect(sentRow().valueInPesos).toBe(82000);
+      });
+
+      it('should send the new price of a subscription', () => {
+        load([row({ installment: 'Recurrente' })]);
+        control().get('valueInPesos')!.setValue(115000);
+        component.onAmountBlur(control());
+        component.onDifferenceChosen({ kind: 'PriceChange' });
+
+        component.onSubmit();
+
+        expect(sentRow().difference).toEqual({ kind: 'PriceChange' });
       });
 
       it('should send nothing for a row that was not edited', () => {
@@ -321,7 +366,8 @@ describe('CardTransactionsPayComponent', () => {
 
         component.onSubmit();
 
-        expect(sentRow().difference).toBeUndefined();
+        expect(createSpy).not.toHaveBeenCalled();
+        expect(openSpy.calls.mostRecent().args[0]).toEqual(jasmine.objectContaining({ difference: 30000 }));
       });
 
       it('should send the explanation only for the rows that have one', () => {

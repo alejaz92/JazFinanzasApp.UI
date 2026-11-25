@@ -210,9 +210,9 @@ describe('PurchaseDifferenceDialogComponent', () => {
     expect(component.canConfirm).toBeFalse();
   });
 
-  it('should emit "later" and "revert"', () => {
+  it('should emit that it was cancelled', () => {
     prepare(lessContext);
-    component.later();
+    component.cancel();
     expect(choices).toEqual([{ kind: 'Later' }]);
   });
 
@@ -228,18 +228,78 @@ describe('PurchaseDifferenceDialogComponent', () => {
     component.select('Discount');
 
     component.confirm();
-    component.later();
+    component.cancel();
 
     expect(choices).toEqual([{ kind: 'Discount' }]);
   });
 
-  it('should count closing the dialog without choosing as "later"', () => {
+  it('should count closing the dialog without choosing as cancelling', () => {
     component.open(lessContext);
 
     // Cerrar el modal (la X, Escape o un clic afuera) dispara este evento de Bootstrap.
     component.modalRef.nativeElement.dispatchEvent(new Event('hidden.bs.modal'));
 
     expect(choices).toEqual([{ kind: 'Later' }]);
+  });
+
+  const text = () => (fixture.nativeElement as HTMLElement).textContent!;
+
+  it('should not offer any way out without answering when it is required', () => {
+    prepare({ ...lessContext, required: true });
+    expect(text()).not.toContain('Cancelar');
+    expect((fixture.nativeElement as HTMLElement).querySelector('.btn-close')).toBeNull();
+
+    prepare(lessContext);
+    expect(text()).toContain('Cancelar');
+    expect((fixture.nativeElement as HTMLElement).querySelector('.btn-close')).not.toBeNull();
+  });
+
+  it('should lock the modal when it is required', () => {
+    const options: any[] = [];
+    (window as any).bootstrap = { Modal: class { constructor(_el: unknown, o: unknown) { options.push(o); } show() {} hide() {} } };
+
+    component.open({ ...lessContext, required: true });
+    component.open(lessContext);
+
+    expect(options).toEqual([{ backdrop: 'static', keyboard: false }, { backdrop: true, keyboard: true }]);
+  });
+
+  it('should offer the discount of the month, the new price and "only this time" for a subscription paid for less', () => {
+    prepare({ ...lessContext, recurring: true, required: true, paidAmount: 82000 });
+
+    expect(text()).toContain('Un descuento de este mes');
+    expect(text()).toContain('Cambió el precio');
+    expect(text()).toContain('Desde este mes la suscripción queda en $ 82.000,00');
+    expect(text()).toContain('Es solo por esta vez');
+    expect(text()).not.toContain('La parte de otra persona');
+  });
+
+  it('should not offer a discount for a subscription paid for more', () => {
+    prepare({ ...moreContext, recurring: true, required: true, paidAmount: 109500 });
+
+    expect(text()).not.toContain('descuento');
+    expect(text()).toContain('Cambió el precio');
+    expect(text()).toContain('Es solo por esta vez');
+    expect(text()).not.toContain('El total de la compra estaba mal cargado');
+  });
+
+  it('should emit the new price and "only this time"', () => {
+    for (const kind of ['PriceChange', 'ThisTimeOnly'] as const) {
+      choices.length = 0;
+      component.open({ ...lessContext, recurring: true });
+      component.select(kind);
+      component.confirm();
+      expect(choices).toEqual([{ kind }]);
+    }
+  });
+
+  it('should only let the amount be reverted when an installment purchase is paid for more', () => {
+    prepare({ ...moreContext, allowFixTotal: false, required: true });
+
+    expect(component.hasOptions).toBeFalse();
+    expect(text()).toContain('Lo que sobra queda en «Gastos Tarjeta»');
+    expect(text()).toContain('Es un error');
+    expect(text()).not.toContain('Confirmar');
   });
 
   it('should show the revert button only when it is allowed', () => {

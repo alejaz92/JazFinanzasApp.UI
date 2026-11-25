@@ -7,8 +7,7 @@ import { CurrencyFiatFormatPipe } from 'src/app/shared/pipes/currencyFiatFormat/
 import {
   DIFFERENCE_SUM_TOLERANCE,
   PurchaseDifferenceChoice,
-  PurchaseDifferenceContext,
-  PurchaseDifferenceKind
+  PurchaseDifferenceContext
 } from '../models/purchase-difference.model';
 
 declare const bootstrap: any;
@@ -19,8 +18,11 @@ interface PersonRow {
 }
 
 // Pregunta qué fue la diferencia entre el valor de la cuota de una compra con tarjeta y lo que se pagó: un descuento del banco, la parte de otras
-// personas o un total mal cargado (plan-repartos-y-descuentos-faltantes.md). Se usa al pagar el resumen y en la pantalla de compras que no cierran.
-// Cerrarlo sin elegir cuenta como "lo veo después": no se carga nada.
+// personas o un total mal cargado; en una suscripción, un descuento del mes, un cambio de precio o algo de esa sola vez
+// (plan-repartos-y-descuentos-faltantes.md). Se usa al pagar el resumen, donde hay que contestar, y en la pantalla de compras que no cierran, donde
+// se puede cancelar.
+export type DifferenceOption = 'Discount' | 'People' | 'FixTotal' | 'PriceChange' | 'ThisTimeOnly';
+
 @Component({
   selector: 'app-purchase-difference-dialog',
   standalone: true,
@@ -33,7 +35,7 @@ export class PurchaseDifferenceDialogComponent implements OnInit {
   @ViewChild('modalRef') modalRef!: ElementRef;
 
   context: PurchaseDifferenceContext | null = null;
-  selected: PurchaseDifferenceKind | null = null;
+  selected: DifferenceOption | null = null;
   rows: PersonRow[] = [];
   people: Person[] = [];
 
@@ -62,6 +64,23 @@ export class PurchaseDifferenceDialogComponent implements OnInit {
     return this.context?.title ?? (this.paidLess ? 'Pagás menos que la cuota' : 'Pagás más que la cuota');
   }
 
+  // Lo que se puede elegir según la compra y según se pague de menos o de más.
+  offers(option: DifferenceOption): boolean {
+    const recurring = !!this.context?.recurring;
+    switch (option) {
+      case 'Discount': return this.paidLess;
+      case 'People': return this.paidLess && !recurring;
+      case 'FixTotal': return !this.paidLess && !recurring && !!this.context?.allowFixTotal;
+      case 'PriceChange':
+      case 'ThisTimeOnly': return recurring;
+    }
+  }
+
+  // Una compra en cuotas pagada de más no tiene ninguna explicación: solo queda volver al valor de la cuota.
+  get hasOptions(): boolean {
+    return (['Discount', 'People', 'FixTotal', 'PriceChange', 'ThisTimeOnly'] as DifferenceOption[]).some(o => this.offers(o));
+  }
+
   // Lo que todavía falta repartir entre las personas (negativo si se repartió de más).
   get remaining(): number {
     return this.round(this.absoluteDifference - this.assigned);
@@ -82,21 +101,20 @@ export class PurchaseDifferenceDialogComponent implements OnInit {
   open(context: PurchaseDifferenceContext): void {
     this.context = context;
     this.answered = false;
-    // Se pagó de menos: lo más común es un descuento; de más: corregir el total, si se puede.
     this.selected = null;
     this.rows = [];
 
     const el = this.modalRef?.nativeElement as HTMLElement | null;
     if (!el) return;
-    this.modalInstance = new bootstrap.Modal(el);
-    // Cerrar el diálogo sin elegir (la X, la tecla Escape o hacer clic afuera) es "lo veo después".
+    this.modalInstance = new bootstrap.Modal(el, context.required ? { backdrop: 'static', keyboard: false } : { backdrop: true, keyboard: true });
+    // Cerrar el diálogo sin elegir (la X, la tecla Escape o hacer clic afuera) solo se puede cuando no es obligatorio contestar.
     el.addEventListener('hidden.bs.modal', () => {
       if (!this.answered) this.emit({ kind: 'Later' });
     }, { once: true });
     this.modalInstance.show();
   }
 
-  select(kind: PurchaseDifferenceKind): void {
+  select(kind: DifferenceOption): void {
     this.selected = kind;
     if (kind === 'People' && this.rows.length === 0) this.addRow();
   }
@@ -128,7 +146,7 @@ export class PurchaseDifferenceDialogComponent implements OnInit {
     this.choose({ kind: this.selected });
   }
 
-  later(): void {
+  cancel(): void {
     this.choose({ kind: 'Later' });
   }
 

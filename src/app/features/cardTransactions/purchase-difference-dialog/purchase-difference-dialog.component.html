@@ -3,7 +3,7 @@
     <div class="modal-content">
       <div class="modal-header bg-primary text-white">
         <h5 class="modal-title">{{ title }}</h5>
-        <button type="button" class="btn-close btn-close-white" aria-label="Cerrar" (click)="later()"></button>
+        <button type="button" class="btn-close btn-close-white" aria-label="Cerrar" *ngIf="!context?.required" (click)="cancel()"></button>
       </div>
 
       <div class="modal-body" *ngIf="context">
@@ -14,22 +14,39 @@
           {{ paidLess ? 'sale menos de lo que vale' : 'sale más de lo que vale' }}.
           La diferencia es de <strong>{{ absoluteDifference | currencyFiatFormat: context.symbol }}</strong>.
         </p>
-        <p class="mb-2">¿Qué fue?</p>
+        <p class="mb-2" *ngIf="hasOptions">¿Qué fue?</p>
+        <p class="mb-2" *ngIf="!hasOptions">
+          Una compra en cuotas no se puede pagar por más que su cuota: volvé al valor de la cuota. Lo que sobra queda en «Gastos Tarjeta».
+        </p>
 
-        <div class="list-group mb-3">
-          <label class="list-group-item" *ngIf="paidLess">
+        <div class="list-group mb-3" *ngIf="hasOptions">
+          <label class="list-group-item" *ngIf="offers('Discount')">
             <input class="form-check-input me-2" type="radio" name="differenceKind" [checked]="selected === 'Discount'" (change)="select('Discount')">
-            <strong>Un descuento del banco</strong>
-            <div class="small text-muted ms-4">Se carga como un descuento ya aplicado de esta compra.</div>
+            <strong>{{ context.recurring ? 'Un descuento de este mes' : 'Un descuento del banco' }}</strong>
+            <div class="small text-muted ms-4">
+              {{ context.recurring ? 'Cuenta solo en este mes: el precio de la suscripción no cambia.' : 'Se carga como un descuento ya aplicado de esta compra.' }}
+            </div>
           </label>
 
-          <label class="list-group-item" *ngIf="paidLess">
+          <label class="list-group-item" *ngIf="offers('PriceChange')">
+            <input class="form-check-input me-2" type="radio" name="differenceKind" [checked]="selected === 'PriceChange'" (change)="select('PriceChange')">
+            <strong>Cambió el precio</strong>
+            <div class="small text-muted ms-4">Desde este mes la suscripción queda en {{ context.paidAmount ?? 0 | currencyFiatFormat: context.symbol }}.</div>
+          </label>
+
+          <label class="list-group-item" *ngIf="offers('ThisTimeOnly')">
+            <input class="form-check-input me-2" type="radio" name="differenceKind" [checked]="selected === 'ThisTimeOnly'" (change)="select('ThisTimeOnly')">
+            <strong>Es solo por esta vez</strong>
+            <div class="small text-muted ms-4">Se paga este monto y la suscripción queda como está.</div>
+          </label>
+
+          <label class="list-group-item" *ngIf="offers('People')">
             <input class="form-check-input me-2" type="radio" name="differenceKind" [checked]="selected === 'People'" (change)="select('People')">
             <strong>La parte de otra persona</strong>
             <div class="small text-muted ms-4">Alguien te devolvió (o te va a devolver) su parte por fuera de la app: se carga como ya cobrada.</div>
           </label>
 
-          <label class="list-group-item" *ngIf="!paidLess && context.allowFixTotal">
+          <label class="list-group-item" *ngIf="offers('FixTotal')">
             <input class="form-check-input me-2" type="radio" name="differenceKind" [checked]="selected === 'FixTotal'" (change)="select('FixTotal')">
             <strong>El total de la compra estaba mal cargado</strong>
             <div class="small text-muted ms-4">El total de la compra pasa a ser lo que pagás.</div>
@@ -71,9 +88,9 @@
       </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary me-auto" (click)="later()">Lo veo después</button>
+        <button type="button" class="btn btn-outline-secondary me-auto" *ngIf="!context?.required" (click)="cancel()">Cancelar</button>
         <button type="button" class="btn btn-outline-danger" *ngIf="context?.allowRevert" (click)="revert()">Es un error: volver al valor de la cuota</button>
-        <button type="button" class="btn btn-primary" [disabled]="!canConfirm" (click)="confirm()">
+        <button type="button" class="btn btn-primary" *ngIf="hasOptions" [disabled]="!canConfirm" (click)="confirm()">
           <i class="bi bi-check-lg me-1"></i>Confirmar
         </button>
       </div>
