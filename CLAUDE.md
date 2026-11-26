@@ -52,7 +52,7 @@ app/
 │   ├── asset/
 │   ├── assetType/
 │   ├── people/
-│   ├── shared-expenses/   # feature en desarrollo, ver docs/plans/gastos-compartidos.md
+│   ├── shared-expenses/   # gastos compartidos con personas, ver docs/plans/completados/gastos-compartidos.md
 │   ├── report/
 │   └── user/
 ├── app.routes.ts     # rutas con loadComponent (lazy)
