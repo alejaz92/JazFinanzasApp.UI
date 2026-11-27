@@ -133,6 +133,26 @@ export const routes: Routes = [
     canActivate: [AuthGuard]
   },
   {
+    path: 'recurring-expenses',
+    loadComponent: () => import('./features/recurring-expenses/recurring-expense-list/recurring-expense-list.component').then(m => m.RecurringExpenseListComponent),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'recurring-expenses/add',
+    loadComponent: () => import('./features/recurring-expenses/recurring-expense-form/recurring-expense-form.component').then(m => m.RecurringExpenseFormComponent),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'recurring-expenses/:id',
+    loadComponent: () => import('./features/recurring-expenses/recurring-expense-detail/recurring-expense-detail.component').then(m => m.RecurringExpenseDetailComponent),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'recurring-expenses/:id/edit',
+    loadComponent: () => import('./features/recurring-expenses/recurring-expense-form/recurring-expense-form.component').then(m => m.RecurringExpenseFormComponent),
+    canActivate: [AuthGuard]
+  },
+  {
     path: 'cardTransactions',
     loadComponent: () => import('./features/cardTransactions/card-transactions-list/card-transactions-list.component').then(m => m.CardTransactionsListComponent),
     canActivate: [AuthGuard]

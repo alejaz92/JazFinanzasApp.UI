@@ -1,0 +1,299 @@
+<app-loading [isLoading]="isLoading"></app-loading>
+
+<div class="container mt-4" *ngIf="!isLoading">
+    <div class="alert alert-danger" *ngIf="loadFailed">
+        No se pudo cargar la ficha.
+        <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="load()">Reintentar</button>
+        <a class="btn btn-sm btn-link" [routerLink]="['/recurring-expenses']">Volver a la lista</a>
+    </div>
+
+    <ng-container *ngIf="!loadFailed && expense">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <h1 class="mb-0">
+                {{ expense.name }}
+                <span class="badge text-bg-secondary fs-6 align-middle" *ngIf="!expense.isActive">Dado de baja</span>
+            </h1>
+            <app-back-button [defaultUrl]="['/recurring-expenses']"></app-back-button>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <div class="col-6 col-md-3 mb-2">
+                        <dt>{{ expense.source === 'CARD' ? 'Tarjeta' : 'Cuenta' }}</dt>
+                        <dd class="mb-0">{{ paidWith }}</dd>
+                    </div>
+                    <div class="col-6 col-md-3 mb-2">
+                        <dt>Categoría</dt>
+                        <dd class="mb-0">{{ expense.transactionClass }}</dd>
+                    </div>
+                    <div class="col-6 col-md-3 mb-2">
+                        <dt>Último costo</dt>
+                        <dd class="mb-0">{{ expense.expectedAmount | currencyFiatFormat: symbol }}</dd>
+                    </div>
+                    <div class="col-6 col-md-3 mb-2">
+                        <dt>{{ expense.isActive ? 'Desde' : 'Vigencia' }}</dt>
+                        <dd class="mb-0">
+                            {{ monthLabel(expense.startMonth) }}<span *ngIf="expense.endMonth"> a {{ monthLabel(expense.endMonth) }}</span>
+                        </dd>
+                    </div>
+                    <div class="col-6 col-md-3 mb-2" *ngIf="isAccount">
+                        <dt>Frecuencia</dt>
+                        <dd class="mb-0">{{ frequencyLabels[expense.frequency] }}</dd>
+                    </div>
+                    <div class="col-12" *ngIf="expense.notes">
+                        <dt>Notas</dt>
+                        <dd class="mb-0">{{ expense.notes }}</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 mb-3">
+            <ng-container *ngIf="expense.isActive">
+                <button type="button" class="btn btn-primary" *ngIf="isAccount" [class.active]="panel === 'register'" [disabled]="isSaving" (click)="open('register')">
+                    <i class="bi bi-cash-coin me-1"></i>Registrar un pago
+                </button>
+            </ng-container>
+            <button type="button" class="btn btn-outline-primary" *ngIf="isAccount" [class.active]="panel === 'linkPayment'" [disabled]="isSaving" (click)="open('linkPayment')">
+                <i class="bi bi-link-45deg me-1"></i>Asociar un egreso
+            </button>
+            <button type="button" class="btn btn-outline-primary" [class.active]="panel === 'linkPurchase'" [disabled]="isSaving" (click)="open('linkPurchase')">
+                <i class="bi bi-credit-card me-1"></i>Asociar una compra
+            </button>
+            <a class="btn btn-outline-secondary" [routerLink]="['/recurring-expenses', expense.id, 'edit']">
+                <i class="bi bi-pencil-square me-1"></i>Editar
+            </a>
+            <ng-container *ngIf="expense.isActive">
+                <button type="button" class="btn btn-outline-secondary" [class.active]="panel === 'source'" [disabled]="isSaving" (click)="open('source')">
+                    <i class="bi bi-arrow-left-right me-1"></i>Cambiar tarjeta o cuenta
+                </button>
+                <button type="button" class="btn btn-outline-danger" [class.active]="panel === 'cancel'" [disabled]="isSaving" (click)="open('cancel')">
+                    <i class="bi bi-x-circle me-1"></i>Dar de baja
+                </button>
+            </ng-container>
+            <button type="button" class="btn btn-primary" *ngIf="!expense.isActive" [class.active]="panel === 'reactivate'" [disabled]="isSaving" (click)="open('reactivate')">
+                <i class="bi bi-arrow-counterclockwise me-1"></i>Volver a contratar
+            </button>
+            <button type="button" class="btn btn-outline-danger" *ngIf="!expense.hasPayments" [disabled]="isSaving" (click)="askDelete()">
+                <i class="bi bi-trash me-1"></i>Borrar
+            </button>
+        </div>
+
+        <!-- Cambiar con qué se paga, o volver a contratar: los mismos datos. -->
+        <div class="card mb-3" *ngIf="panel === 'source' || panel === 'reactivate'">
+            <div class="card-body">
+                <h2 class="h5">{{ panel === 'source' ? 'Cambiar tarjeta o cuenta' : 'Volver a contratar' }}</h2>
+                <div class="mb-2">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" id="panelCard" name="panelSource" value="CARD" [(ngModel)]="form.source">
+                        <label class="form-check-label" for="panelCard">Con una tarjeta</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" id="panelAccount" name="panelSource" value="ACCOUNT" [(ngModel)]="form.source">
+                        <label class="form-check-label" for="panelAccount">Desde una cuenta</label>
+                    </div>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-4" *ngIf="form.source === 'CARD'">
+                        <label class="form-label" for="panelCardId">Tarjeta</label>
+                        <select id="panelCardId" class="form-select" [(ngModel)]="form.cardId">
+                            <option [ngValue]="null" disabled>Seleccione</option>
+                            <option *ngFor="let card of cards" [ngValue]="card.id">{{ card.name }}</option>
+                        </select>
+                    </div>
+                    <ng-container *ngIf="form.source === 'ACCOUNT'">
+                        <div class="col-md-4">
+                            <label class="form-label" for="panelAccountId">Cuenta</label>
+                            <select id="panelAccountId" class="form-select" [(ngModel)]="form.accountId">
+                                <option [ngValue]="null" disabled>Seleccione</option>
+                                <option *ngFor="let account of accounts" [ngValue]="account.id">{{ account.name }}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="panelFrequency">¿Cada cuánto?</label>
+                            <select id="panelFrequency" class="form-select" [(ngModel)]="form.frequency">
+                                <option value="MONTHLY">Todos los meses</option>
+                                <option value="BIMONTHLY">Cada dos meses</option>
+                                <option value="NONE">Sin frecuencia fija</option>
+                            </select>
+                        </div>
+                    </ng-container>
+                    <div class="col-md-4" *ngIf="panel === 'reactivate' || asksFromMonth">
+                        <label class="form-label" for="panelMonth">{{ panel === 'reactivate' ? 'Desde qué mes' : 'Primer mes pagado así' }}</label>
+                        <input type="month" id="panelMonth" class="form-control" [(ngModel)]="form.month">
+                    </div>
+                    <div class="col-md-4" *ngIf="panel === 'reactivate'">
+                        <label class="form-label" for="panelAmount">Monto esperado (opcional)</label>
+                        <input type="text" inputmode="decimal" id="panelAmount" class="form-control" [(ngModel)]="form.amount" appCurrencyInput
+                               [placeholder]="expense.expectedAmount | currencyFiatFormat: symbol">
+                    </div>
+                </div>
+                <div class="mt-3 d-flex gap-2">
+                    <button type="button" class="btn btn-primary" [disabled]="isSaving" (click)="panel === 'source' ? submitSource() : submitReactivate()">Confirmar</button>
+                    <button type="button" class="btn btn-link" (click)="close()">Cancelar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3" *ngIf="panel === 'cancel'">
+            <div class="card-body">
+                <h2 class="h5">Dar de baja</h2>
+                <p class="text-muted">La ficha conserva su historia. Lo que ya esté cobrado desde ese mes sigue contando.</p>
+                <label class="form-label" for="cancelMonth">Primer mes que ya no se paga</label>
+                <input type="month" id="cancelMonth" class="form-control" style="max-width: 220px;" [(ngModel)]="form.month">
+                <div class="mt-3 d-flex gap-2">
+                    <button type="button" class="btn btn-danger" [disabled]="isSaving" (click)="submitCancel()">Dar de baja</button>
+                    <button type="button" class="btn btn-link" (click)="close()">Cancelar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3" *ngIf="panel === 'register'">
+            <div class="card-body">
+                <h2 class="h5">Registrar un pago</h2>
+                <p class="text-muted">Crea el egreso en la cuenta, en {{ expense.assetSymbol }}, y lo deja asociado a esta ficha.</p>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label" for="payMonth">Mes que pagás</label>
+                        <input type="month" id="payMonth" class="form-control" [(ngModel)]="form.month">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="payDate">Fecha del pago</label>
+                        <input type="date" id="payDate" class="form-control" [(ngModel)]="form.date">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="payAmount">Monto</label>
+                        <input type="text" inputmode="decimal" id="payAmount" class="form-control" [(ngModel)]="form.amount" appCurrencyInput>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="payAccount">Cuenta</label>
+                        <select id="payAccount" class="form-select" [(ngModel)]="form.accountId">
+                            <option *ngFor="let account of accounts" [ngValue]="account.id">{{ account.name }}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label" for="payDetail">Detalle</label>
+                        <input type="text" id="payDetail" class="form-control" [(ngModel)]="form.detail">
+                    </div>
+                </div>
+                <div class="mt-3 d-flex gap-2">
+                    <button type="button" class="btn btn-primary" [disabled]="isSaving" (click)="submitPayment()">Registrar</button>
+                    <button type="button" class="btn btn-link" (click)="close()">Cancelar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3" *ngIf="panel === 'linkPayment'">
+            <div class="card-body">
+                <h2 class="h5">Asociar un egreso ya cargado</h2>
+                <p class="text-muted">
+                    Egresos de {{ expense.accountName }} en «{{ expense.transactionClass }}» de ese mes y los primeros días del siguiente, que no sean de ninguna ficha.
+                </p>
+                <label class="form-label" for="linkMonth">Mes que paga</label>
+                <input type="month" id="linkMonth" class="form-control mb-3" style="max-width: 220px;" [(ngModel)]="form.month" (change)="onSearchMonthChange()">
+                <div class="text-muted" *ngIf="paymentCandidates === null">Buscando…</div>
+                <div class="text-muted" *ngIf="paymentCandidates?.length === 0">No hay egresos para asociar en ese mes.</div>
+                <ul class="list-group" *ngIf="paymentCandidates?.length">
+                    <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap gap-2" *ngFor="let candidate of paymentCandidates">
+                        <span>{{ candidate.date | date: 'dd/MM/yyyy' }} — {{ candidate.detail }} — <strong>{{ candidate.amount | currencyFiatFormat: symbolOf(candidate.assetSymbol) }}</strong></span>
+                        <button type="button" class="btn btn-sm btn-primary" [disabled]="isSaving" (click)="linkPayment(candidate)">Asociar</button>
+                    </li>
+                </ul>
+                <button type="button" class="btn btn-link px-0 mt-2" (click)="close()">Cerrar</button>
+            </div>
+        </div>
+
+        <div class="card mb-3" *ngIf="panel === 'linkPurchase'">
+            <div class="card-body">
+                <h2 class="h5">Asociar una compra con tarjeta</h2>
+                <p class="text-muted">
+                    Compras sueltas en «{{ expense.transactionClass }}», hechas o con su primera cuota en ese mes, que no sean de ninguna ficha. Las cuotas ya pagadas
+                    entran en el mes de su resumen; una sin pagar sigue contando como compra hasta que se pague.
+                </p>
+                <label class="form-label" for="purchaseMonth">Mes</label>
+                <input type="month" id="purchaseMonth" class="form-control mb-3" style="max-width: 220px;" [(ngModel)]="form.month" (change)="onSearchMonthChange()">
+                <div class="text-muted" *ngIf="purchaseCandidates === null">Buscando…</div>
+                <div class="text-muted" *ngIf="purchaseCandidates?.length === 0">No hay compras para asociar en ese mes.</div>
+                <ul class="list-group" *ngIf="purchaseCandidates?.length">
+                    <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap gap-2" *ngFor="let candidate of purchaseCandidates">
+                        <span>
+                            {{ candidate.date | date: 'dd/MM/yyyy' }} — {{ candidate.detail }} — {{ candidate.cardName }} —
+                            <strong>{{ candidate.totalAmount | currencyFiatFormat: symbolOf(candidate.assetSymbol) }}</strong>
+                            <span class="small text-muted">({{ candidate.paidInstallments }}/{{ candidate.installments }} pagadas)</span>
+                        </span>
+                        <button type="button" class="btn btn-sm btn-primary" [disabled]="isSaving" (click)="linkPurchase(candidate)">Asociar</button>
+                    </li>
+                </ul>
+                <button type="button" class="btn btn-link px-0 mt-2" (click)="close()">Cerrar</button>
+            </div>
+        </div>
+
+        <h2 class="h5">Mes a mes</h2>
+        <div class="alert alert-info" *ngIf="history.length === 0">Todavía no hay ningún mes para mostrar.</div>
+
+        <div class="table-responsive" *ngIf="history.length > 0">
+            <table class="table table-bordered align-middle">
+                <thead>
+                    <tr>
+                        <th>Mes</th>
+                        <th class="text-end">Monto</th>
+                        <th>Detalle</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let month of history">
+                        <td>
+                            <div class="text-nowrap">{{ monthLabel(month.month) }}</div>
+                            <span class="badge" [class]="'badge ' + stateBadges[month.state]">{{ stateLabels[month.state] }}</span>
+                        </td>
+                        <td class="text-end text-nowrap">
+                            {{ month.amount | currencyFiatFormat: symbol }}
+                            <div>
+                                <span class="badge text-bg-light border" *ngIf="month.isEstimate">estimado</span>
+                                <span class="badge text-bg-light border" *ngIf="month.converted" title="Se pagó en otra moneda y se convirtió">convertido</span>
+                            </div>
+                        </td>
+                        <td>
+                            <!-- Con cobros: cada uno, con lo que se le puede corregir. -->
+                            <div class="mb-1" *ngFor="let payment of month.payments">
+                                <div class="d-flex flex-wrap align-items-center gap-2">
+                                    <span *ngIf="payment.cardId !== null">Resumen de {{ monthLabel(payment.date) }} · {{ payment.cardName }}</span>
+                                    <span *ngIf="payment.cardId === null">{{ payment.date | date: 'dd/MM/yyyy' }} · {{ payment.accountName }}</span>
+                                    <strong *ngIf="payment.converted || month.payments.length > 1">{{ payment.nativeAmount | currencyFiatFormat: symbolOf(payment.nativeAssetSymbol) }}</strong>
+                                    <span class="badge text-bg-primary" *ngIf="payment.chargedEarly">{{ payment.cardId !== null ? 'adelantado' : 'pagado antes' }}</span>
+                                    <span class="badge text-bg-warning" *ngIf="payment.chargedLate">{{ payment.cardId !== null ? 'atrasado' : 'pagado después' }}</span>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" [disabled]="isSaving" (click)="startMove(month, payment)">Mover</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" [disabled]="isSaving" (click)="askUnlink(payment)">Desvincular</button>
+                                </div>
+                                <div class="d-flex flex-wrap align-items-center gap-2 mt-1" *ngIf="movingPaymentId === payment.transactionId">
+                                    <label class="small" [for]="'move' + payment.transactionId">Pasar al mes</label>
+                                    <input type="month" class="form-control form-control-sm" style="max-width: 180px;" [id]="'move' + payment.transactionId" [(ngModel)]="moveMonth">
+                                    <button type="button" class="btn btn-sm btn-primary" [disabled]="isSaving" (click)="confirmMove()">Mover</button>
+                                    <button type="button" class="btn btn-sm btn-link" (click)="movingPaymentId = null">Cancelar</button>
+                                </div>
+                            </div>
+
+                            <!-- Sin cobros: por qué, y las marcas. -->
+                            <ng-container *ngIf="month.payments.length === 0">
+                                <div *ngIf="month.exceptionStatus">{{ markLabels[month.exceptionStatus] }}</div>
+                                <div class="small text-muted" *ngIf="month.isEstimate && !month.exceptionStatus">Se espera de {{ month.cardName ?? month.accountName }}</div>
+                                <div class="d-flex flex-wrap gap-2 mt-1">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" *ngIf="month.exceptionStatus !== 'NO_CHARGE'" [disabled]="isSaving" (click)="mark(month, 'NO_CHARGE')">Sin cargo</button>
+                                    <ng-container *ngIf="isCardMonth(month)">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" *ngIf="month.exceptionStatus !== 'DEFERRED'" [disabled]="isSaving" (click)="mark(month, 'DEFERRED')">Atrasado</button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" *ngIf="month.exceptionStatus !== 'PENDING'" [disabled]="isSaving" (click)="mark(month, 'PENDING')">No sé por qué no vino</button>
+                                    </ng-container>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" *ngIf="month.exceptionStatus" [disabled]="isSaving" (click)="mark(month, null)">Quitar marca</button>
+                                </div>
+                            </ng-container>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </ng-container>
+</div>
+
+<!-- Fuera del contenedor: el modal tiene que existir aunque la ficha todavía se esté cargando. -->
+<app-confirm-modal #confirmModal [title]="confirmTitle" [message]="confirmMessage" (confirmed)="onConfirmed()"></app-confirm-modal>

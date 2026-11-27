@@ -1,0 +1,71 @@
+<app-loading [isLoading]="isLoading"></app-loading>
+
+<div class="container mt-4" *ngIf="!isLoading">
+    <div class="d-flex align-items-center gap-2 mb-3">
+        <h1 class="mb-0">Fijos y suscripciones</h1>
+        <a class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+           [routerLink]="['/recurring-expenses/add']" title="Agregar fijo o suscripción" aria-label="Agregar fijo o suscripción"
+           style="width: 44px; height: 44px; font-size: 1.2rem;">
+            <i class="bi-plus-lg text-white"></i>
+        </a>
+    </div>
+
+    <div class="alert alert-danger" *ngIf="loadFailed">
+        No se pudo cargar la lista.
+        <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="load()">Reintentar</button>
+    </div>
+
+    <ng-container *ngIf="!loadFailed">
+        <div class="alert alert-info" *ngIf="isEmpty">
+            Todavía no cargaste ningún fijo ni suscripción. Agregá el primero con el botón de arriba: una suscripción con tarjeta, o algo que
+            pagás desde una cuenta, como el alquiler.
+        </div>
+
+        <ng-container *ngIf="active.length > 0">
+            <h2 class="h5">Vigentes</h2>
+            <ng-container *ngTemplateOutlet="table; context: { items: active, current: true }"></ng-container>
+        </ng-container>
+
+        <ng-container *ngIf="cancelled.length > 0">
+            <h2 class="h5 mt-4">Dados de baja</h2>
+            <ng-container *ngTemplateOutlet="table; context: { items: cancelled, current: false }"></ng-container>
+        </ng-container>
+    </ng-container>
+</div>
+
+<ng-template #table let-items="items" let-current="current">
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered align-middle">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th class="d-none d-md-table-cell">Categoría</th>
+                    <th class="d-none d-sm-table-cell">Se paga con</th>
+                    <th class="text-end">Último costo</th>
+                    <th *ngIf="current">Este mes</th>
+                    <th *ngIf="!current">Hasta</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let item of items">
+                    <td>
+                        <a [routerLink]="['/recurring-expenses', item.id]">{{ item.name }}</a>
+                        <div class="small text-muted d-sm-none">{{ paidWith(item) }}</div>
+                    </td>
+                    <td class="d-none d-md-table-cell">{{ item.transactionClass }}</td>
+                    <td class="d-none d-sm-table-cell">
+                        <i class="bi me-1" [class.bi-credit-card]="item.source === 'CARD'" [class.bi-bank]="item.source === 'ACCOUNT'" aria-hidden="true"></i>{{ paidWith(item) }}
+                    </td>
+                    <td class="text-end text-nowrap">{{ item.expectedAmount | currencyFiatFormat: symbolOf(item.assetSymbol) }}</td>
+                    <td *ngIf="current">
+                        <span class="badge" [class]="'badge ' + stateBadge(item)">{{ stateLabel(item) }}</span>
+                        <div class="small text-muted text-nowrap" *ngIf="item.currentMonthState === 'Paid' && item.currentMonthAmount !== null">
+                            {{ item.currentMonthAmount | currencyFiatFormat: symbolOf(item.assetSymbol) }}
+                        </div>
+                    </td>
+                    <td *ngIf="!current">{{ monthLabel(item.endMonth) }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</ng-template>

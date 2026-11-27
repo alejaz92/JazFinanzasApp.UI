@@ -1,0 +1,91 @@
+<app-loading [isLoading]="isLoading"></app-loading>
+
+<div class="container mt-4" *ngIf="!isLoading">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <h1 class="mb-0">{{ isEdit ? 'Editar' : 'Nuevo fijo o suscripción' }}</h1>
+        <app-back-button [defaultUrl]="isEdit ? ['/recurring-expenses', id] : ['/recurring-expenses']"></app-back-button>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label for="name" class="form-label">Nombre</label>
+                <input type="text" class="form-control" id="name" formControlName="name" maxlength="100">
+            </div>
+            <div class="col-md-6">
+                <label for="category" class="form-label">Categoría</label>
+                <select id="category" class="form-select" formControlName="transactionClassId">
+                    <option [ngValue]="null" disabled>Seleccione</option>
+                    <option *ngFor="let category of categories" [ngValue]="category.id">{{ category.name }}</option>
+                </select>
+            </div>
+        </div>
+
+        <ng-container *ngIf="!isEdit">
+            <div class="mb-3">
+                <span class="form-label d-block">¿Con qué se paga?</span>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" id="sourceCard" formControlName="source" value="CARD">
+                    <label class="form-check-label" for="sourceCard">Con una tarjeta</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" id="sourceAccount" formControlName="source" value="ACCOUNT">
+                    <label class="form-check-label" for="sourceAccount">Desde una cuenta</label>
+                </div>
+            </div>
+        </ng-container>
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-6" *ngIf="!isEdit && source === 'CARD'">
+                <label for="card" class="form-label">Tarjeta</label>
+                <select id="card" class="form-select" formControlName="cardId">
+                    <option [ngValue]="null" disabled>Seleccione</option>
+                    <option *ngFor="let card of cards" [ngValue]="card.id">{{ card.name }}</option>
+                </select>
+            </div>
+            <div class="col-md-6" *ngIf="!isEdit && source === 'ACCOUNT'">
+                <label for="account" class="form-label">Cuenta</label>
+                <select id="account" class="form-select" formControlName="accountId">
+                    <option [ngValue]="null" disabled>Seleccione</option>
+                    <option *ngFor="let account of accounts" [ngValue]="account.id">{{ account.name }}</option>
+                </select>
+            </div>
+            <div class="col-md-6" *ngIf="source === 'ACCOUNT'">
+                <label for="frequency" class="form-label">¿Cada cuánto se paga?</label>
+                <select id="frequency" class="form-select" formControlName="frequency">
+                    <option value="MONTHLY">Todos los meses</option>
+                    <option value="BIMONTHLY">Cada dos meses</option>
+                    <option value="NONE">Sin frecuencia fija</option>
+                </select>
+                <div class="form-text">Sin frecuencia fija no se espera ningún mes ni se avisa si falta.</div>
+            </div>
+            <div class="col-md-6" *ngIf="!isEdit">
+                <label for="startMonth" class="form-label">Desde qué mes</label>
+                <input type="month" class="form-control" id="startMonth" formControlName="startMonth">
+            </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label for="asset" class="form-label">Moneda</label>
+                <select id="asset" class="form-select" formControlName="assetId">
+                    <option [ngValue]="null" disabled>Seleccione</option>
+                    <option *ngFor="let currency of currencies" [ngValue]="currency.id">{{ currency.name }}</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label for="expectedAmount" class="form-label">Monto esperado</label>
+                <input type="text" inputmode="decimal" class="form-control" id="expectedAmount" formControlName="expectedAmount" appCurrencyInput>
+                <div class="form-text" *ngIf="!moneyLocked">Lo que esperás pagar. Con el primer cobro pasa a ser lo último que costó.</div>
+                <div class="form-text" *ngIf="moneyLocked">Ya tiene cobros: la moneda no se cambia y lo esperado es lo último que costó.</div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="notes" class="form-label">Notas (opcional)</label>
+            <textarea class="form-control" id="notes" formControlName="notes" rows="2"></textarea>
+        </div>
+
+        <app-submit-button [loading]="isSubmitting"></app-submit-button>
+    </form>
+</div>
