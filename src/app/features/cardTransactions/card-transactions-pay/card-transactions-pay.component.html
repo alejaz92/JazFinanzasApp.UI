@@ -183,7 +183,7 @@
                 </div>
             </div>
 
-            <div class="col-md-9 col-sm-12-" *ngIf="cardTransactionsArray.length > 0">
+            <div class="col-md-9 col-sm-12-" [class.offset-md-3]="showEmptyMonthPanel" *ngIf="cardTransactionsArray.length > 0">
                 <div class="card">
                     <div class="card-header">
                         <h5>Gastos Tarjeta</h5>
@@ -218,12 +218,12 @@
                                         <th>Pagar</th>
                                     </tr>
                                 </thead>
-                                <tbody formArrayName="cardTransactionsArray">
-                                    <tr 
-                                        class="align-middle" 
-                                        *ngFor="let cardTransaction of cardTransactionsArray.controls; let i = index" 
-                                        [formGroupName]="i"
-                                        
+                                <tbody>
+                                    <!-- Cada fila se ata a su grupo y no a su posición: "Vino dos veces" inserta filas en el medio. -->
+                                    <tr
+                                        class="align-middle"
+                                        *ngFor="let cardTransaction of cardTransactionsArray.controls"
+                                        [formGroup]="$any(cardTransaction)"
                                     >
                                        
                                         <td *ngIf="!cardTransaction.get('isManual')?.value">{{ cardTransaction.value.date | date: 'dd/MM/yyyy' }}</td>
@@ -241,7 +241,32 @@
 
 
 
-                                        <td *ngIf="!cardTransaction.get('isManual')?.value">{{ cardTransaction.value.detail }}</td>
+                                        <td *ngIf="!cardTransaction.get('isManual')?.value">
+                                            {{ cardTransaction.value.detail }}
+                                            <div class="subscription-notes" *ngIf="isSubscription(cardTransaction)">
+                                                <span class="badge text-bg-warning" *ngIf="lateMonthLabel(cardTransaction) as late">Atrasado de {{ late }}</span>
+                                                <span class="badge text-bg-info" *ngIf="cardTransaction.get('isSecondCharge')?.value">Segundo cobro</span>
+                                                <div class="text-muted" *ngIf="cardTransaction.get('alreadyCharged')?.value">
+                                                    Ya cobrada en el resumen anterior. Tildala solo si vino otra vez.
+                                                </div>
+                                                <div class="text-muted" *ngIf="cardTransaction.get('coveredByPurchase')?.value">
+                                                    Este mes ya está la compra suelta de la ficha. Tildala solo si además vino la suscripción.
+                                                </div>
+                                                <button type="button" class="btn btn-link btn-sm p-0" *ngIf="canComeTwice(cardTransaction)"
+                                                    (click)="addSecondCharge(cardTransaction)">Vino dos veces</button>
+                                                <select class="form-select form-select-sm" formControlName="outcome" data-testid="outcome"
+                                                    aria-label="Qué pasó con este cobro" *ngIf="asksWhatHappened(cardTransaction)">
+                                                    <option value="" disabled>¿Qué pasó?</option>
+                                                    <option *ngFor="let option of outcomeOptions" [value]="option.value">{{ option.label }}</option>
+                                                </select>
+                                                <select class="form-select form-select-sm" formControlName="secondChargeKind" data-testid="second-charge-kind"
+                                                    aria-label="A qué corresponde este cobro" *ngIf="asksWhichCharge(cardTransaction)">
+                                                    <option value="" disabled>¿A qué corresponde?</option>
+                                                    <option value="NEXT">Es el de {{ nextMonthLabel }}, que se adelantó</option>
+                                                    <option value="EXTRA">Es un cobro de más de {{ statementMonthLabel }}</option>
+                                                </select>
+                                            </div>
+                                        </td>
                                         <td *ngIf="cardTransaction.get('isManual')?.value">
                                             <input type="text" class="form-control small-font-input" formControlName="detail">
                                         </td>
@@ -281,10 +306,16 @@
                                         <td>{{cardTransaction.value.valueInPesos}}</td> -->
                                   
                                         <td>
-                                            <input 
-                                                type="checkbox" 
-                                                formControlName="pay"  
+                                            <input
+                                                type="checkbox"
+                                                formControlName="pay"
+                                                (change)="onPayChange(cardTransaction, $any($event.target).checked)"
+                                                *ngIf="!cardTransaction.get('isSecondCharge')?.value"
                                             >
+                                            <button type="button" class="btn btn-outline-danger btn-sm" aria-label="Quitar el segundo cobro"
+                                                *ngIf="cardTransaction.get('isSecondCharge')?.value" (click)="removeSecondCharge(cardTransaction)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
                                         </td>
                                       </tr>
                                 </tbody>
@@ -308,7 +339,7 @@
                         <div class="d-flex mt-3">
                             <div class="me-auto">
                                 <button type="button" class="btn btn-success  m-1" (click)="addManualEntry()">Agregar +</button>
-                                <button type="button" class="btn btn-danger m-1" (click)="removeManualEntry()" *ngIf="tableLength > originalTableLength">Eliminar -</button>
+                                <button type="button" class="btn btn-danger m-1" (click)="removeManualEntry()" *ngIf="hasManualRows">Eliminar -</button>
                             </div>                            
 
                             <div class="ms-auto">

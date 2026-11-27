@@ -76,10 +76,10 @@ describe('IncExpSummaryReportComponent — conciliación y resumen sin cargar', 
 
   const settle = () => new Promise(resolve => setTimeout(resolve));
   const el = () => fixture.nativeElement as HTMLElement;
-  const section = (statementAmount: number, spending: number) => ({ statementAmount, othersShare: 0, discounts: 0, notCounted: 0, rounding: 0, spending });
+  const section = (statementAmount: number, spending: number) => ({ statementAmount, othersShare: 0, discounts: 0, notCounted: 0, rounding: 0, spending, recurringPayments: 0, recurringEstimates: 0 });
   const waterfall = (missing: boolean): IncExpWaterfall => ({ month: '2026-11-01T00:00:00', totalIncome: 100, expenseSteps: [], totalExpense: 50, result: 50, previousMonthResult: 0, previousTotalIncome: 0, cardStatementMissing: missing });
   const reconciliation = (): CardReconciliation => ({
-    month: '2026-11-01T00:00:00', pesos: { statementAmount: 1000, othersShare: 100, discounts: 50, notCounted: 0, rounding: 0, spending: 850 }, dollars: section(0, 0),
+    month: '2026-11-01T00:00:00', pesos: { statementAmount: 1000, othersShare: 100, discounts: 50, notCounted: 0, rounding: 0, spending: 850, recurringPayments: 0, recurringEstimates: 0 }, dollars: section(0, 0),
     dollarsInPesos: 0, blueRateUsed: null, totalPesos: 850, underpaidInstallmentsCount: 2, underpaidInstallmentsAmount: 300
   });
 
@@ -113,6 +113,19 @@ describe('IncExpSummaryReportComponent — conciliación y resumen sin cargar', 
 
     expect(reconciliationRequests().length).toBe(0);
     expect(el().querySelector('[data-testid="card-reconciliation"]')).not.toBeNull();
+  });
+
+  // plan-gastos-recurrentes.md, Fase 9
+  it('dice cuánto del gasto es de fijos y suscripciones, lo cobrado y lo esperado, solo si hay algo', async () => {
+    await showWaterfall();
+    component.toggleReconciliation();
+    const data = reconciliation();
+    data.pesos.recurringPayments = 300;
+    reconciliationRequests()[0].flush(data);
+    fixture.detectChanges();
+
+    expect(el().querySelector('[data-testid="reconciliation-recurring-payments"]')!.textContent).toContain('300,00');
+    expect(el().querySelector('[data-testid="reconciliation-recurring-estimates"]')).toBeNull();
   });
 
   it('al abrirlo la pide para el mes y muestra el total y las cuotas pagadas de menos', async () => {

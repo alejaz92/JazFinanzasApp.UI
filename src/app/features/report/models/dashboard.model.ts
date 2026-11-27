@@ -34,8 +34,12 @@ export interface DashboardThermometer {
 //
 // plan-repartos-y-descuentos-faltantes.md, Fase 8: se suma 'CardPurchaseMismatch' — hay compras con tarjeta cuyas cuotas se pagaron por un monto que
 // ningún reparto ni descuento explica (Detail trae la cantidad). Lleva a la pantalla "Compras que no cierran"; no usa LinkId.
+//
+// plan-gastos-recurrentes.md, Fase 9: se suma 'RecurringExpenseMissing' — un fijo que se paga desde una cuenta pasó su día habitual sin el pago
+// cargado (Title = su nombre, LinkId = id de la ficha). Lleva a la ficha.
 export type DashboardPendingKind = 'CardDue' | 'OpenSharedEvent' | 'PersonDebt' | 'TripWithoutRecentExpense' | 'StaleQuote' | 'BondCollection'
-    | 'CategorySpike' | 'LargeMovement' | 'MissingIncome' | 'AssistantFinding' | 'AssistantQualityReviewDue' | 'CardPurchaseMismatch';
+    | 'CategorySpike' | 'LargeMovement' | 'MissingIncome' | 'AssistantFinding' | 'AssistantQualityReviewDue' | 'CardPurchaseMismatch'
+    | 'RecurringExpenseMissing';
 export type DashboardPendingSeverity = 'info' | 'warning' | 'danger';
 
 export interface DashboardPendingItem {

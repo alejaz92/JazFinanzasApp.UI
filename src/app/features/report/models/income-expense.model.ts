@@ -28,6 +28,9 @@ export interface CardReconciliationSection {
     /** Centavos de redondeo (positivos o negativos): no son un descuento. */
     rounding: number;
     spending: number;
+    /** De ese gasto (ya incluido arriba), lo de los fijos y suscripciones: los cobros pagados y, aparte, lo esperado que todavía no se pagó. */
+    recurringPayments: number;
+    recurringEstimates: number;
 }
 
 /** "Cómo se llega al gasto con tarjeta" de un mes (plan-ingresos-egresos-por-fecha-de-compra.md, D5): siempre en pesos, con los dólares aparte. */
@@ -107,11 +110,12 @@ export interface SpendingCalendar {
     year: number;
     days: DaySpending[];
     weekdayAverages: WeekdayAverage[];
-    /** Con la medida de compra: los cargos recurrentes de tarjeta de cada mes, que no tienen un día de compra y por eso no están en `days`. Con la de cuentas, vacío. */
+    /** Con la medida de compra: los recurrentes de tarjeta y los fijos de cuenta sin pagar de cada mes, que no tienen un día de compra y por eso no están en `days`. Con la de cuentas, vacío. */
     recurringByMonth: MonthlyAmount[];
 }
 
-export type SpendingRowKind = 'Direct' | 'CardInstallment' | 'CardRecurring';
+/** `RecurringEstimate`: lo esperado de un fijo de cuenta que en el mes todavía no se pagó. */
+export type SpendingRowKind = 'Direct' | 'CardInstallment' | 'CardRecurring' | 'RecurringEstimate';
 
 /**
  * Una fila del gasto por compra (plan-ingresos-egresos-por-fecha-de-compra.md, D4): lo que compone el número de una categoría, de un día o de una etiqueta.
@@ -142,6 +146,9 @@ export interface SpendingRow {
     accountName: string | null;
     cardId: number | null;
     cardName: string | null;
+    /** El fijo o suscripción de la fila, si tiene ficha, y si el monto es el esperado porque todavía no se pagó. */
+    recurringExpenseId?: number | null;
+    isEstimate?: boolean;
 }
 
 export interface IncomeCategorySeries {

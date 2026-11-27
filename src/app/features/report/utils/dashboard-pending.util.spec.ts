@@ -26,6 +26,13 @@ describe('dashboard-pending.util', () => {
         expect(pendingIcon('CardPurchaseMismatch')).toBe('bi-calculator');
     });
 
+    // plan-gastos-recurrentes.md, Fase 9
+    it('el aviso de un fijo sin pagar lleva a su ficha, con acción "Ver ficha"', () => {
+        expect(pendingRoute({ ...item('RecurringExpenseMissing'), linkId: 7 })).toEqual(['/recurring-expenses', '7']);
+        expect(pendingAction('RecurringExpenseMissing')).toBe('Ver ficha');
+        expect(pendingIcon('RecurringExpenseMissing')).toBe('bi-calendar-x');
+    });
+
     it('StaleQuote sigue sin ruta (informativo)', () => {
         expect(pendingRoute(item('StaleQuote'))).toBeNull();
     });

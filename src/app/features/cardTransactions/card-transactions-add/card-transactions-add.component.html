@@ -8,20 +8,10 @@
 
     <form [formGroup]="cardTransactionForm" (ngSubmit)="onSubmit()">
 
-        <div class="row mb-3">
-            <div class="col">
-                <label for="movementType" class="form-label">Tipo de Movimiento</label>
-                <select id="movementType" class="form-control" formControlName="movementType"
-                    (change)="onMovementTypeChange($event)">
-                    <option value="" disabled selected>Seleccione</option>
-                    <option value="U">Unico</option>
-                    <option value="R">Recurrente</option>
-                </select>
-                <div *ngIf="cardTransactionForm.controls['movementType'].errors?.['incorrect'] " class="text-danger mt-2">
-                    Debe seleccionarse un tipo de movimiento.
-                </div>
-            </div>
-        </div>
+        <p class="text-muted small">
+            ¿Es una suscripción o un gasto que se repite todos los meses? Cargalo en
+            <a [routerLink]="['/recurring-expenses', 'add']">Fijos y suscripciones</a>.
+        </p>
         <div class="row mb-3">
             <div class="col-md-6">
                 <label for="date" class="form-label">Fecha</label>
@@ -89,7 +79,7 @@
                 </div>
 
             </div>
-            <div class="col-md-6" *ngIf="selectedMovementType == 'U'">
+            <div class="col-md-6">
                 <label for="installments" class="form-label">Cuotas</label>
                 <input type="number" class="form-control" id="installments" formControlName="installments" 
                 (change)="updateInstallments()" min="1"> 
@@ -105,7 +95,7 @@
                     Debe seleccionarse un mes de Pago Inicial.
                 </div>
             </div>
-            <div class="col-md-6" *ngIf="selectedMovementType == 'U'">
+            <div class="col-md-6">
                 <label for="lastInstallmentDate" class="form-label">Ultima Cuota</label>
                 <input readonly type="month" class="form-control" id="lastInstallmentDate" formControlName="lastInstallmentDate">
 

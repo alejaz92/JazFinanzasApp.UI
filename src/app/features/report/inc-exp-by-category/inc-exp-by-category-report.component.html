@@ -24,12 +24,12 @@
                 <ul class="mb-0">
                     <li>El tamaño de cada bloque es lo gastado en esa categoría; los más grandes son los que más pesaron.</li>
                     @if (reportContext.spendingMeasure() === 'purchase') {
-                        <li>Con un clic se abre un panel con la tendencia de los últimos 6 meses de esa categoría y lo que compone el número, gasto por gasto: lo pagado desde cada cuenta, las cuotas de tarjeta ("cuota 2 de 6", con la fecha y lo que costó la compra), los recurrentes y, si la compra era compartida, tu parte junto al total. Al pie, la suma, que es el número del bloque.</li>
+                        <li>Con un clic se abre un panel con la tendencia de los últimos 6 meses de esa categoría y lo que compone el número, gasto por gasto: lo pagado desde cada cuenta, las cuotas de tarjeta ("cuota 2 de 6", con la fecha y lo que costó la compra), las suscripciones y los fijos (con "estimado" si todavía no se pagaron) y, si la compra era compartida, tu parte junto al total. Al pie, la suma, que es el número del bloque.</li>
                     } @else {
                         <li>Con un clic se abre un panel con la tendencia de los últimos 6 meses de esa categoría y los movimientos de cuenta que la componen.</li>
                     }
                     @if (reportContext.spendingMeasure() === 'purchase') {
-                        <li>Cuenta lo mismo que el Resumen del mes: lo pagado directo desde las cuentas, cada compra con tarjeta repartida en cuotas (una por mes, por tu parte) y los cargos recurrentes en cada mes. La tendencia de 6 meses usa la misma medida.</li>
+                        <li>Cuenta lo mismo que el Resumen del mes: lo pagado directo desde las cuentas, cada compra con tarjeta repartida en cuotas (una por mes, por tu parte) y las suscripciones y los fijos en el mes al que corresponden (lo pagado, o lo esperado mientras no se hayan pagado). La tendencia de 6 meses usa la misma medida.</li>
                     } @else {
                         <li>Cuenta lo mismo que el Resumen del mes: egresos con categoría, con las cuotas de tarjeta contadas al pagarse.</li>
                     }

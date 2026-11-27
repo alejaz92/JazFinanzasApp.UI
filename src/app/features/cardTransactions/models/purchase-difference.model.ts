@@ -1,7 +1,7 @@
 // plan-repartos-y-descuentos-faltantes.md (D3, D4, D5): qué fue la diferencia entre el valor de la cuota de una compra con tarjeta y lo que se pagó.
 
-// `PriceChange` es solo de una suscripción al pagar el resumen: el precio nuevo rige desde ese mes (Fase 15).
-export type PurchaseDifferenceKind = 'Discount' | 'People' | 'FixTotal' | 'PriceChange';
+// Una suscripción no tiene diferencias que explicar: cada mes vale lo que se paga (plan-gastos-recurrentes.md, D5).
+export type PurchaseDifferenceKind = 'Discount' | 'People' | 'FixTotal';
 
 export interface PurchaseDifferencePerson {
     personId: number;
@@ -34,20 +34,14 @@ export interface PurchaseDifferenceContext {
     allowRevert: boolean;
     // Hay que contestar: sin "Cancelar", sin la X y sin cerrar con Escape o haciendo clic afuera (el pago del resumen).
     required?: boolean;
-    // La cuota es de una suscripción: se ofrecen el descuento del mes, el cambio de precio y "solo por esta vez".
-    recurring?: boolean;
-    // Lo que se paga: el precio nuevo que quedaría en una suscripción.
-    paidAmount?: number;
 }
 
-// Lo que el usuario eligió en el diálogo. `Later` es cerrarlo sin elegir (solo cuando no es obligatorio): no se carga nada. `ThisTimeOnly` es "es solo
-// por esta vez": una suscripción se paga por ese monto y no se carga nada. `Revert` es "es un error": la cuota vuelve a su valor.
+// Lo que el usuario eligió en el diálogo. `Later` es cerrarlo sin elegir (solo cuando no es obligatorio): no se carga nada. `Revert` es "es un
+// error": la cuota vuelve a su valor.
 export type PurchaseDifferenceChoice =
     | { kind: 'Discount' }
     | { kind: 'People'; people: PurchaseDifferencePerson[] }
     | { kind: 'FixTotal' }
-    | { kind: 'PriceChange' }
-    | { kind: 'ThisTimeOnly' }
     | { kind: 'Later' }
     | { kind: 'Revert' };
 

@@ -57,6 +57,21 @@ describe('SpendingRowsTableComponent', () => {
     expect(t).not.toContain('Cuota');
   });
 
+  // plan-gastos-recurrentes.md, Fase 9
+  it('lo que todavía no se pagó dice "estimado", y un fijo de cuenta, "fijo" y su cuenta', () => {
+    const el = render([
+      row({ kind: 'CardRecurring', detail: 'Netflix', cardName: 'Visa', recurringExpenseId: 7, isEstimate: true }),
+      row({ kind: 'RecurringEstimate', sourceId: 8, detail: 'Alquiler', accountName: 'Banco', recurringExpenseId: 8, isEstimate: true })
+    ]);
+
+    const rows = Array.from(el.querySelectorAll('tbody tr')).map(r => r.textContent!.replace(/\s+/g, ' '));
+    expect(rows[0]).toContain('recurrente');
+    expect(rows[0]).toContain('estimado');
+    expect(rows[1]).toContain('fijo');
+    expect(rows[1]).toContain('estimado');
+    expect(rows[1]).toContain('Banco');
+  });
+
   it('una compra compartida muestra el total, lo que pusieron otros y tu parte junto a lo que cuenta', () => {
     const el = render([row({
       kind: 'CardInstallment', detail: 'Cena con Redo y Violeta', amount: 44333.33, nativeAmount: 44333.33, installmentNumber: 1, installments: 1,

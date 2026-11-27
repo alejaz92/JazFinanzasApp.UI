@@ -14,10 +14,10 @@
 <app-loading [isLoading]="isLoading"></app-loading>
 
 <ng-container *ngIf="dataRequested && !isLoading && data">
-    <!-- Con la medida de compra: los cargos recurrentes de cada mes, aparte del mapa (decisión G1) -->
+    <!-- Con la medida de compra: los recurrentes de tarjeta y los fijos sin pagar de cada mes, aparte del mapa (decisión G1) -->
     <div class="card mb-3" *ngIf="reportContext.spendingMeasure() === 'purchase' && recurringMonths.length > 0" data-testid="recurring-line">
         <div class="card-body py-2">
-            <div class="small text-body-secondary mb-1">Cargos recurrentes de tarjeta de cada mes: no tienen un día de compra, por eso no están en el mapa.</div>
+            <div class="small text-body-secondary mb-1">Suscripciones de tarjeta y fijos todavía sin pagar de cada mes: no tienen un día de compra, por eso no están en el mapa.</div>
             <div class="d-flex flex-wrap gap-2">
                 <span class="badge text-bg-light border" *ngFor="let m of recurringMonths">{{ m.label }}: {{ m.amount | currencyFiatFormat }}</span>
             </div>
@@ -31,7 +31,7 @@
             <app-info-button title="Calendario de gastos">
                 <p>Cada cuadradito es un día del año elegido: cuanto más intenso el color, más se gastó ese día (la escala de arriba va de cero al día más caro del año). Con un clic se abren los gastos de ese día.</p>
                 @if (reportContext.spendingMeasure() === 'purchase') {
-                    <p class="mb-0">Cuenta lo mismo que el Resumen del mes: lo pagado directo desde las cuentas y cada cuota de una compra con tarjeta en el día del mes en que compraste (una compra hecha después del cierre, el día 1 del mes siguiente). Los cargos recurrentes de tarjeta no tienen un día de compra, así que no se pintan en el mapa ni entran en el promedio por día de la semana: se muestran aparte, en la línea de arriba, mes por mes y con su total del año.</p>
+                    <p class="mb-0">Cuenta lo mismo que el Resumen del mes: lo pagado directo desde las cuentas y cada cuota de una compra con tarjeta en el día del mes en que compraste (una compra hecha después del cierre, el día 1 del mes siguiente). Las suscripciones de tarjeta (lo pagado en el mes, o lo esperado si todavía no se pagó) y los fijos de cuenta sin pagar del mes en curso no tienen un día de compra, así que no se pintan en el mapa ni entran en el promedio por día de la semana: se muestran aparte, en la línea de arriba, mes por mes y con su total del año. Un fijo de cuenta ya pagado es un egreso más, en su día.</p>
                 } @else {
                     <p class="mb-0">Cuenta lo mismo que el Resumen del mes: egresos con categoría, y la tarjeta el día en que se carga el pago del resumen, que es casi siempre el día 1: por eso el día 1 de cada mes se ve tan cargado.</p>
                 }

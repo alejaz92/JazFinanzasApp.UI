@@ -22,22 +22,8 @@
         <div class="list-group mb-3" *ngIf="hasOptions">
           <label class="list-group-item" *ngIf="offers('Discount')">
             <input class="form-check-input me-2" type="radio" name="differenceKind" [checked]="selected === 'Discount'" (change)="select('Discount')">
-            <strong>{{ context.recurring ? 'Un descuento de este mes' : 'Un descuento del banco' }}</strong>
-            <div class="small text-muted ms-4">
-              {{ context.recurring ? 'Cuenta solo en este mes: el precio de la suscripción no cambia.' : 'Se carga como un descuento ya aplicado de esta compra.' }}
-            </div>
-          </label>
-
-          <label class="list-group-item" *ngIf="offers('PriceChange')">
-            <input class="form-check-input me-2" type="radio" name="differenceKind" [checked]="selected === 'PriceChange'" (change)="select('PriceChange')">
-            <strong>Cambió el precio</strong>
-            <div class="small text-muted ms-4">Desde este mes la suscripción queda en {{ context.paidAmount ?? 0 | currencyFiatFormat: context.symbol }}.</div>
-          </label>
-
-          <label class="list-group-item" *ngIf="offers('ThisTimeOnly')">
-            <input class="form-check-input me-2" type="radio" name="differenceKind" [checked]="selected === 'ThisTimeOnly'" (change)="select('ThisTimeOnly')">
-            <strong>Es solo por esta vez</strong>
-            <div class="small text-muted ms-4">Se paga este monto y la suscripción queda como está.</div>
+            <strong>Un descuento del banco</strong>
+            <div class="small text-muted ms-4">Se carga como un descuento ya aplicado de esta compra.</div>
           </label>
 
           <label class="list-group-item" *ngIf="offers('People')">

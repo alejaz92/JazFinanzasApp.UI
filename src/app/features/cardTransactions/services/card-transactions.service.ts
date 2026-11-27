@@ -5,7 +5,6 @@ import { CardTransactionPending } from '../models/cardTransactions-pending.model
 import { environment } from 'src/environments/environment.development';
 import { CardTransactionsAdd } from '../models/cardTransactions-add.model';
 import { CardTransactionPaymentList } from '../models/CardTransactionPayment-List.model';
-import { RecurrentCardTransactionGet, RecurrentCardTransactionPut } from '../models/CardTransaction-recurrent.model';
 import { CardPurchaseMismatch } from '../models/card-purchase-mismatch.model';
 import { PurchaseDifference } from '../models/purchase-difference.model';
 
@@ -46,14 +45,6 @@ export class CardTransactionsService {
 
   registerEmptyMonth(request: any): Observable<any> {
     return this.http.post<any>(`${environment.apiBaseURL}/api/CardTransaction/CardPayments/NoExpenses`, request);
-  }
-
-  getRecurrentCardTransactions(id: number): Observable<RecurrentCardTransactionGet> {
-    return this.http.get<RecurrentCardTransactionGet>(`${environment.apiBaseURL}/api/CardTransaction/editRecurrent/${id}`);
-  }
-
-  editRecurrentCardTransaction(id: number, cardTransaction: RecurrentCardTransactionPut): Observable<RecurrentCardTransactionPut> {
-    return this.http.put<RecurrentCardTransactionPut>(`${environment.apiBaseURL}/api/CardTransaction/editRecurrent/${id}`, cardTransaction);
   }
 
 }

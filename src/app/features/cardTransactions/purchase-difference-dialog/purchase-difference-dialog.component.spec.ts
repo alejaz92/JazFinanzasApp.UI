@@ -264,35 +264,6 @@ describe('PurchaseDifferenceDialogComponent', () => {
     expect(options).toEqual([{ backdrop: 'static', keyboard: false }, { backdrop: true, keyboard: true }]);
   });
 
-  it('should offer the discount of the month, the new price and "only this time" for a subscription paid for less', () => {
-    prepare({ ...lessContext, recurring: true, required: true, paidAmount: 82000 });
-
-    expect(text()).toContain('Un descuento de este mes');
-    expect(text()).toContain('Cambió el precio');
-    expect(text()).toContain('Desde este mes la suscripción queda en $ 82.000,00');
-    expect(text()).toContain('Es solo por esta vez');
-    expect(text()).not.toContain('La parte de otra persona');
-  });
-
-  it('should not offer a discount for a subscription paid for more', () => {
-    prepare({ ...moreContext, recurring: true, required: true, paidAmount: 109500 });
-
-    expect(text()).not.toContain('descuento');
-    expect(text()).toContain('Cambió el precio');
-    expect(text()).toContain('Es solo por esta vez');
-    expect(text()).not.toContain('El total de la compra estaba mal cargado');
-  });
-
-  it('should emit the new price and "only this time"', () => {
-    for (const kind of ['PriceChange', 'ThisTimeOnly'] as const) {
-      choices.length = 0;
-      component.open({ ...lessContext, recurring: true });
-      component.select(kind);
-      component.confirm();
-      expect(choices).toEqual([{ kind }]);
-    }
-  });
-
   it('should only let the amount be reverted when an installment purchase is paid for more', () => {
     prepare({ ...moreContext, allowFixTotal: false, required: true });
 

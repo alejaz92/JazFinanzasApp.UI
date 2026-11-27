@@ -111,11 +111,11 @@
                         </ng-container>
                     </td>
                     <td class="align-middle text-center">
-                        <a *ngIf="cardTransaction.installments == 'Recurrente'"
+                        <a *ngIf="cardTransaction.recurringExpenseId"
                            class="btn-icon bg-primary"
-                           title="Editar Recurrente"
-                           [routerLink]="['/cardTransactions/editRecurrent', cardTransaction.id]">
-                            <i class="bi-pencil-square"></i>
+                           title="Ver ficha"
+                           [routerLink]="['/recurring-expenses', cardTransaction.recurringExpenseId]">
+                            <i class="bi-arrow-repeat"></i>
                         </a>
                     </td>
                 </tr>

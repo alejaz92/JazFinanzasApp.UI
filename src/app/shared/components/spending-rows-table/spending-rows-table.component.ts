@@ -7,7 +7,7 @@ import { CurrencyFiatFormatPipe } from '../../pipes/currencyFiatFormat/currency-
 // El detalle de lo que compone el gasto por compra (plan-ingresos-egresos-por-fecha-de-compra.md, decisión D y Fase 9): una fila por gasto, con su origen. Lo
 // comparten los paneles de Por categoría, del día del Calendario y de Por etiqueta cuando el reporte cuenta por compra.
 //   - una cuota se muestra como "Cuota 2 de 6", con la fecha de la compra y lo que costó (tu parte);
-//   - un recurrente, rotulado "recurrente" y con su tarjeta;
+//   - un recurrente, rotulado "recurrente" y con su tarjeta; si todavía no se pagó, además "estimado" (un fijo de cuenta, "fijo" y con su cuenta);
 //   - una compra compartida, con tu parte junto al total y a lo que pusieron los demás;
 //   - un monto en otra moneda que la elegida, con el original además del convertido.
 // Al pie, la suma de las filas: es el número del bloque que se abrió.
@@ -55,6 +55,7 @@ export class SpendingRowsTableComponent {
     }
 
     origin(row: SpendingRow): string {
-        return (row.kind === 'Direct' ? row.accountName : row.cardName) ?? '—';
+        const fromAccount = row.kind === 'Direct' || row.kind === 'RecurringEstimate';
+        return (fromAccount ? row.accountName : row.cardName) ?? '—';
     }
 }

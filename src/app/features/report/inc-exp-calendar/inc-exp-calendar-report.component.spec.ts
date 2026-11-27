@@ -97,7 +97,8 @@ describe('IncExpCalendarReportComponent — recurrentes y panel del día', () =>
     http.expectOne(r => /SpendingRows\/1/.test(r.urlWithParams)).flush([
       rowOf({ amount: 100 }),
       rowOf({ sourceId: 2, kind: 'CardInstallment', detail: 'Buzo', amount: 250, nativeAmount: 250, installmentNumber: 1, installments: 6, purchaseOwnTotal: 1500, purchaseDate: '2026-10-01T00:00:00', accountName: null, cardName: 'Visa' }),
-      rowOf({ sourceId: 3, kind: 'CardRecurring', detail: 'Swiss Medical', amount: 94340, nativeAmount: 94340, accountName: null, cardName: 'Visa' }) // cae el día 1 pero no se pinta
+      rowOf({ sourceId: 3, kind: 'CardRecurring', detail: 'Swiss Medical', amount: 94340, nativeAmount: 94340, accountName: null, cardName: 'Visa' }), // cae el día 1 pero no se pinta
+      rowOf({ sourceId: 4, kind: 'RecurringEstimate', detail: 'Alquiler', amount: 500000, nativeAmount: 500000, accountName: 'Banco', isEstimate: true })
     ]);
     fixture.detectChanges();
     await settle();
@@ -107,6 +108,7 @@ describe('IncExpCalendarReportComponent — recurrentes y panel del día', () =>
     expect(component.dayRows.length).toBe(2);
     expect(text).toContain('Cuota 1 de 6');
     expect(text).not.toContain('Swiss Medical');
+    expect(text).not.toContain('Alquiler');
     expect(text).toContain('$ 350,00');
   });
 });

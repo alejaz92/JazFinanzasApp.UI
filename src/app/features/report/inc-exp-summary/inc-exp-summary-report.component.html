@@ -58,7 +58,7 @@
             <p>Una cascada: arranca con los ingresos del mes, cada escalón resta una categoría de egreso (de la más grande a la más chica) y termina en el resultado del mes.</p>
             <ul class="mb-0">
                 @if (reportContext.spendingMeasure() === 'purchase') {
-                    <li>Los egresos son el gasto del mes: lo que pagaste directo desde tus cuentas, más cada compra con tarjeta repartida en sus cuotas (una por mes, por tu parte, sin lo que te devuelven otros ni los descuentos del banco) y los cargos recurrentes de tarjeta en cada mes en que estuvieron activos.</li>
+                    <li>Los egresos son el gasto del mes: lo que pagaste directo desde tus cuentas, más cada compra con tarjeta repartida en sus cuotas (una por mes, por tu parte, sin lo que te devuelven otros ni los descuentos del banco) y las suscripciones de tarjeta en cada mes (lo que se pagó, o lo esperado mientras no se haya pagado). Un fijo que se paga desde una cuenta cuenta en el mes al que corresponde y, si el mes en curso todavía no se pagó, se suma lo esperado.</li>
                     <li>Una compra con tarjeta cuenta desde el mes del primer resumen que la cobra: si la hiciste después del cierre, desde el mes siguiente. El pago del resumen no suma, porque ya contó en la compra; por eso el mes no depende de cuándo lo cargues.</li>
                     <li>Los ingresos son los que entraron a tus cuentas. Quedan afuera los cambios de moneda y las categorías que no cuentan como ingreso o egreso.</li>
                     <li>Cada monto se convierte a la moneda elegida: lo pagado desde las cuentas con su cotización y las cuotas de tarjeta con la cotización blue del día de cada cuota.</li>
@@ -145,6 +145,10 @@
                         <tr><td>Menos lo de categorías que no cuentan como egreso</td><td class="text-end">{{ -reconciliation.pesos.notCounted | currencyFiatFormat }}</td></tr>
                         <tr *ngIf="hasRounding"><td>Centavos de redondeo</td><td class="text-end">{{ -reconciliation.pesos.rounding | currencyFiatFormat }}</td></tr>
                         <tr class="fw-semibold"><td>Gasto con tarjeta en pesos</td><td class="text-end">{{ reconciliation.pesos.spending | currencyFiatFormat }}</td></tr>
+                        <tr class="small text-body-secondary" *ngIf="reconciliation.pesos.recurringPayments" data-testid="reconciliation-recurring-payments">
+                            <td class="ps-4">De eso, cobros de fijos y suscripciones</td><td class="text-end">{{ reconciliation.pesos.recurringPayments | currencyFiatFormat }}</td></tr>
+                        <tr class="small text-body-secondary" *ngIf="reconciliation.pesos.recurringEstimates" data-testid="reconciliation-recurring-estimates">
+                            <td class="ps-4">De eso, suscripciones esperadas y todavía sin pagar</td><td class="text-end">{{ reconciliation.pesos.recurringEstimates | currencyFiatFormat }}</td></tr>
 
                         <ng-container *ngIf="hasDollars">
                             <tr><td colspan="2" class="fw-semibold">En dólares</td></tr>
@@ -153,6 +157,10 @@
                             <tr><td>Menos los descuentos del banco</td><td class="text-end">{{ formatUsd(-reconciliation.dollars.discounts) }}</td></tr>
                             <tr><td>Menos lo de categorías que no cuentan como egreso</td><td class="text-end">{{ formatUsd(-reconciliation.dollars.notCounted) }}</td></tr>
                             <tr><td>Gasto con tarjeta en dólares</td><td class="text-end">{{ formatUsd(reconciliation.dollars.spending) }}</td></tr>
+                            <tr class="small text-body-secondary" *ngIf="reconciliation.dollars.recurringPayments">
+                                <td class="ps-4">De eso, cobros de fijos y suscripciones</td><td class="text-end">{{ formatUsd(reconciliation.dollars.recurringPayments) }}</td></tr>
+                            <tr class="small text-body-secondary" *ngIf="reconciliation.dollars.recurringEstimates">
+                                <td class="ps-4">De eso, suscripciones esperadas y todavía sin pagar</td><td class="text-end">{{ formatUsd(reconciliation.dollars.recurringEstimates) }}</td></tr>
                             <tr><td>Esos dólares, convertidos a pesos con la blue de cada cuota</td><td class="text-end">{{ reconciliation.dollarsInPesos | currencyFiatFormat }}</td></tr>
                         </ng-container>
 

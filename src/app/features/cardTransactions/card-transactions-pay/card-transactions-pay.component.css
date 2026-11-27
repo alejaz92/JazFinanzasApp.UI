@@ -11,3 +11,7 @@
 .small-font-input {
     font-size: 0.8rem;
   }
+.subscription-notes {
+    white-space: normal;
+    min-width: 15rem;
+}

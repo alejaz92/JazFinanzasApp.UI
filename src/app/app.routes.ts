@@ -173,11 +173,6 @@ export const routes: Routes = [
     canActivate: [AuthGuard]
   },
   {
-    path: 'cardTransactions/editRecurrent/:id',
-    loadComponent: () => import('./features/cardTransactions/card-transactions-edit-recurrent/card-transactions-edit-recurrent.component').then(m => m.CardTransactionsEditRecurrentComponent),
-    canActivate: [AuthGuard]
-  },
-  {
     path: 'cryptoTransactions',
     loadComponent: () => import('./features/cryptoTransaction/crypto-transaction-list/crypto-transaction-list.component').then(m => m.CryptoTransactionListComponent),
     canActivate: [AuthGuard]

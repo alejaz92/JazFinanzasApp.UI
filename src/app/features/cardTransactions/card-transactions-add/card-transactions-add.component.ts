@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CardTransactionsService } from '../services/card-transactions.service';
 import { HttpClient } from '@angular/common/http';
@@ -28,13 +29,12 @@ import { TagService } from 'src/app/features/tag/services/tag.service';
     selector: 'app-card-transactions-add',
     templateUrl: './card-transactions-add.component.html',
     styleUrls: ['./card-transactions-add.component.css'],
-    imports: [LoadingComponent, NgIf, FormsModule, ReactiveFormsModule, NgFor, CurrencyInputDirective, BankPromotionFormComponent, SharedExpenseFormComponent, BackButtonComponent, DecimalPipe, SubmitButtonComponent, TagPickerComponent]
+    imports: [LoadingComponent, NgIf, FormsModule, ReactiveFormsModule, NgFor, CurrencyInputDirective, BankPromotionFormComponent, SharedExpenseFormComponent, BackButtonComponent, DecimalPipe, SubmitButtonComponent, TagPickerComponent, RouterLink]
 })
 export class CardTransactionsAddComponent implements OnInit {
   isLoading: boolean = true;
   isSubmitting: boolean = false;
   cardTransactionForm!: FormGroup;
-  selectedMovementType: string = '';
   assets: any[] = [];
   expenseClasses: any[] = [];
   cards: any[] = [];
@@ -64,7 +64,6 @@ export class CardTransactionsAddComponent implements OnInit {
 
   ngOnInit(): void {
     this.cardTransactionForm = this.fb.group({
-      movementType: ['', Validators.required],
       date: ['', Validators.required],
       asset: ['', Validators.required],
       totalAmount: ['', Validators.required],
@@ -110,11 +109,6 @@ export class CardTransactionsAddComponent implements OnInit {
     });
   }
 
-  onMovementTypeChange(event: any) {
-    this.selectedMovementType = event.target.value;
-    //this.updateInstallments();
-  }
-
   get totalAmountForSharedExpense(): number {
     const raw = this.cardTransactionForm?.get('totalAmount')?.value;
     return parseFloat(raw) || 0;
@@ -154,10 +148,6 @@ export class CardTransactionsAddComponent implements OnInit {
 
     const formValues = this.cardTransactionForm.value;
 
-    if (formValues.movementType === '') {
-      this.cardTransactionForm.controls['movementType'].setErrors({ 'incorrect': true });
-    }
-
     if(formValues.date === '') {
       this.cardTransactionForm.controls['date'].setErrors({ 'incorrect': true });
     }
@@ -186,13 +176,9 @@ export class CardTransactionsAddComponent implements OnInit {
       this.cardTransactionForm.controls['firstInstallmentDate'].setErrors({ 'incorrect': true });
     }
 
-    if (formValues.movementType === 'U') {
-      if (formValues.installments === '') {
-        this.cardTransactionForm.controls['installments'].setErrors({ 'incorrect': true });
-      }
+    if (formValues.installments === '') {
+      this.cardTransactionForm.controls['installments'].setErrors({ 'incorrect': true });
     }
-
-    const [year, month] = formValues.firstInstallmentDate.split('-');
 
     var cardTransactionAdd: CardTransactionsAdd = {
       date: formValues.date,
@@ -203,18 +189,11 @@ export class CardTransactionsAddComponent implements OnInit {
       totalAmount: parseFloat(formValues.totalAmount) || 0,
       installments: parseInt(formValues.installments) || 1,
       firstInstallment: formValues.firstInstallmentDate + '-01',
+      lastInstallment: formValues.lastInstallmentDate + '-01',
+      // Las suscripciones se cargan en "Fijos y suscripciones" (plan-gastos-recurrentes.md, D8).
       repeat: "NO",
       tripId: formValues.trip ? parseInt(formValues.trip, 10) : null
     };
-
-    if (formValues.movementType === 'R') {
-
-      cardTransactionAdd.repeat = "YES";
-
-    }
-    else {
-      cardTransactionAdd.lastInstallment = formValues.lastInstallmentDate + '-01';
-    }
 
     if (this.sharedExpenseActive && !this.sharedExpenseData) {
       this.sharedExpenseError = 'Debe agregar al menos una persona con monto válido.';
@@ -295,18 +274,19 @@ export class CardTransactionsAddComponent implements OnInit {
   }
 
   updateInstallments() {
-    if (this.selectedMovementType === 'U') {
-      const [year, month] = this.cardTransactionForm.value.firstInstallmentDate.split('-').map(Number);
-    
-      // Crear la fecha en el primer día del mes seleccionado
-      const firstInstallmentDate = new Date(year, month - 1, 1);
+    const first: string = this.cardTransactionForm.value.firstInstallmentDate;
+    if (!first) return;
 
-      let lastInstallmentDate = new Date(firstInstallmentDate);
+    const [year, month] = first.split('-').map(Number);
 
-      lastInstallmentDate.setMonth(firstInstallmentDate.getMonth() + this.cardTransactionForm.value.installments - 1);
+    // Crear la fecha en el primer día del mes seleccionado
+    const firstInstallmentDate = new Date(year, month - 1, 1);
 
-      this.cardTransactionForm.controls['lastInstallmentDate'].setValue(this.formatDateToMonth(lastInstallmentDate));
-    }
+    let lastInstallmentDate = new Date(firstInstallmentDate);
+
+    lastInstallmentDate.setMonth(firstInstallmentDate.getMonth() + this.cardTransactionForm.value.installments - 1);
+
+    this.cardTransactionForm.controls['lastInstallmentDate'].setValue(this.formatDateToMonth(lastInstallmentDate));
   }
 
   assignFirstInstallment() {

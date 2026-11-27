@@ -18,10 +18,9 @@ interface PersonRow {
 }
 
 // Pregunta qué fue la diferencia entre el valor de la cuota de una compra con tarjeta y lo que se pagó: un descuento del banco, la parte de otras
-// personas o un total mal cargado; en una suscripción, un descuento del mes, un cambio de precio o algo de esa sola vez
-// (plan-repartos-y-descuentos-faltantes.md). Se usa al pagar el resumen, donde hay que contestar, y en la pantalla de compras que no cierran, donde
-// se puede cancelar.
-export type DifferenceOption = 'Discount' | 'People' | 'FixTotal' | 'PriceChange' | 'ThisTimeOnly';
+// personas o un total mal cargado (plan-repartos-y-descuentos-faltantes.md). Se usa al pagar el resumen, donde hay que contestar, y en la pantalla
+// de compras que no cierran, donde se puede cancelar. Las suscripciones no pasan por acá.
+export type DifferenceOption = 'Discount' | 'People' | 'FixTotal';
 
 @Component({
   selector: 'app-purchase-difference-dialog',
@@ -66,19 +65,16 @@ export class PurchaseDifferenceDialogComponent implements OnInit {
 
   // Lo que se puede elegir según la compra y según se pague de menos o de más.
   offers(option: DifferenceOption): boolean {
-    const recurring = !!this.context?.recurring;
     switch (option) {
-      case 'Discount': return this.paidLess;
-      case 'People': return this.paidLess && !recurring;
-      case 'FixTotal': return !this.paidLess && !recurring && !!this.context?.allowFixTotal;
-      case 'PriceChange':
-      case 'ThisTimeOnly': return recurring;
+      case 'Discount':
+      case 'People': return this.paidLess;
+      case 'FixTotal': return !this.paidLess && !!this.context?.allowFixTotal;
     }
   }
 
   // Una compra en cuotas pagada de más no tiene ninguna explicación: solo queda volver al valor de la cuota.
   get hasOptions(): boolean {
-    return (['Discount', 'People', 'FixTotal', 'PriceChange', 'ThisTimeOnly'] as DifferenceOption[]).some(o => this.offers(o));
+    return (['Discount', 'People', 'FixTotal'] as DifferenceOption[]).some(o => this.offers(o));
   }
 
   // Lo que todavía falta repartir entre las personas (negativo si se repartió de más).

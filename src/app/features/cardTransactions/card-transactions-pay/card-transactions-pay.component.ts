@@ -3,7 +3,8 @@ import { AbstractControl, FormBuilder, FormGroup, FormArray, Validators, FormsMo
 import { AccountService } from 'src/app/features/account/services/account.service';
 import { CardService } from 'src/app/features/card/services/card.service';
 import { CardTransactionsService } from '../services/card-transactions.service';
-import { CardTransactionPaymentList } from '../models/CardTransactionPayment-List.model';
+import { CardStatementOutcome, CardStatementOutcomeKind, CardTransactionPaymentList } from '../models/CardTransactionPayment-List.model';
+import { monthLabel, nextMonthValue } from '../../recurring-expenses/utils/recurring-expense.utils';
 import { TransactionClassService } from 'src/app/features/transactionClass/services/transaction-class.service';
 import { AssetService } from 'src/app/features/asset/services/asset.service';
 import { TmplAstVariable } from '@angular/compiler';
@@ -22,11 +23,11 @@ import { PurchaseDifferenceDialogComponent } from '../purchase-difference-dialog
 import { PurchaseDifference, PurchaseDifferenceChoice, PurchaseDifferencePerson, differenceThreshold } from '../models/purchase-difference.model';
 
 // Lo que el usuario respondió sobre la diferencia de una cuota editada (plan-repartos-y-descuentos-faltantes.md, D5 y Fase 15). Contestar es
-// obligatorio. `ThisTimeOnly` (solo suscripciones) no manda nada.
+// obligatorio.
 interface RowDifference {
   // Cuota menos lo pagado en el momento de responder: si el monto cambia, la respuesta ya no vale y se vuelve a preguntar.
   amount: number;
-  state: 'Discount' | 'People' | 'FixTotal' | 'PriceChange' | 'ThisTimeOnly';
+  state: 'Discount' | 'People' | 'FixTotal';
   people?: PurchaseDifferencePerson[];
 }
 
@@ -46,14 +47,20 @@ export class CardTransactionsPayComponent implements OnInit {
   assets: any[] = [];
   cardTransactions: CardTransactionPaymentList[] = [];
   selectedPaymentAssets: string | null = null;
-  tableLength: number = 0;
-  originalTableLength: number = 0;
   reimbursementsPreview: number = 0;
   cardPendingCredit: CardPendingCredit | null = null;
   gastosAutoCalculados: boolean = true;
   hasQueriedResumen: boolean = false;
   noExpensesForm!: FormGroup;
   isSubmittingEmptyMonth: boolean = false;
+
+  // Lo que se puede contestar sobre una suscripción esperada que no vino (plan-gastos-recurrentes.md, D5).
+  readonly outcomeOptions: { value: CardStatementOutcomeKind; label: string }[] = [
+    { value: 'DEFERRED', label: 'Se atrasó: viene en el próximo resumen' },
+    { value: 'NO_CHARGE', label: 'Ese mes no se cobró' },
+    { value: 'CANCELLED', label: 'La di de baja' },
+    { value: 'PENDING', label: 'Todavía no sé' }
+  ];
 
   @ViewChild('differenceDialog') differenceDialog?: PurchaseDifferenceDialogComponent;
   // La respuesta de cada cuota editada con una diferencia, y la cuota por la que se está preguntando ahora.
@@ -135,7 +142,6 @@ export class CardTransactionsPayComponent implements OnInit {
       if (!data) return;
 
       this.cardTransactions = data;
-      this.originalTableLength = this.tableLength = this.cardTransactions.length;
       this.populateCardTransactionsArray(this.cardTransactions);
       this.hasQueriedResumen = true;
 
@@ -203,8 +209,9 @@ export class CardTransactionsPayComponent implements OnInit {
   private loadReimbursementsPreview(transactions: CardTransactionPaymentList[]): void {
     this.reimbursementsPreview = 0;
 
+    // Una suscripción puede traer dos filas de la misma compra (un mes atrasado y el actual): se consulta una vez.
     transactions
-      .filter(t => t.cardTransactionId)
+      .filter((t, i) => t.cardTransactionId && transactions.findIndex(o => o.cardTransactionId === t.cardTransactionId) === i)
       .forEach(t => {
         this.sharedExpenseService.getByCardTransactionId(t.cardTransactionId).subscribe({
           next: (detail) => {
@@ -251,9 +258,11 @@ export class CardTransactionsPayComponent implements OnInit {
     return Math.round((totals.totalPesos - this.reimbursementsPreview - this.cardCreditApplied) * 100) / 100;
   }
 
-  // Sin gastos pendientes ni saldo a favor que aplicar: no hay nada que pagar este mes.
+  // Sin gastos pendientes ni saldo a favor que aplicar: no hay nada que pagar este mes. Las suscripciones ya cobradas por adelantado no se
+  // esperan: mientras no se tilden, tampoco son un gasto del mes.
   get showEmptyMonthPanel(): boolean {
-    return this.hasQueriedResumen && this.cardTransactionsArray.length === 0 && this.cardCreditAvailable === 0;
+    return this.hasQueriedResumen && this.cardCreditAvailable === 0
+      && this.cardTransactionsArray.controls.every(control => control.get('alreadyCharged')?.value && !control.get('pay')?.value);
   }
 
   // Sugiere el próximo período sumando un mes a las fechas actuales de la tarjeta; quedan editables
@@ -287,33 +296,33 @@ export class CardTransactionsPayComponent implements OnInit {
     cardTransactionsArray.clear();
     this.rowDifferences.clear();
 
-    
-    cardTransactions.forEach(transaction => {
+    cardTransactions.forEach(transaction => cardTransactionsArray.push(this.createRow(transaction)));
+  }
 
-
-      const transactionGroup = this.fb.group({
-        cardTransactionId: [transaction.cardTransactionId],
-        installmentNumber: [transaction.installmentNumber],
-        date: [transaction.date],
-        transactionClassId: [transaction.transactionClassId],
-        transactionClass: [transaction.transactionClass],
-        detail: [transaction.detail],
-        assetId: [transaction.assetId],
-        asset: [transaction.asset],
-        installment: [transaction.installment],
-        installmentAmount: [{ value: transaction.installmentAmount, disabled: true }],
-        valueInPesos: [{ value: transaction.valueInPesos, disabled: true }],
-        pay: true,
-        isManual: false,
-        originalInstallmentAmount: [transaction.installmentAmount],
-        originalValueInPesos: [transaction.valueInPesos]
-      });
-
-
-      cardTransactionsArray.push(transactionGroup);
-
-
-
+  private createRow(transaction: CardTransactionPaymentList, isSecondCharge: boolean = false): FormGroup {
+    return this.fb.group({
+      cardTransactionId: [transaction.cardTransactionId],
+      installmentNumber: [transaction.installmentNumber],
+      date: [transaction.date],
+      transactionClassId: [transaction.transactionClassId],
+      transactionClass: [transaction.transactionClass],
+      detail: [transaction.detail],
+      assetId: [transaction.assetId],
+      asset: [transaction.asset],
+      installment: [transaction.installment],
+      installmentAmount: [{ value: transaction.installmentAmount, disabled: true }],
+      valueInPesos: [{ value: transaction.valueInPesos, disabled: true }],
+      pay: !(transaction.alreadyCharged || transaction.coveredByPurchase),
+      isManual: false,
+      originalInstallmentAmount: [transaction.installmentAmount],
+      originalValueInPesos: [transaction.valueInPesos],
+      recurringExpenseId: [transaction.recurringExpenseId ?? null],
+      recurringMonth: [transaction.recurringMonth ?? null],
+      alreadyCharged: [!!transaction.alreadyCharged],
+      coveredByPurchase: [!!transaction.coveredByPurchase],
+      isSecondCharge: [isSecondCharge],
+      secondChargeKind: [''],
+      outcome: ['']
     });
   }
 
@@ -324,31 +333,28 @@ export class CardTransactionsPayComponent implements OnInit {
     this.rowDifferences.clear();
 
     this.cardTransactionsArray.controls.forEach((control) => {
-      if (paymentAssets === 'Pesos') {
-        control.get('valueInPesos')?.enable();
-        control.get('installmentAmount')?.disable();
+      this.setEditableAmount(control);
 
-        const originalInstallmentAmount = control.get('originalInstallmentAmount')?.value;
+      const originalInstallmentAmount = control.get('originalInstallmentAmount')?.value;
+      const originalValueInPesos = control.get('originalValueInPesos')?.value;
+      if (paymentAssets === 'Pesos') {
         control.get('installmentAmount')?.setValue(originalInstallmentAmount);
       } else if (paymentAssets === 'Pesos+Dolar') {
-        control.get('valueInPesos')?.disable();
-        control.get('installmentAmount')?.enable();
-
-        const originalValueInPesos = control.get('originalValueInPesos')?.value;
         control.get('valueInPesos')?.setValue(originalValueInPesos);
       } else {
-        control.get('valueInPesos')?.disable();
-        control.get('installmentAmount')?.disable();
-
-        const originalInstallmentAmount = control.get('originalInstallmentAmount')?.value;
-        const originalValueInPesos = control.get('originalValueInPesos')?.value;
-
         control.get('installmentAmount')?.setValue(originalInstallmentAmount);
         control.get('valueInPesos')?.setValue(originalValueInPesos);
       }
     });
 
     this.refreshCurrencyFormat();
+  }
+
+  // Pagando en pesos se edita el valor en pesos; pagando en pesos y dólares, el monto de la cuota.
+  private setEditableAmount(control: AbstractControl): void {
+    const toggle = (name: string, enabled: boolean) => enabled ? control.get(name)?.enable() : control.get(name)?.disable();
+    toggle('valueInPesos', this.selectedPaymentAssets === 'Pesos');
+    toggle('installmentAmount', this.selectedPaymentAssets === 'Pesos+Dolar');
   }
 
   // Método para actualizar el formato
@@ -495,16 +501,17 @@ refreshCurrencyFormat() {
     })
 
     this.cardTransactionsArray.push(manualEntry);
-    this.tableLength = this.cardTransactionsArray.length;
 
     this.updateEditOptions();
   }
 
+  get hasManualRows(): boolean {
+    return this.cardTransactionsArray.controls.some(control => control.get('isManual')?.value);
+  }
+
   //remove last manual entry
   removeManualEntry() {
-
-
-    if (this.tableLength === this.originalTableLength) {
+    if (!this.hasManualRows) {
       this.toastService.error('No hay filas manuales para eliminar.');
       return;
     }
@@ -512,12 +519,130 @@ refreshCurrencyFormat() {
     const lastManualEntry = this.cardTransactionsArray.controls[this.cardTransactionsArray.length - 1];
     if (lastManualEntry.get('isManual')?.value) {
       this.cardTransactionsArray.removeAt(this.cardTransactionsArray.length - 1);
-      this.tableLength = this.cardTransactionsArray.length;
     } else {
       this.toastService.error('La última fila no es una fila manual.');
     }
   }
- 
+
+  // ── Suscripciones: lo que se esperaba contra lo que vino (plan-gastos-recurrentes.md, D5) ──────────────────────────────────────────────
+
+  isSubscription(control: AbstractControl): boolean {
+    return control.get('installment')?.value === 'Recurrente';
+  }
+
+  // Una fila de ficha que el resumen tiene que traer: si no se paga, hay que decir qué pasó.
+  private isExpected(control: AbstractControl): boolean {
+    return this.isSubscription(control) && !!control.get('recurringExpenseId')?.value
+      && !control.get('alreadyCharged')?.value && !control.get('coveredByPurchase')?.value && !control.get('isSecondCharge')?.value;
+  }
+
+  asksWhatHappened(control: AbstractControl): boolean {
+    return this.isExpected(control) && !control.get('pay')?.value;
+  }
+
+  // Un segundo cobro de un mes (o uno sobre un mes ya cobrado): es el del mes siguiente, o uno de más.
+  asksWhichCharge(control: AbstractControl): boolean {
+    return !!control.get('pay')?.value && (!!control.get('alreadyCharged')?.value || !!control.get('isSecondCharge')?.value);
+  }
+
+  canComeTwice(control: AbstractControl): boolean {
+    if (!this.isExpected(control) || !control.get('pay')?.value) return false;
+    if (this.monthOf(control) !== this.statementMonth) return false;
+    return !this.secondChargeOf(control);
+  }
+
+  addSecondCharge(control: AbstractControl): void {
+    const values = (control as FormGroup).getRawValue();
+    const second = this.createRow({
+      ...values,
+      installmentAmount: values.originalInstallmentAmount,
+      valueInPesos: values.originalValueInPesos,
+      alreadyCharged: false,
+      coveredByPurchase: false
+    }, true);
+    this.cardTransactionsArray.insert(this.cardTransactionsArray.controls.indexOf(control) + 1, second);
+    this.setEditableAmount(second);
+    this.refreshCurrencyFormat();
+  }
+
+  removeSecondCharge(control: AbstractControl): void {
+    const index = this.cardTransactionsArray.controls.indexOf(control);
+    if (index >= 0) this.cardTransactionsArray.removeAt(index);
+    this.rowDifferences.delete(control);
+  }
+
+  // Lo contestado deja de valer al tildar o destildar; sin el primer cobro no hay un segundo.
+  onPayChange(control: AbstractControl, pay: boolean): void {
+    control.get(pay ? 'outcome' : 'secondChargeKind')?.setValue('');
+    if (pay) return;
+
+    const second = this.secondChargeOf(control);
+    if (second && this.isExpected(control) && this.monthOf(control) === this.statementMonth) this.removeSecondCharge(second);
+  }
+
+  private secondChargeOf(control: AbstractControl): AbstractControl | undefined {
+    const expenseId = control.get('recurringExpenseId')?.value;
+    return this.cardTransactionsArray.controls.find(other =>
+      other.get('isSecondCharge')?.value && other.get('recurringExpenseId')?.value === expenseId);
+  }
+
+  // "2026-11"
+  private get statementMonth(): string {
+    return String(this.cardPaymentForm.get('paymentMonth')?.value ?? '').substring(0, 7);
+  }
+
+  private monthOf(control: AbstractControl): string {
+    return String(control.get('recurringMonth')?.value ?? '').substring(0, 7);
+  }
+
+  // El mes de una suscripción atrasada que viene en este resumen, o null.
+  lateMonthLabel(control: AbstractControl): string | null {
+    const month = this.monthOf(control);
+    return this.isSubscription(control) && month && month < this.statementMonth ? monthLabel(month) : null;
+  }
+
+  get statementMonthLabel(): string {
+    return monthLabel(this.statementMonth);
+  }
+
+  get nextMonthLabel(): string {
+    return this.statementMonth ? monthLabel(nextMonthValue(this.statementMonth)) : '';
+  }
+
+  // Lo que falta contestar de las suscripciones antes de poder pagar, o null.
+  private subscriptionProblem(): string | null {
+    const rows = this.cardTransactionsArray.controls;
+    for (const row of rows) {
+      const name = row.get('detail')?.value;
+      if (this.asksWhichCharge(row) && !row.get('secondChargeKind')?.value) {
+        return `Indicá a qué corresponde el segundo cobro de ${name}.`;
+      }
+      if (this.asksWhatHappened(row) && !row.get('outcome')?.value) {
+        return `Decí qué pasó con ${name}, que no vino en este resumen.`;
+      }
+    }
+
+    // La baja termina el mes anterior al del resumen: nada de ahí en adelante se puede cobrar.
+    const cancelled = rows.filter(row => this.asksWhatHappened(row) && row.get('outcome')?.value === 'CANCELLED');
+    for (const row of cancelled) {
+      const charged = rows.some(other => other.get('pay')?.value && this.isSubscription(other)
+        && other.get('recurringExpenseId')?.value === row.get('recurringExpenseId')?.value
+        && (this.monthOf(other) >= this.statementMonth || other.get('secondChargeKind')?.value === 'NEXT'));
+      if (charged) return `${row.get('detail')?.value} no se puede dar de baja y cobrar en el mismo resumen.`;
+    }
+    return null;
+  }
+
+  private recurringOutcomes(): CardStatementOutcome[] {
+    return this.cardTransactionsArray.controls
+      .filter(control => this.asksWhatHappened(control))
+      .map(control => ({
+        recurringExpenseId: control.get('recurringExpenseId')!.value,
+        month: control.get('recurringMonth')?.value,
+        outcome: control.get('outcome')!.value
+      }));
+  }
+
 
   isRowIncomplete(row: FormGroup): boolean {
     // Verificar si la fila tiene todos los campos requeridos, sin tener en cuenta las filas con input deshabilitados
@@ -652,6 +777,12 @@ refreshCurrencyFormat() {
       return;
     }
 
+    const subscriptionProblem = this.subscriptionProblem();
+    if (subscriptionProblem) {
+      this.toastService.error(subscriptionProblem);
+      return;
+    }
+
     // Ninguna cuota se paga por otro monto sin decir qué fue: si queda alguna sin contestar, se pregunta y no se envía.
     const unanswered = this.cardTransactionsArray.controls.find((control) => this.isUnanswered(control));
     if (unanswered) {
@@ -674,7 +805,11 @@ refreshCurrencyFormat() {
         installment: control.get('installment')?.value,
         installmentAmount: parseFloat(control.get('installmentAmount')?.value) || 0,
         valueInPesos: parseFloat(control.get('valueInPesos')?.value) || 0,
-        difference: this.differenceFor(control)
+        difference: this.differenceFor(control),
+        recurringExpenseId: control.get('recurringExpenseId')?.value ?? null,
+        recurringMonth: control.get('recurringMonth')?.value ?? null,
+        advanceNext: control.get('secondChargeKind')?.value === 'NEXT',
+        extra: control.get('secondChargeKind')?.value === 'EXTRA'
       }));
 
 
@@ -690,7 +825,8 @@ refreshCurrencyFormat() {
         cardCreditApplied: this.cardCreditApplied,
         nextClosingDate,
         nextDueDate,
-        cardTransactions: cardTransactions
+        cardTransactions: cardTransactions,
+        recurringOutcomes: this.recurringOutcomes()
       }
 
       if (cardPaymentRequest.paymentAsset === 'Pesos+Dolar') {
@@ -711,9 +847,10 @@ refreshCurrencyFormat() {
 
              this.toastService.success('Movimiento creado con éxito');
            },
-           error: () => {
+           error: (err) => {
              this.isSubmitting = false;
-             this.toastService.error('Error al registrar el pago de tarjeta');
+             const reason = err?.error?.message;
+             this.toastService.error(reason ? `Error al registrar el pago de tarjeta: ${reason}` : 'Error al registrar el pago de tarjeta');
            }
          });
 
@@ -724,7 +861,8 @@ refreshCurrencyFormat() {
   // Cuota menos lo pagado, en la moneda de la compra, o null si no hay nada que preguntar. Solo se compara en la misma moneda: pagar en pesos una
   // compra en dólares se edita por el tipo de cambio, no por un descuento. Las filas manuales y las que no se pagan no se comparan.
   private differenceOf(control: AbstractControl): { difference: number; symbol: string } | null {
-    if (control.get('isManual')?.value || !control.get('pay')?.value) return null;
+    // En una suscripción no hay nada que explicar: el mes vale lo que se paga.
+    if (control.get('isManual')?.value || !control.get('pay')?.value || this.isSubscription(control)) return null;
     if (!(Number(control.get('cardTransactionId')?.value) > 0)) return null;
 
     let original: unknown;
@@ -766,8 +904,6 @@ refreshCurrencyFormat() {
     this.askingRow = { control, difference: found.difference };
 
     const installment = String(control.get('installment')?.value ?? '');
-    const recurring = this.isRecurring(control);
-    const paid = control.get(this.selectedPaymentAssets === 'Pesos' ? 'valueInPesos' : 'installmentAmount')?.value;
     this.differenceDialog?.open({
       detail: control.get('detail')?.value ?? '',
       installmentLabel: installment || undefined,
@@ -776,14 +912,8 @@ refreshCurrencyFormat() {
       // Corregir el total solo si se paga de más y la compra es de una sola cuota ("1/1").
       allowFixTotal: found.difference < 0 && installment.endsWith('/1'),
       allowRevert: true,
-      required: true,
-      recurring,
-      paidAmount: this.parseAmount(paid)
+      required: true
     });
-  }
-
-  private isRecurring(control: AbstractControl): boolean {
-    return control.get('installment')?.value === 'Recurrente';
   }
 
   // Una cuota con una diferencia sin respuesta (o con la respuesta de otro monto).
@@ -827,10 +957,10 @@ refreshCurrencyFormat() {
     this.refreshCurrencyFormat();
   }
 
-  // Lo que se manda al backend para esa fila: solo una explicación que sigue valiendo para el monto actual. "Es solo por esta vez" no manda nada.
+  // Lo que se manda al backend para esa fila: solo una explicación que sigue valiendo para el monto actual.
   private differenceFor(control: AbstractControl): PurchaseDifference | undefined {
     const answered = this.rowDifferences.get(control);
-    if (!answered || answered.state === 'ThisTimeOnly') return undefined;
+    if (!answered) return undefined;
 
     const current = this.differenceOf(control);
     if (!current || Math.abs(current.difference - answered.amount) > 0.01) return undefined;
@@ -846,11 +976,9 @@ refreshCurrencyFormat() {
     if (!answered) return null;
 
     switch (answered.state) {
-      case 'Discount': return this.isRecurring(control) ? 'Descuento de este mes' : 'Descuento del banco';
+      case 'Discount': return 'Descuento del banco';
       case 'People': return answered.people && answered.people.length === 1 ? 'Parte de 1 persona' : `Parte de ${answered.people?.length ?? 0} personas`;
       case 'FixTotal': return 'Corrige el total de la compra';
-      case 'PriceChange': return 'Cambió el precio';
-      case 'ThisTimeOnly': return 'Solo por esta vez';
     }
   }
 

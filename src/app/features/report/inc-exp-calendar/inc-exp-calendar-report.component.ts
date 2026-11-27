@@ -47,7 +47,7 @@ export class IncExpCalendarReportComponent {
     // corrección 2026-09-04): drill-down sin redirigir a /transactions.
     selectedDate: string | null = null;
     dayMovements: Transaction[] = [];
-    // Con la medida de compra el panel muestra lo que compone el día (Fase 9), sin los recurrentes, que no están en el mapa.
+    // Con la medida de compra el panel muestra lo que compone el día (Fase 9), sin los recurrentes ni los estimados, que no están en el mapa.
     dayRows: SpendingRow[] = [];
     isLoadingMovements = false;
 
@@ -118,7 +118,7 @@ export class IncExpCalendarReportComponent {
         this.drawerInstance?.hide();
     }
 
-    // Los cargos recurrentes de cada mes (decisión G1): no tienen un día de compra, así que van aparte del mapa.
+    // Los recurrentes de tarjeta y los fijos sin pagar de cada mes (decisión G1): no tienen un día de compra, así que van aparte del mapa.
     get recurringMonths(): { label: string; amount: number }[] {
         return (this.data?.recurringByMonth ?? []).map(m => ({ label: MONTH_LABELS[Number(m.month.substring(5, 7)) - 1], amount: m.amount }));
     }
@@ -134,7 +134,7 @@ export class IncExpCalendarReportComponent {
         if (this.reportContext.spendingMeasure() === 'purchase' && assetId != null) {
             this.incomeExpenseService.getSpendingRows(assetId, from, to).subscribe(rows => {
                 // Un recurrente cae el día 1 de cada mes en el cálculo, pero no se pinta en el mapa: tampoco se lista acá, para que el panel sume lo mismo que el día.
-                this.dayRows = rows.filter(r => r.kind !== 'CardRecurring');
+                this.dayRows = rows.filter(r => r.kind !== 'CardRecurring' && r.kind !== 'RecurringEstimate');
                 this.isLoadingMovements = false;
             });
             return;
